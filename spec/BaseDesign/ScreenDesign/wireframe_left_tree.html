@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdownエディタ・ビューア - ワイヤーフレーム</title>
+    <link rel="stylesheet" href="styles/wireframe.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="menu-item">ファイル
+                <div class="submenu">
+                    <div>新規作成</div>
+                    <div>開く</div>
+                    <div>フォルダを開く</div>
+                    <div>保存</div>
+                    <div>名前を付けて保存</div>
+                    <div class="menu-item">エクスポート
+                        <div class="submenu">
+                            <div>HTML</div>
+                            <div>PDF</div>
+                            <div>Word (docx)</div>
+                            <div>画像 (PNG)</div>
+                        </div>
+                    </div>
+                    <div>終了</div>
+                </div>
+            </div>
+            <div class="menu-item">編集
+                <div class="submenu">
+                    <div>切り取り</div>
+                    <div>コピー</div>
+                    <div>貼り付け</div>
+                    <div>元に戻す</div>
+                    <div>やり直し</div>
+                </div>
+            </div>
+            <div class="menu-item">表示
+                <div class="submenu">
+                    <div>モード</div>
+                    <div>CSS選択</div>
+                </div>
+            </div>
+            <div class="menu-item">設定
+                <div class="submenu">
+                    <div>設定</div>
+                </div>
+            </div>
+            <div class="menu-item">ヘルプ
+                <div class="submenu">
+                    <div>バージョン情報</div>
+                </div>
+            </div>
+        </nav>
+        <div class="toolbar">
+            <select>
+                <option>CSS選択</option>
+            </select>
+            <select>
+                <option>ビューアーモード</option>
+                <option>Markdown編集モード</option>
+                <option>リアルタイム編集モード</option>
+            </select>
+        </div>
+    </header>
+    <main>
+        <div id="folder-tree-area">
+            <!-- フォルダツリーエリア -->
+            <p>ここにフォルダツリーが表示されます。</p>
+            <ul>
+                <li><span class="collapse-indicator">+</span> Folder 1
+                    <ul>
+                        <li>File A.md</li>
+                        <li>File B.md</li>
+                    </ul>
+                </li>
+                <li><span class="collapse-indicator">+</span> Folder 2
+                    <ul>
+                        <li>File C.md</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <div id="main-editor-area">
+            <!-- メイン表示・編集エリア -->
+            <p>ここにMarkdownコンテンツが表示・編集されます。</p>
+            <p>現在のモードに応じて表示形式が変わります。</p>
+            <p>例: ビューアーモードではHTML表示、Markdown編集モードではRaw Markdown表示、リアルタイム編集モードではカーソル行のみMarkdown表示。</p>
+        </div>
+    </main>
+</body>
+</html>
