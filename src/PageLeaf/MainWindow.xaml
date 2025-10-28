@@ -4,9 +4,23 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PageLeaf"
+        xmlns:views="clr-namespace:PageLeaf.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="PageLeaf Markdown Editor" Height="600" Width="1000">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200" MinWidth="150"/>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
 
+        <views:FolderTree Grid.Column="0" />
+
+        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+
+        <!-- 右側の区画 (将来のエディタ用) -->
+        <Grid Grid.Column="2">
+
+        </Grid>
     </Grid>
 </Window>
