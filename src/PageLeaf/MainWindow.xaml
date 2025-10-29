@@ -17,44 +17,44 @@
 
         <!-- Menu -->
         <Menu Grid.Row="0">
-            <MenuItem Header="_ファイル">
-                <MenuItem Header="_新規作成"/>
-                <MenuItem Header="_開く"/>
-                <MenuItem Header="_フォルダを開く"/>
+            <MenuItem Header="{StaticResource MenuFileHeader}">
+                <MenuItem Header="{StaticResource MenuFileNewHeader}"/>
+                <MenuItem Header="{StaticResource MenuFileOpenHeader}"/>
+                <MenuItem Header="{StaticResource MenuFileOpenFolderHeader}"/>
                 <Separator/>
-                <MenuItem Header="_保存"/>
-                <MenuItem Header="_名前を付けて保存"/>
+                <MenuItem Header="{StaticResource MenuFileSaveHeader}"/>
+                <MenuItem Header="{StaticResource MenuFileSaveAsHeader}"/>
                 <Separator/>
-                <MenuItem Header="_エクスポート">
-                    <MenuItem Header="HTML"/>
-                    <MenuItem Header="PDF"/>
-                    <MenuItem Header="Word (docx)"/>
-                    <MenuItem Header="画像 (PNG)"/>
+                <MenuItem Header="{StaticResource MenuFileExportHeader}">
+                    <MenuItem Header="{StaticResource MenuFileExportHtmlHeader}"/>
+                    <MenuItem Header="{StaticResource MenuFileExportPdfHeader}"/>
+                    <MenuItem Header="{StaticResource MenuFileExportWordDocxHeader}"/>
+                    <MenuItem Header="{StaticResource MenuFileExportImagePngHeader}"/>
                 </MenuItem>
                 <Separator/>
-                <MenuItem Header="_終了"/>
+                <MenuItem Header="{StaticResource MenuFileExitHeader}"/>
             </MenuItem>
-            <MenuItem Header="_編集">
-                <MenuItem Header="_切り取り"/>
-                <MenuItem Header="_コピー"/>
-                <MenuItem Header="_貼り付け"/>
+            <MenuItem Header="{StaticResource MenuEditHeader}">
+                <MenuItem Header="{StaticResource MenuEditCutHeader}"/>
+                <MenuItem Header="{StaticResource MenuEditCopyHeader}"/>
+                <MenuItem Header="{StaticResource MenuEditPasteHeader}"/>
                 <Separator/>
-                <MenuItem Header="_元に戻す"/>
-                <MenuItem Header="_やり直し"/>
+                <MenuItem Header="{StaticResource MenuEditUndoHeader}"/>
+                <MenuItem Header="{StaticResource MenuEditRedoHeader}"/>
             </MenuItem>
-            <MenuItem Header="_表示">
-                <MenuItem Header="モード">
-                    <MenuItem Header="ビューアーモード"/>
-                    <MenuItem Header="Markdown 編集モード"/>
-                    <MenuItem Header="リアルタイム編集モード"/>
+            <MenuItem Header="{StaticResource MenuViewHeader}">
+                <MenuItem Header="{StaticResource MenuViewModelHeader}">
+                    <MenuItem Header="{StaticResource MenuViewerViewModeHeader}"/>
+                    <MenuItem Header="{StaticResource MenuViewMarkdownEditModeHeader}"/>
+                    <MenuItem Header="{StaticResource MenuViewRealtimeEditModeHeader}"/>
                 </MenuItem>
-                <MenuItem Header="CSS 選択"/>
+                <MenuItem Header="{StaticResource MenuViewCssSelectHeader}"/>
             </MenuItem>
-            <MenuItem Header="_設定">
-                <MenuItem Header="_設定"/>
+            <MenuItem Header="{StaticResource MenuSettingsHeader}">
+                <MenuItem Header="{StaticResource MenuSettingsSettingsHeader}"/>
             </MenuItem>
-            <MenuItem Header="_ヘルプ">
-                <MenuItem Header="_バージョン情報"/>
+            <MenuItem Header="{StaticResource MenuHelpHeader}">
+                <MenuItem Header="{StaticResource MenuHelpAboutHeader}"/>
             </MenuItem>
         </Menu>
 
