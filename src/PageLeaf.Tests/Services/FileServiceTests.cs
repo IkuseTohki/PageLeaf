@@ -72,5 +72,59 @@ namespace PageLeaf.Tests.Services
             Assert.IsFalse(file2Node.IsDirectory, "file2.txtがディレクトリとして扱われています。");
             Assert.AreEqual(Path.Combine(_testFolderPath, "subfolder", "file2.txt"), file2Node.FilePath);
         }
+        [TestMethod]
+        public void OpenFolder_ShouldThrowDirectoryNotFoundException_WhenPathDoesNotExist()
+        {
+            // テスト観点: 存在しないフォルダパスを指定した場合、DirectoryNotFoundExceptionがスローされることを確認する。
+
+            // Arrange
+            var fileService = new FileService();
+            var nonExistentPath = Path.Combine(_testFolderPath, "non_existent_folder");
+
+            // Act & Assert
+            Assert.ThrowsException<DirectoryNotFoundException>(() => fileService.OpenFolder(nonExistentPath));
+        }
+        [TestMethod]
+        public void OpenFolder_ShouldReturnEmptyCollection_WhenFolderIsEmpty()
+        {
+            // テスト観点: 空のフォルダを指定した場合、空のコレクションが返されることを確認する。
+
+            // Arrange
+            var fileService = new FileService();
+            var emptyFolderPath = Path.Combine(_testFolderPath, "empty_folder");
+            Directory.CreateDirectory(emptyFolderPath);
+
+            // Act
+            var result = fileService.OpenFolder(emptyFolderPath).ToList();
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+        [DataTestMethod]
+        [DataRow("", DisplayName = "空文字列")]
+        [DataRow("   ", DisplayName = "空白文字列")]
+        public void OpenFolder_ShouldThrowArgumentException_WhenPathIsInvalid(string invalidPath)
+        {
+            // テスト観点: 無効な（空や空白の）文字列がパスとして指定された場合、ArgumentExceptionがスローされることを確認する。
+
+            // Arrange
+            var fileService = new FileService();
+
+            // Act & Assert
+            Assert.ThrowsException<ArgumentException>(() => fileService.OpenFolder(invalidPath));
+        }
+
+        [TestMethod]
+        public void OpenFolder_ShouldThrowArgumentNullException_WhenPathIsNull()
+        {
+            // テスト観点: nullがパスとして指定された場合、ArgumentNullExceptionがスローされることを確認する。
+
+            // Arrange
+            var fileService = new FileService();
+
+            // Act & Assert
+            Assert.ThrowsException<ArgumentNullException>(() => fileService.OpenFolder(null!));
+        }
     }
 }

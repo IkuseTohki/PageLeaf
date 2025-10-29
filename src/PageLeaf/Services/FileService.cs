@@ -15,10 +15,19 @@ namespace PageLeaf.Services
         /// <returns>フォルダ構造を表すFileTreeNodeのIEnumerable。</returns>
         public IEnumerable<FileTreeNode> OpenFolder(string folderPath)
         {
+            if (folderPath is null)
+            {
+                throw new ArgumentNullException(nameof(folderPath));
+            }
+            if (string.IsNullOrWhiteSpace(folderPath))
+            {
+                throw new ArgumentException("Folder path cannot be empty or whitespace.", nameof(folderPath));
+            }
+
             if (!Directory.Exists(folderPath))
             {
-                // フォルダが存在しない場合は空のリストを返します。
-                return Enumerable.Empty<FileTreeNode>();
+                // フォルダが存在しない場合は例外をスローします。
+                throw new DirectoryNotFoundException($"Directory not found: {folderPath}");
             }
 
             var nodes = new List<FileTreeNode>();
