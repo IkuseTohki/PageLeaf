@@ -4,23 +4,82 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PageLeaf"
+        xmlns:viewmodels="clr-namespace:PageLeaf.ViewModels"
         xmlns:views="clr-namespace:PageLeaf.Views"
         mc:Ignorable="d"
         Title="PageLeaf Markdown Editor" Height="600" Width="1000">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200" MinWidth="150"/>
-            <ColumnDefinition Width="5"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Menu -->
+            <RowDefinition Height="Auto"/> <!-- ToolBar -->
+            <RowDefinition Height="*"/>    <!-- Main Content -->
+        </Grid.RowDefinitions>
 
-        <views:FolderTree Grid.Column="0" />
+        <!-- Menu -->
+        <Menu Grid.Row="0">
+            <MenuItem Header="_ファイル">
+                <MenuItem Header="_新規作成"/>
+                <MenuItem Header="_開く"/>
+                <MenuItem Header="_フォルダを開く"/>
+                <Separator/>
+                <MenuItem Header="_保存"/>
+                <MenuItem Header="_名前を付けて保存"/>
+                <Separator/>
+                <MenuItem Header="_エクスポート">
+                    <MenuItem Header="HTML"/>
+                    <MenuItem Header="PDF"/>
+                    <MenuItem Header="Word (docx)"/>
+                    <MenuItem Header="画像 (PNG)"/>
+                </MenuItem>
+                <Separator/>
+                <MenuItem Header="_終了"/>
+            </MenuItem>
+            <MenuItem Header="_編集">
+                <MenuItem Header="_切り取り"/>
+                <MenuItem Header="_コピー"/>
+                <MenuItem Header="_貼り付け"/>
+                <Separator/>
+                <MenuItem Header="_元に戻す"/>
+                <MenuItem Header="_やり直し"/>
+            </MenuItem>
+            <MenuItem Header="_表示">
+                <MenuItem Header="モード">
+                    <MenuItem Header="ビューアーモード"/>
+                    <MenuItem Header="Markdown 編集モード"/>
+                    <MenuItem Header="リアルタイム編集モード"/>
+                </MenuItem>
+                <MenuItem Header="CSS 選択"/>
+            </MenuItem>
+            <MenuItem Header="_設定">
+                <MenuItem Header="_設定"/>
+            </MenuItem>
+            <MenuItem Header="_ヘルプ">
+                <MenuItem Header="_バージョン情報"/>
+            </MenuItem>
+        </Menu>
 
-        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+        <!-- ToolBar -->
+        <ToolBar Grid.Row="1">
+            <ComboBox/>
+            <ComboBox/>
+        </ToolBar>
 
-        <!-- 右側の区画 (将来のエディタ用) -->
-        <Grid Grid.Column="2">
+        <!-- Main Content -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" MinWidth="150"/>
+                <ColumnDefinition Width="5"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
+            <views:FolderTree Grid.Column="0" />
+
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
+
+            <!-- 右側の区画 (将来のエディタ用) -->
+            <Grid Grid.Column="2">
+
+            </Grid>
         </Grid>
     </Grid>
 </Window>
