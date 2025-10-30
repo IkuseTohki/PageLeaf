@@ -3,40 +3,48 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:PageLeaf"
              xmlns:system="clr-namespace:System;assembly=mscorlib"
+             xmlns:utilities="clr-namespace:PageLeaf.Utilities"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <system:String x:Key="MenuFileHeader">_ファイル</system:String>
-        <system:String x:Key="MenuFileNewHeader">_新規作成</system:String>
-        <system:String x:Key="MenuFileOpenHeader">_開く</system:String>
-        <system:String x:Key="MenuFileOpenFolderHeader">_フォルダを開く</system:String>
-        <system:String x:Key="MenuFileSaveHeader">_保存</system:String>
-        <system:String x:Key="MenuFileSaveAsHeader">_名前を付けて保存</system:String>
-        <system:String x:Key="MenuFileExportHeader">_エクスポート</system:String>
-        <system:String x:Key="MenuFileExportImagePngHeader">画像 (PNG)</system:String>
-        <system:String x:Key="MenuFileExportHtmlHeader">HTML</system:String>
-        <system:String x:Key="MenuFileExportPdfHeader">PDF</system:String>
-        <system:String x:Key="MenuFileExportWordDocxHeader">Word (docx)</system:String>
-        <system:String x:Key="MenuFileExitHeader">_終了</system:String>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Resources/Styles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
 
-        <system:String x:Key="MenuEditHeader">_編集</system:String>
-        <system:String x:Key="MenuEditCutHeader">_切り取り</system:String>
-        <system:String x:Key="MenuEditCopyHeader">_コピー</system:String>
-        <system:String x:Key="MenuEditPasteHeader">_貼り付け</system:String>
-        <system:String x:Key="MenuEditUndoHeader">_元に戻す</system:String>
-        <system:String x:Key="MenuEditRedoHeader">_やり直し</system:String>
+            <utilities:DisplayModeToStringConverter x:Key="DisplayModeToStringConverter"/>
 
-        <system:String x:Key="MenuViewHeader">_表示</system:String>
-        <system:String x:Key="MenuViewModelHeader">モード</system:String>
-        <system:String x:Key="MenuViewerViewModeHeader">ビューアーモード</system:String>
-        <system:String x:Key="MenuViewMarkdownEditModeHeader">Markdown 編集モード</system:String>
-        <system:String x:Key="MenuViewRealtimeEditModeHeader">リアルタイム編集モード</system:String>
-        <system:String x:Key="MenuViewCssSelectHeader">CSS 選択</system:String>
+            <system:String x:Key="MenuFileHeader">_ファイル</system:String>
+            <system:String x:Key="MenuFileNewHeader">_新規作成</system:String>
+            <system:String x:Key="MenuFileOpenHeader">_開く</system:String>
+            <system:String x:Key="MenuFileOpenFolderHeader">_フォルダを開く</system:String>
+            <system:String x:Key="MenuFileSaveHeader">_保存</system:String>
+            <system:String x:Key="MenuFileSaveAsHeader">_名前を付けて保存</system:String>
+            <system:String x:Key="MenuFileExportHeader">_エクスポート</system:String>
+            <system:String x:Key="MenuFileExportImagePngHeader">画像 (PNG)</system:String>
+            <system:String x:Key="MenuFileExportHtmlHeader">HTML</system:String>
+            <system:String x:Key="MenuFileExportPdfHeader">PDF</system:String>
+            <system:String x:Key="MenuFileExportWordDocxHeader">Word (docx)</system:String>
+            <system:String x:Key="MenuFileExitHeader">_終了</system:String>
 
-        <system:String x:Key="MenuSettingsHeader">_設定</system:String>
-        <system:String x:Key="MenuSettingsSettingsHeader">_設定</system:String>
+            <system:String x:Key="MenuEditHeader">_編集</system:String>
+            <system:String x:Key="MenuEditCutHeader">_切り取り</system:String>
+            <system:String x:Key="MenuEditCopyHeader">_コピー</system:String>
+            <system:String x:Key="MenuEditPasteHeader">_貼り付け</system:String>
+            <system:String x:Key="MenuEditUndoHeader">_元に戻す</system:String>
+            <system:String x:Key="MenuEditRedoHeader">_やり直し</system:String>
 
-        <system:String x:Key="MenuHelpHeader">_ヘルプ</system:String>
-        <system:String x:Key="MenuHelpAboutHeader">_バージョン情報</system:String>
-         
+            <system:String x:Key="MenuViewHeader">_表示</system:String>
+            <system:String x:Key="MenuViewModelHeader">モード</system:String>
+            <system:String x:Key="MenuViewerViewModeHeader">ビューアーモード</system:String>
+            <system:String x:Key="MenuViewMarkdownEditModeHeader">Markdown 編集モード</system:String>
+            <system:String x:Key="MenuViewRealtimeEditModeHeader">リアルタイム編集モード</system:String>
+            <system:String x:Key="MenuViewCssSelectHeader">CSS 選択</system:String>
+
+            <system:String x:Key="MenuSettingsHeader">_設定</system:String>
+            <system:String x:Key="MenuSettingsSettingsHeader">_設定</system:String>
+
+            <system:String x:Key="MenuHelpHeader">_ヘルプ</system:String>
+            <system:String x:Key="MenuHelpAboutHeader">_バージョン情報</system:String>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

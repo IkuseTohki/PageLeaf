@@ -60,8 +60,14 @@
 
         <!-- ToolBar -->
         <ToolBar Grid.Row="1">
-            <ComboBox/>
-            <ComboBox/>
+            <ComboBox ItemsSource="{Binding AvailableModes}" SelectedItem="{Binding SelectedMode}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Converter={StaticResource DisplayModeToStringConverter}}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ComboBox ItemsSource="{Binding AvailableCssFiles}" SelectedItem="{Binding SelectedCssFile}"/>
         </ToolBar>
 
         <!-- Main Content -->

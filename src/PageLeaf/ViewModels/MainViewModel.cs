@@ -2,6 +2,8 @@ using Microsoft.Extensions.Logging;
 using PageLeaf.Models;
 using PageLeaf.Services;
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Windows.Input;
 
 namespace PageLeaf.ViewModels
@@ -11,6 +13,10 @@ namespace PageLeaf.ViewModels
         private readonly IFileService _fileService;
         private readonly ILogger<MainViewModel> _logger;
         private FileTreeNode _rootNode;
+        private ObservableCollection<DisplayMode> _availableModes;
+        private DisplayMode _selectedMode;
+        private ObservableCollection<string> _availableCssFiles;
+        private string _selectedCssFile;
 
         public FileTreeNode RootNode
         {
@@ -22,6 +28,46 @@ namespace PageLeaf.ViewModels
             }
         }
 
+        public ObservableCollection<DisplayMode> AvailableModes
+        {
+            get => _availableModes;
+            set
+            {
+                _availableModes = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public DisplayMode SelectedMode
+        {
+            get => _selectedMode;
+            set
+            {
+                _selectedMode = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<string> AvailableCssFiles
+        {
+            get => _availableCssFiles;
+            set
+            {
+                _availableCssFiles = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string SelectedCssFile
+        {
+            get => _selectedCssFile;
+            set
+            {
+                _selectedCssFile = value;
+                OnPropertyChanged();
+            }
+        }
+
         public ICommand OpenFolderCommand { get; }
 
         public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger)
@@ -29,6 +75,12 @@ namespace PageLeaf.ViewModels
             _fileService = fileService;
             _logger = logger;
             OpenFolderCommand = new Utilities.DelegateCommand(OpenFolder);
+
+            AvailableModes = new ObservableCollection<DisplayMode>(Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>());
+            SelectedMode = AvailableModes.FirstOrDefault();
+
+            AvailableCssFiles = new ObservableCollection<string> { "github.css", "solarized-light.css", "solarized-dark.css" };
+            SelectedCssFile = AvailableCssFiles[0];
         }
 
         private void OpenFolder(object parameter)
