@@ -64,8 +64,37 @@ namespace PageLeaf.Services
 
         public MarkdownDocument Open(string filePath)
         {
-            // TODO: 未実装です。今後のタスクで実装します。
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(filePath))
+            {
+                throw new ArgumentException("File path cannot be null or empty.", nameof(filePath));
+            }
+
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException($"File not found: {filePath}");
+            }
+
+            try
+            {
+                string content = File.ReadAllText(filePath);
+                return new MarkdownDocument
+                {
+                    FilePath = filePath,
+                    Content = content
+                };
+            }
+            catch (IOException ex)
+            {
+                throw new IOException($"Error reading file: {filePath}", ex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                throw new UnauthorizedAccessException($"Access to file '{filePath}' is denied.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"An unexpected error occurred while opening file: {filePath}", ex);
+            }
         }
 
         public void Save(MarkdownDocument document)

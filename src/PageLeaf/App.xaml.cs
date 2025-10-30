@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PageLeaf.Services;
 using PageLeaf.ViewModels;
+using PageLeaf.Views; // NEW
 using Serilog;
 using System;
 using System.IO;
@@ -48,6 +49,7 @@ namespace PageLeaf
                 {
                     // Services をDIコンテナに登録
                     services.AddSingleton<IFileService, FileService>();
+                    services.AddSingleton<IDialogService, DialogService>(); // NEW
 
                     // ViewModels と Views をDIコンテナに登録
                     services.AddSingleton<MainViewModel>();

@@ -19,7 +19,7 @@
         <Menu Grid.Row="0">
             <MenuItem Header="{StaticResource MenuFileHeader}">
                 <MenuItem Header="{StaticResource MenuFileNewHeader}"/>
-                <MenuItem Header="{StaticResource MenuFileOpenHeader}"/>
+                <MenuItem Header="{StaticResource MenuFileOpenHeader}" Command="{Binding OpenFileCommand}"/>
                 <MenuItem Header="{StaticResource MenuFileOpenFolderHeader}"/>
                 <Separator/>
                 <MenuItem Header="{StaticResource MenuFileSaveHeader}"/>
@@ -82,9 +82,13 @@
 
             <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
 
-            <!-- 右側の区画 (将来のエディタ用) -->
+            <!-- 右側の区画 (エディタ) -->
             <Grid Grid.Column="2">
-
+                <TextBox Text="{Binding EditorText, Mode=TwoWay}"
+                         TextWrapping="Wrap"
+                         AcceptsReturn="True"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         Margin="5"/>
             </Grid>
         </Grid>
     </Grid>
