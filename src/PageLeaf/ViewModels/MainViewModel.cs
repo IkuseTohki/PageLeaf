@@ -13,14 +13,14 @@ namespace PageLeaf.ViewModels
         private readonly IFileService _fileService;
         private readonly ILogger<MainViewModel> _logger;
         private readonly IDialogService _dialogService;
-        private FileTreeNode _rootNode;
-        private ObservableCollection<DisplayMode> _availableModes;
+        private FileTreeNode? _rootNode;
+        private ObservableCollection<DisplayMode> _availableModes = null!;
         private DisplayMode _selectedMode;
-        private ObservableCollection<string> _availableCssFiles;
-        private string _selectedCssFile;
-        private MarkdownDocument _currentDocument;
+        private ObservableCollection<string> _availableCssFiles = null!;
+        private string _selectedCssFile = null!;
+        private MarkdownDocument _currentDocument = null!;
 
-        public FileTreeNode RootNode
+        public FileTreeNode? RootNode
         {
             get => _rootNode;
             private set
@@ -118,7 +118,7 @@ namespace PageLeaf.ViewModels
             CurrentDocument = new MarkdownDocument { Content = "# Hello, PageLeaf!" };
         }
 
-        private void OpenFolder(object parameter)
+        private void OpenFolder(object? parameter)
         {
             try
             {
@@ -140,7 +140,7 @@ namespace PageLeaf.ViewModels
             }
         }
 
-        private void ExecuteOpenFile(object parameter)
+        private void ExecuteOpenFile(object? parameter)
         {
             _logger.LogInformation("OpenFileCommand executed.");
 

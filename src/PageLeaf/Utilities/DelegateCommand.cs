@@ -8,13 +8,13 @@ namespace PageLeaf.Utilities
     /// </summary>
     public class DelegateCommand : ICommand
     {
-        private readonly Action<object> _execute;
-        private readonly Predicate<object> _canExecute;
+        private readonly Action<object?> _execute;
+        private readonly Predicate<object?>? _canExecute;
 
         /// <summary>
         /// コマンドの実行可能状態が変更されたときに発生します。
         /// </summary>
-        public event EventHandler CanExecuteChanged
+        public event EventHandler? CanExecuteChanged
         {
             add { CommandManager.RequerySuggested += value; }
             remove { CommandManager.RequerySuggested -= value; }
@@ -25,7 +25,7 @@ namespace PageLeaf.Utilities
         /// </summary>
         /// <param name="execute">コマンドの実行ロジック。</param>
         /// <param name="canExecute">コマンドの実行可能状態を判断するロジック。</param>
-        public DelegateCommand(Action<object> execute, Predicate<object> canExecute = null)
+        public DelegateCommand(Action<object?> execute, Predicate<object?>? canExecute = null)
         {
             _execute = execute ?? throw new ArgumentNullException(nameof(execute));
             _canExecute = canExecute;
@@ -36,7 +36,7 @@ namespace PageLeaf.Utilities
         /// </summary>
         /// <param name="parameter">コマンドのパラメータ。</param>
         /// <returns>コマンドが実行可能な場合は true、それ以外は false。</returns>
-        public bool CanExecute(object parameter)
+        public bool CanExecute(object? parameter)
         {
             return _canExecute == null || _canExecute(parameter);
         }
@@ -45,7 +45,7 @@ namespace PageLeaf.Utilities
         /// コマンドを実行します。
         /// </summary>
         /// <param name="parameter">コマンドのパラメータ。</param>
-        public void Execute(object parameter)
+        public void Execute(object? parameter)
         {
             _execute(parameter);
         }
