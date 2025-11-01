@@ -97,6 +97,7 @@ namespace PageLeaf.ViewModels
         public ICommand OpenFolderCommand { get; }
         public ICommand OpenFileCommand { get; }
         public ICommand SaveFileCommand { get; }
+        public ICommand SaveAsFileCommand { get; } // 追加
 
         public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService)
         {
@@ -110,6 +111,7 @@ namespace PageLeaf.ViewModels
             OpenFolderCommand = new Utilities.DelegateCommand(OpenFolder);
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
             SaveFileCommand = new Utilities.DelegateCommand(ExecuteSaveFile);
+            SaveAsFileCommand = new Utilities.DelegateCommand(ExecuteSaveAsFile); // 追加
 
             AvailableModes = new ObservableCollection<DisplayMode>(Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>());
             SelectedMode = AvailableModes.FirstOrDefault();
@@ -192,6 +194,42 @@ namespace PageLeaf.ViewModels
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while saving the file for {FilePath}.", CurrentDocument.FilePath);
+            }
+        }
+
+        private void ExecuteSaveAsFile(object? parameter) // 追加
+        {
+            _logger.LogInformation("ExecuteSaveAsFile command triggered.");
+
+            if (CurrentDocument == null)
+            {
+                _logger.LogWarning("CurrentDocument is null. Save As command cannot execute.");
+                return;
+            }
+
+            string? newFilePath = _dialogService.ShowSaveFileDialog(
+                "名前を付けて保存",
+                "Markdown files (*.md;*.markdown)|*.md;*.markdown|All files (*.*)|*.*",
+                CurrentDocument.FilePath // 既存のファイルパスを初期値として渡す
+            );
+
+            if (!string.IsNullOrEmpty(newFilePath))
+            {
+                try
+                {
+                    // 新しいファイルパスでドキュメントを更新し、保存
+                    CurrentDocument.FilePath = newFilePath;
+                    _fileService.Save(CurrentDocument);
+                    _logger.LogInformation("File saved as: {FilePath}", newFilePath);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while saving the file as {FilePath}.", newFilePath);
+                }
+            }
+            else
+            {
+                _logger.LogInformation("Save As dialog was cancelled.");
             }
         }
     }

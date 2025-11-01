@@ -23,7 +23,7 @@
                 <MenuItem Header="{StaticResource MenuFileOpenFolderHeader}"/>
                 <Separator/>
                 <MenuItem Header="{StaticResource MenuFileSaveHeader}" Command="{Binding SaveFileCommand}"/>
-                <MenuItem Header="{StaticResource MenuFileSaveAsHeader}"/>
+                <MenuItem Header="{StaticResource MenuFileSaveAsHeader}" Command="{Binding SaveAsFileCommand}"/>
                 <Separator/>
                 <MenuItem Header="{StaticResource MenuFileExportHeader}">
                     <MenuItem Header="{StaticResource MenuFileExportHtmlHeader}"/>

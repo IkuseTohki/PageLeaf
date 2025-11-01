@@ -136,5 +136,31 @@ namespace PageLeaf.Tests.ViewModels
             // Assert
             _mockFileService.Verify(s => s.Save(It.Is<MarkdownDocument>(doc => doc.FilePath == testFilePath && doc.Content == fileContent)), Times.Once);
         }
+
+        [TestMethod]
+        public void SaveAsFileCommand_ShouldCallFileServiceSave_WhenUserSelectsFilePath()
+        {
+            // テスト観点: SaveAsFileCommand が、IDialogService.ShowSaveFileDialog を呼び出し、
+            //             ユーザーがファイルパスを選択した場合に IFileService.Save が
+            //             正しい内容と新しいファイルパスで呼び出されることを確認する。
+            // Arrange
+            string initialFilePath = @"C:\test\initial.md";
+            string initialContent = "# Initial Content";
+            var initialDocument = new MarkdownDocument { FilePath = initialFilePath, Content = initialContent };
+            _viewModel.CurrentDocument = initialDocument;
+
+            string newFilePath = @"C:\new\path\to\file.md";
+            _mockDialogService.Setup(s => s.ShowSaveFileDialog(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()))
+                              .Returns(newFilePath);
+
+            // Act
+            _viewModel.SaveAsFileCommand.Execute(null);
+
+            // Assert
+            _mockDialogService.Verify(s => s.ShowSaveFileDialog(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()), Times.Once);
+            _mockFileService.Verify(s => s.Save(It.Is<MarkdownDocument>(doc =>
+                doc.FilePath == newFilePath && doc.Content == initialContent)), Times.Once);
+            Assert.AreEqual(newFilePath, _viewModel.CurrentDocument.FilePath, "CurrentDocument.FilePath should be updated to the new path.");
+        }
     }
 }

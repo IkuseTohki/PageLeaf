@@ -113,10 +113,10 @@ namespace PageLeaf.Services
                 throw new ArgumentNullException(nameof(document));
             }
 
-            if (string.IsNullOrEmpty(document.FilePath))
+            if (string.IsNullOrWhiteSpace(document.FilePath))
             {
-                _logger.LogError("Save method called with a document that has a null or empty FilePath.");
-                throw new ArgumentException("File path cannot be null or empty.", nameof(document.FilePath));
+                _logger.LogError("Save method called with a document that has a null, empty, or whitespace FilePath.");
+                throw new ArgumentException("File path cannot be null, empty, or whitespace.", nameof(document.FilePath));
             }
 
             _logger.LogInformation("Attempting to save file to {FilePath}.", document.FilePath);
