@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using PageLeaf.Models;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,13 @@ namespace PageLeaf.Services
 {
     public class FileService : IFileService
     {
+        private readonly ILogger<FileService> _logger;
+
+        public FileService(ILogger<FileService> logger)
+        {
+            _logger = logger;
+        }
+
         /// <summary>
         /// 指定されたフォルダパスのファイルとサブフォルダの構造を再帰的に読み込み、ツリーノードのコレクションとして返します。
         /// </summary>
@@ -99,8 +107,30 @@ namespace PageLeaf.Services
 
         public void Save(MarkdownDocument document)
         {
-            // TODO: 未実装です。今後のタスクで実装します。
-            throw new NotImplementedException();
+            if (document == null)
+            {
+                _logger.LogError("Save method called with a null document.");
+                throw new ArgumentNullException(nameof(document));
+            }
+
+            if (string.IsNullOrEmpty(document.FilePath))
+            {
+                _logger.LogError("Save method called with a document that has a null or empty FilePath.");
+                throw new ArgumentException("File path cannot be null or empty.", nameof(document.FilePath));
+            }
+
+            _logger.LogInformation("Attempting to save file to {FilePath}.", document.FilePath);
+
+            try
+            {
+                File.WriteAllText(document.FilePath, document.Content ?? string.Empty);
+                _logger.LogInformation("Successfully saved file to {FilePath}.", document.FilePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving file to {FilePath}.", document.FilePath);
+                throw new IOException($"Error saving file: {document.FilePath}", ex);
+            }
         }
     }
 }

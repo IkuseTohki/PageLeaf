@@ -22,7 +22,7 @@
                 <MenuItem Header="{StaticResource MenuFileOpenHeader}" Command="{Binding OpenFileCommand}"/>
                 <MenuItem Header="{StaticResource MenuFileOpenFolderHeader}"/>
                 <Separator/>
-                <MenuItem Header="{StaticResource MenuFileSaveHeader}"/>
+                <MenuItem Header="{StaticResource MenuFileSaveHeader}" Command="{Binding SaveFileCommand}"/>
                 <MenuItem Header="{StaticResource MenuFileSaveAsHeader}"/>
                 <Separator/>
                 <MenuItem Header="{StaticResource MenuFileExportHeader}">
@@ -84,7 +84,7 @@
 
             <!-- 右側の区画 (エディタ) -->
             <Grid Grid.Column="2">
-                <TextBox Text="{Binding EditorText, Mode=TwoWay}"
+                <TextBox Text="{Binding EditorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          TextWrapping="Wrap"
                          AcceptsReturn="True"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"

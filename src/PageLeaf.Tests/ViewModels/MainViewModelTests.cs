@@ -119,5 +119,22 @@ namespace PageLeaf.Tests.ViewModels
             // Arrange, Act & Assert
             Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, null!));
         }
+
+        [TestMethod]
+        public void SaveFileCommand_ShouldCallFileServiceSave_WhenDocumentHasFilePath()
+        {
+            // テスト観点: SaveFileCommand が、ファイルパスを持つ CurrentDocument の内容を IFileService.Save を介して上書き保存することを確認する。
+            // Arrange
+            string testFilePath = @"C:\test\existing.md";
+            string fileContent = "# Existing Content";
+            var documentToSave = new MarkdownDocument { FilePath = testFilePath, Content = fileContent };
+            _viewModel.CurrentDocument = documentToSave;
+
+            // Act
+            _viewModel.SaveFileCommand.Execute(null);
+
+            // Assert
+            _mockFileService.Verify(s => s.Save(It.Is<MarkdownDocument>(doc => doc.FilePath == testFilePath && doc.Content == fileContent)), Times.Once);
+        }
     }
 }

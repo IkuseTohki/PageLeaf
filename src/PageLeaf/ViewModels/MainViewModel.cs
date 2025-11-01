@@ -96,6 +96,7 @@ namespace PageLeaf.ViewModels
 
         public ICommand OpenFolderCommand { get; }
         public ICommand OpenFileCommand { get; }
+        public ICommand SaveFileCommand { get; }
 
         public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService)
         {
@@ -108,6 +109,7 @@ namespace PageLeaf.ViewModels
             _dialogService = dialogService;
             OpenFolderCommand = new Utilities.DelegateCommand(OpenFolder);
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
+            SaveFileCommand = new Utilities.DelegateCommand(ExecuteSaveFile);
 
             AvailableModes = new ObservableCollection<DisplayMode>(Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>());
             SelectedMode = AvailableModes.FirstOrDefault();
@@ -170,6 +172,26 @@ namespace PageLeaf.ViewModels
             else
             {
                 _logger.LogInformation("File open dialog was cancelled or returned empty path.");
+            }
+        }
+
+        private void ExecuteSaveFile(object? parameter)
+        {
+            _logger.LogInformation("ExecuteSaveFile command triggered.");
+
+            if (CurrentDocument == null)
+            {
+                _logger.LogWarning("CurrentDocument is null. Save command cannot execute.");
+                return;
+            }
+
+            try
+            {
+                _fileService.Save(CurrentDocument);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while saving the file for {FilePath}.", CurrentDocument.FilePath);
             }
         }
     }
