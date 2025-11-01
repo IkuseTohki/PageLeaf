@@ -18,7 +18,7 @@ namespace PageLeaf.ViewModels
         private DisplayMode _selectedMode;
         private ObservableCollection<string> _availableCssFiles;
         private string _selectedCssFile;
-        private string _editorText;
+        private MarkdownDocument _currentDocument;
 
         public FileTreeNode RootNode
         {
@@ -70,21 +70,39 @@ namespace PageLeaf.ViewModels
             }
         }
 
-        public string EditorText
+        public MarkdownDocument CurrentDocument
         {
-            get => _editorText;
+            get => _currentDocument;
             set
             {
-                _editorText = value;
+                _currentDocument = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(EditorText)); // CurrentDocumentが変更されたらEditorTextも更新
+            }
+        }
+
+        public string EditorText
+        {
+            get => _currentDocument?.Content ?? string.Empty;
+            set
+            {
+                if (_currentDocument != null)
+                {
+                    _currentDocument.Content = value;
+                }
+                OnPropertyChanged(); // CurrentDocumentがnullの場合でも変更通知を発生させる
             }
         }
 
         public ICommand OpenFolderCommand { get; }
         public ICommand OpenFileCommand { get; }
 
-        public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService) // MODIFIED: Constructor parameters
+        public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService)
         {
+            ArgumentNullException.ThrowIfNull(fileService);
+            ArgumentNullException.ThrowIfNull(logger);
+            ArgumentNullException.ThrowIfNull(dialogService);
+
             _fileService = fileService;
             _logger = logger;
             _dialogService = dialogService;
@@ -97,7 +115,7 @@ namespace PageLeaf.ViewModels
             AvailableCssFiles = new ObservableCollection<string> { "github.css", "solarized-light.css", "solarized-dark.css" };
             SelectedCssFile = AvailableCssFiles[0];
 
-            EditorText = "# Hello, PageLeaf!";
+            CurrentDocument = new MarkdownDocument { Content = "# Hello, PageLeaf!" };
         }
 
         private void OpenFolder(object parameter)
@@ -139,7 +157,7 @@ namespace PageLeaf.ViewModels
                     _logger.LogInformation("Attempting to open file: {FilePath}", filePath); // Log before opening
                     MarkdownDocument document = _fileService.Open(filePath);
                     _logger.LogInformation("File opened successfully. Document content length: {Length}", document.Content?.Length ?? 0); // Log after opening
-                    EditorText = document.Content;
+                    CurrentDocument = document;
                     _logger.LogInformation("EditorText updated with content from {FilePath}", filePath); // Log after update
                     // TODO: document.FilePath も保持する必要があるが、これはフェーズ3でMarkdownDocumentモデルを導入する際に対応
                 }
