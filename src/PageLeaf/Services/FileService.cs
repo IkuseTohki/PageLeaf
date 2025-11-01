@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using Ude;
 
 namespace PageLeaf.Services
 {
@@ -84,11 +86,13 @@ namespace PageLeaf.Services
 
             try
             {
-                string content = File.ReadAllText(filePath);
+                var encoding = DetectEncoding(filePath);
+                string content = File.ReadAllText(filePath, encoding);
                 return new MarkdownDocument
                 {
                     FilePath = filePath,
-                    Content = content
+                    Content = content,
+                    Encoding = encoding // 検出したエンコーディングを保存
                 };
             }
             catch (IOException ex)
@@ -123,13 +127,49 @@ namespace PageLeaf.Services
 
             try
             {
-                File.WriteAllText(document.FilePath, document.Content ?? string.Empty);
-                _logger.LogInformation("Successfully saved file to {FilePath}.", document.FilePath);
+                // ドキュメントに保存されているエンコーディングを使用。なければUTF8をデフォルトとする。
+                var encodingToUse = document.Encoding ?? Encoding.UTF8;
+                File.WriteAllText(document.FilePath, document.Content ?? string.Empty, encodingToUse);
+                _logger.LogInformation("Successfully saved file to {FilePath} with encoding {EncodingName}.", document.FilePath, encodingToUse.WebName);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error saving file to {FilePath}.", document.FilePath);
                 throw new IOException($"Error saving file: {document.FilePath}", ex);
+            }
+        }
+
+        private Encoding DetectEncoding(string filePath)
+        {
+            // .NET Core では、CodePagesEncodingProvider の登録が必要
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                var charsetDetector = new CharsetDetector();
+                charsetDetector.Feed(fileStream);
+                charsetDetector.DataEnd();
+
+                if (charsetDetector.Charset != null)
+                {
+                    _logger.LogInformation("Detected charset: {Charset}, Confidence: {Confidence}", charsetDetector.Charset, charsetDetector.Confidence);
+                    try
+                    {
+                        return Encoding.GetEncoding(charsetDetector.Charset);
+                    }
+                    catch (ArgumentException)
+                    {
+                        _logger.LogWarning("Could not get encoding for detected charset '{Charset}'. Falling back to UTF-8.", charsetDetector.Charset);
+                        // 不明なエンコーディングの場合はデフォルト（UTF-8）にフォールバック
+                        return Encoding.UTF8;
+                    }
+                }
+                else
+                {
+                    _logger.LogInformation("Charset detection failed. Falling back to UTF-8.");
+                    // 判別できなかった場合もデフォルト（UTF-8）にフォールバック
+                    return Encoding.UTF8;
+                }
             }
         }
     }

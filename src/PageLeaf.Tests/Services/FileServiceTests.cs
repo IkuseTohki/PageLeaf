@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Extensions.Logging.Abstractions;
+using System.Text;
 
 namespace PageLeaf.Tests.Services
 {
@@ -220,6 +221,61 @@ namespace PageLeaf.Tests.Services
 
             // Act & Assert
             Assert.ThrowsException<ArgumentException>(() => fileService.Open(invalidPath));
+        }
+
+        [TestMethod]
+        public void Open_ShouldDetectShiftJisEncoding_WhenFileIsShiftJis()
+        {
+            // テスト観点: Shift_JISでエンコードされたファイルを正しく読み込めることを確認する。
+            // Arrange
+            var fileService = new FileService(new NullLogger<FileService>());
+            var filePath = Path.Combine(_testFolderPath, "sjis_file.md");
+            var expectedContent = "これはShift_JISのテストです。";
+
+            // Shift_JIS (code page 932) のエンコーディングを取得
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            var sjisEncoding = Encoding.GetEncoding(932);
+
+            File.WriteAllText(filePath, expectedContent, sjisEncoding);
+
+            // Act
+            var document = fileService.Open(filePath);
+
+            // Assert
+            Assert.AreEqual(expectedContent, document.Content, "ファイルの内容が正しくデコードされていません。");
+        }
+
+        [TestMethod]
+        public void Save_ShouldPreserveOriginalShiftJisEncoding()
+        {
+            // テスト観点: Shift_JISでエンコードされたファイルを開き、変更して保存した際に、
+            //             元のShift_JISエンコーディングが維持されることを確認する。
+            // Arrange
+            var fileService = new FileService(new NullLogger<FileService>());
+            var filePath = Path.Combine(_testFolderPath, "sjis_to_save.md");
+            var originalContent = "これはShift_JISのテストです。";
+
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            var sjisEncoding = Encoding.GetEncoding(932);
+            File.WriteAllText(filePath, originalContent, sjisEncoding);
+
+            // Act
+            // ファイルを開き、内容を変更して保存
+            var document = fileService.Open(filePath);
+            document.Content += " (変更済み)";
+            fileService.Save(document);
+
+            // Assert
+            // 保存されたファイルのエンコーディングを再確認
+            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                var charsetDetector = new Ude.CharsetDetector();
+                charsetDetector.Feed(fileStream);
+                charsetDetector.DataEnd();
+
+                Assert.IsNotNull(charsetDetector.Charset, "エンコーディングが判別できませんでした。");
+                Assert.AreEqual("SHIFT-JIS", charsetDetector.Charset.ToUpper(), "エンコーディングがShift-JISに維持されていません。");
+            }
         }
     }
 }

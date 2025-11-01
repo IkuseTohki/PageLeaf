@@ -13,12 +13,16 @@ namespace PageLeaf.ViewModels
         private readonly IFileService _fileService;
         private readonly ILogger<MainViewModel> _logger;
         private readonly IDialogService _dialogService;
+        private readonly IMarkdownService _markdownService; // 追加
         private FileTreeNode? _rootNode;
         private ObservableCollection<DisplayMode> _availableModes = null!;
         private DisplayMode _selectedMode;
         private ObservableCollection<string> _availableCssFiles = null!;
         private string _selectedCssFile = null!;
         private MarkdownDocument _currentDocument = null!;
+        private bool _isMarkdownEditorVisible;
+        private bool _isViewerVisible;
+        private string _htmlContent = string.Empty; // 追加
 
         public FileTreeNode? RootNode
         {
@@ -45,8 +49,52 @@ namespace PageLeaf.ViewModels
             get => _selectedMode;
             set
             {
-                _selectedMode = value;
-                OnPropertyChanged();
+                if (_selectedMode != value)
+                {
+                    _selectedMode = value;
+                    OnPropertyChanged();
+                    UpdateVisibility();
+                    UpdateHtmlContent(); // モード変更時にもHTMLを更新
+                }
+            }
+        }
+
+        public bool IsMarkdownEditorVisible
+        {
+            get => _isMarkdownEditorVisible;
+            set
+            {
+                if (_isMarkdownEditorVisible != value)
+                {
+                    _isMarkdownEditorVisible = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool IsViewerVisible
+        {
+            get => _isViewerVisible;
+            set
+            {
+                if (_isViewerVisible != value)
+                {
+                    _isViewerVisible = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string HtmlContent
+        {
+            get => _htmlContent;
+            set
+            {
+                if (_htmlContent != value)
+                {
+                    _htmlContent = value;
+                    OnPropertyChanged();
+                }
             }
         }
 
@@ -78,6 +126,7 @@ namespace PageLeaf.ViewModels
                 _currentDocument = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(EditorText)); // CurrentDocumentが変更されたらEditorTextも更新
+                UpdateHtmlContent(); // ドキュメント変更時にもHTMLを更新
             }
         }
 
@@ -99,15 +148,17 @@ namespace PageLeaf.ViewModels
         public ICommand SaveFileCommand { get; }
         public ICommand SaveAsFileCommand { get; } // 追加
 
-        public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService)
+        public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService, IMarkdownService markdownService) // IMarkdownService を追加
         {
             ArgumentNullException.ThrowIfNull(fileService);
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(dialogService);
+            ArgumentNullException.ThrowIfNull(markdownService); // 追加
 
             _fileService = fileService;
             _logger = logger;
             _dialogService = dialogService;
+            _markdownService = markdownService; // 追加
             OpenFolderCommand = new Utilities.DelegateCommand(OpenFolder);
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
             SaveFileCommand = new Utilities.DelegateCommand(ExecuteSaveFile);
@@ -120,6 +171,27 @@ namespace PageLeaf.ViewModels
             SelectedCssFile = AvailableCssFiles[0];
 
             CurrentDocument = new MarkdownDocument { Content = "# Hello, PageLeaf!" };
+
+            UpdateVisibility(); // 初期表示を設定
+        }
+
+        private void UpdateVisibility()
+        {
+            IsMarkdownEditorVisible = SelectedMode == DisplayMode.Markdown;
+            IsViewerVisible = SelectedMode == DisplayMode.Viewer;
+            // RealTimeモードは今回は未実装のため、ここでは考慮しない
+        }
+
+        private void UpdateHtmlContent()
+        {
+            if (SelectedMode == DisplayMode.Viewer && CurrentDocument != null)
+            {
+                HtmlContent = _markdownService.ConvertToHtml(CurrentDocument.Content);
+            }
+            else
+            {
+                HtmlContent = string.Empty; // Viewerモードでない場合はHTMLをクリア
+            }
         }
 
         private void OpenFolder(object? parameter)

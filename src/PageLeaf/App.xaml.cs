@@ -49,7 +49,8 @@ namespace PageLeaf
                 {
                     // Services をDIコンテナに登録
                     services.AddSingleton<IFileService, FileService>();
-                    services.AddSingleton<IDialogService, DialogService>(); // NEW
+                    services.AddSingleton<IDialogService, DialogService>();
+                    services.AddSingleton<IMarkdownService, MarkdownService>(); // MarkdownService を登録
 
                     // ViewModels と Views をDIコンテナに登録
                     services.AddSingleton<MainViewModel>();

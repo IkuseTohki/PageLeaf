@@ -14,6 +14,7 @@ namespace PageLeaf.Tests.ViewModels
         private readonly Mock<IFileService> _mockFileService;
         private readonly Mock<ILogger<MainViewModel>> _mockLogger;
         private readonly Mock<IDialogService> _mockDialogService;
+        private readonly Mock<IMarkdownService> _mockMarkdownService; // 追加
         private readonly MainViewModel _viewModel;
 
         public MainViewModelTests()
@@ -21,7 +22,8 @@ namespace PageLeaf.Tests.ViewModels
             _mockFileService = new Mock<IFileService>();
             _mockLogger = new Mock<ILogger<MainViewModel>>();
             _mockDialogService = new Mock<IDialogService>();
-            _viewModel = new MainViewModel(_mockFileService.Object, _mockLogger.Object, _mockDialogService.Object);
+            _mockMarkdownService = new Mock<IMarkdownService>(); // 追加
+            _viewModel = new MainViewModel(_mockFileService.Object, _mockLogger.Object, _mockDialogService.Object, _mockMarkdownService.Object); // 引数に追加
         }
 
         [TestMethod]
@@ -101,7 +103,7 @@ namespace PageLeaf.Tests.ViewModels
         {
             // テスト観点: IFileService が null の場合に ArgumentNullException がスローされることを確認する。
             // Arrange, Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(null!, _mockLogger.Object, _mockDialogService.Object));
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(null!, _mockLogger.Object, _mockDialogService.Object, _mockMarkdownService.Object));
         }
 
         [TestMethod]
@@ -109,7 +111,7 @@ namespace PageLeaf.Tests.ViewModels
         {
             // テスト観点: ILogger が null の場合に ArgumentNullException がスローされることを確認する。
             // Arrange, Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, null!, _mockDialogService.Object));
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, null!, _mockDialogService.Object, _mockMarkdownService.Object));
         }
 
         [TestMethod]
@@ -117,7 +119,15 @@ namespace PageLeaf.Tests.ViewModels
         {
             // テスト観点: IDialogService が null の場合に ArgumentNullException がスローされることを確認する。
             // Arrange, Act & Assert
-            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, null!));
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, null!, _mockMarkdownService.Object));
+        }
+
+        [TestMethod]
+        public void Constructor_ShouldThrowArgumentNullException_WhenMarkdownServiceIsNull()
+        {
+            // テスト観点: IMarkdownService が null の場合に ArgumentNullException がスローされることを確認する。
+            // Arrange, Act & Assert
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, _mockDialogService.Object, null!));
         }
 
         [TestMethod]
@@ -161,6 +171,107 @@ namespace PageLeaf.Tests.ViewModels
             _mockFileService.Verify(s => s.Save(It.Is<MarkdownDocument>(doc =>
                 doc.FilePath == newFilePath && doc.Content == initialContent)), Times.Once);
             Assert.AreEqual(newFilePath, _viewModel.CurrentDocument.FilePath, "CurrentDocument.FilePath should be updated to the new path.");
+        }
+
+        [TestMethod]
+        public void SelectedMode_Changes_And_Notifies()
+        {
+            // テスト観点: SelectedMode プロパティが変更されたときに、PropertyChanged イベントが正しく発行されることを確認する。
+            // Arrange
+            var receivedEvents = new List<string>();
+            _viewModel.PropertyChanged += (sender, e) => { receivedEvents.Add(e.PropertyName!); };
+
+            // Act
+            // 初期値がViewerである可能性があるので、異なる値に設定してからViewerに戻す
+            _viewModel.SelectedMode = DisplayMode.Markdown; // まず異なる値に設定
+            _viewModel.SelectedMode = DisplayMode.Viewer;   // その後、テストしたい値に設定
+
+            // Assert
+            CollectionAssert.Contains(receivedEvents, nameof(MainViewModel.SelectedMode));
+        }
+
+        [TestMethod]
+        public void IsMarkdownEditorVisible_ShouldBeTrue_WhenSelectedModeIsMarkdown()
+        {
+            // テスト観点: SelectedMode が DisplayMode.Markdown のとき、IsMarkdownEditorVisible が true になることを確認する。
+            // Arrange
+            _viewModel.SelectedMode = DisplayMode.Viewer; // 初期状態をViewerにしておく
+
+            // Act
+            _viewModel.SelectedMode = DisplayMode.Markdown;
+
+            // Assert
+            Assert.IsTrue(_viewModel.IsMarkdownEditorVisible);
+            Assert.IsFalse(_viewModel.IsViewerVisible);
+        }
+
+        [TestMethod]
+        public void IsViewerVisible_ShouldBeTrue_WhenSelectedModeIsViewer()
+        {
+            // テスト観点: SelectedMode が DisplayMode.Viewer のとき、IsViewerVisible が true になることを確認する。
+            // Arrange
+            _viewModel.SelectedMode = DisplayMode.Markdown; // 初期状態をMarkdownにしておく
+
+            // Act
+            _viewModel.SelectedMode = DisplayMode.Viewer;
+
+            // Assert
+            Assert.IsTrue(_viewModel.IsViewerVisible);
+            Assert.IsFalse(_viewModel.IsMarkdownEditorVisible);
+        }
+        [TestMethod]
+        public void HtmlContent_ShouldBeUpdatedAndNotify_WhenCurrentDocumentContentChangesAndModeIsViewer()
+        {
+            // テスト観点: CurrentDocument の Content が変更され、かつモードが Viewer のときに、
+            //             IMarkdownService を介して HTML 変換が行われ、HtmlContent が更新され、
+            //             PropertyChanged イベントが発行されることを確認する。
+            // Arrange
+            var mockMarkdownService = new Mock<IMarkdownService>();
+            var viewModel = new MainViewModel(_mockFileService.Object, _mockLogger.Object, _mockDialogService.Object, mockMarkdownService.Object); // IMarkdownService を追加
+            viewModel.SelectedMode = DisplayMode.Viewer; // Viewerモードに設定
+
+            string markdownContent = "# Test Markdown";
+            string expectedHtml = "<h1>Test Markdown</h1>";
+            mockMarkdownService.Setup(s => s.ConvertToHtml(markdownContent)).Returns(expectedHtml);
+
+            var receivedEvents = new List<string>();
+            viewModel.PropertyChanged += (sender, e) => { receivedEvents.Add(e.PropertyName!); };
+
+            // Act
+            viewModel.CurrentDocument = new MarkdownDocument { Content = markdownContent };
+
+            // Assert
+            mockMarkdownService.Verify(s => s.ConvertToHtml(markdownContent), Times.Once);
+            Assert.AreEqual(expectedHtml, viewModel.HtmlContent);
+            CollectionAssert.Contains(receivedEvents, nameof(MainViewModel.HtmlContent));
+        }
+
+        [TestMethod]
+        public void HtmlContent_ShouldBeUpdatedAndNotify_WhenSelectedModeChangesToViewer()
+        {
+            // テスト観点: SelectedMode が Viewer に変更されたときに、
+            //             IMarkdownService を介して HTML 変換が行われ、HtmlContent が更新され、
+            //             PropertyChanged イベントが発行されることを確認する。
+            // Arrange
+            var mockMarkdownService = new Mock<IMarkdownService>();
+            var viewModel = new MainViewModel(_mockFileService.Object, _mockLogger.Object, _mockDialogService.Object, mockMarkdownService.Object); // IMarkdownService を追加
+            viewModel.CurrentDocument = new MarkdownDocument { Content = "# Initial Markdown" };
+            viewModel.SelectedMode = DisplayMode.Markdown; // 初期モードをMarkdownに設定
+
+            string markdownContent = "# Initial Markdown";
+            string expectedHtml = "<h1>Initial Markdown</h1>";
+            mockMarkdownService.Setup(s => s.ConvertToHtml(markdownContent)).Returns(expectedHtml);
+
+            var receivedEvents = new List<string>();
+            viewModel.PropertyChanged += (sender, e) => { receivedEvents.Add(e.PropertyName!); };
+
+            // Act
+            viewModel.SelectedMode = DisplayMode.Viewer; // Viewerモードに切り替え
+
+            // Assert
+            mockMarkdownService.Verify(s => s.ConvertToHtml(markdownContent), Times.AtLeastOnce()); // 少なくとも1回呼び出されることを検証
+            Assert.AreEqual(expectedHtml, viewModel.HtmlContent);
+            CollectionAssert.Contains(receivedEvents, nameof(MainViewModel.HtmlContent));
         }
     }
 }

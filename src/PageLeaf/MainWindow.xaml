@@ -6,6 +6,7 @@
         xmlns:local="clr-namespace:PageLeaf"
         xmlns:viewmodels="clr-namespace:PageLeaf.ViewModels"
         xmlns:views="clr-namespace:PageLeaf.Views"
+        xmlns:utils="clr-namespace:PageLeaf.Utilities"
         mc:Ignorable="d"
         Title="PageLeaf Markdown Editor" Height="600" Width="1000">
     <Window.InputBindings>
@@ -93,7 +94,13 @@
                          TextWrapping="Wrap"
                          AcceptsReturn="True"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         Margin="5"/>
+                         Margin="5"
+                         Visibility="{Binding IsMarkdownEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                <WebBrowser x:Name="MarkdownViewer"
+                            Margin="5"
+                            Visibility="{Binding IsViewerVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            utils:WebBrowserHelper.Html="{Binding HtmlContent}"/>
             </Grid>
         </Grid>
     </Grid>

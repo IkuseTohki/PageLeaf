@@ -3,5 +3,6 @@
                     xmlns:utilities="clr-namespace:PageLeaf.Utilities">
 
     <utilities:DisplayModeToStringConverter x:Key="DisplayModeToStringConverter"/>
+    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
 </ResourceDictionary>
