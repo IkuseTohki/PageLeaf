@@ -8,6 +8,11 @@
         xmlns:views="clr-namespace:PageLeaf.Views"
         mc:Ignorable="d"
         Title="PageLeaf Markdown Editor" Height="600" Width="1000">
+    <Window.InputBindings>
+        <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveFileCommand}"/>
+        <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveAsFileCommand}"/>
+        <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenFileCommand}"/>
+    </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/> <!-- Menu -->
@@ -19,11 +24,11 @@
         <Menu Grid.Row="0">
             <MenuItem Header="{StaticResource MenuFileHeader}">
                 <MenuItem Header="{StaticResource MenuFileNewHeader}"/>
-                <MenuItem Header="{StaticResource MenuFileOpenHeader}" Command="{Binding OpenFileCommand}"/>
+                <MenuItem Header="{StaticResource MenuFileOpenHeader}" Command="{Binding OpenFileCommand}" InputGestureText="Ctrl+O"/>
                 <MenuItem Header="{StaticResource MenuFileOpenFolderHeader}"/>
                 <Separator/>
-                <MenuItem Header="{StaticResource MenuFileSaveHeader}" Command="{Binding SaveFileCommand}"/>
-                <MenuItem Header="{StaticResource MenuFileSaveAsHeader}" Command="{Binding SaveAsFileCommand}"/>
+                <MenuItem Header="{StaticResource MenuFileSaveHeader}" Command="{Binding SaveFileCommand}" InputGestureText="Ctrl+S"/>
+                <MenuItem Header="{StaticResource MenuFileSaveAsHeader}" Command="{Binding SaveAsFileCommand}" InputGestureText="Ctrl+Shift+S"/>
                 <Separator/>
                 <MenuItem Header="{StaticResource MenuFileExportHeader}">
                     <MenuItem Header="{StaticResource MenuFileExportHtmlHeader}"/>
