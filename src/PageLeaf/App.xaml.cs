@@ -50,7 +50,8 @@ namespace PageLeaf
                     // Services をDIコンテナに登録
                     services.AddSingleton<IFileService, FileService>();
                     services.AddSingleton<IDialogService, DialogService>();
-                    services.AddSingleton<IMarkdownService, MarkdownService>(); // MarkdownService を登録
+                    services.AddSingleton<IMarkdownService, MarkdownService>();
+                    services.AddSingleton<IEditorService, EditorService>(); // EditorService を登録
 
                     // ViewModels と Views をDIコンテナに登録
                     services.AddSingleton<MainViewModel>();
@@ -62,6 +63,7 @@ namespace PageLeaf
             SetupGlobalExceptionHandling();
 
             await AppHost.StartAsync();
+
 
             var mainWindow = AppHost.Services.GetRequiredService<MainWindow>();
             mainWindow.Show();

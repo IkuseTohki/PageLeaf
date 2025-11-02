@@ -66,7 +66,7 @@
 
         <!-- ToolBar -->
         <ToolBar Grid.Row="1">
-            <ComboBox ItemsSource="{Binding AvailableModes}" SelectedItem="{Binding SelectedMode}">
+            <ComboBox ItemsSource="{Binding AvailableModes}" SelectedItem="{Binding Editor.SelectedMode}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Converter={StaticResource DisplayModeToStringConverter}}"/>
@@ -90,17 +90,17 @@
 
             <!-- 右側の区画 (エディタ) -->
             <Grid Grid.Column="2">
-                <TextBox Text="{Binding EditorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox Text="{Binding Editor.EditorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          TextWrapping="Wrap"
                          AcceptsReturn="True"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          Margin="5"
-                         Visibility="{Binding IsMarkdownEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                         Visibility="{Binding Editor.IsMarkdownEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
                 <WebBrowser x:Name="MarkdownViewer"
                             Margin="5"
-                            Visibility="{Binding IsViewerVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            utils:WebBrowserHelper.Html="{Binding HtmlContent}"/>
+                            Visibility="{Binding Editor.IsViewerVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            utils:WebBrowserHelper.Html="{Binding Editor.HtmlContent}"/>
             </Grid>
         </Grid>
     </Grid>
