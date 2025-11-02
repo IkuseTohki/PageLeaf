@@ -48,6 +48,9 @@ namespace PageLeaf
                 .ConfigureServices((hostContext, services) =>
                 {
                     // Services をDIコンテナに登録
+                    // いくつかの Service は複数の依存関係を持つが、コンストラクタが一つであり、
+                    // 全ての依存関係がDIコンテナに登録されているため、自動解決が可能。
+                    // 可読性と一貫性のため、シンプルな登録方法を採用している。
                     services.AddSingleton<IFileService, FileService>();
                     services.AddSingleton<ICssService, CssService>();
                     services.AddSingleton<ISettingsService, SettingsService>();

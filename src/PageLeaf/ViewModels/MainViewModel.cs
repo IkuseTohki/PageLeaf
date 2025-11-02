@@ -51,9 +51,10 @@ namespace PageLeaf.ViewModels
                 {
                     _selectedCssFile = value;
                     OnPropertyChanged();
-                    // Save setting when SelectedCssFile changes
+                    // 選択されたCSSファイルが変更された場合、設定を保存し、エディタビューに新しいCSSを適用する
                     _settingsService.CurrentSettings.SelectedCss = value;
                     _settingsService.SaveSettings(_settingsService.CurrentSettings);
+                    Editor.ApplyCss(value);
                 }
             }
         }
@@ -90,7 +91,7 @@ namespace PageLeaf.ViewModels
 
             AvailableCssFiles = new ObservableCollection<string>(_cssService.GetAvailableCssFileNames());
 
-            // Load selected CSS from settings
+            // 設定から選択されたCSSを読み込む
             var loadedCss = _settingsService.CurrentSettings.SelectedCss;
             if (!string.IsNullOrEmpty(loadedCss) && AvailableCssFiles.Contains(loadedCss))
             {
@@ -100,6 +101,8 @@ namespace PageLeaf.ViewModels
             {
                 SelectedCssFile = AvailableCssFiles.FirstOrDefault() ?? "github.css";
             }
+
+            Editor.ApplyCss(SelectedCssFile);
         }
 
         private void OpenFolder(object? parameter)

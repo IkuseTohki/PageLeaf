@@ -8,27 +8,37 @@ namespace PageLeaf.Tests.Services
     [TestClass]
     public class EditorServiceTests
     {
+        private Mock<IMarkdownService> _mockMarkdownService = null!;
+        private Mock<ICssService> _mockCssService = null!;
+        private EditorService _editorService = null!;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            _mockMarkdownService = new Mock<IMarkdownService>();
+            _mockCssService = new Mock<ICssService>();
+            _editorService = new EditorService(_mockMarkdownService.Object, _mockCssService.Object);
+        }
+
         [TestMethod]
         public void SelectedMode_ShouldUpdateVisibilityProperties()
         {
             // テスト観点: SelectedMode を変更すると、IsMarkdownEditorVisible と IsViewerVisible が正しく更新されることを確認する。
             // Arrange
-            var mockMarkdownService = new Mock<IMarkdownService>();
-            var editorService = new EditorService(mockMarkdownService.Object);
 
             // Act
-            editorService.SelectedMode = DisplayMode.Markdown;
+            _editorService.SelectedMode = DisplayMode.Markdown;
 
             // Assert
-            Assert.IsTrue(editorService.IsMarkdownEditorVisible);
-            Assert.IsFalse(editorService.IsViewerVisible);
+            Assert.IsTrue(_editorService.IsMarkdownEditorVisible);
+            Assert.IsFalse(_editorService.IsViewerVisible);
 
             // Act
-            editorService.SelectedMode = DisplayMode.Viewer;
+            _editorService.SelectedMode = DisplayMode.Viewer;
 
             // Assert
-            Assert.IsFalse(editorService.IsMarkdownEditorVisible);
-            Assert.IsTrue(editorService.IsViewerVisible);
+            Assert.IsFalse(_editorService.IsMarkdownEditorVisible);
+            Assert.IsTrue(_editorService.IsViewerVisible);
         }
 
         [TestMethod]
@@ -38,12 +48,11 @@ namespace PageLeaf.Tests.Services
             //             SelectedMode が Viewer であれば HtmlContent も更新されることを確認する。
 
             // Arrange
-            var mockMarkdownService = new Mock<IMarkdownService>();
             var newDocument = new MarkdownDocument { Content = "## New Content" };
             var expectedHtml = "<h2>New Content</h2>";
-            mockMarkdownService.Setup(m => m.ConvertToHtml("## New Content")).Returns(expectedHtml);
+            _mockMarkdownService.Setup(m => m.ConvertToHtml("## New Content", It.IsAny<string?>())).Returns(expectedHtml);
 
-            var editorService = new EditorService(mockMarkdownService.Object);
+            var editorService = new EditorService(_mockMarkdownService.Object, _mockCssService.Object);
 
             // Act (Mode: Markdown)
             editorService.SelectedMode = DisplayMode.Markdown;
@@ -60,6 +69,59 @@ namespace PageLeaf.Tests.Services
             // Assert (Mode: Viewer)
             Assert.AreEqual(newDocument.Content, editorService.EditorText);
             Assert.AreEqual(expectedHtml, editorService.HtmlContent, "ViewerモードではHtmlContentが更新されるはずです");
+        }
+
+        [TestMethod]
+        public void ApplyCss_ShouldUpdateHtmlContent_WithNewCss()
+        {
+            // テスト観点: ApplyCss を呼び出すと、新しいCSSパスでHTMLが再生成されることを確認する。
+            // Arrange
+            var document = new MarkdownDocument { Content = "# Title" };
+            _editorService.LoadDocument(document);
+            _editorService.SelectedMode = DisplayMode.Viewer; // Viewerモードにしておく
+
+            var cssFileName = "github.css";
+            var cssPath = "C:\\css\\github.css";
+            var expectedHtml = "<h1>Title with CSS</h1>";
+
+            _mockCssService.Setup(s => s.GetCssPath(cssFileName)).Returns(cssPath);
+            _mockMarkdownService.Setup(m => m.ConvertToHtml("# Title", cssPath)).Returns(expectedHtml);
+
+            // Act
+            _editorService.ApplyCss(cssFileName);
+
+            // Assert
+            _mockCssService.Verify(s => s.GetCssPath(cssFileName), Times.Once);
+            _mockMarkdownService.Verify(m => m.ConvertToHtml("# Title", cssPath), Times.Once);
+            Assert.AreEqual(expectedHtml, _editorService.HtmlContent);
+        }
+
+        [TestMethod]
+        public void EditorText_WhenChanged_ShouldReconvertHtmlWithCurrentCss()
+        {
+            // テスト観点: EditorTextが変更された際、現在適用されているCSSでHTMLが再生成されることを確認する。
+            // Arrange
+            var document = new MarkdownDocument { Content = "# Title" };
+            _editorService.LoadDocument(document);
+            _editorService.SelectedMode = DisplayMode.Viewer;
+
+            // 最初にCSSを適用しておく
+            var cssFileName = "github.css";
+            var cssPath = "C:\\css\\github.css";
+            _mockCssService.Setup(s => s.GetCssPath(cssFileName)).Returns(cssPath);
+            _editorService.ApplyCss(cssFileName);
+
+            // EditorText変更後のHTMLモックを設定
+            var newMarkdown = "## Subtitle";
+            var expectedHtml = "<h2>Subtitle with CSS</h2>";
+            _mockMarkdownService.Setup(m => m.ConvertToHtml(newMarkdown, cssPath)).Returns(expectedHtml);
+
+            // Act
+            _editorService.EditorText = newMarkdown;
+
+            // Assert
+            _mockMarkdownService.Verify(m => m.ConvertToHtml(newMarkdown, cssPath), Times.Once);
+            Assert.AreEqual(expectedHtml, _editorService.HtmlContent);
         }
     }
 }

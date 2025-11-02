@@ -114,5 +114,35 @@ namespace PageLeaf.Tests.Services
                     It.Is<Func<It.IsAnyType, Exception?, string>>((v, t) => true)),
                 Times.Once);
         }
+
+        [TestMethod]
+        public void test_GetCssPath_ShouldReturnCorrectAbsolutePath()
+        {
+            // テスト観点: GetCssPath が、指定されたファイル名に対して正しい絶対パスを返すことを確認する。
+            // Arrange
+            var cssFileName = "github.css";
+            _cssService = new CssService(_mockFileService.Object, _mockLogger.Object);
+            var expectedPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "css", cssFileName);
+
+            // Act
+            var result = _cssService.GetCssPath(cssFileName);
+
+            // Assert
+            Assert.AreEqual(expectedPath, result);
+        }
+
+        [TestMethod]
+        public void test_GetCssPath_ShouldReturnEmptyString_WhenFileNameIsEmpty()
+        {
+            // テスト観点: ファイル名が空の場合、GetCssPath が空文字列を返すことを確認する。
+            // Arrange
+            _cssService = new CssService(_mockFileService.Object, _mockLogger.Object);
+
+            // Act
+            var result = _cssService.GetCssPath("");
+
+            // Assert
+            Assert.AreEqual(string.Empty, result);
+        }
     }
 }

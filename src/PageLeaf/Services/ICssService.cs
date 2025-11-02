@@ -12,5 +12,6 @@ namespace PageLeaf.Services
         /// </summary>
         /// <returns>利用可能なCSSファイルのファイル名（拡張子含む）のリスト。</returns>
         IEnumerable<string> GetAvailableCssFileNames();
+        string GetCssPath(string cssFileName);
     }
 }

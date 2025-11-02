@@ -1,14 +1,14 @@
 using PageLeaf.Models;
 using PageLeaf.ViewModels;
 using System;
-using System.Collections.ObjectModel;
-using System.Linq;
 
 namespace PageLeaf.Services
 {
     public class EditorService : ViewModelBase, IEditorService
     {
         private readonly IMarkdownService _markdownService;
+        private readonly ICssService _cssService;
+        private string? _currentCssPath;
 
         private DisplayMode _selectedMode;
         private MarkdownDocument _currentDocument = new MarkdownDocument { Content = "# Hello, PageLeaf!" };
@@ -59,10 +59,7 @@ namespace PageLeaf.Services
 
         public string HtmlContent
         {
-            get
-            {
-                return _htmlContent;
-            }
+            get => _htmlContent;
             private set
             {
                 if (_htmlContent != value)
@@ -78,10 +75,13 @@ namespace PageLeaf.Services
             get => _currentDocument;
             private set
             {
-                _currentDocument = value;
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(EditorText)); // CurrentDocumentが変更されたらEditorTextも更新
-                UpdateHtmlContent(); // ドキュメント変更時にもHTMLを更新
+                if (_currentDocument != value)
+                {
+                    _currentDocument = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(EditorText)); // CurrentDocumentが変更されたらEditorTextも更新
+                    UpdateHtmlContent(); // ドキュメント変更時にもHTMLを更新
+                }
             }
         }
 
@@ -93,17 +93,19 @@ namespace PageLeaf.Services
                 if (CurrentDocument.Content != value)
                 {
                     CurrentDocument.Content = value;
-                    OnPropertyChanged(); // CurrentDocumentがnullの場合でも変更通知を発生させる
+                    OnPropertyChanged();
                     UpdateHtmlContent();
                 }
             }
         }
 
-        public EditorService(IMarkdownService markdownService)
+        public EditorService(IMarkdownService markdownService, ICssService cssService)
         {
             ArgumentNullException.ThrowIfNull(markdownService);
+            ArgumentNullException.ThrowIfNull(cssService);
 
             _markdownService = markdownService;
+            _cssService = cssService;
 
             SelectedMode = DisplayMode.Markdown; // 初期モード
 
@@ -113,6 +115,12 @@ namespace PageLeaf.Services
         public void LoadDocument(MarkdownDocument document)
         {
             CurrentDocument = document;
+        }
+
+        public void ApplyCss(string cssFileName)
+        {
+            _currentCssPath = _cssService.GetCssPath(cssFileName);
+            UpdateHtmlContent();
         }
 
         private void UpdateVisibility()
@@ -125,10 +133,10 @@ namespace PageLeaf.Services
         {
             if (SelectedMode == DisplayMode.Viewer)
             {
-                HtmlContent = _markdownService.ConvertToHtml(CurrentDocument.Content);
+                HtmlContent = _markdownService.ConvertToHtml(CurrentDocument.Content, _currentCssPath);
             }
             else
-            { 
+            {
                 HtmlContent = string.Empty;
             }
         }

@@ -48,5 +48,21 @@ namespace PageLeaf.Services
                 return Enumerable.Empty<string>();
             }
         }
+
+        /// <summary>
+        /// 指定されたCSSファイル名の完全な絶対パスを取得します。
+        /// </summary>
+        /// <param name="cssFileName">パスを取得するCSSファイル名。</param>
+        /// <returns>CSSファイルの絶対パス。ファイル名が空またはnullの場合は空文字列を返します。</returns>
+        public string GetCssPath(string cssFileName)
+        {
+            if (string.IsNullOrEmpty(cssFileName))
+            {
+                _logger.LogWarning("GetCssPath called with empty file name.");
+                return string.Empty;
+            }
+
+            return Path.Combine(_cssDirectoryPath, cssFileName);
+        }
     }
 }

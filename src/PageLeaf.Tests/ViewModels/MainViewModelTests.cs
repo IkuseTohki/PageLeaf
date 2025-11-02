@@ -420,5 +420,26 @@ namespace PageLeaf.Tests.ViewModels
             Assert.AreEqual("theme2.css", savedSettings.SelectedCss);
         }
 
+        [TestMethod]
+        public void SelectedCssFile_WhenChanged_ShouldCallApplyCssOnEditorService()
+        {
+            // テスト観点: SelectedCssFile プロパティが変更された際に、IEditorService の ApplyCss メソッドが正しいファイル名で呼び出されることを確認する。
+            // Arrange
+            _viewModel = new MainViewModel(
+                _mockFileService.Object,
+                _mockLogger.Object,
+                _mockDialogService.Object,
+                _mockEditorService.Object,
+                _mockCssService.Object,
+                _mockSettingsService.Object);
+
+            var newCss = "new-theme.css";
+
+            // Act
+            _viewModel.SelectedCssFile = newCss;
+
+            // Assert
+            _mockEditorService.Verify(s => s.ApplyCss(newCss), Times.Once);
+        }
     }
 }

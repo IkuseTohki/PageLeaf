@@ -13,5 +13,6 @@ namespace PageLeaf.Services
         bool IsViewerVisible { get; }
 
         void LoadDocument(MarkdownDocument document);
+        void ApplyCss(string cssFileName);
     }
 }
