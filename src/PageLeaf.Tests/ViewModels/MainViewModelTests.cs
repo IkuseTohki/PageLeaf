@@ -132,6 +132,7 @@ namespace PageLeaf.Tests.ViewModels
             string fileContent = "# Existing Content";
             var documentToSave = new MarkdownDocument { FilePath = testFilePath, Content = fileContent };
             _mockEditorService.Setup(e => e.CurrentDocument).Returns(documentToSave);
+            _mockFileService.Setup(s => s.FileExists(testFilePath)).Returns(true); // ファイルが存在するとモック
 
             // Act
             _viewModel.SaveFileCommand.Execute(null);
@@ -159,6 +160,91 @@ namespace PageLeaf.Tests.ViewModels
             // Assert
             _mockFileService.Verify(s => s.Save(It.Is<MarkdownDocument>(doc =>
                 doc.FilePath == newFilePath && doc.Content == initialContent)), Times.Once);
+        }
+
+        [TestMethod]
+        public void ExecuteSaveFile_WhenFileDoesNotExist_ShouldCallExecuteSaveAsFile()
+        {
+            // テスト観点: Editor.CurrentDocument.FilePath が存在しない場合、ExecuteSaveFile が ExecuteSaveAsFile を呼び出すことを検証する。
+            // Arrange
+            string nonExistentFilePath = @"C:\nonexistent\file.md";
+            var documentToSave = new MarkdownDocument { FilePath = nonExistentFilePath, Content = "# New Content" };
+            _mockEditorService.Setup(e => e.CurrentDocument).Returns(documentToSave);
+            _mockFileService.Setup(s => s.FileExists(nonExistentFilePath)).Returns(false); // ファイルが存在しないとモック
+
+            // ExecuteSaveAsFile が呼び出されたことを検証するためのモック
+            // SaveAsFileCommand は DelegateCommand なので、直接 Verify できない。
+            // そのため、SaveAsFileCommand が内部で呼び出す ShowSaveFileDialog をモックし、それが呼び出されることを検証する。
+            _mockDialogService.Setup(s => s.ShowSaveFileDialog(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()
+            )).Returns((string?)null); // ダイアログはキャンセルされたと仮定
+
+            // Act
+            _viewModel.SaveFileCommand.Execute(null);
+
+            // Assert
+            // ExecuteSaveAsFile が呼び出されたことを間接的に検証
+            _mockDialogService.Verify(s => s.ShowSaveFileDialog(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()
+            ), Times.Once);
+            // ファイルが存在しないため、_fileService.Save は呼び出されないことを確認
+            _mockFileService.Verify(s => s.Save(It.IsAny<MarkdownDocument>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void ExecuteSaveFile_WhenFileDoesNotExistAndSaveAsIsCanceled_ShouldNotSave()
+        {
+            // テスト観点: Editor.CurrentDocument.FilePath が存在せず、ExecuteSaveAsFile 内の ShowSaveFileDialog がキャンセルされた場合、_fileService.Save が呼び出されないことを検証する。
+            // Arrange
+            string nonExistentFilePath = @"C:\nonexistent\file.md";
+            var documentToSave = new MarkdownDocument { FilePath = nonExistentFilePath, Content = "# New Content" };
+            _mockEditorService.Setup(e => e.CurrentDocument).Returns(documentToSave);
+            _mockFileService.Setup(s => s.FileExists(nonExistentFilePath)).Returns(false); // ファイルが存在しないとモック
+
+            _mockDialogService.Setup(s => s.ShowSaveFileDialog(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()
+            )).Returns((string?)null); // ダイアログはキャンセルされたと仮定
+
+            // Act
+            _viewModel.SaveFileCommand.Execute(null);
+
+            // Assert
+            _mockFileService.Verify(s => s.Save(It.IsAny<MarkdownDocument>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void ExecuteSaveFile_WhenFileDoesNotExistAndSaveAsIsSuccessful_ShouldSaveWithNewPath()
+        {
+            // テスト観点: Editor.CurrentDocument.FilePath が存在せず、ExecuteSaveAsFile 内の ShowSaveFileDialog で新しいパスが選択された場合、Editor.CurrentDocument.FilePath が更新され、_fileService.Save が新しいパスで呼び出されることを検証する。
+            // Arrange
+            string nonExistentFilePath = @"C:\nonexistent\file.md";
+            string newFilePath = @"C:\new\path\to\saved_file.md";
+            string fileContent = "# New Content";
+            var documentToSave = new MarkdownDocument { FilePath = nonExistentFilePath, Content = fileContent };
+            _mockEditorService.Setup(e => e.CurrentDocument).Returns(documentToSave);
+            _mockFileService.Setup(s => s.FileExists(nonExistentFilePath)).Returns(false); // ファイルが存在しないとモック
+
+            _mockDialogService.Setup(s => s.ShowSaveFileDialog(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string?>()
+            )).Returns(newFilePath); // 新しいパスが選択されたと仮定
+
+            // Act
+            _viewModel.SaveFileCommand.Execute(null);
+
+            // Assert
+            // Editor.CurrentDocument.FilePath が新しいパスに更新されていることを確認
+            Assert.AreEqual(newFilePath, _mockEditorService.Object.CurrentDocument.FilePath);
+            // _fileService.Save が新しいパスで呼び出されたことを確認
+            _mockFileService.Verify(s => s.Save(It.Is<MarkdownDocument>(doc =>
+                doc.FilePath == newFilePath && doc.Content == fileContent)), Times.Once);
         }
 
     }

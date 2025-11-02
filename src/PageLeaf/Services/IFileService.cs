@@ -9,5 +9,6 @@ namespace PageLeaf.Services
         MarkdownDocument Open(string filePath);
         void Save(MarkdownDocument document);
         IEnumerable<FileTreeNode> OpenFolder(string folderPath);
+        bool FileExists(string filePath);
     }
 }

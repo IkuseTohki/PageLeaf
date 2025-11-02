@@ -139,6 +139,16 @@ namespace PageLeaf.Services
             }
         }
 
+        /// <summary>
+        /// 指定されたファイルパスのファイルが存在するかどうかを判断します。
+        /// </summary>
+        /// <param name="filePath">ファイルパス。</param>
+        /// <returns>ファイルが存在する場合は true、それ以外の場合は false。</returns>
+        public bool FileExists(string filePath)
+        {
+            return File.Exists(filePath);
+        }
+
         private Encoding DetectEncoding(string filePath)
         {
             // .NET Core では、CodePagesEncodingProvider の登録が必要

@@ -136,6 +136,14 @@ namespace PageLeaf.ViewModels
                 return;
             }
 
+            // ファイルパスが設定されていない、またはファイルが存在しない場合は「名前を付けて保存」に切り替える
+            if (string.IsNullOrEmpty(Editor.CurrentDocument.FilePath) || !_fileService.FileExists(Editor.CurrentDocument.FilePath))
+            {
+                _logger.LogInformation("File does not exist or has no path. Switching to Save As...");
+                ExecuteSaveAsFile(parameter);
+                return;
+            }
+
             try
             {
                 _fileService.Save(Editor.CurrentDocument);
