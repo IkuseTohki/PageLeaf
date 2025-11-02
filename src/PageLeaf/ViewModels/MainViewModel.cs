@@ -14,6 +14,7 @@ namespace PageLeaf.ViewModels
         private readonly ILogger<MainViewModel> _logger;
         private readonly IDialogService _dialogService;
         private readonly ICssService _cssService;
+        private readonly ISettingsService _settingsService;
         private FileTreeNode? _rootNode;
         private ObservableCollection<string> _availableCssFiles = null!;
         private string _selectedCssFile = null!;
@@ -40,15 +41,20 @@ namespace PageLeaf.ViewModels
                 _availableCssFiles = value;
                 OnPropertyChanged();
             }
-        }
-
+        }
         public string SelectedCssFile
         {
             get => _selectedCssFile;
             set
             {
-                _selectedCssFile = value;
-                OnPropertyChanged();
+                if (_selectedCssFile != value)
+                {
+                    _selectedCssFile = value;
+                    OnPropertyChanged();
+                    // Save setting when SelectedCssFile changes
+                    _settingsService.CurrentSettings.SelectedCss = value;
+                    _settingsService.SaveSettings(_settingsService.CurrentSettings);
+                }
             }
         }
 
@@ -57,19 +63,21 @@ namespace PageLeaf.ViewModels
         public ICommand SaveFileCommand { get; }
         public ICommand SaveAsFileCommand { get; }
 
-        public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService, IEditorService editorService, ICssService cssService)
+        public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService, IEditorService editorService, ICssService cssService, ISettingsService settingsService)
         {
             ArgumentNullException.ThrowIfNull(fileService);
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(editorService);
             ArgumentNullException.ThrowIfNull(cssService);
+            ArgumentNullException.ThrowIfNull(settingsService);
 
             _fileService = fileService;
             _logger = logger;
             _dialogService = dialogService;
             Editor = editorService;
             _cssService = cssService;
+            _settingsService = settingsService;
 
             OpenFolderCommand = new Utilities.DelegateCommand(OpenFolder);
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
@@ -81,7 +89,17 @@ namespace PageLeaf.ViewModels
             );
 
             AvailableCssFiles = new ObservableCollection<string>(_cssService.GetAvailableCssFileNames());
-            SelectedCssFile = AvailableCssFiles.FirstOrDefault() ?? "github.css";
+
+            // Load selected CSS from settings
+            var loadedCss = _settingsService.CurrentSettings.SelectedCss;
+            if (!string.IsNullOrEmpty(loadedCss) && AvailableCssFiles.Contains(loadedCss))
+            {
+                SelectedCssFile = loadedCss;
+            }
+            else
+            {
+                SelectedCssFile = AvailableCssFiles.FirstOrDefault() ?? "github.css";
+            }
         }
 
         private void OpenFolder(object? parameter)

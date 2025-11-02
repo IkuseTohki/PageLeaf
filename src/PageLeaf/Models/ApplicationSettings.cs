@@ -12,5 +12,8 @@ namespace PageLeaf.Models
         public FolderTreePosition FolderTreePosition { get; set; }
         public string SelectedCss { get; set; } = "";
         public string LastOpenedFolder { get; set; } = "";
+
+        // Default constructor for deserialization
+        public ApplicationSettings() { }
     }
 }

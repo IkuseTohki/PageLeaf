@@ -50,6 +50,7 @@ namespace PageLeaf
                     // Services をDIコンテナに登録
                     services.AddSingleton<IFileService, FileService>();
                     services.AddSingleton<ICssService, CssService>();
+                    services.AddSingleton<ISettingsService, SettingsService>();
                     services.AddSingleton<IDialogService, DialogService>();
                     services.AddSingleton<IMarkdownService, MarkdownService>();
                     services.AddSingleton<IEditorService, EditorService>(); // EditorService を登録
