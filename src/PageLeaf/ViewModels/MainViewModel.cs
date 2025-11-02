@@ -13,6 +13,7 @@ namespace PageLeaf.ViewModels
         private readonly IFileService _fileService;
         private readonly ILogger<MainViewModel> _logger;
         private readonly IDialogService _dialogService;
+        private readonly ICssService _cssService;
         private FileTreeNode? _rootNode;
         private ObservableCollection<string> _availableCssFiles = null!;
         private string _selectedCssFile = null!;
@@ -56,17 +57,19 @@ namespace PageLeaf.ViewModels
         public ICommand SaveFileCommand { get; }
         public ICommand SaveAsFileCommand { get; }
 
-        public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService, IEditorService editorService)
+        public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService, IEditorService editorService, ICssService cssService)
         {
             ArgumentNullException.ThrowIfNull(fileService);
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(editorService);
+            ArgumentNullException.ThrowIfNull(cssService);
 
             _fileService = fileService;
             _logger = logger;
             _dialogService = dialogService;
             Editor = editorService;
+            _cssService = cssService;
 
             OpenFolderCommand = new Utilities.DelegateCommand(OpenFolder);
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
@@ -77,9 +80,8 @@ namespace PageLeaf.ViewModels
                 Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>()
             );
 
-
-            AvailableCssFiles = new ObservableCollection<string> { "github.css", "solarized-light.css", "solarized-dark.css" };
-            SelectedCssFile = AvailableCssFiles[0];
+            AvailableCssFiles = new ObservableCollection<string>(_cssService.GetAvailableCssFileNames());
+            SelectedCssFile = AvailableCssFiles.FirstOrDefault() ?? "github.css";
         }
 
         private void OpenFolder(object? parameter)

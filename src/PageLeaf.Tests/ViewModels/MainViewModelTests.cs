@@ -11,11 +11,12 @@ namespace PageLeaf.Tests.ViewModels
     [TestClass]
     public class MainViewModelTests
     {
-        private Mock<IFileService> _mockFileService;
-        private Mock<ILogger<MainViewModel>> _mockLogger;
-        private Mock<IDialogService> _mockDialogService;
-        private Mock<IEditorService> _mockEditorService;
-        private MainViewModel _viewModel;
+        private Mock<IFileService> _mockFileService = null!;
+        private Mock<ILogger<MainViewModel>> _mockLogger = null!;
+        private Mock<IDialogService> _mockDialogService = null!;
+        private Mock<IEditorService> _mockEditorService = null!;
+        private Mock<ICssService> _mockCssService = null!;
+        private MainViewModel _viewModel = null!;
 
         [TestInitialize]
         public void Setup()
@@ -24,11 +25,18 @@ namespace PageLeaf.Tests.ViewModels
             _mockLogger = new Mock<ILogger<MainViewModel>>();
             _mockDialogService = new Mock<IDialogService>();
             _mockEditorService = new Mock<IEditorService>();
+            _mockCssService = new Mock<ICssService>();
+
+            // Default setup for _mockCssService
+            var defaultCssFiles = new List<string> { "theme1.css", "theme2.css" };
+            _mockCssService.Setup(s => s.GetAvailableCssFileNames()).Returns(defaultCssFiles);
+
             _viewModel = new MainViewModel(
                 _mockFileService.Object,
                 _mockLogger.Object,
                 _mockDialogService.Object,
-                _mockEditorService.Object);
+                _mockEditorService.Object,
+                _mockCssService.Object);
         }
 
         [TestMethod]
@@ -99,28 +107,28 @@ namespace PageLeaf.Tests.ViewModels
         public void Constructor_ShouldThrowArgumentNullException_WhenFileServiceIsNull()
         {
             // テスト観点: IFileService が null の場合に ArgumentNullException がスローされることを確認する。
-            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(null!, _mockLogger.Object, _mockDialogService.Object, _mockEditorService.Object));
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(null!, _mockLogger.Object, _mockDialogService.Object, _mockEditorService.Object, _mockCssService.Object));
         }
 
         [TestMethod]
         public void Constructor_ShouldThrowArgumentNullException_WhenLoggerIsNull()
         {
             // テスト観点: ILogger が null の場合に ArgumentNullException がスローされることを確認する。
-            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, null!, _mockDialogService.Object, _mockEditorService.Object));
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, null!, _mockDialogService.Object, _mockEditorService.Object, _mockCssService.Object));
         }
 
         [TestMethod]
         public void Constructor_ShouldThrowArgumentNullException_WhenDialogServiceIsNull()
         {
             // テスト観点: IDialogService が null の場合に ArgumentNullException がスローされることを確認する。
-            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, null!, _mockEditorService.Object));
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, null!, _mockEditorService.Object, _mockCssService.Object));
         }
 
         [TestMethod]
         public void Constructor_ShouldThrowArgumentNullException_WhenEditorServiceIsNull()
         {
             // テスト観点: IEditorService が null の場合に ArgumentNullException がスローされることを確認する。
-            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, _mockDialogService.Object, null!));
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, _mockDialogService.Object, null!, _mockCssService.Object));
         }
 
         [TestMethod]
@@ -245,6 +253,40 @@ namespace PageLeaf.Tests.ViewModels
             // _fileService.Save が新しいパスで呼び出されたことを確認
             _mockFileService.Verify(s => s.Save(It.Is<MarkdownDocument>(doc =>
                 doc.FilePath == newFilePath && doc.Content == fileContent)), Times.Once);
+        }
+
+        [TestMethod]
+        public void test_MainViewModel_ShouldLoadCssFilesFromServiceOnInitialization()
+        {
+            // テスト観点: MainViewModel が初期化された際に、ICssService から利用可能なCSSファイルリストが正しくロードされることを確認する。
+            // Arrange
+            var availableCss = new List<string> { "theme1.css", "theme2.css" };
+            _mockCssService.Setup(s => s.GetAvailableCssFileNames()).Returns(availableCss);
+
+            // Act
+            // ViewModelはSetupで初期化済みなので、ここでは再初期化しない
+            // _viewModel = new MainViewModel(...);
+
+            // Assert
+            CollectionAssert.AreEquivalent(availableCss, _viewModel.AvailableCssFiles.ToList());
+            _mockCssService.Verify(s => s.GetAvailableCssFileNames(), Times.Once);
+        }
+
+        [TestMethod]
+        public void test_MainViewModel_ShouldSelectDefaultCssFile_OnInitialization()
+        {
+            // テスト観点: MainViewModel が初期化された際に、利用可能なCSSファイルリストの最初の要素がデフォルトとして選択されることを確認する。
+            // Arrange
+            var availableCss = new List<string> { "theme1.css", "theme2.css" };
+            _mockCssService.Setup(s => s.GetAvailableCssFileNames()).Returns(availableCss);
+
+            // Act
+            // ViewModelはSetupで初期化済みなので、ここでは再初期化しない
+            // _viewModel = new MainViewModel(...);
+
+            // Assert
+            Assert.AreEqual("theme1.css", _viewModel.SelectedCssFile);
+            _mockCssService.Verify(s => s.GetAvailableCssFileNames(), Times.Once);
         }
 
     }

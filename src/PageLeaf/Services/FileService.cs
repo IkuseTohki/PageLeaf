@@ -149,6 +149,37 @@ namespace PageLeaf.Services
             return File.Exists(filePath);
         }
 
+        /// <summary>
+        /// 指定されたフォルダパスから、指定された検索パターンに一致するファイルのフルパスのリストを取得します。
+        /// </summary>
+        /// <param name="folderPath">検索対象のフォルダパス。</param>
+        /// <param name="searchPattern">検索するファイルパターン（例: "*.css", "*.txt"）。</param>
+        /// <returns>一致するファイルのフルパスのリスト。フォルダが存在しない場合やファイルが見つからない場合は空のリストを返します。</returns>
+        public IEnumerable<string> GetFiles(string folderPath, string searchPattern)
+        {
+            if (string.IsNullOrEmpty(folderPath))
+            {
+                _logger.LogWarning("GetFiles called with null or empty folderPath.");
+                return Enumerable.Empty<string>();
+            }
+
+            if (!Directory.Exists(folderPath))
+            {
+                _logger.LogWarning("Folder not found for GetFiles: {FolderPath}", folderPath);
+                return Enumerable.Empty<string>();
+            }
+
+            try
+            {
+                return Directory.GetFiles(folderPath, searchPattern, SearchOption.TopDirectoryOnly);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting files from {FolderPath} with pattern {SearchPattern}.", folderPath, searchPattern);
+                return Enumerable.Empty<string>();
+            }
+        }
+
         private Encoding DetectEncoding(string filePath)
         {
             // .NET Core では、CodePagesEncodingProvider の登録が必要

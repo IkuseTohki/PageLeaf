@@ -209,9 +209,23 @@ namespace PageLeaf.Tests.Services
             Assert.ThrowsException<FileNotFoundException>(() => fileService.Open(nonExistentFilePath));
         }
 
+        public static IEnumerable<object[]> InvalidPaths =>
+            new List<object[]>
+            {
+                new object[] { null! },
+                new object[] { "" }
+            };
+
+        public static IEnumerable<object[]> GetFilesTestCases =>
+            new List<object[]>
+            {
+                new object[] { "*.txt", new string[] { "file1.txt", "file3.txt" } },
+                new object[] { "*.md", new string[] { "file4.md" } },
+                new object[] { "*.*", new string[] { "file1.txt", "file3.txt", "file4.md", "non_css_file.log" } }
+            };
+
         [DataTestMethod]
-        [DataRow(null, DisplayName = "FilePath is null")]
-        [DataRow("", DisplayName = "FilePath is empty")]
+        [DynamicData(nameof(InvalidPaths))]
         public void Open_ShouldThrowArgumentException_WhenPathIsInvalid(string invalidPath)
         {
             // テスト観点: FilePathが無効な場合にArgumentExceptionがスローされることを確認する。
@@ -276,6 +290,86 @@ namespace PageLeaf.Tests.Services
                 Assert.IsNotNull(charsetDetector.Charset, "エンコーディングが判別できませんでした。");
                 Assert.AreEqual("SHIFT-JIS", charsetDetector.Charset.ToUpper(), "エンコーディングがShift-JISに維持されていません。");
             }
+        }
+
+        [DataTestMethod]
+        [DynamicData(nameof(GetFilesTestCases))]
+        public void GetFiles_ShouldReturnCorrectListOfFiles_WhenFolderContainsMatchingFiles(string searchPattern, string[] expectedFileNames)
+        {
+            // テスト観点: 指定されたフォルダに一致するファイルが存在する場合、正しいファイル名のリストが返されることを検証する。
+            // Arrange
+            var fileService = new FileService(new NullLogger<FileService>());
+            var testSubFolder = Path.Combine(_testFolderPath, "test_getfiles_folder");
+            Directory.CreateDirectory(testSubFolder);
+            File.WriteAllText(Path.Combine(testSubFolder, "file1.txt"), "content1");
+            File.WriteAllText(Path.Combine(testSubFolder, "file3.txt"), "content3");
+            File.WriteAllText(Path.Combine(testSubFolder, "file4.md"), "content4");
+            File.WriteAllText(Path.Combine(testSubFolder, "non_css_file.log"), "log content");
+
+            // Act
+            var result = fileService.GetFiles(testSubFolder, searchPattern).ToList();
+
+            // Assert
+            Assert.AreEqual(expectedFileNames.Length, result.Count, "返されたファイル数が期待値と異なります。");
+            foreach (var expectedFileName in expectedFileNames)
+            {
+                Assert.IsTrue(result.Any(f => Path.GetFileName(f) == expectedFileName), $"{expectedFileName} が結果に含まれていません。");
+            }
+        }
+
+        [TestMethod]
+        public void GetFiles_ShouldReturnEmptyList_WhenFolderIsEmpty()
+        {
+            // テスト観点: 空のフォルダを指定した場合、空のリストが返されることを検証する。
+            // Arrange
+            var fileService = new FileService(new NullLogger<FileService>());
+            var emptyFolder = Path.Combine(_testFolderPath, "empty_getfiles_folder");
+            Directory.CreateDirectory(emptyFolder);
+
+            // Act
+            var result = fileService.GetFiles(emptyFolder, "*.*").ToList();
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count, "空のフォルダからファイルが返されました。");
+        }
+
+        [TestMethod]
+        public void GetFiles_ShouldReturnEmptyList_WhenFolderDoesNotExist()
+        {
+            // テスト観点: 存在しないフォルダを指定した場合、空のリストが返されることを検証する。
+            // Arrange
+            var fileService = new FileService(new NullLogger<FileService>());
+            var nonExistentFolder = Path.Combine(_testFolderPath, "non_existent_getfiles_folder");
+
+            // Act
+            var result = fileService.GetFiles(nonExistentFolder, "*.*").ToList();
+
+            // Assert
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count, "存在しないフォルダからファイルが返されました。");
+        }
+
+        [TestMethod]
+        public void GetFiles_ShouldNotIncludeNonMatchingFiles()
+        {
+            // テスト観点: 指定されたパターンに一致しないファイルが含まれていても、一致するファイルのみがリストに含まれることを検証する。
+            // Arrange
+            var fileService = new FileService(new NullLogger<FileService>());
+            var testSubFolder = Path.Combine(_testFolderPath, "test_non_matching_files");
+            Directory.CreateDirectory(testSubFolder);
+            File.WriteAllText(Path.Combine(testSubFolder, "file1.txt"), "content1");
+            File.WriteAllText(Path.Combine(testSubFolder, "image.png"), "binary content");
+            File.WriteAllText(Path.Combine(testSubFolder, "document.docx"), "binary content");
+
+            // Act
+            var result = fileService.GetFiles(testSubFolder, "*.txt").ToList();
+
+            // Assert
+            Assert.AreEqual(1, result.Count, "返されたファイル数が期待値と異なります。");
+            Assert.IsTrue(result.Any(f => Path.GetFileName(f) == "file1.txt"), "file1.txt が結果に含まれていません。");
+            Assert.IsFalse(result.Any(f => Path.GetFileName(f) == "image.png"), "image.png が誤って含まれています。");
+            Assert.IsFalse(result.Any(f => Path.GetFileName(f) == "document.docx"), "document.docx が誤って含まれています。");
         }
     }
 }
