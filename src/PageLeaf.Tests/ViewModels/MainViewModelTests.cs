@@ -441,5 +441,25 @@ namespace PageLeaf.Tests.ViewModels
             // Assert
             _mockEditorService.Verify(s => s.ApplyCss(newCss), Times.Once);
         }
+
+        [TestMethod]
+        public void NewDocumentCommand_ShouldCallEditorServiceNewDocument()
+        {
+            // テスト観点: NewDocumentCommand が実行された際に、IEditorService の NewDocument メソッドが呼び出されることを確認する。
+            // Arrange
+            _viewModel = new MainViewModel(
+                _mockFileService.Object,
+                _mockLogger.Object,
+                _mockDialogService.Object,
+                _mockEditorService.Object,
+                _mockCssService.Object,
+                _mockSettingsService.Object);
+
+            // Act
+            _viewModel.NewDocumentCommand.Execute(null);
+
+            // Assert
+            _mockEditorService.Verify(s => s.NewDocument(), Times.Once);
+        }
     }
 }

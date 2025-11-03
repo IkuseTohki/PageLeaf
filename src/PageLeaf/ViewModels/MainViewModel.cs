@@ -63,6 +63,7 @@ namespace PageLeaf.ViewModels
         public ICommand OpenFileCommand { get; }
         public ICommand SaveFileCommand { get; }
         public ICommand SaveAsFileCommand { get; }
+        public ICommand NewDocumentCommand { get; }
 
         public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService, IEditorService editorService, ICssService cssService, ISettingsService settingsService)
         {
@@ -84,6 +85,7 @@ namespace PageLeaf.ViewModels
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
             SaveFileCommand = new Utilities.DelegateCommand(ExecuteSaveFile);
             SaveAsFileCommand = new Utilities.DelegateCommand(ExecuteSaveAsFile);
+            NewDocumentCommand = new Utilities.DelegateCommand(ExecuteNewDocument);
 
             AvailableModes = new ObservableCollection<DisplayMode>(
                 Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>()
@@ -103,6 +105,12 @@ namespace PageLeaf.ViewModels
             }
 
             Editor.ApplyCss(SelectedCssFile);
+        }
+
+        private void ExecuteNewDocument(object? parameter)
+        {
+            _logger.LogInformation("NewDocumentCommand executed.");
+            Editor.NewDocument();
         }
 
         private void OpenFolder(object? parameter)

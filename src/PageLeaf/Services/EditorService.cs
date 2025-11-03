@@ -123,6 +123,14 @@ namespace PageLeaf.Services
             UpdateHtmlContent();
         }
 
+        /// <summary>
+        /// 新しいドキュメントを作成し、エディタの状態をリセットします。
+        /// </summary>
+        public void NewDocument()
+        {
+            CurrentDocument = new MarkdownDocument { Content = string.Empty, FilePath = null };
+        }
+
         private void UpdateVisibility()
         {
             IsMarkdownEditorVisible = SelectedMode == DisplayMode.Markdown;
@@ -133,7 +141,7 @@ namespace PageLeaf.Services
         {
             if (SelectedMode == DisplayMode.Viewer)
             {
-                HtmlContent = _markdownService.ConvertToHtml(CurrentDocument.Content, _currentCssPath);
+                HtmlContent = _markdownService.ConvertToHtml(CurrentDocument.Content, _currentCssPath ?? string.Empty);
             }
             else
             {

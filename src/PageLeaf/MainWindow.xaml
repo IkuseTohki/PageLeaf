@@ -13,6 +13,7 @@
         <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveFileCommand}"/>
         <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveAsFileCommand}"/>
         <KeyBinding Key="O" Modifiers="Control" Command="{Binding OpenFileCommand}"/>
+        <KeyBinding Key="N" Modifiers="Control" Command="{Binding NewDocumentCommand}"/>
     </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
@@ -24,7 +25,7 @@
         <!-- Menu -->
         <Menu Grid.Row="0">
             <MenuItem Header="{StaticResource MenuFileHeader}">
-                <MenuItem Header="{StaticResource MenuFileNewHeader}"/>
+                <MenuItem Header="{StaticResource MenuFileNewHeader}" Command="{Binding NewDocumentCommand}" InputGestureText="Ctrl+N"/>
                 <MenuItem Header="{StaticResource MenuFileOpenHeader}" Command="{Binding OpenFileCommand}" InputGestureText="Ctrl+O"/>
                 <MenuItem Header="{StaticResource MenuFileOpenFolderHeader}"/>
                 <Separator/>

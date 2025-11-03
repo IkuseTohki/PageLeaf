@@ -14,5 +14,6 @@ namespace PageLeaf.Services
 
         void LoadDocument(MarkdownDocument document);
         void ApplyCss(string cssFileName);
+        void NewDocument();
     }
 }

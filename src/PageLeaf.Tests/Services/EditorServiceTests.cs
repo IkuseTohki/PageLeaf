@@ -123,5 +123,24 @@ namespace PageLeaf.Tests.Services
             _mockMarkdownService.Verify(m => m.ConvertToHtml(newMarkdown, cssPath), Times.Once);
             Assert.AreEqual(expectedHtml, _editorService.HtmlContent);
         }
+
+        [TestMethod]
+        public void NewDocument_ShouldResetDocumentProperties()
+        {
+            // テスト観点: NewDocument メソッドを呼び出すと、CurrentDocument の Content が空文字列に、FilePath が null にリセットされることを確認する。
+            // Arrange
+            var initialDocument = new MarkdownDocument { Content = "Existing Content", FilePath = "C:\\path\\to\\file.md" };
+            _editorService.LoadDocument(initialDocument);
+            _editorService.SelectedMode = DisplayMode.Viewer; // Viewerモードに設定
+            _mockMarkdownService.Invocations.Clear(); // LoadDocumentによるConvertToHtmlの呼び出し履歴をクリア
+
+            // Act
+            _editorService.NewDocument();
+
+            // Assert
+            Assert.AreEqual(string.Empty, _editorService.CurrentDocument.Content);
+            Assert.IsNull(_editorService.CurrentDocument.FilePath);
+            _mockMarkdownService.Verify(m => m.ConvertToHtml(string.Empty, It.IsAny<string?>()), Times.Once); // HTMLコンテンツも更新されることを確認
+        }
     }
 }
