@@ -8,7 +8,7 @@ namespace PageLeaf.Models
     {
         private string _content = "";
         private string _filePath = "";
-        private bool _isDirty;
+        private bool _isDirty = false;
 
         public string Content
         {

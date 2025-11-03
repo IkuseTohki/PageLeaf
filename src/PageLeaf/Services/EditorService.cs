@@ -9,11 +9,11 @@ namespace PageLeaf.Services
     {
         private readonly IMarkdownService _markdownService;
         private readonly ICssService _cssService;
-        private readonly IDialogService _dialogService; // IDialogService を追加
+        private readonly IDialogService _dialogService;
         private string? _currentCssPath;
 
         private DisplayMode _selectedMode;
-        private MarkdownDocument _currentDocument = new MarkdownDocument { Content = "# Hello, PageLeaf!" };
+        private MarkdownDocument _currentDocument = new MarkdownDocument();
         private bool _isMarkdownEditorVisible;
         private bool _isViewerVisible;
         private string _htmlContent = string.Empty;
@@ -161,8 +161,7 @@ namespace PageLeaf.Services
         /// </summary>
         public void NewDocument()
         {
-            CurrentDocument = new MarkdownDocument { Content = string.Empty, FilePath = null };
-            CurrentDocument.IsDirty = false; // 新しいドキュメントなので、変更状態をリセット
+            CurrentDocument = new MarkdownDocument();
         }
 
         /// <summary>
