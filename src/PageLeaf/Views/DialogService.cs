@@ -2,7 +2,7 @@ using Microsoft.Win32;
 using PageLeaf.Models;
 using PageLeaf.Services;
 using System;
-using System.Windows; // MessageBox を使用するために追加
+using System.Windows; // MessageBox
 
 namespace PageLeaf.Views
 {

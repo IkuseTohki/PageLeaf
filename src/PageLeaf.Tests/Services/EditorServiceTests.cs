@@ -10,7 +10,7 @@ namespace PageLeaf.Tests.Services
     {
         private Mock<IMarkdownService> _mockMarkdownService = null!;
         private Mock<ICssService> _mockCssService = null!;
-        private Mock<IDialogService> _mockDialogService = null!; // IDialogService のモックを追加
+        private Mock<IDialogService> _mockDialogService = null!;
         private EditorService _editorService = null!;
 
         [TestInitialize]
@@ -124,7 +124,8 @@ namespace PageLeaf.Tests.Services
             // Assert
             _mockMarkdownService.Verify(m => m.ConvertToHtml(newMarkdown, cssPath), Times.Once);
             Assert.AreEqual(expectedHtml, _editorService.HtmlContent);
-        }
+        }
+
         [TestMethod]
         public void NewDocument_ShouldResetDocumentProperties()
         {
