@@ -12,47 +12,35 @@ classDiagram
         +MarkdownContent: string
         +CurrentMode: DisplayMode
         +SelectedCss: string
-        +FolderTreePosition: FolderTreePosition
-        +FileTree: IEnumerable<FileTreeNode>
+        +IsCssEditorVisible: bool
         +OpenFileCommand: ICommand
-        +OpenFolderCommand: ICommand
         +SaveFileCommand: ICommand
         +ExportCommand: ICommand
         +OpenSettingsCommand: ICommand
+        +ToggleCssEditorCommand: ICommand
     }
     class SettingsViewModel {
         <<ViewModel>>
-        +FolderTreePosition: FolderTreePosition
         +SaveSettingsCommand: ICommand
         +CancelSettingsCommand: ICommand
     }
 
-    class FileTreeNode {
-        +Name: string
-        +FilePath: string
-        +IsDirectory: bool
-        +Children: IEnumerable<FileTreeNode>
-    }
     class MarkdownDocument {
         +Content: string
         +FilePath: string
     }
     class ApplicationSettings {
-        +FolderTreePosition: FolderTreePosition
         +SelectedCss: string
-        +LastOpenedFolder: string
     }
 
     class IFileService {
         <<Interface>>
         +Open(filePath): MarkdownDocument
         +Save(document): void
-        +OpenFolder(folderPath): IEnumerable<FileTreeNode>
     }
     class FileService {
         +Open(filePath): MarkdownDocument
         +Save(document): void
-        +OpenFolder(folderPath): IEnumerable<FileTreeNode>
     }
 
     class IExportService {
@@ -73,6 +61,22 @@ classDiagram
         +SaveSettings(settings): void
     }
 
+    class ICssService {
+        <<Interface>>
+        +GetCssFiles(): IEnumerable<string>
+        +GetCssContent(fileName): string
+        +SaveCssContent(fileName, content): void
+        +CreateCssFile(fileName): void
+        +DeleteCssFile(fileName): void
+    }
+    class CssService {
+        +GetCssFiles(): IEnumerable<string>
+        +GetCssContent(fileName): string
+        +SaveCssContent(fileName, content): void
+        +CreateCssFile(fileName): void
+        +DeleteCssFile(fileName): void
+    }
+
     MainWindow --> MainWindowViewModel
     SettingsWindow --> SettingsViewModel
 
@@ -80,8 +84,8 @@ classDiagram
     MainWindowViewModel --> IFileService
     MainWindowViewModel --> IExportService
     MainWindowViewModel --> ISettingsService
+    MainWindowViewModel --> ICssService
     MainWindowViewModel --> ApplicationSettings
-    MainWindowViewModel --> FileTreeNode
 
     SettingsViewModel --> ISettingsService
     SettingsViewModel --> ApplicationSettings
@@ -89,6 +93,7 @@ classDiagram
     FileService ..|> IFileService
     ExportService ..|> IExportService
     SettingsService ..|> ISettingsService
+    CssService ..|> ICssService
 
     ApplicationSettings "1" -- "1" ISettingsService : uses
     MarkdownDocument "1" -- "1" IFileService : uses

@@ -9,7 +9,7 @@
 ### 主要な責務
 
 - アプリケーションのメイン画面レイアウトの定義と表示。
-- メニューバー、ツールバー、フォルダツリー、メインエディタ/ビューアエリアなどの UI 要素の配置。
+- メニューバー、ツールバー、メインエディタ/ビューアエリア、CSS 編集パネルなどの UI 要素の配置。
 - ユーザー入力（ボタンクリック、メニュー選択など）のイベントを ViewModel のコマンドにバインドして伝達。
 - ViewModel のプロパティ変更通知に応じて UI を更新。
 
@@ -17,12 +17,12 @@
 
 ### 概要
 
-アプリケーションの設定画面を表す View クラスです。フォルダツリーの表示位置など、各種設定項目の表示とユーザーによる設定変更の受付を担当します。MVVM パターンにおける View として機能し、直接的なビジネスロジックは持ちません。ViewModel からのデータバインディングを通じて表示内容を更新し、ViewModel へのコマンドバインディングを通じてユーザー操作を伝達します。
+アプリケーションの設定画面を表す View クラスです。各種設定項目の表示とユーザーによる設定変更の受付を担当します。MVVM パターンにおける View として機能し、直接的なビジネスロジックは持ちません。ViewModel からのデータバインディングを通じて表示内容を更新し、ViewModel へのコマンドバインディングを通じてユーザー操作を伝達します。
 
 ### 主要な責務
 
-- 設定項目の UI 要素（ラジオボタン、チェックボックスなど）の配置と表示。
-- ユーザーによる設定変更（ラジオボタン選択など）のイベントを ViewModel のコマンドにバインドして伝達。
+- 設定項目の UI 要素（チェックボックスなど）の配置と表示。
+- ユーザーによる設定変更のイベントを ViewModel のコマンドにバインドして伝達。
 - ViewModel のプロパティ変更通知に応じて UI を更新。
 - 設定の保存、キャンセル操作の受付。
 
@@ -37,33 +37,28 @@ MainWindow のプレゼンテーションロジックと状態を管理する Vi
 - `MarkdownContent`: string 型。メインエディタ/ビューアエリアに表示される Markdown コンテンツ。Model の`MarkdownDocument`と同期します。
 - `CurrentMode`: `DisplayMode`型（enum）。現在の表示モード（ビューアー、Markdown 編集、リアルタイム編集）。
 - `SelectedCss`: string 型。現在選択されている CSS ファイルのパス。View の CSS 選択プルダウンとバインドします。
-- `FolderTreePosition`: `FolderTreePosition`型（enum）。フォルダツリーの表示位置（左/右）。View のレイアウトに影響します。
-- `FileTree`: `IEnumerable<FileTreeNode>` 型。フォルダツリーのトップレベルノードのコレクション。View の TreeView とバインドします。
+- `IsCssEditorVisible`: bool 型。CSS 編集パネルの表示/非表示を制御します。
 
 ### 主要なコマンド
 
 - `OpenFileCommand`: ファイルを開く操作を処理します。`IFileService`を利用します。
-- `OpenFolderCommand`: フォルダを開く操作を処理します。`IFileService`を利用して `FileTree` プロパティを更新し、フォルダツリーの構築をトリガーします。
 - `SaveFileCommand`: ファイルを保存する操作を処理します。`IFileService`を利用します。
 - `ExportCommand`: Markdown コンテンツを各種形式でエクスポートする操作を処理します。`IExportService`を利用します。
 - `OpenSettingsCommand`: 設定画面を開く操作を処理します。
+- `ToggleCssEditorCommand`: CSS 編集パネルの表示/非表示を切り替える操作を処理します。
 
 ### 主要な責務
 
 - View の状態管理とデータ提供。
 - ユーザー操作に応じた Model 層のサービス呼び出し。
 - アプリケーション設定（`ApplicationSettings`）の読み込みと適用。
-- フォルダツリーの構築と管理（`IFileService`から取得した `FileTreeNode` データを元に）。
+- CSS の管理と編集に関するロジックの実行（`ICssService`を利用）。
 
 ## SettingsViewModel クラス
 
 ### 概要
 
 SettingsWindow のプレゼンテーションロジックと状態を管理する ViewModel クラスです。View（SettingsWindow）と Model（ApplicationSettings, ISettingsService）の間の仲介役として機能します。View に表示する設定データを公開し、View からのユーザー操作を受け取って設定の保存やキャンセルを処理します。
-
-### 主要なプロパティ
-
-- `FolderTreePosition`: `FolderTreePosition`型（enum）。フォルダツリーの表示位置。View のラジオボタンとバインドします。
 
 ### 主要なコマンド
 
@@ -75,23 +70,6 @@ SettingsWindow のプレゼンテーションロジックと状態を管理す�
 - 設定画面の状態管理とデータ提供。
 - ユーザーによる設定変更の受付と一時的な保持。
 - 設定の保存（`ISettingsService`を利用）および破棄。
-
-## FileTreeNode クラス
-
-### 概要
-
-フォルダツリーの各ノード（ファイルまたはフォルダ）を表すデータモデルクラスです。階層的な親子関係を持つことができます。ビジネスロジックは含まず、純粋なデータコンテナとして機能します。
-
-### 主要なプロパティ
-
-- `Name`: string 型。ファイルまたはフォルダの名前。
-- `FilePath`: string 型。ファイルまたはフォルダのフルパス。
-- `IsDirectory`: bool 型。フォルダであるかどうかを示します。
-- `Children`: `IEnumerable<FileTreeNode>` 型。子ノードのコレクションです（フォルダの場合）。
-
-### 主要な責務
-
-- ファイルシステムの階層構造の保持。
 
 ## MarkdownDocument クラス
 
@@ -116,9 +94,7 @@ Markdown ファイルのデータモデルを表すクラスです。ファイ�
 
 ### 主要なプロパティ
 
-- `FolderTreePosition`: `FolderTreePosition`型（enum）。フォルダツリーの表示位置（左/右）。
 - `SelectedCss`: string 型。現在選択されている CSS ファイルのパス。
-- `LastOpenedFolder`: string 型。最後に開いたフォルダのパス。アプリケーション起動時に前回の状態を復元するために使用されます。
 
 ### 主要な責務
 
@@ -128,13 +104,12 @@ Markdown ファイルのデータモデルを表すクラスです。ファイ�
 
 ### 概要
 
-ファイルシステム操作（ファイルの読み書き、フォルダの探索）に関する契約を定義するインターフェースです。Model 層とインフラストラクチャ層の境界を明確にし、依存性逆転の原則を適用します。これにより、ファイル操作の実装詳細が ViewModel や Model から隠蔽されます。
+ファイルシステム操作（ファイルの読み書き）に関する契約を定義するインターフェースです。Model 層とインフラストラクチャ層の境界を明確にし、依存性逆転の原則を適用します。これにより、ファイル操作の実装詳細が ViewModel や Model から隠蔽されます。
 
 ### 主要なメソッド
 
 - `Open(filePath: string): MarkdownDocument`: 指定されたパスの Markdown ファイルを読み込み、`MarkdownDocument`オブジェクトとして返します。
 - `Save(document: MarkdownDocument): void`: `MarkdownDocument`オブジェクトの内容を指定されたパスに保存します。
-- `OpenFolder(folderPath: string): IEnumerable<FileTreeNode>`: 指定されたフォルダの階層構造を取得し、`FileTreeNode`のコレクションとして返します。フォルダツリー構築のために使用されます。
 
 ### 主要な責務
 
@@ -145,7 +120,7 @@ Markdown ファイルのデータモデルを表すクラスです。ファイ�
 
 ### 概要
 
-`IFileService`インターフェースの実装クラスです。実際のファイルシステムへのアクセスを行い、ファイルの読み書きやフォルダの内容取得などの具体的な処理を提供します。
+`IFileService`インターフェースの実装クラスです。実際のファイルシステムへのアクセスを行い、ファイルの読み書きなどの具体的な処理を提供します。
 
 ### 主要な責務
 
@@ -207,3 +182,34 @@ Markdown コンテンツを各種形式（HTML, PDF, Word, 画像）にエクス
 - `ISettingsService`で定義されたメソッドの具体的な実装。
 - 設定の読み書き処理の実行。
 - 設定の永続化メカニズムの管理。
+
+## ICssService インターフェース
+
+### 概要
+
+CSS ファイルの管理（取得、保存、作成、削除）に関する契約を定義するインターフェースです。ViewModel が具体的なファイル操作を意識することなく、CSS の管理機能を利用できるようにします。
+
+### 主要なメソッド
+
+- `GetCssFiles(): IEnumerable<string>`: 利用可能な CSS ファイルの一覧を取得します。
+- `GetCssContent(fileName: string): string`: 指定された CSS ファイルの内容を取得します。
+- `SaveCssContent(fileName: string, content: string): void`: 指定された CSS ファイルに内容を保存します。
+- `CreateCssFile(fileName: string): void`: 新しい CSS ファイルを作成します。
+- `DeleteCssFile(fileName: string): void`: 指定された CSS ファイルを削除します。
+
+### 主要な責務
+
+- CSS ファイル操作の抽象化。
+- CSS ファイルへの依存を分離。
+
+## CssService クラス
+
+### 概要
+
+`ICssService`インターフェースの実装クラスです。CSS ファイルの具体的な読み書き、作成、削除処理を提供します。
+
+### 主要な責務
+
+- `ICssService`で定義されたメソッドの具体的な実装。
+- CSS ファイルの I/O 処理の実行。
+- エラーハンドリング。
