@@ -11,9 +11,11 @@ namespace PageLeaf.Services
         DisplayMode SelectedMode { get; set; }
         bool IsMarkdownEditorVisible { get; }
         bool IsViewerVisible { get; }
+        bool IsDirty { get; } // EditorService が公開する IsDirty
 
         void LoadDocument(MarkdownDocument document);
         void ApplyCss(string cssFileName);
         void NewDocument();
+        SaveConfirmationResult PromptForSaveIfDirty();
     }
 }

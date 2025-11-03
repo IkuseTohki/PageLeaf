@@ -1,6 +1,7 @@
 using PageLeaf.Models;
 using PageLeaf.ViewModels;
 using System;
+using System.ComponentModel;
 
 namespace PageLeaf.Services
 {
@@ -8,6 +9,7 @@ namespace PageLeaf.Services
     {
         private readonly IMarkdownService _markdownService;
         private readonly ICssService _cssService;
+        private readonly IDialogService _dialogService; // IDialogService を追加
         private string? _currentCssPath;
 
         private DisplayMode _selectedMode;
@@ -15,6 +17,9 @@ namespace PageLeaf.Services
         private bool _isMarkdownEditorVisible;
         private bool _isViewerVisible;
         private string _htmlContent = string.Empty;
+
+        // EditorService が公開する IsDirty プロパティ
+        public bool IsDirty => CurrentDocument.IsDirty;
 
         public DisplayMode SelectedMode
         {
@@ -77,10 +82,23 @@ namespace PageLeaf.Services
             {
                 if (_currentDocument != value)
                 {
+                    // 既存の購読を解除
+                    if (_currentDocument != null)
+                    {
+                        _currentDocument.PropertyChanged -= CurrentDocument_PropertyChanged;
+                    }
+
                     _currentDocument = value;
                     OnPropertyChanged();
                     OnPropertyChanged(nameof(EditorText)); // CurrentDocumentが変更されたらEditorTextも更新
                     UpdateHtmlContent(); // ドキュメント変更時にもHTMLを更新
+
+                    // 新しいドキュメントの購読を開始
+                    if (_currentDocument != null)
+                    {
+                        _currentDocument.PropertyChanged += CurrentDocument_PropertyChanged;
+                    }
+                    OnPropertyChanged(nameof(IsDirty)); // IsDirty の状態も更新される可能性があるため通知
                 }
             }
         }
@@ -92,29 +110,44 @@ namespace PageLeaf.Services
             {
                 if (CurrentDocument.Content != value)
                 {
-                    CurrentDocument.Content = value;
+                    CurrentDocument.Content = value; // ここで MarkdownDocument.IsDirty が true になる
                     OnPropertyChanged();
                     UpdateHtmlContent();
                 }
             }
         }
 
-        public EditorService(IMarkdownService markdownService, ICssService cssService)
+        public EditorService(IMarkdownService markdownService, ICssService cssService, IDialogService dialogService)
         {
             ArgumentNullException.ThrowIfNull(markdownService);
             ArgumentNullException.ThrowIfNull(cssService);
+            ArgumentNullException.ThrowIfNull(dialogService); // IDialogService の null チェック
 
             _markdownService = markdownService;
             _cssService = cssService;
+            _dialogService = dialogService; // IDialogService を設定
 
             SelectedMode = DisplayMode.Markdown; // 初期モード
 
+            // CurrentDocument の PropertyChanged イベントを購読し、IsDirty の変更を検知
+            _currentDocument.PropertyChanged += CurrentDocument_PropertyChanged;
+
             UpdateVisibility(); // 初期表示を設定
+        }
+
+        // CurrentDocument の PropertyChanged イベントハンドラ
+        private void CurrentDocument_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(MarkdownDocument.IsDirty))
+            {
+                OnPropertyChanged(nameof(IsDirty)); // EditorService の IsDirty の変更を通知
+            }
         }
 
         public void LoadDocument(MarkdownDocument document)
         {
             CurrentDocument = document;
+            CurrentDocument.IsDirty = false; // ドキュメントをロードしたら、変更状態をリセット
         }
 
         public void ApplyCss(string cssFileName)
@@ -129,6 +162,20 @@ namespace PageLeaf.Services
         public void NewDocument()
         {
             CurrentDocument = new MarkdownDocument { Content = string.Empty, FilePath = null };
+            CurrentDocument.IsDirty = false; // 新しいドキュメントなので、変更状態をリセット
+        }
+
+        /// <summary>
+        /// 未保存の変更がある場合、ユーザーに保存を促すダイアログを表示します。
+        /// </summary>
+        /// <returns>ユーザーの選択結果。</returns>
+        public SaveConfirmationResult PromptForSaveIfDirty()
+        {
+            if (IsDirty)
+            {
+                return _dialogService.ShowSaveConfirmationDialog();
+            }
+            return SaveConfirmationResult.NoAction; // 変更がない場合は何もしない
         }
 
         private void UpdateVisibility()
@@ -141,7 +188,9 @@ namespace PageLeaf.Services
         {
             if (SelectedMode == DisplayMode.Viewer)
             {
+#pragma warning disable CS8625 // null リテラルまたは考えられる null 値を null 非許容参照型に変換しています。
                 HtmlContent = _markdownService.ConvertToHtml(CurrentDocument.Content, _currentCssPath ?? string.Empty);
+#pragma warning restore CS8625 // null リテラルまたは考えられる null 値を null 非許容参照型に変換しています。
             }
             else
             {

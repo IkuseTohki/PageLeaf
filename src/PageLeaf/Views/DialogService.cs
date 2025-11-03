@@ -1,6 +1,8 @@
 using Microsoft.Win32;
+using PageLeaf.Models;
 using PageLeaf.Services;
 using System;
+using System.Windows; // MessageBox を使用するために追加
 
 namespace PageLeaf.Views
 {
@@ -51,6 +53,28 @@ namespace PageLeaf.Views
                 return saveFileDialog.FileName;
             }
             return null;
+        }
+
+        /// <summary>
+        /// 未保存の変更がある場合に、保存を促す確認ダイアログを表示します。
+        /// </summary>
+        /// <returns>ユーザーの選択結果。</returns>
+        public SaveConfirmationResult ShowSaveConfirmationDialog()
+        {
+            MessageBoxResult result = MessageBox.Show(
+                "未保存の変更があります。保存しますか？",
+                "PageLeaf",
+                MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Warning
+            );
+
+            return result switch
+            {
+                MessageBoxResult.Yes => SaveConfirmationResult.Save,
+                MessageBoxResult.No => SaveConfirmationResult.Discard,
+                MessageBoxResult.Cancel => SaveConfirmationResult.Cancel,
+                _ => SaveConfirmationResult.Cancel // デフォルトはキャンセル
+            };
         }
     }
 }

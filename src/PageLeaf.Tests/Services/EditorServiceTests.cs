@@ -10,6 +10,7 @@ namespace PageLeaf.Tests.Services
     {
         private Mock<IMarkdownService> _mockMarkdownService = null!;
         private Mock<ICssService> _mockCssService = null!;
+        private Mock<IDialogService> _mockDialogService = null!; // IDialogService のモックを追加
         private EditorService _editorService = null!;
 
         [TestInitialize]
@@ -17,7 +18,8 @@ namespace PageLeaf.Tests.Services
         {
             _mockMarkdownService = new Mock<IMarkdownService>();
             _mockCssService = new Mock<ICssService>();
-            _editorService = new EditorService(_mockMarkdownService.Object, _mockCssService.Object);
+            _mockDialogService = new Mock<IDialogService>(); // モックを初期化
+            _editorService = new EditorService(_mockMarkdownService.Object, _mockCssService.Object, _mockDialogService.Object);
         }
 
         [TestMethod]
@@ -52,7 +54,7 @@ namespace PageLeaf.Tests.Services
             var expectedHtml = "<h2>New Content</h2>";
             _mockMarkdownService.Setup(m => m.ConvertToHtml("## New Content", It.IsAny<string?>())).Returns(expectedHtml);
 
-            var editorService = new EditorService(_mockMarkdownService.Object, _mockCssService.Object);
+            var editorService = new EditorService(_mockMarkdownService.Object, _mockCssService.Object, _mockDialogService.Object);
 
             // Act (Mode: Markdown)
             editorService.SelectedMode = DisplayMode.Markdown;
@@ -122,8 +124,7 @@ namespace PageLeaf.Tests.Services
             // Assert
             _mockMarkdownService.Verify(m => m.ConvertToHtml(newMarkdown, cssPath), Times.Once);
             Assert.AreEqual(expectedHtml, _editorService.HtmlContent);
-        }
-
+        }
         [TestMethod]
         public void NewDocument_ShouldResetDocumentProperties()
         {
@@ -141,6 +142,78 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual(string.Empty, _editorService.CurrentDocument.Content);
             Assert.IsNull(_editorService.CurrentDocument.FilePath);
             _mockMarkdownService.Verify(m => m.ConvertToHtml(string.Empty, It.IsAny<string?>()), Times.Once); // HTMLコンテンツも更新されることを確認
+        }
+
+        [TestMethod]
+        public void EditorText_WhenChanged_ShouldSetIsDirtyToTrue()
+        {
+            // テスト観点: EditorText が変更されたときに EditorService.IsDirty が true になることを確認する。
+            // Arrange
+            _editorService.CurrentDocument.IsDirty = false; // 初期状態をfalseに設定
+
+            // Act
+            _editorService.EditorText = "Some new content";
+
+            // Assert
+            Assert.IsTrue(_editorService.IsDirty);
+        }
+
+        [TestMethod]
+        public void LoadDocument_ShouldResetIsDirtyToFalse()
+        {
+            // テスト観点: LoadDocument 後に EditorService.IsDirty が false にリセットされることを確認する。
+            // Arrange
+            var initialDocument = new MarkdownDocument { Content = "Existing Content", IsDirty = true };
+            _editorService.LoadDocument(initialDocument);
+
+            // Act
+            _editorService.LoadDocument(new MarkdownDocument { Content = "New Content" });
+
+            // Assert
+            Assert.IsFalse(_editorService.IsDirty);
+        }
+
+        [TestMethod]
+        public void NewDocument_ShouldResetIsDirtyToFalse()
+        {
+            // テスト観点: NewDocument 後に EditorService.IsDirty が false にリセットされることを確認する。
+            // Arrange
+            _editorService.CurrentDocument.IsDirty = true; // 初期状態をtrueに設定
+
+            // Act
+            _editorService.NewDocument();
+
+            // Assert
+            Assert.IsFalse(_editorService.IsDirty);
+        }
+
+        [TestMethod]
+        public void PromptForSaveIfDirty_WhenDirty_ShouldCallDialogService()
+        {
+            // テスト観点: IsDirty が true の場合、PromptForSaveIfDirty が IDialogService.ShowSaveConfirmationDialog を呼び出すことを確認する。
+            // Arrange
+            _editorService.CurrentDocument.IsDirty = true; // 変更ありの状態にする
+            _mockDialogService.Setup(d => d.ShowSaveConfirmationDialog()).Returns(SaveConfirmationResult.Cancel); // モックの振る舞いを設定
+
+            // Act
+            _editorService.PromptForSaveIfDirty();
+
+            // Assert
+            _mockDialogService.Verify(d => d.ShowSaveConfirmationDialog(), Times.Once);
+        }
+
+        [TestMethod]
+        public void PromptForSaveIfDirty_WhenNotDirty_ShouldNotCallDialogService()
+        {
+            // テスト観点: IsDirty が false の場合、PromptForSaveIfDirty が IDialogService.ShowSaveConfirmationDialog を呼び出さないことを確認する。
+            // Arrange
+            _editorService.CurrentDocument.IsDirty = false; // 変更なしの状態にする
+
+            // Act
+            _editorService.PromptForSaveIfDirty();
+
+            // Assert
+            _mockDialogService.Verify(d => d.ShowSaveConfirmationDialog(), Times.Never);
         }
     }
 }

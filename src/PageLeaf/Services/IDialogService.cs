@@ -21,5 +21,11 @@ namespace PageLeaf.Services
         /// <param name="initialFileName">ダイアログの初期ファイル名。</param>
         /// <returns>選択されたファイルの絶対パス。キャンセルされた場合はnull。</returns>
         string? ShowSaveFileDialog(string title, string filter, string? initialFileName = null);
+
+        /// <summary>
+        /// 未保存の変更がある場合に、保存を促す確認ダイアログを表示します。
+        /// </summary>
+        /// <returns>ユーザーの選択結果。</returns>
+        PageLeaf.Models.SaveConfirmationResult ShowSaveConfirmationDialog();
     }
 }

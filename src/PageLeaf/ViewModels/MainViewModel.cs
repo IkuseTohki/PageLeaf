@@ -110,6 +110,18 @@ namespace PageLeaf.ViewModels
         private void ExecuteNewDocument(object? parameter)
         {
             _logger.LogInformation("NewDocumentCommand executed.");
+
+            SaveConfirmationResult result = Editor.PromptForSaveIfDirty();
+
+            if (result == SaveConfirmationResult.Cancel)
+            {
+                return;
+            }
+            if (result == SaveConfirmationResult.Save)
+            {
+                ExecuteSaveFile(null);
+            }
+
             Editor.NewDocument();
         }
 
@@ -138,6 +150,17 @@ namespace PageLeaf.ViewModels
         private void ExecuteOpenFile(object? parameter)
         {
             _logger.LogInformation("OpenFileCommand executed.");
+
+            SaveConfirmationResult result = Editor.PromptForSaveIfDirty();
+
+            if (result == SaveConfirmationResult.Cancel)
+            {
+                return;
+            }
+            if (result == SaveConfirmationResult.Save)
+            {
+                ExecuteSaveFile(null);
+            }
 
             string? filePath = _dialogService.ShowOpenFileDialog(
                 "Markdownファイルを開く",
