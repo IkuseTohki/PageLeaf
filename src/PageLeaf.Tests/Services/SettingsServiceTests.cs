@@ -52,9 +52,7 @@ namespace PageLeaf.Tests.Services
 
             // Assert
             Assert.IsNotNull(settings);
-            Assert.AreEqual(FolderTreePosition.Left, settings.FolderTreePosition);
             Assert.AreEqual("", settings.SelectedCss);
-            Assert.AreEqual("", settings.LastOpenedFolder);
         }
 
         [TestMethod]
@@ -64,9 +62,7 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var expectedSettings = new ApplicationSettings
             {
-                FolderTreePosition = FolderTreePosition.Right,
                 SelectedCss = "solarized-dark.css",
-                LastOpenedFolder = "C:\\Users\\Test\\Documents"
             };
             var serializeOptions = new JsonSerializerOptions();
             serializeOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
@@ -78,9 +74,7 @@ namespace PageLeaf.Tests.Services
 
             // Assert
             Assert.IsNotNull(actualSettings);
-            Assert.AreEqual(expectedSettings.FolderTreePosition, actualSettings.FolderTreePosition);
             Assert.AreEqual(expectedSettings.SelectedCss, actualSettings.SelectedCss);
-            Assert.AreEqual(expectedSettings.LastOpenedFolder, actualSettings.LastOpenedFolder);
         }
 
         [TestMethod]
@@ -90,9 +84,7 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var settingsToSave = new ApplicationSettings
             {
-                FolderTreePosition = FolderTreePosition.Right,
                 SelectedCss = "github.css",
-                LastOpenedFolder = "D:\\Projects\\MyProject"
             };
 
             var service = new SettingsService(_mockLogger.Object, _testAppDataPath);
@@ -108,9 +100,7 @@ namespace PageLeaf.Tests.Services
             var actualSettings = JsonSerializer.Deserialize<ApplicationSettings>(savedContent, deserializeOptions);
 
             Assert.IsNotNull(actualSettings);
-            Assert.AreEqual(settingsToSave.FolderTreePosition, actualSettings.FolderTreePosition);
             Assert.AreEqual(settingsToSave.SelectedCss, actualSettings.SelectedCss);
-            Assert.AreEqual(settingsToSave.LastOpenedFolder, actualSettings.LastOpenedFolder);
         }
 
         [TestMethod]
@@ -149,9 +139,7 @@ namespace PageLeaf.Tests.Services
 
             // Assert
             Assert.IsNotNull(settings);
-            Assert.AreEqual(FolderTreePosition.Left, settings.FolderTreePosition);
             Assert.AreEqual("", settings.SelectedCss);
-            Assert.AreEqual("", settings.LastOpenedFolder);
         }
     }
 }

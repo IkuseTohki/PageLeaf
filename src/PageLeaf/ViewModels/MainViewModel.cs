@@ -15,23 +15,12 @@ namespace PageLeaf.ViewModels
         private readonly IDialogService _dialogService;
         private readonly ICssService _cssService;
         private readonly ISettingsService _settingsService;
-        private FileTreeNode? _rootNode;
         private ObservableCollection<string> _availableCssFiles = null!;
         private string _selectedCssFile = null!;
 
         public IEditorService Editor { get; } // EditorService をプロパティとして公開
 
         public ObservableCollection<DisplayMode> AvailableModes { get; }
-
-        public FileTreeNode? RootNode
-        {
-            get => _rootNode;
-            private set
-            {
-                _rootNode = value;
-                OnPropertyChanged();
-            }
-        }
 
         public ObservableCollection<string> AvailableCssFiles
         {
@@ -59,7 +48,6 @@ namespace PageLeaf.ViewModels
             }
         }
 
-        public ICommand OpenFolderCommand { get; }
         public ICommand OpenFileCommand { get; }
         public ICommand SaveFileCommand { get; }
         public ICommand SaveAsFileCommand { get; }
@@ -81,7 +69,6 @@ namespace PageLeaf.ViewModels
             _cssService = cssService;
             _settingsService = settingsService;
 
-            OpenFolderCommand = new Utilities.DelegateCommand(OpenFolder);
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
             SaveFileCommand = new Utilities.DelegateCommand(ExecuteSaveFile);
             SaveAsFileCommand = new Utilities.DelegateCommand(ExecuteSaveAsFile);
@@ -125,28 +112,6 @@ namespace PageLeaf.ViewModels
             Editor.NewDocument();
         }
 
-        private void OpenFolder(object? parameter)
-        {
-            try
-            {
-                if (parameter is string path)
-                {
-                    var children = _fileService.OpenFolder(path);
-                    RootNode = new FileTreeNode
-                    {
-                        Name = System.IO.Path.GetFileName(path),
-                        FilePath = path,
-                        IsDirectory = true,
-                        Children = new System.Collections.ObjectModel.ObservableCollection<FileTreeNode>(children)
-                    };
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to open folder: {Path}", parameter);
-            }
-        }
-
         private void ExecuteOpenFile(object? parameter)
         {
             _logger.LogInformation("OpenFileCommand executed.");
@@ -164,7 +129,7 @@ namespace PageLeaf.ViewModels
 
             string? filePath = _dialogService.ShowOpenFileDialog(
                 "Markdownファイルを開く",
-                "Markdown files (*.md;*.markdown)|*.md;*.markdown|All files (*.*)|*.*" );
+                "Markdown files (*.md;*.markdown)|*.md;*.markdown|All files (*.*)|*.*");
 
             if (!string.IsNullOrEmpty(filePath))
             {

@@ -31,7 +31,8 @@ namespace PageLeaf
 
             // DIコンテナとロギングを設定
             AppHost = Host.CreateDefaultBuilder()
-                .UseSerilog((hostContext, services, configuration) => {
+                .UseSerilog((hostContext, services, configuration) =>
+                {
                     // ログファイルのパスを設定
                     var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "PageLeaf-.txt");
 

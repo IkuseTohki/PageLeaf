@@ -8,7 +8,6 @@ namespace PageLeaf.Services
     {
         MarkdownDocument Open(string filePath);
         void Save(MarkdownDocument document);
-        IEnumerable<FileTreeNode> OpenFolder(string folderPath);
         bool FileExists(string filePath);
         /// <summary>
         /// 指定されたフォルダパスから、指定された検索パターンに一致するファイルのフルパスのリストを取得します。

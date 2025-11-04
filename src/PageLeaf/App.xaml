@@ -13,7 +13,6 @@
             <system:String x:Key="MenuFileHeader">_ファイル</system:String>
             <system:String x:Key="MenuFileNewHeader">_新規作成</system:String>
             <system:String x:Key="MenuFileOpenHeader">_開く</system:String>
-            <system:String x:Key="MenuFileOpenFolderHeader">_フォルダを開く</system:String>
             <system:String x:Key="MenuFileSaveHeader">_保存</system:String>
             <system:String x:Key="MenuFileSaveAsHeader">_名前を付けて保存</system:String>
             <system:String x:Key="MenuFileExportHeader">_エクスポート</system:String>

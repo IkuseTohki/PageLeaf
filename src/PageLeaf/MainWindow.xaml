@@ -5,7 +5,6 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PageLeaf"
         xmlns:viewmodels="clr-namespace:PageLeaf.ViewModels"
-        xmlns:views="clr-namespace:PageLeaf.Views"
         xmlns:utils="clr-namespace:PageLeaf.Utilities"
         mc:Ignorable="d"
         Title="PageLeaf Markdown Editor" Height="600" Width="1000">
@@ -27,7 +26,6 @@
             <MenuItem Header="{StaticResource MenuFileHeader}">
                 <MenuItem Header="{StaticResource MenuFileNewHeader}" Command="{Binding NewDocumentCommand}" InputGestureText="Ctrl+N"/>
                 <MenuItem Header="{StaticResource MenuFileOpenHeader}" Command="{Binding OpenFileCommand}" InputGestureText="Ctrl+O"/>
-                <MenuItem Header="{StaticResource MenuFileOpenFolderHeader}"/>
                 <Separator/>
                 <MenuItem Header="{StaticResource MenuFileSaveHeader}" Command="{Binding SaveFileCommand}" InputGestureText="Ctrl+S"/>
                 <MenuItem Header="{StaticResource MenuFileSaveAsHeader}" Command="{Binding SaveAsFileCommand}" InputGestureText="Ctrl+Shift+S"/>
@@ -73,18 +71,8 @@
 
         <!-- Main Content -->
         <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200" MinWidth="150"/>
-                <ColumnDefinition Width="5"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-
-            <views:FolderTree Grid.Column="0" />
-
-            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" />
-
             <!-- 右側の区画 (エディタ) -->
-            <Grid Grid.Column="2">
+            <Grid>
                 <TextBox Text="{Binding Editor.EditorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          TextWrapping="Wrap"
                          AcceptsReturn="True"
