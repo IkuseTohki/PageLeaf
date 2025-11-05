@@ -65,11 +65,23 @@
         </Menu>
 
         <!-- ToolBar -->
-        <ToolBar Grid.Row="1">
-            <ComboBox ItemsSource="{Binding AvailableModes}" SelectedItem="{Binding Editor.SelectedMode}" Style="{StaticResource DisplayModeComboBoxStyle}"/>
-            <ComboBox ItemsSource="{Binding AvailableCssFiles}" SelectedItem="{Binding SelectedCssFile}" Style="{StaticResource CssFileComboBoxStyle}"/>
-            <Button Content="CSS編集" Command="{Binding ToggleCssEditorCommand}"/>
-        </ToolBar>
+        <Border Grid.Row="1" Style="{StaticResource ToolBarLikeBorder}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <ComboBox ItemsSource="{Binding AvailableModes}" SelectedItem="{Binding Editor.SelectedMode}" Style="{StaticResource DisplayModeComboBoxStyle}"/>
+                    <ComboBox ItemsSource="{Binding AvailableCssFiles}" SelectedItem="{Binding SelectedCssFile}" Style="{StaticResource CssFileComboBoxStyle}"/>
+                </StackPanel>
+
+                <Button Grid.Column="3" Content="CSS編集" Command="{Binding ToggleCssEditorCommand}" Style="{StaticResource ToolBarButtonStyle}"/>
+            </Grid>
+        </Border>
 
         <!-- Main Content -->
         <Grid Grid.Row="2">
