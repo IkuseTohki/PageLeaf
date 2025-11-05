@@ -17,10 +17,24 @@ namespace PageLeaf.ViewModels
         private readonly ISettingsService _settingsService;
         private ObservableCollection<string> _availableCssFiles = null!;
         private string _selectedCssFile = null!;
+        private bool _isCssEditorVisible;
 
         public IEditorService Editor { get; } // EditorService をプロパティとして公開
 
         public ObservableCollection<DisplayMode> AvailableModes { get; }
+
+        public bool IsCssEditorVisible
+        {
+            get => _isCssEditorVisible;
+            set
+            {
+                if (_isCssEditorVisible != value)
+                {
+                    _isCssEditorVisible = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public ObservableCollection<string> AvailableCssFiles
         {
@@ -52,6 +66,7 @@ namespace PageLeaf.ViewModels
         public ICommand SaveFileCommand { get; }
         public ICommand SaveAsFileCommand { get; }
         public ICommand NewDocumentCommand { get; }
+        public ICommand ToggleCssEditorCommand { get; }
 
         public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService, IEditorService editorService, ICssService cssService, ISettingsService settingsService)
         {
@@ -73,6 +88,7 @@ namespace PageLeaf.ViewModels
             SaveFileCommand = new Utilities.DelegateCommand(ExecuteSaveFile);
             SaveAsFileCommand = new Utilities.DelegateCommand(ExecuteSaveAsFile);
             NewDocumentCommand = new Utilities.DelegateCommand(ExecuteNewDocument);
+            ToggleCssEditorCommand = new Utilities.DelegateCommand(ExecuteToggleCssEditor);
 
             AvailableModes = new ObservableCollection<DisplayMode>(
                 Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>()
@@ -202,6 +218,11 @@ namespace PageLeaf.ViewModels
                     _logger.LogError(ex, "An error occurred while saving the file as {FilePath}.", newFilePath);
                 }
             }
+        }
+
+        private void ExecuteToggleCssEditor(object? obj)
+        {
+            IsCssEditorVisible = !IsCssEditorVisible;
         }
     }
 }

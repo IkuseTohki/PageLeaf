@@ -7,7 +7,7 @@ namespace PageLeaf.Models
     public class MarkdownDocument : INotifyPropertyChanged
     {
         private string _content = "";
-        private string _filePath = "";
+        private string? _filePath = null;
         private bool _isDirty = false;
 
         public string Content
@@ -24,7 +24,7 @@ namespace PageLeaf.Models
             }
         }
 
-        public string FilePath
+        public string? FilePath
         {
             get => _filePath;
             set

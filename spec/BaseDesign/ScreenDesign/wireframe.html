@@ -58,8 +58,136 @@
         </div>
         <div id="css-editor-panel">
             <!-- CSS編集パネル -->
-            <p>ここにCSS編集パネルが表示されます。</p>
-            <p>ツールバーのボタンで表示/非表示が切り替わります。</p>
+            <div class="panel-toolbar">
+                <button>保存</button>
+            </div>
+            <div class="tab-container">
+                <div class="tab-buttons">
+                    <button class="tab-button active" data-tab="tab-general">全体</button>
+                    <button class="tab-button" data-tab="tab-headings">見出し</button>
+                    <button class="tab-button" data-tab="tab-quote">引用</button>
+                    <button class="tab-button" data-tab="tab-list">リスト</button>
+                    <button class="tab-button" data-tab="tab-table">表</button>
+                    <button class="tab-button" data-tab="tab-code">コード</button>
+                </div>
+                <div id="tab-general" class="tab-content active">
+                    <div class="form-group">
+                        <label>文字色:</label>
+                        <input type="color">
+                    </div>
+                    <div class="form-group">
+                        <label>背景色:</label>
+                        <input type="color">
+                    </div>
+                </div>
+                <div id="tab-headings" class="tab-content">
+                    <div class="form-group">
+                        <label>対象見出し:</label>
+                        <select>
+                            <option>H1</option>
+                            <option>H2</option>
+                            <option>H3</option>
+                            <option>H4</option>
+                            <option>H5</option>
+                            <option>H6</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>文字色:</label>
+                        <input type="color">
+                    </div>
+                    <div class="form-group">
+                        <label>スタイル:</label>
+                        <input type="checkbox" id="heading-bold"> <label for="heading-bold">太字</label>
+                        <input type="checkbox" id="heading-italic"> <label for="heading-italic">斜体</label>
+                        <input type="checkbox" id="heading-underline"> <label for="heading-underline">下線</label>
+                        <input type="checkbox" id="heading-strikethrough"> <label for="heading-strikethrough">取り消し線</label>
+                    </div>
+                    <div class="form-group">
+                        <label>フォントサイズ:</label>
+                        <input type="text" placeholder="例: 24px, 1.5em">
+                    </div>
+                    <div class="form-group">
+                        <label>フォントファミリー:</label>
+                        <input type="text" placeholder="例: 'Segoe UI', sans-serif">
+                    </div>
+                    <div class="form-group">
+                        <input type="checkbox" id="heading-numbering"> <label for="heading-numbering">項番の自動採番</label>
+                    </div>
+                </div>
+                <div id="tab-quote" class="tab-content">
+                    <div class="form-group">
+                        <label>文字色:</label>
+                        <input type="color">
+                    </div>
+                    <div class="form-group">
+                        <label>背景色:</label>
+                        <input type="color">
+                    </div>
+                    <div class="form-group">
+                        <label>左枠線 色:</label>
+                        <input type="color">
+                    </div>
+                     <div class="form-group">
+                        <label>左枠線 太さ:</label>
+                        <input type="text" placeholder="例: 4px">
+                    </div>
+                     <div class="form-group">
+                        <label>左枠線 種類:</label>
+                        <select>
+                            <option>solid</option>
+                            <option>dotted</option>
+                            <option>dashed</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="tab-list" class="tab-content">
+                    <div class="form-group">
+                        <label>マーカーの種類 (ul):</label>
+                        <select>
+                            <option>disc</option>
+                            <option>circle</option>
+                            <option>square</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>インデント:</label>
+                        <input type="text" placeholder="例: 20px">
+                    </div>
+                </div>
+                <div id="tab-table" class="tab-content">
+                    <div class="form-group">
+                        <label>罫線 色:</label>
+                        <input type="color">
+                    </div>
+                    <div class="form-group">
+                        <label>罫線 太さ:</label>
+                        <input type="text" placeholder="例: 1px">
+                    </div>
+                    <div class="form-group">
+                        <label>ヘッダー背景色:</label>
+                        <input type="color">
+                    </div>
+                    <div class="form-group">
+                        <label>セル パディング:</label>
+                        <input type="text" placeholder="例: 8px">
+                    </div>
+                </div>
+                <div id="tab-code" class="tab-content">
+                    <div class="form-group">
+                        <label>文字色:</label>
+                        <input type="color">
+                    </div>
+                    <div class="form-group">
+                        <label>背景色:</label>
+                        <input type="color">
+                    </div>
+                    <div class="form-group">
+                        <label>フォントファミリー:</label>
+                        <input type="text" placeholder="例: 'Consolas', monospace">
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 </body>

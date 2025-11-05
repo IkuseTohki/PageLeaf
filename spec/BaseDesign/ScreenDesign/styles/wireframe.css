@@ -120,7 +120,8 @@ main {
     border-left: 1px solid #e0e0e0;
     padding: 10px;
     overflow-y: auto;
-    display: block;
+    display: flex; /* 追加 */
+    flex-direction: column; /* 追加 */
 }
 
 /* サブメニューのネスト */
@@ -128,4 +129,107 @@ main {
     top: 0;
     left: 100%;
     margin-left: 5px;
+}
+
+/* CSS編集パネルの追加スタイル */
+.panel-toolbar {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 10px;
+    text-align: right;
+}
+
+.panel-toolbar button {
+    padding: 6px 12px;
+    border: 1px solid #007bff;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.panel-toolbar button:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.tab-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.tab-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    border-bottom: 1px solid #e0e0e0;
+    margin-bottom: 10px;
+}
+
+.tab-button {
+    flex-grow: 1;
+    padding: 8px 12px;
+    border: none;
+    background-color: #e9ecef;
+    cursor: pointer;
+    font-size: 0.9em;
+    color: #495057;
+    border-radius: 4px 4px 0 0;
+    margin-right: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.tab-button:hover {
+    background-color: #dee2e6;
+}
+
+.tab-button.active {
+    background-color: #ffffff;
+    border-bottom: 1px solid #ffffff; /* アクティブタブの下線を消す */
+    color: #000000;
+    font-weight: bold;
+}
+
+.tab-content {
+    display: none; /* デフォルトで非表示 */
+    padding: 10px 0;
+    flex-grow: 1;
+    overflow-y: auto;
+}
+
+.tab-content.active {
+    display: block; /* アクティブなタブコンテンツのみ表示 */
+}
+
+.form-group {
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-size: 0.85em;
+    color: #555;
+    margin-bottom: 3px;
+}
+
+.form-group input[type="color"],
+.form-group input[type="text"],
+.form-group select {
+    padding: 6px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9em;
+    width: 100%;
+    box-sizing: border-box; /* パディングとボーダーを幅に含める */
+}
+
+.form-group input[type="color"] {
+    height: 30px; /* カラーピッカーの高さ調整 */
+    padding: 0;
+}
+
+.form-group input[type="checkbox"] {
+    margin-right: 5px;
 }

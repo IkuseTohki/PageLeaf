@@ -461,5 +461,78 @@ namespace PageLeaf.Tests.ViewModels
             // Assert
             _mockEditorService.Verify(s => s.NewDocument(), Times.Once);
         }
+
+        [TestMethod]
+        public void IsCssEditorVisible_ShouldBeFalse_ByDefault()
+        {
+            // テスト観点: IsCssEditorVisible プロパティのデフォルト値が false であることを確認する。
+            // Arrange
+            _viewModel = new MainViewModel(
+                _mockFileService.Object,
+                _mockLogger.Object,
+                _mockDialogService.Object,
+                _mockEditorService.Object,
+                _mockCssService.Object,
+                _mockSettingsService.Object);
+
+            // Assert
+            Assert.IsFalse(_viewModel.IsCssEditorVisible);
+        }
+
+        [TestMethod]
+        public void IsCssEditorVisible_ShouldRaisePropertyChanged_WhenChanged()
+        {
+            // テスト観点: IsCssEditorVisible プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            _viewModel = new MainViewModel(
+                _mockFileService.Object,
+                _mockLogger.Object,
+                _mockDialogService.Object,
+                _mockEditorService.Object,
+                _mockCssService.Object,
+                _mockSettingsService.Object);
+
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(MainViewModel.IsCssEditorVisible))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.IsCssEditorVisible = true;
+
+            // Assert
+            Assert.IsTrue(wasRaised);
+        }
+
+        [TestMethod]
+        public void ToggleCssEditorCommand_ShouldToggleIsCssEditorVisible()
+        {
+            // テスト観点: ToggleCssEditorCommand を実行すると、IsCssEditorVisible プロパティの値が反転することを確認する。
+            // Arrange
+            _viewModel = new MainViewModel(
+                _mockFileService.Object,
+                _mockLogger.Object,
+                _mockDialogService.Object,
+                _mockEditorService.Object,
+                _mockCssService.Object,
+                _mockSettingsService.Object);
+            var initialValue = _viewModel.IsCssEditorVisible;
+
+            // Act
+            _viewModel.ToggleCssEditorCommand.Execute(null);
+
+            // Assert
+            Assert.AreEqual(!initialValue, _viewModel.IsCssEditorVisible);
+
+            // Act
+            _viewModel.ToggleCssEditorCommand.Execute(null);
+
+            // Assert
+            Assert.AreEqual(initialValue, _viewModel.IsCssEditorVisible);
+        }
     }
 }
