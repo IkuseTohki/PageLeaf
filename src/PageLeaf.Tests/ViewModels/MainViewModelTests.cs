@@ -17,6 +17,7 @@ namespace PageLeaf.Tests.ViewModels
         private Mock<IEditorService> _mockEditorService = null!;
         private Mock<ICssService> _mockCssService = null!;
         private Mock<ISettingsService> _mockSettingsService = null!;
+        private Mock<ICssEditorService> _mockCssEditorService = null!;
         private MainViewModel _viewModel = null!;
 
         [TestInitialize]
@@ -28,6 +29,7 @@ namespace PageLeaf.Tests.ViewModels
             _mockEditorService = new Mock<IEditorService>();
             _mockCssService = new Mock<ICssService>();
             _mockSettingsService = new Mock<ISettingsService>();
+            _mockCssEditorService = new Mock<ICssEditorService>();
 
             // Default setup for _mockCssService
             var defaultCssFiles = new List<string> { "theme1.css", "theme2.css" };
@@ -51,7 +53,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
             string testFilePath = @"C:\test\test.md";
             var markdownDocument = new MarkdownDocument { FilePath = testFilePath, Content = "# Test" };
 
@@ -78,7 +81,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
             _mockDialogService.Setup(s => s.ShowOpenFileDialog(It.IsAny<string>(), It.IsAny<string>()))
                               .Returns((string?)null);
 
@@ -100,8 +104,9 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
-            string testFilePath = "C:\\test\\test.md";
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
+            string testFilePath = @"C:\test\test.md";
             var exception = new System.IO.FileNotFoundException("File not found");
 
             _mockDialogService.Setup(s => s.ShowOpenFileDialog(It.IsAny<string>(), It.IsAny<string>()))
@@ -128,28 +133,35 @@ namespace PageLeaf.Tests.ViewModels
         public void Constructor_ShouldThrowArgumentNullException_WhenFileServiceIsNull()
         {
             // テスト観点: IFileService が null の場合に ArgumentNullException がスローされることを確認する。
-            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(null!, _mockLogger.Object, _mockDialogService.Object, _mockEditorService.Object, _mockCssService.Object, _mockSettingsService.Object));
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(null!, _mockLogger.Object, _mockDialogService.Object, _mockEditorService.Object, _mockCssService.Object, _mockSettingsService.Object, _mockCssEditorService.Object));
         }
 
         [TestMethod]
         public void Constructor_ShouldThrowArgumentNullException_WhenLoggerIsNull()
         {
             // テスト観点: ILogger が null の場合に ArgumentNullException がスローされることを確認する。
-            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, null!, _mockDialogService.Object, _mockEditorService.Object, _mockCssService.Object, _mockSettingsService.Object));
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, null!, _mockDialogService.Object, _mockEditorService.Object, _mockCssService.Object, _mockSettingsService.Object, _mockCssEditorService.Object));
         }
 
         [TestMethod]
         public void Constructor_ShouldThrowArgumentNullException_WhenDialogServiceIsNull()
         {
             // テスト観点: IDialogService が null の場合に ArgumentNullException がスローされることを確認する。
-            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, null!, _mockEditorService.Object, _mockCssService.Object, _mockSettingsService.Object));
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, null!, _mockEditorService.Object, _mockCssService.Object, _mockSettingsService.Object, _mockCssEditorService.Object));
         }
 
         [TestMethod]
         public void Constructor_ShouldThrowArgumentNullException_WhenEditorServiceIsNull()
         {
             // テスト観点: IEditorService が null の場合に ArgumentNullException がスローされることを確認する。
-            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, _mockDialogService.Object, null!, _mockCssService.Object, _mockSettingsService.Object));
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, _mockDialogService.Object, null!, _mockCssService.Object, _mockSettingsService.Object, _mockCssEditorService.Object));
+        }
+
+        [TestMethod]
+        public void Constructor_ShouldThrowArgumentNullException_WhenCssEditorServiceIsNull()
+        {
+            // テスト観点: ICssEditorService が null の場合に ArgumentNullException がスローされることを確認する。
+            Assert.ThrowsException<ArgumentNullException>(() => new MainViewModel(_mockFileService.Object, _mockLogger.Object, _mockDialogService.Object, _mockEditorService.Object, _mockCssService.Object, _mockSettingsService.Object, null!));
         }
 
         [TestMethod]
@@ -163,7 +175,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
             string testFilePath = @"C:\test\existing.md";
             string fileContent = "# Existing Content";
             var documentToSave = new MarkdownDocument { FilePath = testFilePath, Content = fileContent };
@@ -188,7 +201,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
             string initialContent = "# Initial Content";
             var initialDocument = new MarkdownDocument { Content = initialContent };
             _mockEditorService.Setup(e => e.CurrentDocument).Returns(initialDocument);
@@ -216,8 +230,9 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
-            string nonExistentFilePath = @"C\\nonexistent\\file.md";
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
+            string nonExistentFilePath = @"C:\nonexistent\file.md";
             var documentToSave = new MarkdownDocument { FilePath = nonExistentFilePath, Content = "# New Content" };
             _mockEditorService.Setup(e => e.CurrentDocument).Returns(documentToSave);
             _mockFileService.Setup(s => s.FileExists(nonExistentFilePath)).Returns(false); // ファイルが存在しないとモック
@@ -256,7 +271,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
             string nonExistentFilePath = @"C:\nonexistent\file.md";
             var documentToSave = new MarkdownDocument { FilePath = nonExistentFilePath, Content = "# New Content" };
             _mockEditorService.Setup(e => e.CurrentDocument).Returns(documentToSave);
@@ -286,7 +302,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
             string nonExistentFilePath = @"C:\nonexistent\file.md";
             string newFilePath = @"C:\new\path\to\saved_file.md";
             string fileContent = "# New Content";
@@ -322,7 +339,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
             var availableCss = new List<string> { "theme1.css", "theme2.css" };
             _mockCssService.Setup(s => s.GetAvailableCssFileNames()).Returns(availableCss);
 
@@ -346,7 +364,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
             var availableCss = new List<string> { "theme1.css", "theme2.css" };
             _mockCssService.Setup(s => s.GetAvailableCssFileNames()).Returns(availableCss);
 
@@ -380,7 +399,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
 
             // Assert
             Assert.AreEqual(savedCss, _viewModel.SelectedCssFile);
@@ -409,7 +429,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
 
             // Act
             _viewModel.SelectedCssFile = "theme2.css";
@@ -431,7 +452,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
 
             var newCss = "new-theme.css";
 
@@ -453,7 +475,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
 
             // Act
             _viewModel.NewDocumentCommand.Execute(null);
@@ -473,7 +496,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
 
             // Assert
             Assert.IsFalse(_viewModel.IsCssEditorVisible);
@@ -490,7 +514,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
 
             bool wasRaised = false;
             _viewModel.PropertyChanged += (sender, args) =>
@@ -519,7 +544,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockDialogService.Object,
                 _mockEditorService.Object,
                 _mockCssService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
             var initialValue = _viewModel.IsCssEditorVisible;
 
             // Act
@@ -531,8 +557,88 @@ namespace PageLeaf.Tests.ViewModels
             // Act
             _viewModel.ToggleCssEditorCommand.Execute(null);
 
-            // Assert
-            Assert.AreEqual(initialValue, _viewModel.IsCssEditorVisible);
-        }
-    }
-}
+                        // Assert
+
+                        Assert.AreEqual(initialValue, _viewModel.IsCssEditorVisible);
+
+                    }
+
+            
+
+                    [TestMethod]
+
+                    public void SelectedCssFile_WhenChanged_ShouldParseCssAndSetToCssEditorViewModel()
+
+                    {
+
+                        // テスト観点: SelectedCssFileが変更された際、CSSファイルを読み込み、解析し、
+
+                        //             その結果がCssEditorViewModelに正しく設定されることを確認する。
+
+                        // Arrange
+
+                        var cssFileName = "test.css";
+
+                        var cssFilePath = "C:\\css\\test.css";
+
+                        var cssContent = "body { color: #111111; background-color: #eeeeee; }";
+
+                        var parsedStyles = new CssStyleInfo { BodyTextColor = "rgba(17, 17, 17, 1)", BodyBackgroundColor = "rgba(238, 238, 238, 1)" };
+
+            
+
+                                    _mockCssService.Setup(s => s.GetCssPath(cssFileName)).Returns(cssFilePath);
+
+            
+
+                                    _mockFileService.Setup(s => s.FileExists(cssFilePath)).Returns(true);
+
+            
+
+                                    _mockFileService.Setup(s => s.ReadAllText(cssFilePath)).Returns(cssContent);
+
+                        _mockCssEditorService.Setup(s => s.ParseCss(cssContent)).Returns(parsedStyles);
+
+            
+
+                        _viewModel = new MainViewModel(
+
+                            _mockFileService.Object,
+
+                            _mockLogger.Object,
+
+                            _mockDialogService.Object,
+
+                            _mockEditorService.Object,
+
+                            _mockCssService.Object,
+
+                            _mockSettingsService.Object,
+
+                            _mockCssEditorService.Object);
+
+            
+
+                        // Act
+
+                        _viewModel.SelectedCssFile = cssFileName;
+
+            
+
+                        // Assert
+
+                        _mockFileService.Verify(s => s.ReadAllText(cssFilePath), Times.Once);
+
+                        _mockCssEditorService.Verify(s => s.ParseCss(cssContent), Times.Once);
+
+                        Assert.AreEqual(parsedStyles.BodyTextColor, _viewModel.CssEditorViewModel.BodyTextColor);
+
+                        Assert.AreEqual(parsedStyles.BodyBackgroundColor, _viewModel.CssEditorViewModel.BodyBackgroundColor);
+
+                    }
+
+                }
+
+            }
+
+            

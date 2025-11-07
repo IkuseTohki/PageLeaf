@@ -19,9 +19,9 @@
                 <TabItem Header="全体">
                     <StackPanel Margin="5">
                         <Label Content="文字色:"/>
-                        <TextBox Text="#000000"/>
+                        <TextBox Text="{Binding BodyTextColor, Converter={StaticResource RgbaToHexConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="背景色:"/>
-                        <TextBox Text="#FFFFFF"/>
+                        <TextBox Text="{Binding BodyBackgroundColor, Converter={StaticResource RgbaToHexConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </TabItem>
 

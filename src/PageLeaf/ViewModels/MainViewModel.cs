@@ -15,12 +15,14 @@ namespace PageLeaf.ViewModels
         private readonly IDialogService _dialogService;
         private readonly ICssService _cssService;
         private readonly ISettingsService _settingsService;
+        private readonly ICssEditorService _cssEditorService;
+
+        private bool _isCssEditorVisible;
         private ObservableCollection<string> _availableCssFiles = null!;
         private string _selectedCssFile = null!;
-        private bool _isCssEditorVisible;
 
-        public IEditorService Editor { get; } // EditorService をプロパティとして公開
-
+        public IEditorService Editor { get; }
+        public CssEditorViewModel CssEditorViewModel { get; }
         public ObservableCollection<DisplayMode> AvailableModes { get; }
 
         public bool IsCssEditorVisible
@@ -44,7 +46,8 @@ namespace PageLeaf.ViewModels
                 _availableCssFiles = value;
                 OnPropertyChanged();
             }
-        }
+        }
+
         public string SelectedCssFile
         {
             get => _selectedCssFile;
@@ -58,6 +61,23 @@ namespace PageLeaf.ViewModels
                     _settingsService.CurrentSettings.SelectedCss = value;
                     _settingsService.SaveSettings(_settingsService.CurrentSettings);
                     Editor.ApplyCss(value);
+
+                    try
+                    {
+                        var cssPath = _cssService.GetCssPath(value);
+                        if (!string.IsNullOrEmpty(cssPath) && _fileService.FileExists(cssPath))
+                        {
+                            var cssContent = _fileService.ReadAllText(cssPath);
+                            var parsedStyles = _cssEditorService.ParseCss(cssContent);
+
+                            CssEditorViewModel.BodyTextColor = parsedStyles.BodyTextColor;
+                            CssEditorViewModel.BodyBackgroundColor = parsedStyles.BodyBackgroundColor;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Failed to read and parse CSS file: {CssFile}", value);
+                    }
                 }
             }
         }
@@ -68,7 +88,7 @@ namespace PageLeaf.ViewModels
         public ICommand NewDocumentCommand { get; }
         public ICommand ToggleCssEditorCommand { get; }
 
-        public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService, IEditorService editorService, ICssService cssService, ISettingsService settingsService)
+        public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService, IEditorService editorService, ICssService cssService, ISettingsService settingsService, ICssEditorService cssEditorService)
         {
             ArgumentNullException.ThrowIfNull(fileService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -76,6 +96,7 @@ namespace PageLeaf.ViewModels
             ArgumentNullException.ThrowIfNull(editorService);
             ArgumentNullException.ThrowIfNull(cssService);
             ArgumentNullException.ThrowIfNull(settingsService);
+            ArgumentNullException.ThrowIfNull(cssEditorService);
 
             _fileService = fileService;
             _logger = logger;
@@ -83,6 +104,9 @@ namespace PageLeaf.ViewModels
             Editor = editorService;
             _cssService = cssService;
             _settingsService = settingsService;
+            _cssEditorService = cssEditorService;
+
+            CssEditorViewModel = new CssEditorViewModel();
 
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
             SaveFileCommand = new Utilities.DelegateCommand(ExecuteSaveFile);

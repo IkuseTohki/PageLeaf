@@ -126,6 +126,30 @@ namespace PageLeaf.Services
             }
         }
 
+        public string ReadAllText(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                throw new ArgumentException("File path cannot be null or empty.", nameof(filePath));
+            }
+
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException($"File not found: {filePath}");
+            }
+
+            try
+            {
+                var encoding = DetectEncoding(filePath);
+                return File.ReadAllText(filePath, encoding);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error reading file content from {FilePath}.", filePath);
+                throw; // or return string.Empty; or handle appropriately
+            }
+        }
+
         private Encoding DetectEncoding(string filePath)
         {
             // .NET Core では、CodePagesEncodingProvider の登録が必要

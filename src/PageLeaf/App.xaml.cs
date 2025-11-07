@@ -58,6 +58,7 @@ namespace PageLeaf
                     services.AddSingleton<IDialogService, DialogService>();
                     services.AddSingleton<IMarkdownService, MarkdownService>();
                     services.AddSingleton<IEditorService, EditorService>(); // EditorService を登録
+                    services.AddSingleton<ICssEditorService, CssEditorService>();
 
                     // ViewModels と Views をDIコンテナに登録
                     services.AddSingleton<MainViewModel>();
