@@ -22,6 +22,8 @@
                         <TextBox Text="{Binding BodyTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="背景色:"/>
                         <TextBox Text="{Binding BodyBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <Label Content="フォントサイズ:"/>
+                        <TextBox Text="{Binding BodyFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </TabItem>
 

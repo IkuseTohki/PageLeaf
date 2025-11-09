@@ -4,5 +4,6 @@ namespace PageLeaf.Models
     {
         public string? BodyTextColor { get; set; }
         public string? BodyBackgroundColor { get; set; }
+        public string? BodyFontSize { get; set; }
     }
 }

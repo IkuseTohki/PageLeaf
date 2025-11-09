@@ -12,6 +12,7 @@ namespace PageLeaf.ViewModels
 
         private string? _bodyTextColor;
         private string? _bodyBackgroundColor;
+        private string? _bodyFontSize;
 
         public event EventHandler? CssSaved;
 
@@ -53,6 +54,19 @@ namespace PageLeaf.ViewModels
             }
         }
 
+        public string? BodyFontSize
+        {
+            get => _bodyFontSize;
+            set
+            {
+                if (_bodyFontSize != value)
+                {
+                    _bodyFontSize = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public string? TargetCssPath { get; set; }
 
         private void ExecuteSaveCss(object? parameter)
@@ -70,7 +84,8 @@ namespace PageLeaf.ViewModels
             var styleInfo = new Models.CssStyleInfo
             {
                 BodyTextColor = this.BodyTextColor,
-                BodyBackgroundColor = this.BodyBackgroundColor
+                BodyBackgroundColor = this.BodyBackgroundColor,
+                BodyFontSize = this.BodyFontSize
             };
 
             // 3. CSSコンテンツを更新

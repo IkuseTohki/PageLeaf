@@ -158,5 +158,55 @@ namespace PageLeaf.Tests.Services
 
             Assert.AreEqual(expectedCss, updatedCss);
         }
+
+        [TestMethod]
+        public void ParseCss_ShouldParseBodyFontSize()
+        {
+            /// <summary>
+            /// テスト観点: CSS文字列からbodyセレクタのfont-sizeプロパティが正しく抽出されることを確認する。
+            /// </summary>
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = "body { font-size: 16px; }";
+
+            // Act
+            var styles = service.ParseCss(cssContent);
+
+            // Assert
+            Assert.AreEqual("16px", styles.BodyFontSize);
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldUpdateBodyFontSize()
+        {
+            /// <summary>
+            /// テスト観点: UpdateCssContentメソッドが、CssStyleInfo.BodyFontSizeが設定されている場合に、
+            /// 既存のCSS文字列内のbodyセレクタのfont-sizeを正しく更新、または存在しない場合は追加することを確認する。
+            /// </summary>
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "body { color: #000000; }";
+            var styleInfo = new CssStyleInfo
+            {
+                BodyFontSize = "20px"
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            // Assert
+            var parsedUpdatedStyles = service.ParseCss(updatedCss);
+            Assert.AreEqual("20px", parsedUpdatedStyles.BodyFontSize);
+
+            // 既存のプロパティが消えていないことも確認
+            Assert.AreEqual("#000000", parsedUpdatedStyles.BodyTextColor);
+
+            // font-sizeが更新されるケース
+            existingCss = "body { font-size: 16px; }";
+            styleInfo.BodyFontSize = "24px";
+            updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+            parsedUpdatedStyles = service.ParseCss(updatedCss);
+            Assert.AreEqual("24px", parsedUpdatedStyles.BodyFontSize);
+        }
     }
 }

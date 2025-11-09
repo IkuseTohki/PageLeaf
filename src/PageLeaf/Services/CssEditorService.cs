@@ -45,6 +45,9 @@ namespace PageLeaf.Services
                 {
                     styleInfo.BodyBackgroundColor = ConvertToHex(bodyRule.Style.GetPropertyValue("background-color")); // フォールバック
                 }
+
+                // font-size プロパティを読み取る
+                styleInfo.BodyFontSize = bodyRule.Style.GetPropertyValue("font-size");
             }
 
             return styleInfo;
@@ -78,6 +81,10 @@ namespace PageLeaf.Services
                 if (!string.IsNullOrEmpty(styleInfo.BodyBackgroundColor))
                 {
                     bodyRule.Style.SetProperty("background-color", styleInfo.BodyBackgroundColor);
+                }
+                if (!string.IsNullOrEmpty(styleInfo.BodyFontSize))
+                {
+                    bodyRule.Style.SetProperty("font-size", styleInfo.BodyFontSize);
                 }
             }
 

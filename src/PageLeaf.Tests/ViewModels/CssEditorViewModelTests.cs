@@ -21,48 +21,6 @@ namespace PageLeaf.Tests.ViewModels
         }
 
         [TestMethod]
-        public void BodyTextColor_ShouldRaisePropertyChanged()
-        {
-            // テスト観点: BodyTextColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
-            // Arrange
-            bool wasRaised = false;
-            _viewModel.PropertyChanged += (sender, args) =>
-            {
-                if (args.PropertyName == nameof(CssEditorViewModel.BodyTextColor))
-                {
-                    wasRaised = true;
-                }
-            };
-
-            // Act
-            _viewModel.BodyTextColor = "#123456";
-
-            // Assert
-            Assert.IsTrue(wasRaised);
-        }
-
-        [TestMethod]
-        public void BodyBackgroundColor_ShouldRaisePropertyChanged()
-        {
-            // テスト観点: BodyBackgroundColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
-            // Arrange
-            bool wasRaised = false;
-            _viewModel.PropertyChanged += (sender, args) =>
-            {
-                if (args.PropertyName == nameof(CssEditorViewModel.BodyBackgroundColor))
-                {
-                    wasRaised = true;
-                }
-            };
-
-            // Act
-            _viewModel.BodyBackgroundColor = "#abcdef";
-
-            // Assert
-            Assert.IsTrue(wasRaised);
-        }
-
-        [TestMethod]
         public void SaveCssCommand_ShouldBeInitialized()
         {
             // Arrange
@@ -119,6 +77,70 @@ namespace PageLeaf.Tests.ViewModels
 
             // Assert
             Assert.IsTrue(eventRaised, "CssSaved event should have been raised.");
+        }
+
+        [TestMethod]
+        public void BodyTextColor_ShouldRaisePropertyChanged()
+        {
+            // テスト観点: BodyTextColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.BodyTextColor))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.BodyTextColor = "#123456";
+
+            // Assert
+            Assert.IsTrue(wasRaised);
+        }
+
+        [TestMethod]
+        public void BodyBackgroundColor_ShouldRaisePropertyChanged()
+        {
+            // テスト観点: BodyBackgroundColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.BodyBackgroundColor))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.BodyBackgroundColor = "#abcdef";
+
+            // Assert
+            Assert.IsTrue(wasRaised);
+        }
+
+        [TestMethod]
+        public void BodyFontSize_ShouldRaisePropertyChangedAndUpdateCss()
+        {
+            // テスト観点: BodyFontSize プロパティが変更されたときに、PropertyChanged イベントが発火し、
+            // ICssEditorService.UpdateCssContent が呼び出され、AppliedCss プロパティが更新されることを確認する。
+            // Arrange
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.BodyFontSize))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.BodyFontSize = "20px";
+
+            // Assert
+            Assert.IsTrue(wasRaised);
         }
     }
 }

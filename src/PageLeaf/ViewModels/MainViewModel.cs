@@ -75,6 +75,7 @@ namespace PageLeaf.ViewModels
 
                             CssEditorViewModel.BodyTextColor = parsedStyles.BodyTextColor;
                             CssEditorViewModel.BodyBackgroundColor = parsedStyles.BodyBackgroundColor;
+                            CssEditorViewModel.BodyFontSize = parsedStyles.BodyFontSize;
                         }
                     }
                     catch (Exception ex)
