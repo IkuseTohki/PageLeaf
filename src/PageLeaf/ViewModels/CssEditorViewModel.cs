@@ -13,6 +13,8 @@ namespace PageLeaf.ViewModels
         private string? _bodyTextColor;
         private string? _bodyBackgroundColor;
 
+        public event EventHandler? CssSaved;
+
         public ICommand SaveCssCommand { get; }
 
         public CssEditorViewModel(IFileService fileService, ICssEditorService cssEditorService)
@@ -76,6 +78,9 @@ namespace PageLeaf.ViewModels
 
             // 4. ファイルに書き込む
             _fileService.WriteAllText(TargetCssPath, updatedCss);
+
+            CssSaved?.Invoke(this, EventArgs.Empty);
         }
     }
 }
+

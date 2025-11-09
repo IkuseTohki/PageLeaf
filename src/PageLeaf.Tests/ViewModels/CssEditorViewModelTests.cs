@@ -100,5 +100,25 @@ namespace PageLeaf.Tests.ViewModels
             _mockCssEditorService.Verify(s => s.UpdateCssContent(initialCss, It.Is<Models.CssStyleInfo>(info => info.BodyTextColor == textColor && info.BodyBackgroundColor == bgColor)), Times.Once);
             _mockFileService.Verify(s => s.WriteAllText(filePath, updatedCss), Times.Once);
         }
+
+        [TestMethod]
+        public void SaveCssCommand_ShouldRaiseCssSavedEvent()
+        {
+            // テスト観点: SaveCssCommandの実行が成功したときにCssSavedイベントが発行されることを確認する。
+            // Arrange
+            var filePath = "C:\\temp\\test.css";
+            _viewModel.TargetCssPath = filePath;
+
+            bool eventRaised = false;
+            _viewModel.CssSaved += (sender, args) => {
+                eventRaised = true;
+            };
+
+            // Act
+            _viewModel.SaveCssCommand.Execute(null);
+
+            // Assert
+            Assert.IsTrue(eventRaised, "CssSaved event should have been raised.");
+        }
     }
 }

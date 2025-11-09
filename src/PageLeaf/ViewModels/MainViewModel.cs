@@ -110,6 +110,7 @@ namespace PageLeaf.ViewModels
             _cssEditorService = cssEditorService;
 
             CssEditorViewModel = new CssEditorViewModel(_fileService, _cssEditorService);
+            CssEditorViewModel.CssSaved += OnCssSaved;
 
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
             SaveFileCommand = new Utilities.DelegateCommand(ExecuteSaveFile);
@@ -250,6 +251,11 @@ namespace PageLeaf.ViewModels
         private void ExecuteToggleCssEditor(object? obj)
         {
             IsCssEditorVisible = !IsCssEditorVisible;
+        }
+
+        private void OnCssSaved(object? sender, EventArgs e)
+        {
+            Editor.ApplyCss(SelectedCssFile);
         }
     }
 }

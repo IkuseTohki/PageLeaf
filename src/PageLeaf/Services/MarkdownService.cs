@@ -1,5 +1,6 @@
 using Markdig;
 using System.Text;
+using System;
 
 namespace PageLeaf.Services
 {
@@ -13,7 +14,8 @@ namespace PageLeaf.Services
             headBuilder.AppendLine("<meta charset=\"UTF-8\">");
             if (!string.IsNullOrEmpty(cssPath))
             {
-                headBuilder.AppendLine($"<link rel=\"stylesheet\" href=\"{cssPath}\">");
+                var timestamp = DateTime.Now.Ticks; // タイムスタンプを取得
+                headBuilder.AppendLine($"<link rel=\"stylesheet\" href=\"{cssPath}?v={timestamp}\">");
             }
 
             var htmlBuilder = new StringBuilder();

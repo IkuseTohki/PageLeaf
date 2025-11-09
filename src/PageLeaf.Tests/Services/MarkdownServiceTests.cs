@@ -25,18 +25,19 @@ namespace PageLeaf.Tests.Services
         [TestMethod]
         public void ConvertToHtml_ShouldIncludeCssLink_WhenCssPathIsProvided()
         {
-            // テスト観点: CSSパスが提供された場合、生成されるHTMLの<head>内に<link>タグが正しく挿入されることを確認する。
+            // テスト観点: CSSパスが提供された場合、生成されるHTMLの<head>内に<link>タグが正しく挿入され、
+            //             キャッシュバスティングのためのタイムスタンプが付与されることを確認する。
             // Arrange
             var service = new MarkdownService();
             string markdown = "# Hello";
             string cssPath = "C:\\styles\\github.css";
-            string expectedHtml = $"<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n<link rel=\"stylesheet\" href=\"{cssPath}\">\n</head>\n<body>\n<h1>Hello</h1>\n</body>\n</html>\n";
 
             // Act
             string actualHtml = service.ConvertToHtml(markdown, cssPath);
 
             // Assert
-            Assert.AreEqual(expectedHtml.Replace("\r\n", "\n"), actualHtml.Replace("\r\n", "\n"));
+            // <link rel="stylesheet" href="C:\styles\github.css?v={timestamp}"> の形式を正規表現で検証
+            StringAssert.Matches(actualHtml, new System.Text.RegularExpressions.Regex($@"<link rel=""stylesheet"" href=""{System.Text.RegularExpressions.Regex.Escape(cssPath)}\?v=\d+"">"));
         }
     }
 }

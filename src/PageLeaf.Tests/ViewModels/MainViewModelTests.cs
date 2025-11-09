@@ -624,5 +624,45 @@ namespace PageLeaf.Tests.ViewModels
             _mockCssService.Verify(s => s.GetCssPath(cssFileName), Times.Once);
             Assert.AreEqual(expectedCssPath, _viewModel.CssEditorViewModel.TargetCssPath);
         }
+
+        [TestMethod]
+        public void OnCssSaved_ShouldReapplyCssToEditor()
+        {
+            // テスト観点: CssEditorViewModelのCssSavedイベントを受け取った際に、
+            //             現在の選択されているCSSを再適用するためにIEditorService.ApplyCssが呼ばれることを確認する。
+            // Arrange
+            var cssFileName = "test.css";
+            var cssFilePath = "C:\\css\\test.css";
+            _mockCssService.Setup(s => s.GetCssPath(cssFileName)).Returns(cssFilePath);
+            _mockCssService.Setup(s => s.GetAvailableCssFileNames()).Returns(new List<string> { cssFileName });
+            _mockFileService.Setup(s => s.FileExists(cssFilePath)).Returns(true);
+
+            _viewModel = new MainViewModel(
+                _mockFileService.Object,
+                _mockLogger.Object,
+                _mockDialogService.Object,
+                _mockEditorService.Object,
+                _mockCssService.Object,
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
+
+            _viewModel.SelectedCssFile = cssFileName;
+
+            // SelectedCssFileのセッターでApplyCssが呼ばれるため、呼び出し履歴をクリア
+            _mockEditorService.Invocations.Clear();
+
+            // SaveCssCommandが必要とするモックを設定
+            _viewModel.CssEditorViewModel.TargetCssPath = cssFilePath;
+            _mockFileService.Setup(s => s.ReadAllText(cssFilePath)).Returns("");
+            _mockCssEditorService.Setup(s => s.UpdateCssContent(It.IsAny<string>(), It.IsAny<CssStyleInfo>())).Returns("");
+
+            // Act
+            // SaveCssCommandを実行してCssSavedイベントを発行させる
+            _viewModel.CssEditorViewModel.SaveCssCommand.Execute(null);
+
+            // Assert
+            // イベントハンドラによってApplyCssが再度呼び出されたことを検証
+            _mockEditorService.Verify(s => s.ApplyCss(cssFileName), Times.Once);
+        }
     }
 }
