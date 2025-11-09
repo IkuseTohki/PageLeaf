@@ -10,7 +10,7 @@
         <StackPanel>
             <!-- Panel Toolbar -->
             <Border BorderBrush="LightGray" BorderThickness="0,0,0,1" Padding="5">
-                <Button Content="保存" HorizontalAlignment="Right"/>
+                <Button Content="保存" HorizontalAlignment="Right" Command="{Binding SaveCssCommand}"/>
             </Border>
 
             <!-- Tab Container -->
@@ -19,9 +19,9 @@
                 <TabItem Header="全体">
                     <StackPanel Margin="5">
                         <Label Content="文字色:"/>
-                        <TextBox Text="{Binding BodyTextColor, Converter={StaticResource RgbaToHexConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Text="{Binding BodyTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="背景色:"/>
-                        <TextBox Text="{Binding BodyBackgroundColor, Converter={StaticResource RgbaToHexConverter}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBox Text="{Binding BodyBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </TabItem>
 

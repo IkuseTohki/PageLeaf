@@ -1,4 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using PageLeaf.Services;
 using PageLeaf.ViewModels;
 
 namespace PageLeaf.Tests.ViewModels
@@ -6,14 +8,25 @@ namespace PageLeaf.Tests.ViewModels
     [TestClass]
     public class CssEditorViewModelTests
     {
+        private Mock<IFileService> _mockFileService = null!;
+        private Mock<ICssEditorService> _mockCssEditorService = null!;
+        private CssEditorViewModel _viewModel = null!;
+
+        [TestInitialize]
+        public void Setup()
+        {
+            _mockFileService = new Mock<IFileService>();
+            _mockCssEditorService = new Mock<ICssEditorService>();
+            _viewModel = new CssEditorViewModel(_mockFileService.Object, _mockCssEditorService.Object);
+        }
+
         [TestMethod]
         public void BodyTextColor_ShouldRaisePropertyChanged()
         {
             // テスト観点: BodyTextColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
             // Arrange
-            var viewModel = new CssEditorViewModel();
             bool wasRaised = false;
-            viewModel.PropertyChanged += (sender, args) =>
+            _viewModel.PropertyChanged += (sender, args) =>
             {
                 if (args.PropertyName == nameof(CssEditorViewModel.BodyTextColor))
                 {
@@ -22,7 +35,7 @@ namespace PageLeaf.Tests.ViewModels
             };
 
             // Act
-            viewModel.BodyTextColor = "#123456";
+            _viewModel.BodyTextColor = "#123456";
 
             // Assert
             Assert.IsTrue(wasRaised);
@@ -33,9 +46,8 @@ namespace PageLeaf.Tests.ViewModels
         {
             // テスト観点: BodyBackgroundColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
             // Arrange
-            var viewModel = new CssEditorViewModel();
             bool wasRaised = false;
-            viewModel.PropertyChanged += (sender, args) =>
+            _viewModel.PropertyChanged += (sender, args) =>
             {
                 if (args.PropertyName == nameof(CssEditorViewModel.BodyBackgroundColor))
                 {
@@ -44,10 +56,49 @@ namespace PageLeaf.Tests.ViewModels
             };
 
             // Act
-            viewModel.BodyBackgroundColor = "#abcdef";
+            _viewModel.BodyBackgroundColor = "#abcdef";
 
             // Assert
             Assert.IsTrue(wasRaised);
+        }
+
+        [TestMethod]
+        public void SaveCssCommand_ShouldBeInitialized()
+        {
+            // Arrange
+            // Act
+            var command = _viewModel.SaveCssCommand;
+
+            // Assert
+            Assert.IsNotNull(command);
+        }
+
+        [TestMethod]
+        public void SaveCssCommand_ShouldCallServicesToWriteUpdatedCssToFile()
+        {
+            // テスト観点: SaveCssCommand実行時に、ファイルの読み込み、更新、書き込みが正しく連携されることを確認する。
+            // Arrange
+            var filePath = "C:\\temp\\test.css";
+            var initialCss = "body { color: black; }";
+            var updatedCss = "body { color: red; background-color: white; }";
+            var textColor = "red";
+            var bgColor = "white";
+
+            _viewModel.TargetCssPath = filePath;
+            _viewModel.BodyTextColor = textColor;
+            _viewModel.BodyBackgroundColor = bgColor;
+
+            _mockFileService.Setup(s => s.ReadAllText(filePath)).Returns(initialCss);
+            _mockCssEditorService.Setup(s => s.UpdateCssContent(initialCss, It.Is<Models.CssStyleInfo>(info => info.BodyTextColor == textColor && info.BodyBackgroundColor == bgColor)))
+                                 .Returns(updatedCss);
+
+            // Act
+            _viewModel.SaveCssCommand.Execute(null);
+
+            // Assert
+            _mockFileService.Verify(s => s.ReadAllText(filePath), Times.Once);
+            _mockCssEditorService.Verify(s => s.UpdateCssContent(initialCss, It.Is<Models.CssStyleInfo>(info => info.BodyTextColor == textColor && info.BodyBackgroundColor == bgColor)), Times.Once);
+            _mockFileService.Verify(s => s.WriteAllText(filePath, updatedCss), Times.Once);
         }
     }
 }

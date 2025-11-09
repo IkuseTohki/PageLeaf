@@ -183,5 +183,24 @@ namespace PageLeaf.Services
                 }
             }
         }
+
+        public void WriteAllText(string filePath, string content)
+        {
+            if (string.IsNullOrEmpty(filePath))
+            {
+                throw new ArgumentException("File path cannot be null or empty.", nameof(filePath));
+            }
+
+            try
+            {
+                File.WriteAllText(filePath, content, Encoding.UTF8);
+                _logger.LogInformation("Successfully wrote text to file {FilePath}.", filePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error writing text to file {FilePath}.", filePath);
+                throw;
+            }
+        }
     }
 }

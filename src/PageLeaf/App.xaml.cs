@@ -3,11 +3,12 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PageLeaf.Services;
 using PageLeaf.ViewModels;
-using PageLeaf.Views; // NEW
+using PageLeaf.Views;
 using Serilog;
 using System;
 using System.IO;
 using System.Windows;
+using AngleSharp.Css.Values;
 
 namespace PageLeaf
 {
@@ -28,6 +29,9 @@ namespace PageLeaf
         protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // AngleSharpが色をHEX形式で出力するように設定
+            Color.UseHex = true;
 
             // DIコンテナとロギングを設定
             AppHost = Host.CreateDefaultBuilder()

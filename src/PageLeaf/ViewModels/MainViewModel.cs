@@ -67,6 +67,9 @@ namespace PageLeaf.ViewModels
                         var cssPath = _cssService.GetCssPath(value);
                         if (!string.IsNullOrEmpty(cssPath) && _fileService.FileExists(cssPath))
                         {
+                            // CSSエディタのターゲットパスを更新
+                            CssEditorViewModel.TargetCssPath = cssPath;
+
                             var cssContent = _fileService.ReadAllText(cssPath);
                             var parsedStyles = _cssEditorService.ParseCss(cssContent);
 
@@ -106,7 +109,7 @@ namespace PageLeaf.ViewModels
             _settingsService = settingsService;
             _cssEditorService = cssEditorService;
 
-            CssEditorViewModel = new CssEditorViewModel();
+            CssEditorViewModel = new CssEditorViewModel(_fileService, _cssEditorService);
 
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
             SaveFileCommand = new Utilities.DelegateCommand(ExecuteSaveFile);

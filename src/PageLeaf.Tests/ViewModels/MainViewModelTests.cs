@@ -557,88 +557,72 @@ namespace PageLeaf.Tests.ViewModels
             // Act
             _viewModel.ToggleCssEditorCommand.Execute(null);
 
-                        // Assert
+            // Assert
+            Assert.AreEqual(initialValue, _viewModel.IsCssEditorVisible);
+        }
 
-                        Assert.AreEqual(initialValue, _viewModel.IsCssEditorVisible);
+        [TestMethod]
+        public void SelectedCssFile_WhenChanged_ShouldParseCssAndSetToCssEditorViewModel()
+        {
+            // テスト観点: SelectedCssFileが変更された際、CSSファイルを読み込み、解析し、
+            //             その結果がCssEditorViewModelに正しく設定されることを確認する。
+            // Arrange
+            var cssFileName = "test.css";
+            var cssFilePath = "C:\\css\\test.css";
+            var cssContent = "body { color: #111111; background-color: #eeeeee; }";
+            var parsedStyles = new CssStyleInfo { BodyTextColor = "rgb(17 17 17)", BodyBackgroundColor = "rgb(238 238 238)" };
 
-                    }
+            _mockCssService.Setup(s => s.GetCssPath(cssFileName)).Returns(cssFilePath);
+            _mockFileService.Setup(s => s.FileExists(cssFilePath)).Returns(true);
+            _mockFileService.Setup(s => s.ReadAllText(cssFilePath)).Returns(cssContent);
+            _mockCssEditorService.Setup(s => s.ParseCss(cssContent)).Returns(parsedStyles);
 
-            
+            _viewModel = new MainViewModel(
+                _mockFileService.Object,
+                _mockLogger.Object,
+                _mockDialogService.Object,
+                _mockEditorService.Object,
+                _mockCssService.Object,
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
 
-                    [TestMethod]
+            // Act
+            _viewModel.SelectedCssFile = cssFileName;
 
-                    public void SelectedCssFile_WhenChanged_ShouldParseCssAndSetToCssEditorViewModel()
+            // Assert
+            _mockFileService.Verify(s => s.ReadAllText(cssFilePath), Times.Once);
+            _mockCssEditorService.Verify(s => s.ParseCss(cssContent), Times.Once);
+            Assert.AreEqual(parsedStyles.BodyTextColor, _viewModel.CssEditorViewModel.BodyTextColor);
+            Assert.AreEqual(parsedStyles.BodyBackgroundColor, _viewModel.CssEditorViewModel.BodyBackgroundColor);
+        }
 
-                    {
+        [TestMethod]
+        public void SelectedCssFile_WhenChanged_ShouldSetTargetCssPathOnCssEditorViewModel()
+        {
+            // テスト観点: SelectedCssFileが変更された際、CssEditorViewModelのTargetCssPathが
+            //             正しく設定されることを確認する。
+            // Arrange
+            var cssFileName = "test.css";
+            var expectedCssPath = "C:\\css\\test.css";
 
-                        // テスト観点: SelectedCssFileが変更された際、CSSファイルを読み込み、解析し、
+            _mockCssService.Setup(s => s.GetCssPath(cssFileName)).Returns(expectedCssPath);
+            _mockFileService.Setup(s => s.FileExists(expectedCssPath)).Returns(true);
 
-                        //             その結果がCssEditorViewModelに正しく設定されることを確認する。
+            _viewModel = new MainViewModel(
+                _mockFileService.Object,
+                _mockLogger.Object,
+                _mockDialogService.Object,
+                _mockEditorService.Object,
+                _mockCssService.Object,
+                _mockSettingsService.Object,
+                _mockCssEditorService.Object);
 
-                        // Arrange
+            // Act
+            _viewModel.SelectedCssFile = cssFileName;
 
-                        var cssFileName = "test.css";
-
-                        var cssFilePath = "C:\\css\\test.css";
-
-                        var cssContent = "body { color: #111111; background-color: #eeeeee; }";
-
-                        var parsedStyles = new CssStyleInfo { BodyTextColor = "rgba(17, 17, 17, 1)", BodyBackgroundColor = "rgba(238, 238, 238, 1)" };
-
-            
-
-                                    _mockCssService.Setup(s => s.GetCssPath(cssFileName)).Returns(cssFilePath);
-
-            
-
-                                    _mockFileService.Setup(s => s.FileExists(cssFilePath)).Returns(true);
-
-            
-
-                                    _mockFileService.Setup(s => s.ReadAllText(cssFilePath)).Returns(cssContent);
-
-                        _mockCssEditorService.Setup(s => s.ParseCss(cssContent)).Returns(parsedStyles);
-
-            
-
-                        _viewModel = new MainViewModel(
-
-                            _mockFileService.Object,
-
-                            _mockLogger.Object,
-
-                            _mockDialogService.Object,
-
-                            _mockEditorService.Object,
-
-                            _mockCssService.Object,
-
-                            _mockSettingsService.Object,
-
-                            _mockCssEditorService.Object);
-
-            
-
-                        // Act
-
-                        _viewModel.SelectedCssFile = cssFileName;
-
-            
-
-                        // Assert
-
-                        _mockFileService.Verify(s => s.ReadAllText(cssFilePath), Times.Once);
-
-                        _mockCssEditorService.Verify(s => s.ParseCss(cssContent), Times.Once);
-
-                        Assert.AreEqual(parsedStyles.BodyTextColor, _viewModel.CssEditorViewModel.BodyTextColor);
-
-                        Assert.AreEqual(parsedStyles.BodyBackgroundColor, _viewModel.CssEditorViewModel.BodyBackgroundColor);
-
-                    }
-
-                }
-
-            }
-
-            
+            // Assert
+            _mockCssService.Verify(s => s.GetCssPath(cssFileName), Times.Once);
+            Assert.AreEqual(expectedCssPath, _viewModel.CssEditorViewModel.TargetCssPath);
+        }
+    }
+}

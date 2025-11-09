@@ -18,5 +18,7 @@ namespace PageLeaf.Services
         IEnumerable<string> GetFiles(string folderPath, string searchPattern);
 
         string ReadAllText(string filePath);
+
+        void WriteAllText(string filePath, string content);
     }
 }

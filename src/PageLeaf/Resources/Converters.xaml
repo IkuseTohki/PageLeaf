@@ -5,6 +5,4 @@
     <utilities:DisplayModeToStringConverter x:Key="DisplayModeToStringConverter"/>
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
-    <utilities:RgbaToHexConverter x:Key="RgbaToHexConverter" />
-
 </ResourceDictionary>
