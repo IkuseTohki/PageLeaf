@@ -39,15 +39,18 @@ namespace PageLeaf.Tests.ViewModels
             var filePath = "C:\\temp\\test.css";
             var initialCss = "body { color: black; }";
             var updatedCss = "body { color: red; background-color: white; }";
-            var textColor = "red";
-            var bgColor = "white";
-
+            
             _viewModel.TargetCssPath = filePath;
-            _viewModel.BodyTextColor = textColor;
-            _viewModel.BodyBackgroundColor = bgColor;
+            _viewModel.BodyTextColor = "red";
+            _viewModel.BodyBackgroundColor = "white";
+            _viewModel.HeadingTextColor = "blue";
 
             _mockFileService.Setup(s => s.ReadAllText(filePath)).Returns(initialCss);
-            _mockCssEditorService.Setup(s => s.UpdateCssContent(initialCss, It.Is<Models.CssStyleInfo>(info => info.BodyTextColor == textColor && info.BodyBackgroundColor == bgColor)))
+            _mockCssEditorService.Setup(s => s.UpdateCssContent(initialCss, It.Is<Models.CssStyleInfo>(info => 
+                info.BodyTextColor == _viewModel.BodyTextColor && 
+                info.BodyBackgroundColor == _viewModel.BodyBackgroundColor &&
+                info.HeadingTextColor == _viewModel.HeadingTextColor
+                )))
                                  .Returns(updatedCss);
 
             // Act
@@ -55,7 +58,11 @@ namespace PageLeaf.Tests.ViewModels
 
             // Assert
             _mockFileService.Verify(s => s.ReadAllText(filePath), Times.Once);
-            _mockCssEditorService.Verify(s => s.UpdateCssContent(initialCss, It.Is<Models.CssStyleInfo>(info => info.BodyTextColor == textColor && info.BodyBackgroundColor == bgColor)), Times.Once);
+            _mockCssEditorService.Verify(s => s.UpdateCssContent(initialCss, It.Is<Models.CssStyleInfo>(info =>
+                info.BodyTextColor == _viewModel.BodyTextColor &&
+                info.BodyBackgroundColor == _viewModel.BodyBackgroundColor &&
+                info.HeadingTextColor == _viewModel.HeadingTextColor
+                )), Times.Once);
             _mockFileService.Verify(s => s.WriteAllText(filePath, updatedCss), Times.Once);
         }
 
@@ -138,6 +145,174 @@ namespace PageLeaf.Tests.ViewModels
 
             // Act
             _viewModel.BodyFontSize = "20px";
+
+            // Assert
+            Assert.IsTrue(wasRaised);
+        }
+
+        [TestMethod]
+        public void HeadingTextColor_ShouldRaisePropertyChanged()
+        {
+            // テスト観点: HeadingTextColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.HeadingTextColor))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.HeadingTextColor = "#ff0000";
+
+            // Assert
+            Assert.IsTrue(wasRaised);
+        }
+
+        [TestMethod]
+        public void QuoteTextColor_ShouldRaisePropertyChanged()
+        {
+            // テスト観点: QuoteTextColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.QuoteTextColor))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.QuoteTextColor = "#ff0000";
+
+            // Assert
+            Assert.IsTrue(wasRaised);
+        }
+
+        [TestMethod]
+        public void QuoteBackgroundColor_ShouldRaisePropertyChanged()
+        {
+            // テスト観点: QuoteBackgroundColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.QuoteBackgroundColor))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.QuoteBackgroundColor = "#ff0000";
+
+            // Assert
+            Assert.IsTrue(wasRaised);
+        }
+
+        [TestMethod]
+        public void QuoteBorderColor_ShouldRaisePropertyChanged()
+        {
+            // テスト観点: QuoteBorderColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.QuoteBorderColor))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.QuoteBorderColor = "#ff0000";
+
+            // Assert
+            Assert.IsTrue(wasRaised);
+        }
+
+        [TestMethod]
+        public void TableBorderColor_ShouldRaisePropertyChanged()
+        {
+            // テスト観点: TableBorderColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.TableBorderColor))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.TableBorderColor = "#ff0000";
+
+            // Assert
+            Assert.IsTrue(wasRaised);
+        }
+
+        [TestMethod]
+        public void TableHeaderBackgroundColor_ShouldRaisePropertyChanged()
+        {
+            // テスト観点: TableHeaderBackgroundColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.TableHeaderBackgroundColor))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.TableHeaderBackgroundColor = "#ff0000";
+
+            // Assert
+            Assert.IsTrue(wasRaised);
+        }
+
+        [TestMethod]
+        public void CodeTextColor_ShouldRaisePropertyChanged()
+        {
+            // テスト観点: CodeTextColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.CodeTextColor))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.CodeTextColor = "#ff0000";
+
+            // Assert
+            Assert.IsTrue(wasRaised);
+        }
+
+        [TestMethod]
+        public void CodeBackgroundColor_ShouldRaisePropertyChanged()
+        {
+            // テスト観点: CodeBackgroundColor プロパティが変更されたときに、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.CodeBackgroundColor))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.CodeBackgroundColor = "#ff0000";
 
             // Assert
             Assert.IsTrue(wasRaised);

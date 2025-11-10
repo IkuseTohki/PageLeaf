@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:PageLeaf.Views"
+             xmlns:controls="clr-namespace:PageLeaf.Views.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="300">
     <Grid>
@@ -19,9 +20,9 @@
                 <TabItem Header="全体">
                     <StackPanel Margin="5">
                         <Label Content="文字色:"/>
-                        <TextBox Text="{Binding BodyTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <controls:ColorInputControl ColorText="{Binding BodyTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="背景色:"/>
-                        <TextBox Text="{Binding BodyBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                        <controls:ColorInputControl ColorText="{Binding BodyBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="フォントサイズ:"/>
                         <TextBox Text="{Binding BodyFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
@@ -40,7 +41,7 @@
                             <ComboBoxItem Content="H6"/>
                         </ComboBox>
                         <Label Content="文字色:"/>
-                        <TextBox/>
+                        <controls:ColorInputControl ColorText="{Binding HeadingTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="スタイル:"/>
                         <StackPanel Orientation="Horizontal">
                             <CheckBox Content="太字"/>
@@ -60,11 +61,11 @@
                 <TabItem Header="引用">
                     <StackPanel Margin="5">
                         <Label Content="文字色:"/>
-                        <TextBox/>
+                        <controls:ColorInputControl ColorText="{Binding QuoteTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="背景色:"/>
-                        <TextBox/>
+                        <controls:ColorInputControl ColorText="{Binding QuoteBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="左枠線 色:"/>
-                        <TextBox/>
+                        <controls:ColorInputControl ColorText="{Binding QuoteBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="左枠線 太さ:"/>
                         <TextBox/>
                         <Label Content="左枠線 種類:"/>
@@ -94,11 +95,11 @@
                 <TabItem Header="表">
                     <StackPanel Margin="5">
                         <Label Content="罫線 色:"/>
-                        <TextBox/>
+                        <controls:ColorInputControl ColorText="{Binding TableBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="罫線 太さ:"/>
                         <TextBox/>
                         <Label Content="ヘッダー背景色:"/>
-                        <TextBox/>
+                        <controls:ColorInputControl ColorText="{Binding TableHeaderBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="セル パディング:"/>
                         <TextBox/>
                     </StackPanel>
@@ -108,9 +109,9 @@
                 <TabItem Header="コード">
                     <StackPanel Margin="5">
                         <Label Content="文字色:"/>
-                        <TextBox/>
+                        <controls:ColorInputControl ColorText="{Binding CodeTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="背景色:"/>
-                        <TextBox/>
+                        <controls:ColorInputControl ColorText="{Binding CodeBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="フォントファミリー:"/>
                         <TextBox/>
                     </StackPanel>

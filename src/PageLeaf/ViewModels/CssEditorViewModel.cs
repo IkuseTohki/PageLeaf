@@ -14,6 +14,15 @@ namespace PageLeaf.ViewModels
         private string? _bodyBackgroundColor;
         private string? _bodyFontSize;
 
+        private string? _headingTextColor;
+        private string? _quoteTextColor;
+        private string? _quoteBackgroundColor;
+        private string? _quoteBorderColor;
+        private string? _tableBorderColor;
+        private string? _tableHeaderBackgroundColor;
+        private string? _codeTextColor;
+        private string? _codeBackgroundColor;
+
         public event EventHandler? CssSaved;
 
         public ICommand SaveCssCommand { get; }
@@ -67,6 +76,110 @@ namespace PageLeaf.ViewModels
             }
         }
 
+        public string? HeadingTextColor
+        {
+            get => _headingTextColor;
+            set
+            {
+                if (_headingTextColor != value)
+                {
+                    _headingTextColor = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? QuoteTextColor
+        {
+            get => _quoteTextColor;
+            set
+            {
+                if (_quoteTextColor != value)
+                {
+                    _quoteTextColor = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? QuoteBackgroundColor
+        {
+            get => _quoteBackgroundColor;
+            set
+            {
+                if (_quoteBackgroundColor != value)
+                {
+                    _quoteBackgroundColor = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? QuoteBorderColor
+        {
+            get => _quoteBorderColor;
+            set
+            {
+                if (_quoteBorderColor != value)
+                {
+                    _quoteBorderColor = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? TableBorderColor
+        {
+            get => _tableBorderColor;
+            set
+            {
+                if (_tableBorderColor != value)
+                {
+                    _tableBorderColor = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? TableHeaderBackgroundColor
+        {
+            get => _tableHeaderBackgroundColor;
+            set
+            {
+                if (_tableHeaderBackgroundColor != value)
+                {
+                    _tableHeaderBackgroundColor = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? CodeTextColor
+        {
+            get => _codeTextColor;
+            set
+            {
+                if (_codeTextColor != value)
+                {
+                    _codeTextColor = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? CodeBackgroundColor
+        {
+            get => _codeBackgroundColor;
+            set
+            {
+                if (_codeBackgroundColor != value)
+                {
+                    _codeBackgroundColor = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public string? TargetCssPath { get; set; }
 
         private void ExecuteSaveCss(object? parameter)
@@ -85,7 +198,15 @@ namespace PageLeaf.ViewModels
             {
                 BodyTextColor = this.BodyTextColor,
                 BodyBackgroundColor = this.BodyBackgroundColor,
-                BodyFontSize = this.BodyFontSize
+                BodyFontSize = this.BodyFontSize,
+                HeadingTextColor = this.HeadingTextColor,
+                QuoteTextColor = this.QuoteTextColor,
+                QuoteBackgroundColor = this.QuoteBackgroundColor,
+                QuoteBorderColor = this.QuoteBorderColor,
+                TableBorderColor = this.TableBorderColor,
+                TableHeaderBackgroundColor = this.TableHeaderBackgroundColor,
+                CodeTextColor = this.CodeTextColor,
+                CodeBackgroundColor = this.CodeBackgroundColor
             };
 
             // 3. CSSコンテンツを更新
