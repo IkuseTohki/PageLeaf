@@ -73,9 +73,8 @@ namespace PageLeaf.ViewModels
                             var cssContent = _fileService.ReadAllText(cssPath);
                             var parsedStyles = _cssEditorService.ParseCss(cssContent);
 
-                            CssEditorViewModel.BodyTextColor = parsedStyles.BodyTextColor;
-                            CssEditorViewModel.BodyBackgroundColor = parsedStyles.BodyBackgroundColor;
-                            CssEditorViewModel.BodyFontSize = parsedStyles.BodyFontSize;
+                            // CssEditorViewModelのLoadStylesメソッドを呼び出してスタイルを反映
+                            CssEditorViewModel.LoadStyles(parsedStyles);
                         }
                     }
                     catch (Exception ex)

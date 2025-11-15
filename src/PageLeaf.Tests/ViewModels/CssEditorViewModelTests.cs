@@ -317,5 +317,35 @@ namespace PageLeaf.Tests.ViewModels
             // Assert
             Assert.IsTrue(wasRaised);
         }
+
+        [TestMethod]
+        public void SelectedHeadingLevel_ShouldUpdateHeadingTextColorAndRaisePropertyChanged()
+        {
+            // テスト観点: SelectedHeadingLevel プロパティが変更されたときに、
+            // HeadingTextColor が更新され、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            var cssInfo = new Models.CssStyleInfo();
+            cssInfo.HeadingTextColors["h1"] = "rgba(255, 0, 0, 1)"; // Red
+            cssInfo.HeadingTextColors["h2"] = "rgba(0, 0, 255, 1)"; // Blue
+
+            // LoadStylesが呼ばれたときに内部状態が設定されるようにモックを設定
+            _viewModel.LoadStyles(cssInfo);
+
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.HeadingTextColor))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.SelectedHeadingLevel = "h2";
+
+            // Assert
+            Assert.IsTrue(wasRaised, "PropertyChanged for HeadingTextColor should have been raised.");
+            Assert.AreEqual("rgba(0, 0, 255, 1)", _viewModel.HeadingTextColor);
+        }
     }
 }

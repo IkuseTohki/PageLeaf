@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace PageLeaf.Models
 {
     public class CssStyleInfo
@@ -6,6 +8,7 @@ namespace PageLeaf.Models
         public string? BodyBackgroundColor { get; set; }
         public string? BodyFontSize { get; set; }
         public string? HeadingTextColor { get; set; }
+        public Dictionary<string, string> HeadingTextColors { get; } = new();
         public string? QuoteTextColor { get; set; }
         public string? QuoteBackgroundColor { get; set; }
         public string? QuoteBorderColor { get; set; }

@@ -208,5 +208,24 @@ namespace PageLeaf.Tests.Services
             parsedUpdatedStyles = service.ParseCss(updatedCss);
             Assert.AreEqual("24px", parsedUpdatedStyles.BodyFontSize);
         }
+
+        [TestMethod]
+        public void ParseCss_ShouldParseHeadingTextColors()
+        {
+            // テスト観点: ParseCssが、複数の見出し(h1, h2)のcolorプロパティを解析し、
+            // CssStyleInfoのHeadingTextColorsディクショナリに正しく格納することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = "h1 { color: red; } h2 { color: blue; } p { color: black; }";
+
+            // Act
+            var styles = service.ParseCss(cssContent);
+
+            // Assert
+            Assert.IsNotNull(styles.HeadingTextColors);
+            Assert.AreEqual(2, styles.HeadingTextColors.Count);
+            Assert.AreEqual("rgba(255, 0, 0, 1)", styles.HeadingTextColors["h1"]);
+            Assert.AreEqual("rgba(0, 0, 255, 1)", styles.HeadingTextColors["h2"]);
+        }
     }
 }

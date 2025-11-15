@@ -32,13 +32,8 @@
                 <TabItem Header="見出し">
                     <StackPanel Margin="5">
                         <Label Content="対象見出し:"/>
-                        <ComboBox>
-                            <ComboBoxItem Content="H1"/>
-                            <ComboBoxItem Content="H2"/>
-                            <ComboBoxItem Content="H3"/>
-                            <ComboBoxItem Content="H4"/>
-                            <ComboBoxItem Content="H5"/>
-                            <ComboBoxItem Content="H6"/>
+                        <ComboBox ItemsSource="{Binding AvailableHeadingLevels}"
+                                  SelectedItem="{Binding SelectedHeadingLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         </ComboBox>
                         <Label Content="文字色:"/>
                         <controls:ColorInputControl ColorText="{Binding HeadingTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>

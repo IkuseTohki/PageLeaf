@@ -2,6 +2,10 @@ using System.Windows.Input;
 using PageLeaf.Utilities;
 using PageLeaf.Services;
 using System;
+using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using PageLeaf.Models;
+using System.Linq;
 
 namespace PageLeaf.ViewModels
 {
@@ -23,9 +27,14 @@ namespace PageLeaf.ViewModels
         private string? _codeTextColor;
         private string? _codeBackgroundColor;
 
+        private Dictionary<string, string> _allHeadingTextColors = new();
+        private string? _selectedHeadingLevel;
+
         public event EventHandler? CssSaved;
 
         public ICommand SaveCssCommand { get; }
+
+        public ObservableCollection<string> AvailableHeadingLevels { get; }
 
         public CssEditorViewModel(IFileService fileService, ICssEditorService cssEditorService)
         {
@@ -35,6 +44,54 @@ namespace PageLeaf.ViewModels
             _fileService = fileService;
             _cssEditorService = cssEditorService;
             SaveCssCommand = new DelegateCommand(ExecuteSaveCss);
+
+            AvailableHeadingLevels = new ObservableCollection<string>(
+                Enumerable.Range(1, 6).Select(i => $"h{i}")
+            );
+            SelectedHeadingLevel = AvailableHeadingLevels.FirstOrDefault();
+        }
+
+        public void LoadStyles(CssStyleInfo styleInfo)
+        {
+            // Body styles
+            BodyTextColor = styleInfo.BodyTextColor;
+            BodyBackgroundColor = styleInfo.BodyBackgroundColor;
+            BodyFontSize = styleInfo.BodyFontSize;
+
+            // Heading styles
+            _allHeadingTextColors.Clear();
+            foreach (var entry in styleInfo.HeadingTextColors)
+            {
+                _allHeadingTextColors[entry.Key] = entry.Value;
+            }
+            UpdateHeadingProperties();
+        }
+
+        public string? SelectedHeadingLevel
+        {
+            get => _selectedHeadingLevel;
+            set
+            {
+                if (_selectedHeadingLevel != value)
+                {
+                    _selectedHeadingLevel = value;
+                    OnPropertyChanged();
+                    UpdateHeadingProperties();
+                }
+            }
+        }
+
+        private void UpdateHeadingProperties()
+        {
+            if (_selectedHeadingLevel != null && _allHeadingTextColors.TryGetValue(_selectedHeadingLevel, out var color))
+            {
+                HeadingTextColor = color;
+            }
+            else
+            {
+                HeadingTextColor = null; // 選択されたレベルの色がない場合
+            }
+            // 他の見出し関連プロパティもここに追加する
         }
 
         public string? BodyTextColor
@@ -219,4 +276,5 @@ namespace PageLeaf.ViewModels
         }
     }
 }
+
 

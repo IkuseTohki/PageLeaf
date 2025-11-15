@@ -50,6 +50,25 @@ namespace PageLeaf.Services
                 styleInfo.BodyFontSize = bodyRule.Style.GetPropertyValue("font-size");
             }
 
+            // h1からh6までの見出しのcolorプロパティを解析
+            for (int i = 1; i <= 6; i++)
+            {
+                var headingSelector = $"h{i}";
+                var headingRule = stylesheet.Rules
+                    .OfType<ICssStyleRule>()
+                    .FirstOrDefault(r => r.SelectorText == headingSelector);
+
+                if (headingRule != null)
+                {
+                    var colorProperty = headingRule.Style.GetProperty("color");
+                    if (colorProperty != null && colorProperty.RawValue is AngleSharp.Css.Values.Color angleSharpColor)
+                    {
+                        // AngleSharpは色をrgba形式で正規化するため、CssTextプロパティを使用してそのまま格納
+                        styleInfo.HeadingTextColors[headingSelector] = angleSharpColor.CssText;
+                    }
+                }
+            }
+
             return styleInfo;
         }
 
