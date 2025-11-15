@@ -19,6 +19,8 @@ namespace PageLeaf.ViewModels
         private string? _bodyFontSize;
 
         private string? _headingTextColor;
+        private string? _headingFontSize;
+        private string? _headingFontFamily;
         private string? _quoteTextColor;
         private string? _quoteBackgroundColor;
         private string? _quoteBorderColor;
@@ -28,6 +30,9 @@ namespace PageLeaf.ViewModels
         private string? _codeBackgroundColor;
 
         private Dictionary<string, string> _allHeadingTextColors = new();
+        private Dictionary<string, string> _allHeadingFontSizes = new();
+        private Dictionary<string, string> _allHeadingFontFamilies = new();
+        private Dictionary<string, HeadingStyleFlags> _allHeadingStyleFlags = new();
         private string? _selectedHeadingLevel;
 
         public event EventHandler? CssSaved;
@@ -64,6 +69,25 @@ namespace PageLeaf.ViewModels
             {
                 _allHeadingTextColors[entry.Key] = entry.Value;
             }
+
+            _allHeadingFontSizes.Clear();
+            foreach (var entry in styleInfo.HeadingFontSizes)
+            {
+                _allHeadingFontSizes[entry.Key] = entry.Value;
+            }
+
+            _allHeadingFontFamilies.Clear();
+            foreach (var entry in styleInfo.HeadingFontFamilies)
+            {
+                _allHeadingFontFamilies[entry.Key] = entry.Value;
+            }
+
+            _allHeadingStyleFlags.Clear();
+            foreach (var entry in styleInfo.HeadingStyleFlags)
+            {
+                _allHeadingStyleFlags[entry.Key] = entry.Value;
+            }
+
             UpdateHeadingProperties();
         }
 
@@ -83,13 +107,63 @@ namespace PageLeaf.ViewModels
 
         private void UpdateHeadingProperties()
         {
-            if (_selectedHeadingLevel != null && _allHeadingTextColors.TryGetValue(_selectedHeadingLevel, out var color))
+            if (_selectedHeadingLevel != null)
             {
-                HeadingTextColor = color;
+                // HeadingTextColor
+                if (_allHeadingTextColors.TryGetValue(_selectedHeadingLevel, out var color))
+                {
+                    HeadingTextColor = color;
+                }
+                else
+                {
+                    HeadingTextColor = null; // 選択されたレベルの色がない場合
+                }
+
+                // HeadingFontSize
+                if (_allHeadingFontSizes.TryGetValue(_selectedHeadingLevel, out var fontSize))
+                {
+                    HeadingFontSize = fontSize;
+                }
+                else
+                {
+                    HeadingFontSize = null;
+                }
+
+                // HeadingFontFamily
+                if (_allHeadingFontFamilies.TryGetValue(_selectedHeadingLevel, out var fontFamily))
+                {
+                    HeadingFontFamily = fontFamily;
+                }
+                else
+                {
+                    HeadingFontFamily = null;
+                }
+
+                // HeadingStyleFlags
+                if (_allHeadingStyleFlags.TryGetValue(_selectedHeadingLevel, out var flags))
+                {
+                    IsHeadingBold = flags.IsBold;
+                    IsHeadingItalic = flags.IsItalic;
+                    IsHeadingUnderline = flags.IsUnderline;
+                    IsHeadingStrikethrough = flags.IsStrikethrough;
+                }
+                else
+                {
+                    IsHeadingBold = false;
+                    IsHeadingItalic = false;
+                    IsHeadingUnderline = false;
+                    IsHeadingStrikethrough = false;
+                }
             }
             else
             {
-                HeadingTextColor = null; // 選択されたレベルの色がない場合
+                HeadingTextColor = null;
+                HeadingFontSize = null;
+                HeadingFontFamily = null;
+                IsHeadingBold = false;
+                IsHeadingItalic = false;
+                IsHeadingUnderline = false;
+                IsHeadingStrikethrough = false;
             }
             // 他の見出し関連プロパティもここに追加する
         }
@@ -141,6 +215,88 @@ namespace PageLeaf.ViewModels
                 if (_headingTextColor != value)
                 {
                     _headingTextColor = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? HeadingFontSize
+        {
+            get => _headingFontSize;
+            set
+            {
+                if (_headingFontSize != value)
+                {
+                    _headingFontSize = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? HeadingFontFamily
+        {
+            get => _headingFontFamily;
+            set
+            {
+                if (_headingFontFamily != value)
+                {
+                    _headingFontFamily = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _isHeadingBold;
+        public bool IsHeadingBold
+        {
+            get => _isHeadingBold;
+            set
+            {
+                if (_isHeadingBold != value)
+                {
+                    _isHeadingBold = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _isHeadingItalic;
+        public bool IsHeadingItalic
+        {
+            get => _isHeadingItalic;
+            set
+            {
+                if (_isHeadingItalic != value)
+                {
+                    _isHeadingItalic = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _isHeadingUnderline;
+        public bool IsHeadingUnderline
+        {
+            get => _isHeadingUnderline;
+            set
+            {
+                if (_isHeadingUnderline != value)
+                {
+                    _isHeadingUnderline = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        private bool _isHeadingStrikethrough;
+        public bool IsHeadingStrikethrough
+        {
+            get => _isHeadingStrikethrough;
+            set
+            {
+                if (_isHeadingStrikethrough != value)
+                {
+                    _isHeadingStrikethrough = value;
                     OnPropertyChanged();
                 }
             }

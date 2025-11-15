@@ -39,15 +39,15 @@
                         <controls:ColorInputControl ColorText="{Binding HeadingTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="スタイル:"/>
                         <StackPanel Orientation="Horizontal">
-                            <CheckBox Content="太字"/>
-                            <CheckBox Content="斜体"/>
-                            <CheckBox Content="下線"/>
-                            <CheckBox Content="取り消し線"/>
+                            <CheckBox Content="太字" IsChecked="{Binding IsHeadingBold, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox Content="斜体" IsChecked="{Binding IsHeadingItalic, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox Content="下線" IsChecked="{Binding IsHeadingUnderline, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+                            <CheckBox Content="取り消し線" IsChecked="{Binding IsHeadingStrikethrough, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         </StackPanel>
                         <Label Content="フォントサイズ:"/>
-                        <TextBox/>
+                        <TextBox Text="{Binding HeadingFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="フォントファミリー:"/>
-                        <TextBox/>
+                        <TextBox Text="{Binding HeadingFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <CheckBox Content="項番の自動採番"/>
                     </StackPanel>
                 </TabItem>

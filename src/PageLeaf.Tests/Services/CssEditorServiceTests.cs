@@ -227,5 +227,80 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("rgba(255, 0, 0, 1)", styles.HeadingTextColors["h1"]);
             Assert.AreEqual("rgba(0, 0, 255, 1)", styles.HeadingTextColors["h2"]);
         }
+
+        [TestMethod]
+        public void ParseCss_ShouldParseHeadingFontSizesAndFamilies()
+        {
+            // テスト観点: ParseCssが、複数の見出し(h1, h2)のfont-sizeとfont-familyプロパティを解析し、
+            // CssStyleInfoのHeadingFontSizesとHeadingFontFamiliesディクショナリに正しく格納することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = "h1 { font-size: 24px; font-family: Arial; } h2 { font-size: 1.2em; font-family: 'Times New Roman'; }";
+
+            // Act
+            var styles = service.ParseCss(cssContent);
+
+            // Assert
+            Assert.IsNotNull(styles.HeadingFontSizes);
+            Assert.AreEqual(2, styles.HeadingFontSizes.Count);
+            Assert.AreEqual("24px", styles.HeadingFontSizes["h1"]);
+            Assert.AreEqual("1.2em", styles.HeadingFontSizes["h2"]);
+
+            Assert.IsNotNull(styles.HeadingFontFamilies);
+            Assert.AreEqual(2, styles.HeadingFontFamilies.Count);
+            Assert.AreEqual("Arial", styles.HeadingFontFamilies["h1"]);
+            Assert.AreEqual("\"Times New Roman\"", styles.HeadingFontFamilies["h2"]);
+        }
+
+        [TestMethod]
+        public void ParseCss_ShouldParseHeadingStyleFlags()
+        {
+            // テスト観点: ParseCssが、見出しのfont-weight, font-style, text-decorationプロパティを解析し、
+            // CssStyleInfoのHeadingStyleFlagsディクショナリに正しく格納することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = @"
+                h1 { 
+                    font-weight: bold; 
+                    font-style: italic; 
+                    text-decoration: underline; 
+                } 
+                h2 { 
+                    text-decoration: line-through; 
+                }
+                h3 {
+                    font-weight: normal;
+                    font-style: normal;
+                    text-decoration: none;
+                }";
+
+            // Act
+            var styles = service.ParseCss(cssContent);
+
+            // Assert - h1
+            Assert.IsNotNull(styles.HeadingStyleFlags);
+            Assert.IsTrue(styles.HeadingStyleFlags.ContainsKey("h1"));
+            var h1Flags = styles.HeadingStyleFlags["h1"];
+            Assert.IsTrue(h1Flags.IsBold);
+            Assert.IsTrue(h1Flags.IsItalic);
+            Assert.IsTrue(h1Flags.IsUnderline);
+            Assert.IsFalse(h1Flags.IsStrikethrough);
+
+            // Assert - h2
+            Assert.IsTrue(styles.HeadingStyleFlags.ContainsKey("h2"));
+            var h2Flags = styles.HeadingStyleFlags["h2"];
+            Assert.IsFalse(h2Flags.IsBold);
+            Assert.IsFalse(h2Flags.IsItalic);
+            Assert.IsFalse(h2Flags.IsUnderline);
+            Assert.IsTrue(h2Flags.IsStrikethrough);
+
+            // Assert - h3 (デフォルト値)
+            Assert.IsTrue(styles.HeadingStyleFlags.ContainsKey("h3"));
+            var h3Flags = styles.HeadingStyleFlags["h3"];
+            Assert.IsFalse(h3Flags.IsBold);
+            Assert.IsFalse(h3Flags.IsItalic);
+            Assert.IsFalse(h3Flags.IsUnderline);
+            Assert.IsFalse(h3Flags.IsStrikethrough);
+        }
     }
 }

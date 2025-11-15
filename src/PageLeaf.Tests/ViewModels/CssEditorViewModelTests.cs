@@ -347,5 +347,100 @@ namespace PageLeaf.Tests.ViewModels
             Assert.IsTrue(wasRaised, "PropertyChanged for HeadingTextColor should have been raised.");
             Assert.AreEqual("rgba(0, 0, 255, 1)", _viewModel.HeadingTextColor);
         }
+
+        [TestMethod]
+        public void SelectedHeadingLevel_ShouldUpdateHeadingFontSizeAndFamilyAndRaisePropertyChanged()
+        {
+            // テスト観点: SelectedHeadingLevel プロパティが変更されたときに、
+            // HeadingFontSize と HeadingFontFamily が更新され、PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            var cssInfo = new Models.CssStyleInfo();
+            cssInfo.HeadingFontSizes["h1"] = "20px";
+            cssInfo.HeadingFontFamilies["h1"] = "Arial";
+            cssInfo.HeadingFontSizes["h2"] = "24px";
+            cssInfo.HeadingFontFamilies["h2"] = "Verdana";
+
+            // LoadStylesが呼ばれたときに内部状態が設定されるようにモックを設定
+            _viewModel.LoadStyles(cssInfo);
+
+            bool fontSizeRaised = false;
+            bool fontFamilyRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.HeadingFontSize))
+                {
+                    fontSizeRaised = true;
+                }
+                if (args.PropertyName == nameof(CssEditorViewModel.HeadingFontFamily))
+                {
+                    fontFamilyRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.SelectedHeadingLevel = "h2";
+
+            // Assert
+            Assert.IsTrue(fontSizeRaised, "PropertyChanged for HeadingFontSize should have been raised.");
+            Assert.AreEqual("24px", _viewModel.HeadingFontSize);
+
+            Assert.IsTrue(fontFamilyRaised, "PropertyChanged for HeadingFontFamily should have been raised.");
+            Assert.AreEqual("Verdana", _viewModel.HeadingFontFamily);
+        }
+
+        [TestMethod]
+        public void SelectedHeadingLevel_ShouldUpdateHeadingStyleFlagsAndRaisePropertyChanged()
+        {
+            // テスト観点: SelectedHeadingLevel プロパティが変更されたときに、
+            // IsHeadingBold, IsHeadingItalic, IsHeadingUnderline, IsHeadingStrikethrough が更新され、
+            // PropertyChanged イベントが発火することを確認する。
+            // Arrange
+            var cssInfo = new Models.CssStyleInfo();
+            cssInfo.HeadingStyleFlags["h1"] = new Models.HeadingStyleFlags { IsBold = true, IsItalic = false, IsUnderline = true, IsStrikethrough = false };
+            cssInfo.HeadingStyleFlags["h2"] = new Models.HeadingStyleFlags { IsBold = false, IsItalic = true, IsUnderline = false, IsStrikethrough = true };
+
+            // LoadStylesが呼ばれたときに内部状態が設定されるようにモックを設定
+            _viewModel.LoadStyles(cssInfo);
+
+            bool isBoldRaised = false;
+            bool isItalicRaised = false;
+            bool isUnderlineRaised = false;
+            bool isStrikethroughRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.IsHeadingBold))
+                {
+                    isBoldRaised = true;
+                }
+                if (args.PropertyName == nameof(CssEditorViewModel.IsHeadingItalic))
+                {
+                    isItalicRaised = true;
+                }
+                if (args.PropertyName == nameof(CssEditorViewModel.IsHeadingUnderline))
+                {
+                    isUnderlineRaised = true;
+                }
+                if (args.PropertyName == nameof(CssEditorViewModel.IsHeadingStrikethrough))
+                {
+                    isStrikethroughRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.SelectedHeadingLevel = "h2";
+
+            // Assert
+            Assert.IsTrue(isBoldRaised, "PropertyChanged for IsHeadingBold should have been raised.");
+            Assert.IsFalse(_viewModel.IsHeadingBold);
+
+            Assert.IsTrue(isItalicRaised, "PropertyChanged for IsHeadingItalic should have been raised.");
+            Assert.IsTrue(_viewModel.IsHeadingItalic);
+
+            Assert.IsTrue(isUnderlineRaised, "PropertyChanged for IsHeadingUnderline should have been raised.");
+            Assert.IsFalse(_viewModel.IsHeadingUnderline);
+
+            Assert.IsTrue(isStrikethroughRaised, "PropertyChanged for IsHeadingStrikethrough should have been raised.");
+            Assert.IsTrue(_viewModel.IsHeadingStrikethrough);
+        }
     }
 }

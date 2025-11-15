@@ -66,6 +66,45 @@ namespace PageLeaf.Services
                         // AngleSharpは色をrgba形式で正規化するため、CssTextプロパティを使用してそのまま格納
                         styleInfo.HeadingTextColors[headingSelector] = angleSharpColor.CssText;
                     }
+
+                    // font-sizeプロパティを解析
+                    var fontSize = headingRule.Style.GetPropertyValue("font-size");
+                    if (!string.IsNullOrEmpty(fontSize))
+                    {
+                        styleInfo.HeadingFontSizes[headingSelector] = fontSize;
+                    }
+
+                    // font-familyプロパティを解析
+                    var fontFamily = headingRule.Style.GetPropertyValue("font-family");
+                    if (!string.IsNullOrEmpty(fontFamily))
+                    {
+                        styleInfo.HeadingFontFamilies[headingSelector] = fontFamily;
+                    }
+
+                    // スタイルフラグを解析
+                    var flags = new HeadingStyleFlags();
+                    var fontWeight = headingRule.Style.GetPropertyValue("font-weight");
+                    if (fontWeight == "bold" || (int.TryParse(fontWeight, out var weight) && weight >= 700))
+                    {
+                        flags.IsBold = true;
+                    }
+
+                    var fontStyle = headingRule.Style.GetPropertyValue("font-style");
+                    if (fontStyle == "italic")
+                    {
+                        flags.IsItalic = true;
+                    }
+
+                    var textDecoration = headingRule.Style.GetPropertyValue("text-decoration");
+                    if (textDecoration.Contains("underline"))
+                    {
+                        flags.IsUnderline = true;
+                    }
+                    if (textDecoration.Contains("line-through"))
+                    {
+                        flags.IsStrikethrough = true;
+                    }
+                    styleInfo.HeadingStyleFlags[headingSelector] = flags;
                 }
             }
 
