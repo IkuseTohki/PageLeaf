@@ -108,7 +108,7 @@
                         <Label Content="背景色:"/>
                         <controls:ColorInputControl ColorText="{Binding CodeBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="フォントファミリー:"/>
-                        <TextBox/>
+                        <TextBox Text="{Binding CodeFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </TabItem>
             </TabControl>

@@ -374,5 +374,28 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("8px", styles.TableCellPadding);
             Assert.AreEqual("#F2F2F2", styles.TableHeaderBackgroundColor);
         }
+
+        [TestMethod]
+        public void ParseCss_ShouldParseCodeStyles()
+        {
+            // テスト観点: `code` のスタイル(color, background-color, font-family)が正しく解析され、
+            // CssStyleInfoの対応するプロパティに格納されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = @"
+                code { 
+                    color: #ff0000; 
+                    background-color: #000000; 
+                    font-family: ""Consolas""; 
+                }";
+
+            // Act
+            var styles = service.ParseCss(cssContent);
+
+            // Assert
+            Assert.AreEqual("#FF0000", styles.CodeTextColor);
+            Assert.AreEqual("#000000", styles.CodeBackgroundColor);
+            Assert.AreEqual("\"Consolas\"", styles.CodeFontFamily);
+        }
     }
 }

@@ -32,6 +32,7 @@ namespace PageLeaf.ViewModels
         private string? _tableCellPadding;
         private string? _codeTextColor;
         private string? _codeBackgroundColor;
+        private string? _codeFontFamily;
         private string? _listMarkerType;
         private string? _listIndent;
 
@@ -110,6 +111,11 @@ namespace PageLeaf.ViewModels
             TableHeaderBackgroundColor = styleInfo.TableHeaderBackgroundColor;
             TableBorderWidth = styleInfo.TableBorderWidth;
             TableCellPadding = styleInfo.TableCellPadding;
+
+            // Code styles
+            CodeTextColor = styleInfo.CodeTextColor;
+            CodeBackgroundColor = styleInfo.CodeBackgroundColor;
+            CodeFontFamily = styleInfo.CodeFontFamily;
 
             UpdateHeadingProperties();
         }
@@ -463,6 +469,19 @@ namespace PageLeaf.ViewModels
                 if (_codeBackgroundColor != value)
                 {
                     _codeBackgroundColor = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? CodeFontFamily
+        {
+            get => _codeFontFamily;
+            set
+            {
+                if (_codeFontFamily != value)
+                {
+                    _codeFontFamily = value;
                     OnPropertyChanged();
                 }
             }

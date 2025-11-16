@@ -141,6 +141,18 @@ namespace PageLeaf.Services
                 styleInfo.TableHeaderBackgroundColor = GetColorHexFromRule(thRule, "background-color");
             }
 
+            // code のスタイルを解析
+            var codeRule = stylesheet.Rules
+                .OfType<ICssStyleRule>()
+                .FirstOrDefault(r => r.SelectorText == "code");
+
+            if (codeRule != null)
+            {
+                styleInfo.CodeTextColor = GetColorHexFromRule(codeRule, "color");
+                styleInfo.CodeBackgroundColor = GetColorHexFromRule(codeRule, "background-color");
+                styleInfo.CodeFontFamily = codeRule.Style.GetPropertyValue("font-family");
+            }
+
             return styleInfo;
         }
 

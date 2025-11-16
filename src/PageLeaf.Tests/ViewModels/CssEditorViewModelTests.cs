@@ -553,5 +553,40 @@ namespace PageLeaf.Tests.ViewModels
             Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.TableBorderWidth)));
             Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.TableCellPadding)));
         }
+
+        [TestMethod]
+        public void LoadStyles_ShouldLoadCodeStylesAndRaisePropertyChanged()
+        {
+            // テスト観点: LoadStylesメソッドが呼ばれた際に、CssStyleInfoのコード関連のスタイルが
+            // ViewModelの各プロパティに正しく読み込まれ、PropertyChangedイベントが発火することを確認する。
+            // Arrange
+            var cssInfo = new Models.CssStyleInfo
+            {
+                CodeTextColor = "#111111",
+                CodeBackgroundColor = "#222222",
+                CodeFontFamily = "Consolas"
+            };
+
+            var raisedProperties = new System.Collections.Generic.List<string>();
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName != null)
+                {
+                    raisedProperties.Add(args.PropertyName);
+                }
+            };
+
+            // Act
+            _viewModel.LoadStyles(cssInfo);
+
+            // Assert
+            Assert.AreEqual(cssInfo.CodeTextColor, _viewModel.CodeTextColor);
+            Assert.AreEqual(cssInfo.CodeBackgroundColor, _viewModel.CodeBackgroundColor);
+            Assert.AreEqual(cssInfo.CodeFontFamily, _viewModel.CodeFontFamily);
+
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.CodeTextColor)));
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.CodeBackgroundColor)));
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.CodeFontFamily)));
+        }
     }
 }
