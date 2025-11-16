@@ -515,5 +515,43 @@ namespace PageLeaf.Tests.ViewModels
             Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.ListMarkerType)));
             Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.ListIndent)));
         }
+
+        [TestMethod]
+        public void LoadStyles_ShouldLoadTableStylesAndRaisePropertyChanged()
+        {
+            // テスト観点: LoadStylesメソッドが呼ばれた際に、CssStyleInfoの表関連のスタイルが
+            // ViewModelの各プロパティに正しく読み込まれ、PropertyChangedイベントが発火することを確認する。
+            // Arrange
+            var cssInfo = new Models.CssStyleInfo
+            {
+                TableBorderColor = "#111111",
+                TableHeaderBackgroundColor = "#222222",
+                TableBorderWidth = "2px",
+                TableCellPadding = "10px"
+            };
+
+            var raisedProperties = new System.Collections.Generic.List<string>();
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName != null)
+                {
+                    raisedProperties.Add(args.PropertyName);
+                }
+            };
+
+            // Act
+            _viewModel.LoadStyles(cssInfo);
+
+            // Assert
+            Assert.AreEqual(cssInfo.TableBorderColor, _viewModel.TableBorderColor);
+            Assert.AreEqual(cssInfo.TableHeaderBackgroundColor, _viewModel.TableHeaderBackgroundColor);
+            Assert.AreEqual(cssInfo.TableBorderWidth, _viewModel.TableBorderWidth);
+            Assert.AreEqual(cssInfo.TableCellPadding, _viewModel.TableCellPadding);
+
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.TableBorderColor)));
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.TableHeaderBackgroundColor)));
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.TableBorderWidth)));
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.TableCellPadding)));
+        }
     }
 }

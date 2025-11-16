@@ -348,5 +348,31 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("square", styles.ListMarkerType);
             Assert.AreEqual("40px", styles.ListIndent);
         }
+
+        [TestMethod]
+        public void ParseCss_ShouldParseTableStyles()
+        {
+            // テスト観点: `th, td` と `th` のスタイルが正しく解析され、
+            // CssStyleInfoの対応するプロパティに格納されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = @"
+                th, td { 
+                    border: 1px solid #dddddd; 
+                    padding: 8px; 
+                }
+                th {
+                    background-color: #f2f2f2;
+                }";
+
+            // Act
+            var styles = service.ParseCss(cssContent);
+
+            // Assert
+            Assert.AreEqual("1px", styles.TableBorderWidth);
+            Assert.AreEqual("#DDDDDD", styles.TableBorderColor);
+            Assert.AreEqual("8px", styles.TableCellPadding);
+            Assert.AreEqual("#F2F2F2", styles.TableHeaderBackgroundColor);
+        }
     }
 }

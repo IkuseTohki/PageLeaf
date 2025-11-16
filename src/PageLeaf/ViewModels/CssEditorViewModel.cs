@@ -28,6 +28,8 @@ namespace PageLeaf.ViewModels
         private string? _quoteBorderStyle;
         private string? _tableBorderColor;
         private string? _tableHeaderBackgroundColor;
+        private string? _tableBorderWidth;
+        private string? _tableCellPadding;
         private string? _codeTextColor;
         private string? _codeBackgroundColor;
         private string? _listMarkerType;
@@ -102,6 +104,12 @@ namespace PageLeaf.ViewModels
             // List styles
             ListMarkerType = styleInfo.ListMarkerType;
             ListIndent = styleInfo.ListIndent;
+
+            // Table styles
+            TableBorderColor = styleInfo.TableBorderColor;
+            TableHeaderBackgroundColor = styleInfo.TableHeaderBackgroundColor;
+            TableBorderWidth = styleInfo.TableBorderWidth;
+            TableCellPadding = styleInfo.TableCellPadding;
 
             UpdateHeadingProperties();
         }
@@ -403,6 +411,32 @@ namespace PageLeaf.ViewModels
                 if (_tableHeaderBackgroundColor != value)
                 {
                     _tableHeaderBackgroundColor = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? TableBorderWidth
+        {
+            get => _tableBorderWidth;
+            set
+            {
+                if (_tableBorderWidth != value)
+                {
+                    _tableBorderWidth = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? TableCellPadding
+        {
+            get => _tableCellPadding;
+            set
+            {
+                if (_tableCellPadding != value)
+                {
+                    _tableCellPadding = value;
                     OnPropertyChanged();
                 }
             }

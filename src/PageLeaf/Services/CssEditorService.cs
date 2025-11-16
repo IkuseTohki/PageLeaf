@@ -25,26 +25,8 @@ namespace PageLeaf.Services
 
             if (bodyRule != null)
             {
-                // AngleSharpのColorオブジェクトから直接HEX形式を取得する
-                var colorProperty = bodyRule.Style.GetProperty("color");
-                if (colorProperty != null && colorProperty.RawValue is AngleSharp.Css.Values.Color angleSharpColor)
-                {
-                    styleInfo.BodyTextColor = $"#{angleSharpColor.R:X2}{angleSharpColor.G:X2}{angleSharpColor.B:X2}"; // ここを修正
-                }
-                else
-                {
-                    styleInfo.BodyTextColor = ConvertToHex(bodyRule.Style.GetPropertyValue("color")); // フォールバック
-                }
-
-                var backgroundColorProperty = bodyRule.Style.GetProperty("background-color");
-                if (backgroundColorProperty != null && backgroundColorProperty.RawValue is AngleSharp.Css.Values.Color angleSharpBackgroundColor)
-                {
-                    styleInfo.BodyBackgroundColor = $"#{angleSharpBackgroundColor.R:X2}{angleSharpBackgroundColor.G:X2}{angleSharpBackgroundColor.B:X2}"; // ここを修正
-                }
-                else
-                {
-                    styleInfo.BodyBackgroundColor = ConvertToHex(bodyRule.Style.GetPropertyValue("background-color")); // フォールバック
-                }
+                styleInfo.BodyTextColor = GetColorHexFromRule(bodyRule, "color");
+                styleInfo.BodyBackgroundColor = GetColorHexFromRule(bodyRule, "background-color");
 
                 // font-size プロパティを読み取る
                 styleInfo.BodyFontSize = bodyRule.Style.GetPropertyValue("font-size");
@@ -115,41 +97,13 @@ namespace PageLeaf.Services
 
             if (blockquoteRule != null)
             {
-                // color
-                var colorProperty = blockquoteRule.Style.GetProperty("color");
-                if (colorProperty != null && colorProperty.RawValue is AngleSharp.Css.Values.Color angleSharpColor)
-                {
-                    styleInfo.QuoteTextColor = $"#{angleSharpColor.R:X2}{angleSharpColor.G:X2}{angleSharpColor.B:X2}";
-                }
-                else
-                {
-                    styleInfo.QuoteTextColor = ConvertToHex(blockquoteRule.Style.GetPropertyValue("color"));
-                }
-
-                // background-color
-                var backgroundColorProperty = blockquoteRule.Style.GetProperty("background-color");
-                if (backgroundColorProperty != null && backgroundColorProperty.RawValue is AngleSharp.Css.Values.Color angleSharpBackgroundColor)
-                {
-                    styleInfo.QuoteBackgroundColor = $"#{angleSharpBackgroundColor.R:X2}{angleSharpBackgroundColor.G:X2}{angleSharpBackgroundColor.B:X2}";
-                }
-                else
-                {
-                    styleInfo.QuoteBackgroundColor = ConvertToHex(blockquoteRule.Style.GetPropertyValue("background-color"));
-                }
+                styleInfo.QuoteTextColor = GetColorHexFromRule(blockquoteRule, "color");
+                styleInfo.QuoteBackgroundColor = GetColorHexFromRule(blockquoteRule, "background-color");
 
                 // border-left
                 styleInfo.QuoteBorderWidth = blockquoteRule.Style.GetPropertyValue("border-left-width");
                 styleInfo.QuoteBorderStyle = blockquoteRule.Style.GetPropertyValue("border-left-style");
-
-                var borderLeftColorProperty = blockquoteRule.Style.GetProperty("border-left-color");
-                if (borderLeftColorProperty != null && borderLeftColorProperty.RawValue is AngleSharp.Css.Values.Color angleSharpBorderColor)
-                {
-                    styleInfo.QuoteBorderColor = $"#{angleSharpBorderColor.R:X2}{angleSharpBorderColor.G:X2}{angleSharpBorderColor.B:X2}";
-                }
-                else
-                {
-                    styleInfo.QuoteBorderColor = ConvertToHex(blockquoteRule.Style.GetPropertyValue("border-left-color"));
-                }
+                styleInfo.QuoteBorderColor = GetColorHexFromRule(blockquoteRule, "border-left-color");
             }
 
             // ul のスタイルを解析
@@ -161,6 +115,30 @@ namespace PageLeaf.Services
             {
                 styleInfo.ListMarkerType = ulRule.Style.GetPropertyValue("list-style-type");
                 styleInfo.ListIndent = ulRule.Style.GetPropertyValue("padding-left");
+            }
+
+            // table のスタイルを解析
+            var thTdRule = stylesheet.Rules
+                .OfType<ICssStyleRule>()
+                .FirstOrDefault(r => r.SelectorText == "th, td");
+
+            if (thTdRule != null)
+            {
+                // border
+                styleInfo.TableBorderWidth = thTdRule.Style.GetPropertyValue("border-width");
+                styleInfo.TableBorderColor = GetColorHexFromRule(thTdRule, "border-color");
+
+                // padding
+                styleInfo.TableCellPadding = thTdRule.Style.GetPropertyValue("padding");
+            }
+
+            var thRule = stylesheet.Rules
+                .OfType<ICssStyleRule>()
+                .FirstOrDefault(r => r.SelectorText == "th");
+
+            if (thRule != null)
+            {
+                styleInfo.TableHeaderBackgroundColor = GetColorHexFromRule(thRule, "background-color");
             }
 
             return styleInfo;
@@ -209,34 +187,31 @@ namespace PageLeaf.Services
             }
         }
 
-        /// <summary>
-        /// RGBAまたはRGB形式の色文字列をHEX形式に変換します。
-        /// </summary>
-        /// <param name="colorValue">RGBAまたはRGB形式の色文字列。</param>
-        /// <returns>HEX形式の色文字列（例: #RRGGBB）。変換できない場合はnull。</returns>
-        private string? ConvertToHex(string? colorValue)
+        private string? GetColorHexFromRule(ICssStyleRule rule, string propertyName)
         {
+            var property = rule.Style.GetProperty(propertyName);
+            if (property != null && property.RawValue is AngleSharp.Css.Values.Color angleSharpColor)
+            {
+                return $"#{angleSharpColor.R:X2}{angleSharpColor.G:X2}{angleSharpColor.B:X2}";
+            }
+            // Fallback for non-raw color values
+            var colorValue = rule.Style.GetPropertyValue(propertyName);
             if (string.IsNullOrEmpty(colorValue) || colorValue == "transparent")
             {
                 return null;
             }
-
-            // すでにHEX形式の場合はそのまま返す
-            if (colorValue.StartsWith("#") && (colorValue.Length == 7 || colorValue.Length == 4))
+            if (colorValue.StartsWith("#"))
             {
-                return colorValue;
+                return colorValue.ToUpper();
             }
-
-            System.Windows.Media.Color color; // ここを修正
             try
             {
                 // System.Windows.Media.ColorConverter.ConvertFromString は "rgb(r, g, b)" や "rgba(r, g, b, a)" 形式をパースできる
-                color = (System.Windows.Media.Color)ColorConverter.ConvertFromString(colorValue);
+                var color = (System.Windows.Media.Color)ColorConverter.ConvertFromString(colorValue);
                 return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
             }
             catch
             {
-                // 変換できない場合はnullを返す
                 return null;
             }
         }

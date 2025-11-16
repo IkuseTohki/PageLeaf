@@ -92,11 +92,11 @@
                         <Label Content="罫線 色:"/>
                         <controls:ColorInputControl ColorText="{Binding TableBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="罫線 太さ:"/>
-                        <TextBox/>
+                        <TextBox Text="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="ヘッダー背景色:"/>
                         <controls:ColorInputControl ColorText="{Binding TableHeaderBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="セル パディング:"/>
-                        <TextBox/>
+                        <TextBox Text="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </TabItem>
 
