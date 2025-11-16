@@ -15,6 +15,8 @@ namespace PageLeaf.Models
         public string? QuoteTextColor { get; set; }
         public string? QuoteBackgroundColor { get; set; }
         public string? QuoteBorderColor { get; set; }
+        public string? QuoteBorderWidth { get; set; }
+        public string? QuoteBorderStyle { get; set; }
         public string? TableBorderColor { get; set; }
         public string? TableHeaderBackgroundColor { get; set; }
         public string? CodeTextColor { get; set; }

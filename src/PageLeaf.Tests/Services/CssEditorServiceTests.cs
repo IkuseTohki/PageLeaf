@@ -302,5 +302,30 @@ namespace PageLeaf.Tests.Services
             Assert.IsFalse(h3Flags.IsUnderline);
             Assert.IsFalse(h3Flags.IsStrikethrough);
         }
+
+        [TestMethod]
+        public void ParseCss_ShouldParseBlockquoteStyles()
+        {
+            // テスト観点: `blockquote` のスタイル(color, background-color, border-left)が正しく解析され、
+            // CssStyleInfoの対応するプロパティに格納されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = @"
+                blockquote { 
+                    color: #123456; 
+                    background-color: #abcdef; 
+                    border-left: 3px solid #987654; 
+                }";
+
+            // Act
+            var styles = service.ParseCss(cssContent);
+
+            // Assert
+            Assert.AreEqual("#123456", styles.QuoteTextColor);
+            Assert.AreEqual("#ABCDEF", styles.QuoteBackgroundColor);
+            Assert.AreEqual("3px", styles.QuoteBorderWidth);
+            Assert.AreEqual("solid", styles.QuoteBorderStyle);
+            Assert.AreEqual("#987654", styles.QuoteBorderColor);
+        }
     }
 }

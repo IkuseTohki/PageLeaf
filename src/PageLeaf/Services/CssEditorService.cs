@@ -108,6 +108,50 @@ namespace PageLeaf.Services
                 }
             }
 
+            // blockquote のスタイルを解析
+            var blockquoteRule = stylesheet.Rules
+                .OfType<ICssStyleRule>()
+                .FirstOrDefault(r => r.SelectorText == "blockquote");
+
+            if (blockquoteRule != null)
+            {
+                // color
+                var colorProperty = blockquoteRule.Style.GetProperty("color");
+                if (colorProperty != null && colorProperty.RawValue is AngleSharp.Css.Values.Color angleSharpColor)
+                {
+                    styleInfo.QuoteTextColor = $"#{angleSharpColor.R:X2}{angleSharpColor.G:X2}{angleSharpColor.B:X2}";
+                }
+                else
+                {
+                    styleInfo.QuoteTextColor = ConvertToHex(blockquoteRule.Style.GetPropertyValue("color"));
+                }
+
+                // background-color
+                var backgroundColorProperty = blockquoteRule.Style.GetProperty("background-color");
+                if (backgroundColorProperty != null && backgroundColorProperty.RawValue is AngleSharp.Css.Values.Color angleSharpBackgroundColor)
+                {
+                    styleInfo.QuoteBackgroundColor = $"#{angleSharpBackgroundColor.R:X2}{angleSharpBackgroundColor.G:X2}{angleSharpBackgroundColor.B:X2}";
+                }
+                else
+                {
+                    styleInfo.QuoteBackgroundColor = ConvertToHex(blockquoteRule.Style.GetPropertyValue("background-color"));
+                }
+
+                // border-left
+                styleInfo.QuoteBorderWidth = blockquoteRule.Style.GetPropertyValue("border-left-width");
+                styleInfo.QuoteBorderStyle = blockquoteRule.Style.GetPropertyValue("border-left-style");
+
+                var borderLeftColorProperty = blockquoteRule.Style.GetProperty("border-left-color");
+                if (borderLeftColorProperty != null && borderLeftColorProperty.RawValue is AngleSharp.Css.Values.Color angleSharpBorderColor)
+                {
+                    styleInfo.QuoteBorderColor = $"#{angleSharpBorderColor.R:X2}{angleSharpBorderColor.G:X2}{angleSharpBorderColor.B:X2}";
+                }
+                else
+                {
+                    styleInfo.QuoteBorderColor = ConvertToHex(blockquoteRule.Style.GetPropertyValue("border-left-color"));
+                }
+            }
+
             return styleInfo;
         }
 

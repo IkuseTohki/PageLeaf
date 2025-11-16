@@ -24,6 +24,8 @@ namespace PageLeaf.ViewModels
         private string? _quoteTextColor;
         private string? _quoteBackgroundColor;
         private string? _quoteBorderColor;
+        private string? _quoteBorderWidth;
+        private string? _quoteBorderStyle;
         private string? _tableBorderColor;
         private string? _tableHeaderBackgroundColor;
         private string? _codeTextColor;
@@ -87,6 +89,13 @@ namespace PageLeaf.ViewModels
             {
                 _allHeadingStyleFlags[entry.Key] = entry.Value;
             }
+
+            // Quote styles
+            QuoteTextColor = styleInfo.QuoteTextColor;
+            QuoteBackgroundColor = styleInfo.QuoteBackgroundColor;
+            QuoteBorderColor = styleInfo.QuoteBorderColor;
+            QuoteBorderWidth = styleInfo.QuoteBorderWidth;
+            QuoteBorderStyle = styleInfo.QuoteBorderStyle;
 
             UpdateHeadingProperties();
         }
@@ -336,6 +345,32 @@ namespace PageLeaf.ViewModels
                 if (_quoteBorderColor != value)
                 {
                     _quoteBorderColor = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? QuoteBorderWidth
+        {
+            get => _quoteBorderWidth;
+            set
+            {
+                if (_quoteBorderWidth != value)
+                {
+                    _quoteBorderWidth = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public string? QuoteBorderStyle
+        {
+            get => _quoteBorderStyle;
+            set
+            {
+                if (_quoteBorderStyle != value)
+                {
+                    _quoteBorderStyle = value;
                     OnPropertyChanged();
                 }
             }

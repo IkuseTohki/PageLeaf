@@ -442,5 +442,46 @@ namespace PageLeaf.Tests.ViewModels
             Assert.IsTrue(isStrikethroughRaised, "PropertyChanged for IsHeadingStrikethrough should have been raised.");
             Assert.IsTrue(_viewModel.IsHeadingStrikethrough);
         }
+
+        [TestMethod]
+        public void LoadStyles_ShouldLoadQuoteStylesAndRaisePropertyChanged()
+        {
+            // テスト観点: LoadStylesメソッドが呼ばれた際に、CssStyleInfoの引用関連のスタイルが
+            // ViewModelの各プロパティに正しく読み込まれ、PropertyChangedイベントが発火することを確認する。
+            // Arrange
+            var cssInfo = new Models.CssStyleInfo
+            {
+                QuoteTextColor = "#111111",
+                QuoteBackgroundColor = "#222222",
+                QuoteBorderWidth = "1px",
+                QuoteBorderStyle = "dashed",
+                QuoteBorderColor = "#333333"
+            };
+
+            var raisedProperties = new System.Collections.Generic.List<string>();
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName != null)
+                {
+                    raisedProperties.Add(args.PropertyName);
+                }
+            };
+
+            // Act
+            _viewModel.LoadStyles(cssInfo);
+
+            // Assert
+            Assert.AreEqual(cssInfo.QuoteTextColor, _viewModel.QuoteTextColor);
+            Assert.AreEqual(cssInfo.QuoteBackgroundColor, _viewModel.QuoteBackgroundColor);
+            Assert.AreEqual(cssInfo.QuoteBorderWidth, _viewModel.QuoteBorderWidth);
+            Assert.AreEqual(cssInfo.QuoteBorderStyle, _viewModel.QuoteBorderStyle);
+            Assert.AreEqual(cssInfo.QuoteBorderColor, _viewModel.QuoteBorderColor);
+
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.QuoteTextColor)));
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.QuoteBackgroundColor)));
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.QuoteBorderWidth)));
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.QuoteBorderStyle)));
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.QuoteBorderColor)));
+        }
     }
 }

@@ -62,9 +62,9 @@
                         <Label Content="左枠線 色:"/>
                         <controls:ColorInputControl ColorText="{Binding QuoteBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="左枠線 太さ:"/>
-                        <TextBox/>
+                        <TextBox Text="{Binding QuoteBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="左枠線 種類:"/>
-                        <ComboBox>
+                        <ComboBox Text="{Binding QuoteBorderStyle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <ComboBoxItem Content="solid"/>
                             <ComboBoxItem Content="dotted"/>
                             <ComboBoxItem Content="dashed"/>
