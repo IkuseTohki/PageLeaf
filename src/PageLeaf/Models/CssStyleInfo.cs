@@ -21,6 +21,8 @@ namespace PageLeaf.Models
         public string? TableHeaderBackgroundColor { get; set; }
         public string? CodeTextColor { get; set; }
         public string? CodeBackgroundColor { get; set; }
+        public string? ListMarkerType { get; set; }
+        public string? ListIndent { get; set; }
     }
 
     public class HeadingStyleFlags

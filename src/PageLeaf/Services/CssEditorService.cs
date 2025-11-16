@@ -152,6 +152,17 @@ namespace PageLeaf.Services
                 }
             }
 
+            // ul のスタイルを解析
+            var ulRule = stylesheet.Rules
+                .OfType<ICssStyleRule>()
+                .FirstOrDefault(r => r.SelectorText == "ul");
+
+            if (ulRule != null)
+            {
+                styleInfo.ListMarkerType = ulRule.Style.GetPropertyValue("list-style-type");
+                styleInfo.ListIndent = ulRule.Style.GetPropertyValue("padding-left");
+            }
+
             return styleInfo;
         }
 

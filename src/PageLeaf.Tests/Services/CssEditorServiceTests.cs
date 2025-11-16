@@ -327,5 +327,26 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("solid", styles.QuoteBorderStyle);
             Assert.AreEqual("#987654", styles.QuoteBorderColor);
         }
+
+        [TestMethod]
+        public void ParseCss_ShouldParseListStyles()
+        {
+            // テスト観点: `ul` のスタイル(list-style-type, padding-left)が正しく解析され、
+            // CssStyleInfoの対応するプロパティに格納されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = @"
+                ul { 
+                    list-style-type: square; 
+                    padding-left: 40px; 
+                }";
+
+            // Act
+            var styles = service.ParseCss(cssContent);
+
+            // Assert
+            Assert.AreEqual("square", styles.ListMarkerType);
+            Assert.AreEqual("40px", styles.ListIndent);
+        }
     }
 }

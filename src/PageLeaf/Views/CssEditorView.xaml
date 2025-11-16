@@ -76,13 +76,13 @@
                 <TabItem Header="リスト">
                     <StackPanel Margin="5">
                         <Label Content="マーカーの種類 (ul):"/>
-                        <ComboBox>
+                        <ComboBox Text="{Binding ListMarkerType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <ComboBoxItem Content="disc"/>
                             <ComboBoxItem Content="circle"/>
                             <ComboBoxItem Content="square"/>
                         </ComboBox>
                         <Label Content="インデント:"/>
-                        <TextBox/>
+                        <TextBox Text="{Binding ListIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </TabItem>
 

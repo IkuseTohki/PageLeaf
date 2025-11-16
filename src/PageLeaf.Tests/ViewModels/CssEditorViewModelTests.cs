@@ -483,5 +483,37 @@ namespace PageLeaf.Tests.ViewModels
             Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.QuoteBorderStyle)));
             Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.QuoteBorderColor)));
         }
+
+        [TestMethod]
+        public void LoadStyles_ShouldLoadListStylesAndRaisePropertyChanged()
+        {
+            // テスト観点: LoadStylesメソッドが呼ばれた際に、CssStyleInfoのリスト関連のスタイルが
+            // ViewModelの各プロパティに正しく読み込まれ、PropertyChangedイベントが発火することを確認する。
+            // Arrange
+            var cssInfo = new Models.CssStyleInfo
+            {
+                ListMarkerType = "disc",
+                ListIndent = "20px"
+            };
+
+            var raisedProperties = new System.Collections.Generic.List<string>();
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName != null)
+                {
+                    raisedProperties.Add(args.PropertyName);
+                }
+            };
+
+            // Act
+            _viewModel.LoadStyles(cssInfo);
+
+            // Assert
+            Assert.AreEqual(cssInfo.ListMarkerType, _viewModel.ListMarkerType);
+            Assert.AreEqual(cssInfo.ListIndent, _viewModel.ListIndent);
+
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.ListMarkerType)));
+            Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.ListIndent)));
+        }
     }
 }
