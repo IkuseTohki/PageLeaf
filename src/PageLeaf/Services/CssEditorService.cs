@@ -7,6 +7,7 @@ using System.IO;
 using PageLeaf.Utilities;
 using System.Windows.Media; // ColorConverter を使用するために追加
 using AngleSharp.Css.Values; // AngleSharp.Css.Values.Color を使用するために追加
+using System.Collections.Generic; // List<string> を使用するために追加
 
 namespace PageLeaf.Services
 {
@@ -188,6 +189,111 @@ namespace PageLeaf.Services
                 if (!string.IsNullOrEmpty(styleInfo.BodyFontSize))
                 {
                     bodyRule.Style.SetProperty("font-size", styleInfo.BodyFontSize);
+                }
+            }
+
+            // h1からh6までの見出しスタイルを更新
+            for (int i = 1; i <= 6; i++)
+            {
+                var headingSelector = $"h{i}";
+                var headingRule = stylesheet.Rules
+                    .OfType<ICssStyleRule>()
+                    .FirstOrDefault(r => r.SelectorText == headingSelector);
+
+                // 見出しセレクタが存在しない場合は追加
+                if (headingRule == null)
+                {
+                    var newHeadingRuleText = $"{headingSelector} {{}}";
+                    stylesheet.Insert(newHeadingRuleText, stylesheet.Rules.Length);
+                    headingRule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
+                }
+
+                if (headingRule != null)
+                {
+                    // Color
+                    if (styleInfo.HeadingTextColors.TryGetValue(headingSelector, out var color) && !string.IsNullOrEmpty(color))
+                    {
+                        headingRule.Style.SetProperty("color", color);
+                    }
+                    else if (styleInfo.HeadingTextColors.ContainsKey(headingSelector) && string.IsNullOrEmpty(color))
+                    {
+                        headingRule.Style.RemoveProperty("color");
+                    }
+
+                    // Font Size
+                    if (styleInfo.HeadingFontSizes.TryGetValue(headingSelector, out var fontSize) && !string.IsNullOrEmpty(fontSize))
+                    {
+                        headingRule.Style.SetProperty("font-size", fontSize);
+                    }
+                    else if (styleInfo.HeadingFontSizes.ContainsKey(headingSelector) && string.IsNullOrEmpty(fontSize))
+                    {
+                        headingRule.Style.RemoveProperty("font-size");
+                    }
+
+                    // Font Family
+                    if (styleInfo.HeadingFontFamilies.TryGetValue(headingSelector, out var fontFamily) && !string.IsNullOrEmpty(fontFamily))
+                    {
+                        headingRule.Style.SetProperty("font-family", fontFamily);
+                    }
+                    else if (styleInfo.HeadingFontFamilies.ContainsKey(headingSelector) && string.IsNullOrEmpty(fontFamily))
+                    {
+                        headingRule.Style.RemoveProperty("font-family");
+                    }
+
+                    // Style Flags (Bold, Italic, Underline, Strikethrough)
+                    if (styleInfo.HeadingStyleFlags.TryGetValue(headingSelector, out var flags))
+                    {
+                        // Font Weight
+                        if (flags.IsBold)
+                        {
+                            headingRule.Style.SetProperty("font-weight", "bold");
+                        }
+                        else
+                        {
+                            headingRule.Style.SetProperty("font-weight", "normal");
+                        }
+
+                        // Font Style
+                        if (flags.IsItalic)
+                        {
+                            headingRule.Style.SetProperty("font-style", "italic");
+                        }
+                        else
+                        {
+                            headingRule.Style.SetProperty("font-style", "normal");
+                        }
+
+                        // Text Decoration
+                        var textDecorations = new List<string>();
+                        if (flags.IsUnderline)
+                        {
+                            textDecorations.Add("underline");
+                        }
+                        if (flags.IsStrikethrough)
+                        {
+                            textDecorations.Add("line-through");
+                        }
+
+                        if (textDecorations.Any())
+                        {
+                            headingRule.Style.SetProperty("text-decoration", string.Join(" ", textDecorations));
+                            // text-decoration-color を明示的に設定
+                            if (styleInfo.HeadingTextColors.TryGetValue(headingSelector, out var textColor) && !string.IsNullOrEmpty(textColor))
+                            {
+                                headingRule.Style.SetProperty("text-decoration-color", textColor);
+                            }
+                            else
+                            {
+                                // 文字色が設定されていない場合は、text-decoration-colorも削除
+                                headingRule.Style.RemoveProperty("text-decoration-color");
+                            }
+                        }
+                        else
+                        {
+                            headingRule.Style.SetProperty("text-decoration", "none");
+                            headingRule.Style.RemoveProperty("text-decoration-color"); // 不要な場合は削除
+                        }
+                    }
                 }
             }
 

@@ -43,13 +43,36 @@ namespace PageLeaf.Tests.ViewModels
             _viewModel.TargetCssPath = filePath;
             _viewModel.BodyTextColor = "red";
             _viewModel.BodyBackgroundColor = "white";
-            _viewModel.HeadingTextColor = "blue";
+            _viewModel.HeadingTextColor = "blue"; // これはSelectedHeadingLevelに依存するため、直接検証はしない
+
+            // 見出しスタイルをセット
+            var initialCssInfo = new Models.CssStyleInfo();
+            initialCssInfo.HeadingTextColors["h1"] = "rgba(255, 0, 0, 1)";
+            initialCssInfo.HeadingFontSizes["h1"] = "24px";
+            initialCssInfo.HeadingFontFamilies["h1"] = "Arial";
+            initialCssInfo.HeadingStyleFlags["h1"] = new Models.HeadingStyleFlags { IsBold = true };
+            initialCssInfo.HeadingTextColors["h2"] = "rgba(0, 0, 255, 1)";
+            initialCssInfo.HeadingFontSizes["h2"] = "20px";
+            initialCssInfo.HeadingFontFamilies["h2"] = "Verdana";
+            initialCssInfo.HeadingStyleFlags["h2"] = new Models.HeadingStyleFlags { IsItalic = true };
+            _viewModel.LoadStyles(initialCssInfo); // ViewModelの内部Dictionaryを初期化
 
             _mockFileService.Setup(s => s.ReadAllText(filePath)).Returns(initialCss);
             _mockCssEditorService.Setup(s => s.UpdateCssContent(initialCss, It.Is<Models.CssStyleInfo>(info => 
                 info.BodyTextColor == _viewModel.BodyTextColor && 
                 info.BodyBackgroundColor == _viewModel.BodyBackgroundColor &&
-                info.HeadingTextColor == _viewModel.HeadingTextColor
+                // HeadingTextColorsの検証
+                info.HeadingTextColors.ContainsKey("h1") && info.HeadingTextColors["h1"] == initialCssInfo.HeadingTextColors["h1"] &&
+                info.HeadingTextColors.ContainsKey("h2") && info.HeadingTextColors["h2"] == initialCssInfo.HeadingTextColors["h2"] &&
+                // HeadingFontSizesの検証
+                info.HeadingFontSizes.ContainsKey("h1") && info.HeadingFontSizes["h1"] == initialCssInfo.HeadingFontSizes["h1"] &&
+                info.HeadingFontSizes.ContainsKey("h2") && info.HeadingFontSizes["h2"] == initialCssInfo.HeadingFontSizes["h2"] &&
+                // HeadingFontFamiliesの検証
+                info.HeadingFontFamilies.ContainsKey("h1") && info.HeadingFontFamilies["h1"] == initialCssInfo.HeadingFontFamilies["h1"] &&
+                info.HeadingFontFamilies.ContainsKey("h2") && info.HeadingFontFamilies["h2"] == initialCssInfo.HeadingFontFamilies["h2"] &&
+                // HeadingStyleFlagsの検証
+                info.HeadingStyleFlags.ContainsKey("h1") && info.HeadingStyleFlags["h1"].IsBold == initialCssInfo.HeadingStyleFlags["h1"].IsBold &&
+                info.HeadingStyleFlags.ContainsKey("h2") && info.HeadingStyleFlags["h2"].IsItalic == initialCssInfo.HeadingStyleFlags["h2"].IsItalic
                 )))
                                  .Returns(updatedCss);
 
@@ -61,7 +84,18 @@ namespace PageLeaf.Tests.ViewModels
             _mockCssEditorService.Verify(s => s.UpdateCssContent(initialCss, It.Is<Models.CssStyleInfo>(info =>
                 info.BodyTextColor == _viewModel.BodyTextColor &&
                 info.BodyBackgroundColor == _viewModel.BodyBackgroundColor &&
-                info.HeadingTextColor == _viewModel.HeadingTextColor
+                // HeadingTextColorsの検証
+                info.HeadingTextColors.ContainsKey("h1") && info.HeadingTextColors["h1"] == initialCssInfo.HeadingTextColors["h1"] &&
+                info.HeadingTextColors.ContainsKey("h2") && info.HeadingTextColors["h2"] == initialCssInfo.HeadingTextColors["h2"] &&
+                // HeadingFontSizesの検証
+                info.HeadingFontSizes.ContainsKey("h1") && info.HeadingFontSizes["h1"] == initialCssInfo.HeadingFontSizes["h1"] &&
+                info.HeadingFontSizes.ContainsKey("h2") && info.HeadingFontSizes["h2"] == initialCssInfo.HeadingFontSizes["h2"] &&
+                // HeadingFontFamiliesの検証
+                info.HeadingFontFamilies.ContainsKey("h1") && info.HeadingFontFamilies["h1"] == initialCssInfo.HeadingFontFamilies["h1"] &&
+                info.HeadingFontFamilies.ContainsKey("h2") && info.HeadingFontFamilies["h2"] == initialCssInfo.HeadingFontFamilies["h2"] &&
+                // HeadingStyleFlagsの検証
+                info.HeadingStyleFlags.ContainsKey("h1") && info.HeadingStyleFlags["h1"].IsBold == initialCssInfo.HeadingStyleFlags["h1"].IsBold &&
+                info.HeadingStyleFlags.ContainsKey("h2") && info.HeadingStyleFlags["h2"].IsItalic == initialCssInfo.HeadingStyleFlags["h2"].IsItalic
                 )), Times.Once);
             _mockFileService.Verify(s => s.WriteAllText(filePath, updatedCss), Times.Once);
         }

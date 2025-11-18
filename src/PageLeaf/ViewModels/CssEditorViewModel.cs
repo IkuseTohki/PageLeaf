@@ -245,6 +245,10 @@ namespace PageLeaf.ViewModels
                 {
                     _headingTextColor = value;
                     OnPropertyChanged();
+                    if (_selectedHeadingLevel != null)
+                    {
+                        _allHeadingTextColors[_selectedHeadingLevel] = value ?? string.Empty;
+                    }
                 }
             }
         }
@@ -258,6 +262,10 @@ namespace PageLeaf.ViewModels
                 {
                     _headingFontSize = value;
                     OnPropertyChanged();
+                    if (_selectedHeadingLevel != null)
+                    {
+                        _allHeadingFontSizes[_selectedHeadingLevel] = value ?? string.Empty;
+                    }
                 }
             }
         }
@@ -271,6 +279,10 @@ namespace PageLeaf.ViewModels
                 {
                     _headingFontFamily = value;
                     OnPropertyChanged();
+                    if (_selectedHeadingLevel != null)
+                    {
+                        _allHeadingFontFamilies[_selectedHeadingLevel] = value ?? string.Empty;
+                    }
                 }
             }
         }
@@ -285,6 +297,15 @@ namespace PageLeaf.ViewModels
                 {
                     _isHeadingBold = value;
                     OnPropertyChanged();
+                    if (_selectedHeadingLevel != null)
+                    {
+                        if (!_allHeadingStyleFlags.TryGetValue(_selectedHeadingLevel, out var flags))
+                        {
+                            flags = new HeadingStyleFlags();
+                            _allHeadingStyleFlags[_selectedHeadingLevel] = flags;
+                        }
+                        flags.IsBold = value;
+                    }
                 }
             }
         }
@@ -299,6 +320,15 @@ namespace PageLeaf.ViewModels
                 {
                     _isHeadingItalic = value;
                     OnPropertyChanged();
+                    if (_selectedHeadingLevel != null)
+                    {
+                        if (!_allHeadingStyleFlags.TryGetValue(_selectedHeadingLevel, out var flags))
+                        {
+                            flags = new HeadingStyleFlags();
+                            _allHeadingStyleFlags[_selectedHeadingLevel] = flags;
+                        }
+                        flags.IsItalic = value;
+                    }
                 }
             }
         }
@@ -313,6 +343,15 @@ namespace PageLeaf.ViewModels
                 {
                     _isHeadingUnderline = value;
                     OnPropertyChanged();
+                    if (_selectedHeadingLevel != null)
+                    {
+                        if (!_allHeadingStyleFlags.TryGetValue(_selectedHeadingLevel, out var flags))
+                        {
+                            flags = new HeadingStyleFlags();
+                            _allHeadingStyleFlags[_selectedHeadingLevel] = flags;
+                        }
+                        flags.IsUnderline = value;
+                    }
                 }
             }
         }
@@ -327,6 +366,15 @@ namespace PageLeaf.ViewModels
                 {
                     _isHeadingStrikethrough = value;
                     OnPropertyChanged();
+                    if (_selectedHeadingLevel != null)
+                    {
+                        if (!_allHeadingStyleFlags.TryGetValue(_selectedHeadingLevel, out var flags))
+                        {
+                            flags = new HeadingStyleFlags();
+                            _allHeadingStyleFlags[_selectedHeadingLevel] = flags;
+                        }
+                        flags.IsStrikethrough = value;
+                    }
                 }
             }
         }
@@ -532,7 +580,7 @@ namespace PageLeaf.ViewModels
                 BodyTextColor = this.BodyTextColor,
                 BodyBackgroundColor = this.BodyBackgroundColor,
                 BodyFontSize = this.BodyFontSize,
-                HeadingTextColor = this.HeadingTextColor,
+                // HeadingTextColor = this.HeadingTextColor, // SelectedHeadingLevelに依存するため、Dictionaryをコピーする
                 QuoteTextColor = this.QuoteTextColor,
                 QuoteBackgroundColor = this.QuoteBackgroundColor,
                 QuoteBorderColor = this.QuoteBorderColor,
@@ -541,6 +589,24 @@ namespace PageLeaf.ViewModels
                 CodeTextColor = this.CodeTextColor,
                 CodeBackgroundColor = this.CodeBackgroundColor
             };
+
+            // Heading styles (Dictionaryをコピー)
+            foreach (var entry in _allHeadingTextColors)
+            {
+                styleInfo.HeadingTextColors[entry.Key] = entry.Value;
+            }
+            foreach (var entry in _allHeadingFontSizes)
+            {
+                styleInfo.HeadingFontSizes[entry.Key] = entry.Value;
+            }
+            foreach (var entry in _allHeadingFontFamilies)
+            {
+                styleInfo.HeadingFontFamilies[entry.Key] = entry.Value;
+            }
+            foreach (var entry in _allHeadingStyleFlags)
+            {
+                styleInfo.HeadingStyleFlags[entry.Key] = entry.Value;
+            }
 
             // 3. CSSコンテンツを更新
             var updatedCss = _cssEditorService.UpdateCssContent(existingCss, styleInfo);

@@ -153,6 +153,21 @@ namespace PageLeaf.Tests.Services
                 "  font-size: 12px;",
                 "  color: rgba(0, 0, 0, 1);",
                 "  background-color: rgba(255, 255, 255, 1);",
+                "}",
+                "",
+                "h2 {",
+                "}",
+                "",
+                "h3 {",
+                "}",
+                "",
+                "h4 {",
+                "}",
+                "",
+                "h5 {",
+                "}",
+                "",
+                "h6 {",
                 "}"
             );
 
@@ -396,6 +411,56 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("#FF0000", styles.CodeTextColor);
             Assert.AreEqual("#000000", styles.CodeBackgroundColor);
             Assert.AreEqual("\"Consolas\"", styles.CodeFontFamily);
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldUpdateHeadingStyles()
+        {
+            // テスト観点: UpdateCssContentメソッドが、CssStyleInfoオブジェクトに含まれる見出しスタイル情報に基づいて、
+            // 既存のCSS文字列を正しく更新することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = @"
+                body { font-size: 16px; }
+                h1 { color: red; font-size: 20px; }
+                h2 { font-family: 'Times New Roman'; }
+            ";
+
+            var styleInfo = new CssStyleInfo();
+            styleInfo.HeadingTextColors["h1"] = "rgba(0, 0, 255, 1)"; // Blue
+            styleInfo.HeadingFontSizes["h1"] = "24px";
+            styleInfo.HeadingFontFamilies["h1"] = "Arial";
+            styleInfo.HeadingStyleFlags["h1"] = new HeadingStyleFlags { IsBold = true, IsUnderline = true };
+
+            styleInfo.HeadingTextColors["h2"] = "rgba(0, 255, 0, 1)"; // Green
+            styleInfo.HeadingFontSizes["h2"] = "1.5em";
+            styleInfo.HeadingFontFamilies["h2"] = "Verdana";
+            styleInfo.HeadingStyleFlags["h2"] = new HeadingStyleFlags { IsItalic = true, IsStrikethrough = true };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+            var parsedUpdatedStyles = service.ParseCss(updatedCss);
+
+            // Assert h1
+            Assert.AreEqual("rgba(0, 0, 255, 1)", parsedUpdatedStyles.HeadingTextColors["h1"]);
+            Assert.AreEqual("24px", parsedUpdatedStyles.HeadingFontSizes["h1"]);
+            Assert.AreEqual("Arial", parsedUpdatedStyles.HeadingFontFamilies["h1"]);
+            Assert.IsTrue(parsedUpdatedStyles.HeadingStyleFlags["h1"].IsBold);
+            Assert.IsTrue(parsedUpdatedStyles.HeadingStyleFlags["h1"].IsUnderline);
+            Assert.IsFalse(parsedUpdatedStyles.HeadingStyleFlags["h1"].IsItalic);
+            Assert.IsFalse(parsedUpdatedStyles.HeadingStyleFlags["h1"].IsStrikethrough);
+
+            // Assert h2
+            Assert.AreEqual("rgba(0, 255, 0, 1)", parsedUpdatedStyles.HeadingTextColors["h2"]);
+            Assert.AreEqual("1.5em", parsedUpdatedStyles.HeadingFontSizes["h2"]);
+            Assert.AreEqual("Verdana", parsedUpdatedStyles.HeadingFontFamilies["h2"]);
+            Assert.IsTrue(parsedUpdatedStyles.HeadingStyleFlags["h2"].IsItalic);
+            Assert.IsTrue(parsedUpdatedStyles.HeadingStyleFlags["h2"].IsStrikethrough);
+            Assert.IsFalse(parsedUpdatedStyles.HeadingStyleFlags["h2"].IsBold);
+            Assert.IsFalse(parsedUpdatedStyles.HeadingStyleFlags["h2"].IsUnderline);
+
+            // 既存のbodyスタイルが消えていないことを確認
+            Assert.AreEqual("16px", parsedUpdatedStyles.BodyFontSize);
         }
     }
 }
