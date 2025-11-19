@@ -592,6 +592,7 @@ namespace PageLeaf.ViewModels
                 TableCellPadding = this.TableCellPadding,
                 CodeTextColor = this.CodeTextColor,
                 CodeBackgroundColor = this.CodeBackgroundColor,
+                CodeFontFamily = this.CodeFontFamily,
                 ListMarkerType = this.ListMarkerType,
                 ListIndent = this.ListIndent
             };

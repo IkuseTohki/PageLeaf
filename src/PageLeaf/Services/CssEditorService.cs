@@ -8,6 +8,7 @@ using PageLeaf.Utilities;
 using System.Windows.Media; // ColorConverter を使用するために追加
 using AngleSharp.Css.Values; // AngleSharp.Css.Values.Color を使用するために追加
 using System.Collections.Generic; // List<string> を使用するために追加
+using System;
 
 namespace PageLeaf.Services
 {
@@ -162,244 +163,127 @@ namespace PageLeaf.Services
             var parser = new CssParser();
             var stylesheet = parser.ParseStyleSheet(existingCss);
 
-            var bodyRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "body");
-
-            // bodyセレクタが存在しない場合は追加
-            if (bodyRule == null)
+            // Body
+            UpdateOrCreateRule(stylesheet, "body", (rule, info) =>
             {
-                // 新しいルールを作成し、スタイルシートの末尾に追加
-                var newBodyRuleText = "body {}"; // ルール文字列を直接渡す
-                stylesheet.Insert(newBodyRuleText, stylesheet.Rules.Length);
-                // Insert されたルールを取得する必要がある
-                bodyRule = stylesheet.Rules.LastOrDefault() as ICssStyleRule; // 最後に追加されたルールを取得
-            }
+                if (!string.IsNullOrEmpty(info.BodyTextColor)) rule.Style.SetProperty("color", info.BodyTextColor);
+                if (!string.IsNullOrEmpty(info.BodyBackgroundColor)) rule.Style.SetProperty("background-color", info.BodyBackgroundColor);
+                if (!string.IsNullOrEmpty(info.BodyFontSize)) rule.Style.SetProperty("font-size", info.BodyFontSize);
+            }, styleInfo);
 
-            if (bodyRule != null)
-            {
-                if (!string.IsNullOrEmpty(styleInfo.BodyTextColor))
-                {
-                    bodyRule.Style.SetProperty("color", styleInfo.BodyTextColor);
-                }
-                if (!string.IsNullOrEmpty(styleInfo.BodyBackgroundColor))
-                {
-                    bodyRule.Style.SetProperty("background-color", styleInfo.BodyBackgroundColor);
-                }
-                if (!string.IsNullOrEmpty(styleInfo.BodyFontSize))
-                {
-                    bodyRule.Style.SetProperty("font-size", styleInfo.BodyFontSize);
-                }
-            }
-
-            // h1からh6までの見出しスタイルを更新
+            // Headings
             for (int i = 1; i <= 6; i++)
             {
                 var headingSelector = $"h{i}";
-                var headingRule = stylesheet.Rules
-                    .OfType<ICssStyleRule>()
-                    .FirstOrDefault(r => r.SelectorText == headingSelector);
-
-                // 見出しセレクタが存在しない場合は追加
-                if (headingRule == null)
-                {
-                    var newHeadingRuleText = $"{headingSelector} {{}}";
-                    stylesheet.Insert(newHeadingRuleText, stylesheet.Rules.Length);
-                    headingRule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
-                }
-
-                if (headingRule != null)
+                UpdateOrCreateRule(stylesheet, headingSelector, (rule, info) =>
                 {
                     // Color
-                    if (styleInfo.HeadingTextColors.TryGetValue(headingSelector, out var color) && !string.IsNullOrEmpty(color))
+                    if (info.HeadingTextColors.TryGetValue(headingSelector, out var color) && !string.IsNullOrEmpty(color))
                     {
-                        headingRule.Style.SetProperty("color", color);
+                        rule.Style.SetProperty("color", color);
                     }
-                    else if (styleInfo.HeadingTextColors.ContainsKey(headingSelector) && string.IsNullOrEmpty(color))
+                    else if (info.HeadingTextColors.ContainsKey(headingSelector) && string.IsNullOrEmpty(color))
                     {
-                        headingRule.Style.RemoveProperty("color");
+                        rule.Style.RemoveProperty("color");
                     }
 
                     // Font Size
-                    if (styleInfo.HeadingFontSizes.TryGetValue(headingSelector, out var fontSize) && !string.IsNullOrEmpty(fontSize))
+                    if (info.HeadingFontSizes.TryGetValue(headingSelector, out var fontSize) && !string.IsNullOrEmpty(fontSize))
                     {
-                        headingRule.Style.SetProperty("font-size", fontSize);
+                        rule.Style.SetProperty("font-size", fontSize);
                     }
-                    else if (styleInfo.HeadingFontSizes.ContainsKey(headingSelector) && string.IsNullOrEmpty(fontSize))
+                    else if (info.HeadingFontSizes.ContainsKey(headingSelector) && string.IsNullOrEmpty(fontSize))
                     {
-                        headingRule.Style.RemoveProperty("font-size");
+                        rule.Style.RemoveProperty("font-size");
                     }
 
                     // Font Family
-                    if (styleInfo.HeadingFontFamilies.TryGetValue(headingSelector, out var fontFamily) && !string.IsNullOrEmpty(fontFamily))
+                    if (info.HeadingFontFamilies.TryGetValue(headingSelector, out var fontFamily) && !string.IsNullOrEmpty(fontFamily))
                     {
-                        headingRule.Style.SetProperty("font-family", fontFamily);
+                        rule.Style.SetProperty("font-family", fontFamily);
                     }
-                    else if (styleInfo.HeadingFontFamilies.ContainsKey(headingSelector) && string.IsNullOrEmpty(fontFamily))
+                    else if (info.HeadingFontFamilies.ContainsKey(headingSelector) && string.IsNullOrEmpty(fontFamily))
                     {
-                        headingRule.Style.RemoveProperty("font-family");
+                        rule.Style.RemoveProperty("font-family");
                     }
-
-                    // Style Flags (Bold, Italic, Underline, Strikethrough)
-                    if (styleInfo.HeadingStyleFlags.TryGetValue(headingSelector, out var flags))
+                    
+                    // Style Flags
+                    if (info.HeadingStyleFlags.TryGetValue(headingSelector, out var flags))
                     {
-                        // Font Weight
-                        if (flags.IsBold)
-                        {
-                            headingRule.Style.SetProperty("font-weight", "bold");
-                        }
-                        else
-                        {
-                            headingRule.Style.SetProperty("font-weight", "normal");
-                        }
+                        rule.Style.SetProperty("font-weight", flags.IsBold ? "bold" : "normal");
+                        rule.Style.SetProperty("font-style", flags.IsItalic ? "italic" : "normal");
 
-                        // Font Style
-                        if (flags.IsItalic)
-                        {
-                            headingRule.Style.SetProperty("font-style", "italic");
-                        }
-                        else
-                        {
-                            headingRule.Style.SetProperty("font-style", "normal");
-                        }
-
-                        // Text Decoration
                         var textDecorations = new List<string>();
-                        if (flags.IsUnderline)
-                        {
-                            textDecorations.Add("underline");
-                        }
-                        if (flags.IsStrikethrough)
-                        {
-                            textDecorations.Add("line-through");
-                        }
+                        if (flags.IsUnderline) textDecorations.Add("underline");
+                        if (flags.IsStrikethrough) textDecorations.Add("line-through");
 
                         if (textDecorations.Any())
                         {
-                            headingRule.Style.SetProperty("text-decoration", string.Join(" ", textDecorations));
-                            // text-decoration-color を明示的に設定
-                            if (styleInfo.HeadingTextColors.TryGetValue(headingSelector, out var textColor) && !string.IsNullOrEmpty(textColor))
+                            rule.Style.SetProperty("text-decoration", string.Join(" ", textDecorations));
+                            if (info.HeadingTextColors.TryGetValue(headingSelector, out var textColor) && !string.IsNullOrEmpty(textColor))
                             {
-                                headingRule.Style.SetProperty("text-decoration-color", textColor);
+                                rule.Style.SetProperty("text-decoration-color", textColor);
                             }
                             else
                             {
-                                // 文字色が設定されていない場合は、text-decoration-colorも削除
-                                headingRule.Style.RemoveProperty("text-decoration-color");
+                                rule.Style.RemoveProperty("text-decoration-color");
                             }
                         }
                         else
                         {
-                            headingRule.Style.SetProperty("text-decoration", "none");
-                            headingRule.Style.RemoveProperty("text-decoration-color"); // 不要な場合は削除
+                            rule.Style.SetProperty("text-decoration", "none");
+                            rule.Style.RemoveProperty("text-decoration-color");
                         }
                     }
-                }
+                }, styleInfo);
             }
 
-            // blockquote スタイルを更新
-            var blockquoteRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "blockquote");
-
-            if (blockquoteRule == null)
+            // Blockquote
+            UpdateOrCreateRule(stylesheet, "blockquote", (rule, info) =>
             {
-                var newRuleText = "blockquote {}";
-                stylesheet.Insert(newRuleText, stylesheet.Rules.Length);
-                blockquoteRule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
-            }
+                if (!string.IsNullOrEmpty(info.QuoteTextColor)) rule.Style.SetProperty("color", info.QuoteTextColor);
+                if (!string.IsNullOrEmpty(info.QuoteBackgroundColor)) rule.Style.SetProperty("background-color", info.QuoteBackgroundColor);
+                if (!string.IsNullOrEmpty(info.QuoteBorderWidth) || !string.IsNullOrEmpty(info.QuoteBorderStyle) || !string.IsNullOrEmpty(info.QuoteBorderColor))
+                {
+                    var borderWidth = !string.IsNullOrEmpty(info.QuoteBorderWidth) ? info.QuoteBorderWidth : "medium";
+                    var borderStyle = !string.IsNullOrEmpty(info.QuoteBorderStyle) ? info.QuoteBorderStyle : "none";
+                    var borderColor = !string.IsNullOrEmpty(info.QuoteBorderColor) ? info.QuoteBorderColor : "currentcolor";
+                    rule.Style.SetProperty("border-left", $"{borderWidth} {borderStyle} {borderColor}");
+                }
+            }, styleInfo);
 
-            if (blockquoteRule != null)
+            // List
+            UpdateOrCreateRule(stylesheet, "ul", (rule, info) =>
             {
-                if (!string.IsNullOrEmpty(styleInfo.QuoteTextColor))
-                {
-                    blockquoteRule.Style.SetProperty("color", styleInfo.QuoteTextColor);
-                }
-                if (!string.IsNullOrEmpty(styleInfo.QuoteBackgroundColor))
-                {
-                    blockquoteRule.Style.SetProperty("background-color", styleInfo.QuoteBackgroundColor);
-                }
+                if (!string.IsNullOrEmpty(info.ListMarkerType)) rule.Style.SetProperty("list-style-type", info.ListMarkerType);
+                if (!string.IsNullOrEmpty(info.ListIndent)) rule.Style.SetProperty("padding-left", info.ListIndent);
+            }, styleInfo);
 
-                // border-left プロパティを組み立てる
-                if (!string.IsNullOrEmpty(styleInfo.QuoteBorderWidth) ||
-                    !string.IsNullOrEmpty(styleInfo.QuoteBorderStyle) ||
-                    !string.IsNullOrEmpty(styleInfo.QuoteBorderColor))
-                {
-                    var borderWidth = !string.IsNullOrEmpty(styleInfo.QuoteBorderWidth) ? styleInfo.QuoteBorderWidth : "medium";
-                    var borderStyle = !string.IsNullOrEmpty(styleInfo.QuoteBorderStyle) ? styleInfo.QuoteBorderStyle : "none";
-                    var borderColor = !string.IsNullOrEmpty(styleInfo.QuoteBorderColor) ? styleInfo.QuoteBorderColor : "currentcolor";
-                    blockquoteRule.Style.SetProperty("border-left", $"{borderWidth} {borderStyle} {borderColor}");
-                }
-            }
-
-            // ul スタイルを更新
-            var ulRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "ul");
-
-            if (ulRule == null)
+            // Table
+            UpdateOrCreateRule(stylesheet, "th, td", (rule, info) =>
             {
-                var newRuleText = "ul {}";
-                stylesheet.Insert(newRuleText, stylesheet.Rules.Length);
-                ulRule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
-            }
-
-            if (ulRule != null)
-            {
-                if (!string.IsNullOrEmpty(styleInfo.ListMarkerType))
+                if (!string.IsNullOrEmpty(info.TableBorderWidth) || !string.IsNullOrEmpty(info.TableBorderColor))
                 {
-                    ulRule.Style.SetProperty("list-style-type", styleInfo.ListMarkerType);
+                    var borderWidth = !string.IsNullOrEmpty(info.TableBorderWidth) ? info.TableBorderWidth : "1px";
+                    var borderColor = !string.IsNullOrEmpty(info.TableBorderColor) ? info.TableBorderColor : "black";
+                    rule.Style.SetProperty("border", $"{borderWidth} solid {borderColor}");
                 }
-                if (!string.IsNullOrEmpty(styleInfo.ListIndent))
-                {
-                    ulRule.Style.SetProperty("padding-left", styleInfo.ListIndent);
-                }
-            }
+                if (!string.IsNullOrEmpty(info.TableCellPadding)) rule.Style.SetProperty("padding", info.TableCellPadding);
+            }, styleInfo);
 
-            // table スタイルを更新
-            var thTdRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "th, td");
-
-            if (thTdRule == null)
+            UpdateOrCreateRule(stylesheet, "th", (rule, info) =>
             {
-                var newRuleText = "th, td {}";
-                stylesheet.Insert(newRuleText, stylesheet.Rules.Length);
-                thTdRule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
-            }
+                if (!string.IsNullOrEmpty(info.TableHeaderBackgroundColor)) rule.Style.SetProperty("background-color", info.TableHeaderBackgroundColor);
+            }, styleInfo);
 
-            if (thTdRule != null)
+            // Code
+            UpdateOrCreateRule(stylesheet, "code", (rule, info) =>
             {
-                if (!string.IsNullOrEmpty(styleInfo.TableBorderWidth) || !string.IsNullOrEmpty(styleInfo.TableBorderColor))
-                {
-                    var borderWidth = !string.IsNullOrEmpty(styleInfo.TableBorderWidth) ? styleInfo.TableBorderWidth : "1px";
-                    var borderColor = !string.IsNullOrEmpty(styleInfo.TableBorderColor) ? styleInfo.TableBorderColor : "black";
-                    thTdRule.Style.SetProperty("border", $"{borderWidth} solid {borderColor}");
-                }
-                if (!string.IsNullOrEmpty(styleInfo.TableCellPadding))
-                {
-                    thTdRule.Style.SetProperty("padding", styleInfo.TableCellPadding);
-                }
-            }
+                if (!string.IsNullOrEmpty(info.CodeTextColor)) rule.Style.SetProperty("color", info.CodeTextColor);
+                if (!string.IsNullOrEmpty(info.CodeBackgroundColor)) rule.Style.SetProperty("background-color", info.CodeBackgroundColor);
+                if (!string.IsNullOrEmpty(info.CodeFontFamily)) rule.Style.SetProperty("font-family", info.CodeFontFamily);
+            }, styleInfo);
 
-            var thRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "th");
-
-            if (thRule == null)
-            {
-                var newRuleText = "th {}";
-                stylesheet.Insert(newRuleText, stylesheet.Rules.Length);
-                thRule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
-            }
-
-            if (thRule != null)
-            {
-                if (!string.IsNullOrEmpty(styleInfo.TableHeaderBackgroundColor))
-                {
-                    thRule.Style.SetProperty("background-color", styleInfo.TableHeaderBackgroundColor);
-                }
-            }
 
             // 更新されたスタイルシートを文字列として出力
             using (var writer = new StringWriter())
@@ -408,6 +292,22 @@ namespace PageLeaf.Services
                 return writer.ToString();
             }
         }
+
+        private void UpdateOrCreateRule(ICssStyleSheet stylesheet, string selector, Action<ICssStyleRule, CssStyleInfo> setProperties, CssStyleInfo styleInfo)
+        {
+            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == selector);
+            if (rule == null)
+            {
+                stylesheet.Insert($"{selector} {{}}", stylesheet.Rules.Length);
+                rule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
+            }
+
+            if (rule != null)
+            {
+                setProperties(rule, styleInfo);
+            }
+        }
+
 
         private string? GetColorHexFromRule(ICssStyleRule rule, string propertyName)
         {

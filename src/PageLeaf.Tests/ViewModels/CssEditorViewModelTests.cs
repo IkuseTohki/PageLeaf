@@ -710,5 +710,33 @@ namespace PageLeaf.Tests.ViewModels
             Assert.AreEqual(_viewModel.TableHeaderBackgroundColor, capturedStyleInfo.TableHeaderBackgroundColor);
             Assert.AreEqual(_viewModel.TableCellPadding, capturedStyleInfo.TableCellPadding);
         }
+
+        [TestMethod]
+        public void SaveCssCommand_ShouldCopyCodeStylesToCssStyleInfo()
+        {
+            // テスト観点: SaveCssCommandが実行された際に、ViewModelのコード関連プロパティが
+            // CssStyleInfoオブジェクトに正しくコピーされることを確認する。
+            // Arrange
+            var filePath = "C:\\temp\\test.css";
+            _viewModel.TargetCssPath = filePath;
+
+            _viewModel.CodeTextColor = "#dddddd";
+            _viewModel.CodeBackgroundColor = "#eeeeee";
+            _viewModel.CodeFontFamily = "Courier New";
+
+            Models.CssStyleInfo? capturedStyleInfo = null;
+            _mockCssEditorService.Setup(s => s.UpdateCssContent(It.IsAny<string>(), It.IsAny<Models.CssStyleInfo>()))
+                                 .Callback<string, Models.CssStyleInfo>((css, styleInfo) => capturedStyleInfo = styleInfo)
+                                 .Returns(""); // Return a dummy string
+
+            // Act
+            _viewModel.SaveCssCommand.Execute(null);
+
+            // Assert
+            Assert.IsNotNull(capturedStyleInfo);
+            Assert.AreEqual(_viewModel.CodeTextColor, capturedStyleInfo.CodeTextColor);
+            Assert.AreEqual(_viewModel.CodeBackgroundColor, capturedStyleInfo.CodeBackgroundColor);
+            Assert.AreEqual(_viewModel.CodeFontFamily, capturedStyleInfo.CodeFontFamily);
+        }
     }
 }

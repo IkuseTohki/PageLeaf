@@ -180,6 +180,9 @@ namespace PageLeaf.Tests.Services
                 "}",
                 "",
                 "th {",
+                "}",
+                "",
+                "code {",
                 "}"
             );
 
@@ -552,6 +555,31 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("2px", parsedUpdatedStyles.TableBorderWidth);
             Assert.AreEqual("#BBBBBB", parsedUpdatedStyles.TableHeaderBackgroundColor);
             Assert.AreEqual("10px", parsedUpdatedStyles.TableCellPadding);
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldUpdateCodeStyles()
+        {
+            // テスト観点: UpdateCssContentメソッドが、CssStyleInfoオブジェクトに含まれるコードスタイル情報に基づいて、
+            // 既存のCSS文字列を正しく更新することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "code { color: black; }";
+            var styleInfo = new CssStyleInfo
+            {
+                CodeTextColor = "#dddddd",
+                CodeBackgroundColor = "#eeeeee",
+                CodeFontFamily = "Courier New"
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+            var parsedUpdatedStyles = service.ParseCss(updatedCss);
+
+            // Assert
+            Assert.AreEqual("#DDDDDD", parsedUpdatedStyles.CodeTextColor);
+            Assert.AreEqual("#EEEEEE", parsedUpdatedStyles.CodeBackgroundColor);
+            Assert.AreEqual("Courier New", parsedUpdatedStyles.CodeFontFamily);
         }
     }
 }
