@@ -171,6 +171,9 @@ namespace PageLeaf.Tests.Services
                 "}",
                 "",
                 "blockquote {",
+                "}",
+                "",
+                "ul {",
                 "}"
             );
 
@@ -493,6 +496,29 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("#778899", parsedUpdatedStyles.QuoteBorderColor);
             Assert.AreEqual("5px", parsedUpdatedStyles.QuoteBorderWidth);
             Assert.AreEqual("dotted", parsedUpdatedStyles.QuoteBorderStyle);
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldUpdateListStyles()
+        {
+            // テスト観点: UpdateCssContentメソッドが、CssStyleInfoオブジェクトに含まれるリストスタイル情報に基づいて、
+            // 既存のCSS文字列を正しく更新することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "ul { list-style-type: disc; }";
+            var styleInfo = new CssStyleInfo
+            {
+                ListMarkerType = "square",
+                ListIndent = "30px"
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+            var parsedUpdatedStyles = service.ParseCss(updatedCss);
+
+            // Assert
+            Assert.AreEqual("square", parsedUpdatedStyles.ListMarkerType);
+            Assert.AreEqual("30px", parsedUpdatedStyles.ListIndent);
         }
     }
 }

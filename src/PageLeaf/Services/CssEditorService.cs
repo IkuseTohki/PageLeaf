@@ -332,6 +332,30 @@ namespace PageLeaf.Services
                 }
             }
 
+            // ul スタイルを更新
+            var ulRule = stylesheet.Rules
+                .OfType<ICssStyleRule>()
+                .FirstOrDefault(r => r.SelectorText == "ul");
+
+            if (ulRule == null)
+            {
+                var newRuleText = "ul {}";
+                stylesheet.Insert(newRuleText, stylesheet.Rules.Length);
+                ulRule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
+            }
+
+            if (ulRule != null)
+            {
+                if (!string.IsNullOrEmpty(styleInfo.ListMarkerType))
+                {
+                    ulRule.Style.SetProperty("list-style-type", styleInfo.ListMarkerType);
+                }
+                if (!string.IsNullOrEmpty(styleInfo.ListIndent))
+                {
+                    ulRule.Style.SetProperty("padding-left", styleInfo.ListIndent);
+                }
+            }
+
             // 更新されたスタイルシートを文字列として出力
             using (var writer = new StringWriter())
             {

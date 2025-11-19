@@ -654,5 +654,31 @@ namespace PageLeaf.Tests.ViewModels
             Assert.AreEqual(_viewModel.QuoteBorderWidth, capturedStyleInfo.QuoteBorderWidth);
             Assert.AreEqual(_viewModel.QuoteBorderStyle, capturedStyleInfo.QuoteBorderStyle);
         }
+
+        [TestMethod]
+        public void SaveCssCommand_ShouldCopyListStylesToCssStyleInfo()
+        {
+            // テスト観点: SaveCssCommandが実行された際に、ViewModelのリスト関連プロパティが
+            // CssStyleInfoオブジェクトに正しくコピーされることを確認する。
+            // Arrange
+            var filePath = "C:\\temp\\test.css";
+            _viewModel.TargetCssPath = filePath;
+
+            _viewModel.ListMarkerType = "square";
+            _viewModel.ListIndent = "30px";
+
+            Models.CssStyleInfo? capturedStyleInfo = null;
+            _mockCssEditorService.Setup(s => s.UpdateCssContent(It.IsAny<string>(), It.IsAny<Models.CssStyleInfo>()))
+                                 .Callback<string, Models.CssStyleInfo>((css, styleInfo) => capturedStyleInfo = styleInfo)
+                                 .Returns(""); // Return a dummy string
+
+            // Act
+            _viewModel.SaveCssCommand.Execute(null);
+
+            // Assert
+            Assert.IsNotNull(capturedStyleInfo);
+            Assert.AreEqual(_viewModel.ListMarkerType, capturedStyleInfo.ListMarkerType);
+            Assert.AreEqual(_viewModel.ListIndent, capturedStyleInfo.ListIndent);
+        }
     }
 }

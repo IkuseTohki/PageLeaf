@@ -589,7 +589,9 @@ namespace PageLeaf.ViewModels
                 TableBorderColor = this.TableBorderColor,
                 TableHeaderBackgroundColor = this.TableHeaderBackgroundColor,
                 CodeTextColor = this.CodeTextColor,
-                CodeBackgroundColor = this.CodeBackgroundColor
+                CodeBackgroundColor = this.CodeBackgroundColor,
+                ListMarkerType = this.ListMarkerType,
+                ListIndent = this.ListIndent
             };
 
             // Heading styles (Dictionaryをコピー)
