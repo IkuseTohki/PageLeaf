@@ -168,6 +168,9 @@ namespace PageLeaf.Tests.Services
                 "}",
                 "",
                 "h6 {",
+                "}",
+                "",
+                "blockquote {",
                 "}"
             );
 
@@ -461,6 +464,35 @@ namespace PageLeaf.Tests.Services
 
             // 既存のbodyスタイルが消えていないことを確認
             Assert.AreEqual("16px", parsedUpdatedStyles.BodyFontSize);
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldUpdateBlockquoteStyles()
+        {
+            // テスト観点: UpdateCssContentメソッドが、CssStyleInfoオブジェクトに含まれる引用スタイル情報に基づいて、
+            // 既存のCSS文字列を正しく更新することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "blockquote { color: red; }";
+            var styleInfo = new CssStyleInfo
+            {
+                QuoteTextColor = "#112233",
+                QuoteBackgroundColor = "#445566",
+                QuoteBorderColor = "#778899",
+                QuoteBorderWidth = "5px",
+                QuoteBorderStyle = "dotted"
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+            var parsedUpdatedStyles = service.ParseCss(updatedCss);
+
+            // Assert
+            Assert.AreEqual("#112233", parsedUpdatedStyles.QuoteTextColor);
+            Assert.AreEqual("#445566", parsedUpdatedStyles.QuoteBackgroundColor);
+            Assert.AreEqual("#778899", parsedUpdatedStyles.QuoteBorderColor);
+            Assert.AreEqual("5px", parsedUpdatedStyles.QuoteBorderWidth);
+            Assert.AreEqual("dotted", parsedUpdatedStyles.QuoteBorderStyle);
         }
     }
 }

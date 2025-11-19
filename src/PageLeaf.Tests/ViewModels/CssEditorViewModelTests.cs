@@ -622,5 +622,37 @@ namespace PageLeaf.Tests.ViewModels
             Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.CodeBackgroundColor)));
             Assert.IsTrue(raisedProperties.Contains(nameof(CssEditorViewModel.CodeFontFamily)));
         }
+
+        [TestMethod]
+        public void SaveCssCommand_ShouldCopyQuoteStylesToCssStyleInfo()
+        {
+            // テスト観点: SaveCssCommandが実行された際に、ViewModelの引用関連プロパティが
+            // CssStyleInfoオブジェクトに正しくコピーされることを確認する。
+            // Arrange
+            var filePath = "C:\\temp\\test.css";
+            _viewModel.TargetCssPath = filePath;
+
+            _viewModel.QuoteTextColor = "#123456";
+            _viewModel.QuoteBackgroundColor = "#abcdef";
+            _viewModel.QuoteBorderColor = "#fedcba";
+            _viewModel.QuoteBorderWidth = "2px";
+            _viewModel.QuoteBorderStyle = "dotted";
+
+            Models.CssStyleInfo? capturedStyleInfo = null;
+            _mockCssEditorService.Setup(s => s.UpdateCssContent(It.IsAny<string>(), It.IsAny<Models.CssStyleInfo>()))
+                                 .Callback<string, Models.CssStyleInfo>((css, styleInfo) => capturedStyleInfo = styleInfo)
+                                 .Returns(""); // Return a dummy string
+
+            // Act
+            _viewModel.SaveCssCommand.Execute(null);
+
+            // Assert
+            Assert.IsNotNull(capturedStyleInfo);
+            Assert.AreEqual(_viewModel.QuoteTextColor, capturedStyleInfo.QuoteTextColor);
+            Assert.AreEqual(_viewModel.QuoteBackgroundColor, capturedStyleInfo.QuoteBackgroundColor);
+            Assert.AreEqual(_viewModel.QuoteBorderColor, capturedStyleInfo.QuoteBorderColor);
+            Assert.AreEqual(_viewModel.QuoteBorderWidth, capturedStyleInfo.QuoteBorderWidth);
+            Assert.AreEqual(_viewModel.QuoteBorderStyle, capturedStyleInfo.QuoteBorderStyle);
+        }
     }
 }

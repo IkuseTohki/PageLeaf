@@ -297,6 +297,41 @@ namespace PageLeaf.Services
                 }
             }
 
+            // blockquote スタイルを更新
+            var blockquoteRule = stylesheet.Rules
+                .OfType<ICssStyleRule>()
+                .FirstOrDefault(r => r.SelectorText == "blockquote");
+
+            if (blockquoteRule == null)
+            {
+                var newRuleText = "blockquote {}";
+                stylesheet.Insert(newRuleText, stylesheet.Rules.Length);
+                blockquoteRule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
+            }
+
+            if (blockquoteRule != null)
+            {
+                if (!string.IsNullOrEmpty(styleInfo.QuoteTextColor))
+                {
+                    blockquoteRule.Style.SetProperty("color", styleInfo.QuoteTextColor);
+                }
+                if (!string.IsNullOrEmpty(styleInfo.QuoteBackgroundColor))
+                {
+                    blockquoteRule.Style.SetProperty("background-color", styleInfo.QuoteBackgroundColor);
+                }
+
+                // border-left プロパティを組み立てる
+                if (!string.IsNullOrEmpty(styleInfo.QuoteBorderWidth) ||
+                    !string.IsNullOrEmpty(styleInfo.QuoteBorderStyle) ||
+                    !string.IsNullOrEmpty(styleInfo.QuoteBorderColor))
+                {
+                    var borderWidth = !string.IsNullOrEmpty(styleInfo.QuoteBorderWidth) ? styleInfo.QuoteBorderWidth : "medium";
+                    var borderStyle = !string.IsNullOrEmpty(styleInfo.QuoteBorderStyle) ? styleInfo.QuoteBorderStyle : "none";
+                    var borderColor = !string.IsNullOrEmpty(styleInfo.QuoteBorderColor) ? styleInfo.QuoteBorderColor : "currentcolor";
+                    blockquoteRule.Style.SetProperty("border-left", $"{borderWidth} {borderStyle} {borderColor}");
+                }
+            }
+
             // 更新されたスタイルシートを文字列として出力
             using (var writer = new StringWriter())
             {

@@ -584,6 +584,8 @@ namespace PageLeaf.ViewModels
                 QuoteTextColor = this.QuoteTextColor,
                 QuoteBackgroundColor = this.QuoteBackgroundColor,
                 QuoteBorderColor = this.QuoteBorderColor,
+                QuoteBorderWidth = this.QuoteBorderWidth,
+                QuoteBorderStyle = this.QuoteBorderStyle,
                 TableBorderColor = this.TableBorderColor,
                 TableHeaderBackgroundColor = this.TableHeaderBackgroundColor,
                 CodeTextColor = this.CodeTextColor,
