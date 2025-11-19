@@ -356,6 +356,51 @@ namespace PageLeaf.Services
                 }
             }
 
+            // table スタイルを更新
+            var thTdRule = stylesheet.Rules
+                .OfType<ICssStyleRule>()
+                .FirstOrDefault(r => r.SelectorText == "th, td");
+
+            if (thTdRule == null)
+            {
+                var newRuleText = "th, td {}";
+                stylesheet.Insert(newRuleText, stylesheet.Rules.Length);
+                thTdRule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
+            }
+
+            if (thTdRule != null)
+            {
+                if (!string.IsNullOrEmpty(styleInfo.TableBorderWidth) || !string.IsNullOrEmpty(styleInfo.TableBorderColor))
+                {
+                    var borderWidth = !string.IsNullOrEmpty(styleInfo.TableBorderWidth) ? styleInfo.TableBorderWidth : "1px";
+                    var borderColor = !string.IsNullOrEmpty(styleInfo.TableBorderColor) ? styleInfo.TableBorderColor : "black";
+                    thTdRule.Style.SetProperty("border", $"{borderWidth} solid {borderColor}");
+                }
+                if (!string.IsNullOrEmpty(styleInfo.TableCellPadding))
+                {
+                    thTdRule.Style.SetProperty("padding", styleInfo.TableCellPadding);
+                }
+            }
+
+            var thRule = stylesheet.Rules
+                .OfType<ICssStyleRule>()
+                .FirstOrDefault(r => r.SelectorText == "th");
+
+            if (thRule == null)
+            {
+                var newRuleText = "th {}";
+                stylesheet.Insert(newRuleText, stylesheet.Rules.Length);
+                thRule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
+            }
+
+            if (thRule != null)
+            {
+                if (!string.IsNullOrEmpty(styleInfo.TableHeaderBackgroundColor))
+                {
+                    thRule.Style.SetProperty("background-color", styleInfo.TableHeaderBackgroundColor);
+                }
+            }
+
             // 更新されたスタイルシートを文字列として出力
             using (var writer = new StringWriter())
             {

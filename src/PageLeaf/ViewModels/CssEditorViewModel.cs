@@ -588,6 +588,8 @@ namespace PageLeaf.ViewModels
                 QuoteBorderStyle = this.QuoteBorderStyle,
                 TableBorderColor = this.TableBorderColor,
                 TableHeaderBackgroundColor = this.TableHeaderBackgroundColor,
+                TableBorderWidth = this.TableBorderWidth,
+                TableCellPadding = this.TableCellPadding,
                 CodeTextColor = this.CodeTextColor,
                 CodeBackgroundColor = this.CodeBackgroundColor,
                 ListMarkerType = this.ListMarkerType,

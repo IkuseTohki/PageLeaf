@@ -174,6 +174,12 @@ namespace PageLeaf.Tests.Services
                 "}",
                 "",
                 "ul {",
+                "}",
+                "",
+                "th, td {",
+                "}",
+                "",
+                "th {",
                 "}"
             );
 
@@ -519,6 +525,33 @@ namespace PageLeaf.Tests.Services
             // Assert
             Assert.AreEqual("square", parsedUpdatedStyles.ListMarkerType);
             Assert.AreEqual("30px", parsedUpdatedStyles.ListIndent);
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldUpdateTableStyles()
+        {
+            // テスト観点: UpdateCssContentメソッドが、CssStyleInfoオブジェクトに含まれる表スタイル情報に基づいて、
+            // 既存のCSS文字列を正しく更新することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "th, td { border: 1px solid black; } th { background-color: white; }";
+            var styleInfo = new CssStyleInfo
+            {
+                TableBorderColor = "#aaaaaa",
+                TableBorderWidth = "2px",
+                TableHeaderBackgroundColor = "#bbbbbb",
+                TableCellPadding = "10px"
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+            var parsedUpdatedStyles = service.ParseCss(updatedCss);
+
+            // Assert
+            Assert.AreEqual("#AAAAAA", parsedUpdatedStyles.TableBorderColor);
+            Assert.AreEqual("2px", parsedUpdatedStyles.TableBorderWidth);
+            Assert.AreEqual("#BBBBBB", parsedUpdatedStyles.TableHeaderBackgroundColor);
+            Assert.AreEqual("10px", parsedUpdatedStyles.TableCellPadding);
         }
     }
 }

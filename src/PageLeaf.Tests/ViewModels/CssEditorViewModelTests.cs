@@ -680,5 +680,35 @@ namespace PageLeaf.Tests.ViewModels
             Assert.AreEqual(_viewModel.ListMarkerType, capturedStyleInfo.ListMarkerType);
             Assert.AreEqual(_viewModel.ListIndent, capturedStyleInfo.ListIndent);
         }
+
+        [TestMethod]
+        public void SaveCssCommand_ShouldCopyTableStylesToCssStyleInfo()
+        {
+            // テスト観点: SaveCssCommandが実行された際に、ViewModelの表関連プロパティが
+            // CssStyleInfoオブジェクトに正しくコピーされることを確認する。
+            // Arrange
+            var filePath = "C:\\temp\\test.css";
+            _viewModel.TargetCssPath = filePath;
+
+            _viewModel.TableBorderColor = "#111111";
+            _viewModel.TableBorderWidth = "3px";
+            _viewModel.TableHeaderBackgroundColor = "#222222";
+            _viewModel.TableCellPadding = "15px";
+
+            Models.CssStyleInfo? capturedStyleInfo = null;
+            _mockCssEditorService.Setup(s => s.UpdateCssContent(It.IsAny<string>(), It.IsAny<Models.CssStyleInfo>()))
+                                 .Callback<string, Models.CssStyleInfo>((css, styleInfo) => capturedStyleInfo = styleInfo)
+                                 .Returns(""); // Return a dummy string
+
+            // Act
+            _viewModel.SaveCssCommand.Execute(null);
+
+            // Assert
+            Assert.IsNotNull(capturedStyleInfo);
+            Assert.AreEqual(_viewModel.TableBorderColor, capturedStyleInfo.TableBorderColor);
+            Assert.AreEqual(_viewModel.TableBorderWidth, capturedStyleInfo.TableBorderWidth);
+            Assert.AreEqual(_viewModel.TableHeaderBackgroundColor, capturedStyleInfo.TableHeaderBackgroundColor);
+            Assert.AreEqual(_viewModel.TableCellPadding, capturedStyleInfo.TableCellPadding);
+        }
     }
 }
