@@ -8,7 +8,7 @@ namespace PageLeaf.Services
     {
         public string ConvertToHtml(string markdown, string? cssPath)
         {
-            var pipeline = new MarkdownPipelineBuilder().UsePipeTables().Build();
+            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
             var htmlBody = Markdown.ToHtml(markdown ?? string.Empty, pipeline);
 
             var headBuilder = new StringBuilder();

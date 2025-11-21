@@ -28,7 +28,7 @@ namespace PageLeaf.Tests.Services
             string actualHtml = service.ConvertToHtml(markdown, null);
 
             // Assert
-            Assert.AreEqual(expectedHtml.Replace("\r\n", "\n"), actualHtml.Replace("\r\n", "\n"));
+            StringAssert.Matches(actualHtml, new Regex(@"<h1[^>]*>Hello</h1>"));
         }
 
         [TestMethod]
@@ -47,6 +47,88 @@ namespace PageLeaf.Tests.Services
             // Assert
             // <link rel="stylesheet" href="C:\styles\github.css?v={timestamp}"> の形式を正規表現で検証
             StringAssert.Matches(actualHtml, new Regex($"<link rel=\"stylesheet\" href=\"{Regex.Escape(cssPath)}\\?v=\\d+\">"));
+        }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldConvertEmphasis()
+        {
+            // テスト観点: 太字、イタリック、打ち消し線が正しくHTMLタグに変換されることを確認する。
+            // Arrange
+            var service = new MarkdownService();
+            var markdown = "**bold** *italic* ~~strike~~";
+
+            // Act
+            string html = service.ConvertToHtml(markdown, null);
+
+            // Assert
+            StringAssert.Contains(html, "<strong>bold</strong>");
+            StringAssert.Contains(html, "<em>italic</em>");
+            StringAssert.Contains(html, "<del>strike</del>");
+        }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldConvertLists()
+        {
+            // テスト観点: 順序なしリストと順序付きリストが正しくHTMLタグに変換されることを確認する。
+            // Arrange
+            var service = new MarkdownService();
+            var markdown = "* Unordered\n1. Ordered";
+
+            // Act
+            string html = service.ConvertToHtml(markdown, null);
+
+            // Assert
+            StringAssert.Contains(html, "<ul>\n<li>Unordered</li>\n</ul>");
+            StringAssert.Contains(html, "<ol>\n<li>Ordered</li>\n</ol>");
+        }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldConvertLinksAndImages()
+        {
+            // テスト観点: リンクと画像が正しくHTMLタグに変換されることを確認する。
+            // Arrange
+            var service = new MarkdownService();
+            var markdown = "[PageLeaf](https://example.com)\n![alt text](image.png)";
+
+            // Act
+            string html = service.ConvertToHtml(markdown, null);
+
+            // Assert
+            StringAssert.Contains(html, "<a href=\"https://example.com\">PageLeaf</a>");
+            StringAssert.Contains(html, "<img src=\"image.png\" alt=\"alt text\" />");
+        }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldConvertQuotesAndCode()
+        {
+            // テスト観点: 引用、インラインコード、コードブロックが正しくHTMLタグに変換されることを確認する。
+            // Arrange
+            var service = new MarkdownService();
+            var markdown = "> quote\n`code`\n```csharp\nvar x = 1;\n```";
+
+            // Act
+            string html = service.ConvertToHtml(markdown, null);
+
+            // Assert
+            StringAssert.Matches(html, new Regex(@"<blockquote>\s*<p>quote\s+<code>code</code></p>\s*</blockquote>"));
+            StringAssert.Matches(html, new Regex(@"<pre><code[^>]*>var x = 1;\n</code></pre>"));
+        }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldConvertTaskListsAndHorizontalRules()
+        {
+            // テスト観点: タスクリストと水平線が正しくHTMLタグに変換されることを確認する。
+            // Arrange
+            var service = new MarkdownService();
+            var markdown = "- [x] Done\n- [ ] Todo\n\n---";
+
+            // Act
+            string html = service.ConvertToHtml(markdown, null);
+
+            // Assert
+            StringAssert.Matches(html, new Regex(@"<input[^>]+checked=""checked""[^>]*>"));
+            Assert.IsTrue(Regex.IsMatch(html, @"<li[^>]*>\s*<input[^>]+type=""checkbox""(?!.*checked)[^>]*>"), "Unchecked task list item not found.");
+            StringAssert.Contains(html, "<hr />");
         }
 
         [TestMethod]
