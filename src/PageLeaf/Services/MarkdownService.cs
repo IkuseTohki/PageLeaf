@@ -8,7 +8,8 @@ namespace PageLeaf.Services
     {
         public string ConvertToHtml(string markdown, string? cssPath)
         {
-            var htmlBody = Markdown.ToHtml(markdown ?? string.Empty);
+            var pipeline = new MarkdownPipelineBuilder().UsePipeTables().Build();
+            var htmlBody = Markdown.ToHtml(markdown ?? string.Empty, pipeline);
 
             var headBuilder = new StringBuilder();
             headBuilder.AppendLine("<meta charset=\"UTF-8\">");

@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PageLeaf.Services;
+using System.Text.RegularExpressions;
 
 namespace PageLeaf.Tests.Services
 {
@@ -13,7 +14,15 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var service = new MarkdownService();
             string markdown = "# Hello";
-            string expectedHtml = "<!DOCTYPE html>\n<html>\n<head>\n<meta charset=\"UTF-8\">\n</head>\n<body>\n<h1>Hello</h1>\n</body>\n</html>\n";
+            string expectedHtml = "<!DOCTYPE html>\n" +
+                                  "<html>\n" +
+                                  "<head>\n" +
+                                  "<meta charset=\"UTF-8\">\n" +
+                                  "</head>\n" +
+                                  "<body>\n" +
+                                  "<h1>Hello</h1>\n" +
+                                  "</body>\n" +
+                                  "</html>\n";
 
             // Act
             string actualHtml = service.ConvertToHtml(markdown, null);
@@ -37,7 +46,34 @@ namespace PageLeaf.Tests.Services
 
             // Assert
             // <link rel="stylesheet" href="C:\styles\github.css?v={timestamp}"> の形式を正規表現で検証
-            StringAssert.Matches(actualHtml, new System.Text.RegularExpressions.Regex($@"<link rel=""stylesheet"" href=""{System.Text.RegularExpressions.Regex.Escape(cssPath)}\?v=\d+"">"));
+            StringAssert.Matches(actualHtml, new Regex($"<link rel=\"stylesheet\" href=\"{Regex.Escape(cssPath)}\\?v=\\d+\">"));
+        }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldConvertPipeTableToHtmlTable()
+        {
+            // テスト観点: Markdownのパイプテーブルが、意図したHTMLのテーブル構造に正しく変換されることを確認する。
+            // Arrange
+            var service = new MarkdownService();
+            var markdown = "|赤身|白身|軍艦|\n" +
+                           "|:---|:---:|---:|\n" +
+                           "|マグロ|ヒラメ|ウニ|\n" +
+                           "|カツオ|タイ|イクラ|\n" +
+                           "|トロ|カンパチ|ネギトロ|";
+
+            // Act
+            string html = service.ConvertToHtml(markdown, null);
+
+            // Assert
+            StringAssert.Contains(html, "<table>");
+            StringAssert.Contains(html, "<thead>");
+            StringAssert.Contains(html, "<tbody>");
+            StringAssert.Matches(html, new Regex(@"<th.*>赤身</th>"));
+            StringAssert.Matches(html, new Regex(@"<td.*>マグロ</td>"));
+
+            // ヘッダー1行 + データ3行 = 4つの<tr>タグがあるはず
+            int trCount = System.Text.RegularExpressions.Regex.Matches(html, "<tr>").Count;
+            Assert.AreEqual(4, trCount, "Expected 4 <tr> tags for header and 3 data rows.");
         }
     }
 }
