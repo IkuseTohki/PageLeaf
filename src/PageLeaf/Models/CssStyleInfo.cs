@@ -20,6 +20,7 @@ namespace PageLeaf.Models
         public string? TableBorderColor { get; set; }
         public string? TableHeaderBackgroundColor { get; set; }
         public string? TableBorderWidth { get; set; }
+        public string? TableBorderStyle { get; set; }
         public string? TableCellPadding { get; set; }
         public string? CodeTextColor { get; set; }
         public string? CodeBackgroundColor { get; set; }

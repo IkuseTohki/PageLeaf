@@ -9,6 +9,8 @@ using System.Windows.Media; // ColorConverter を使用するために追加
 using AngleSharp.Css.Values; // AngleSharp.Css.Values.Color を使用するために追加
 using System.Collections.Generic; // List<string> を使用するために追加
 using System;
+using AngleSharp.Css;
+using System.Text.RegularExpressions;
 
 namespace PageLeaf.Services
 {
@@ -129,6 +131,7 @@ namespace PageLeaf.Services
                 // border
                 styleInfo.TableBorderWidth = thTdRule.Style.GetPropertyValue("border-width");
                 styleInfo.TableBorderColor = GetColorHexFromRule(thTdRule, "border-color");
+                styleInfo.TableBorderStyle = thTdRule.Style.GetPropertyValue("border-style");
 
                 // padding
                 styleInfo.TableCellPadding = thTdRule.Style.GetPropertyValue("padding");
@@ -259,14 +262,15 @@ namespace PageLeaf.Services
                 if (!string.IsNullOrEmpty(info.ListIndent)) rule.Style.SetProperty("padding-left", info.ListIndent);
             }, styleInfo);
 
-            // Table
+            // Table - 一旦ロングハンドで生成させる
             UpdateOrCreateRule(stylesheet, "th, td", (rule, info) =>
             {
-                if (!string.IsNullOrEmpty(info.TableBorderWidth) || !string.IsNullOrEmpty(info.TableBorderColor))
+                if (!string.IsNullOrEmpty(info.TableBorderWidth) || !string.IsNullOrEmpty(info.TableBorderColor) || !string.IsNullOrEmpty(info.TableBorderStyle))
                 {
                     var borderWidth = !string.IsNullOrEmpty(info.TableBorderWidth) ? info.TableBorderWidth : "1px";
+                    var borderStyle = !string.IsNullOrEmpty(info.TableBorderStyle) ? info.TableBorderStyle : "solid";
                     var borderColor = !string.IsNullOrEmpty(info.TableBorderColor) ? info.TableBorderColor : "black";
-                    rule.Style.SetProperty("border", $"{borderWidth} solid {borderColor}");
+                    rule.Style.SetProperty("border", $"{borderWidth} {borderStyle} {borderColor}");
                 }
                 if (!string.IsNullOrEmpty(info.TableCellPadding)) rule.Style.SetProperty("padding", info.TableCellPadding);
             }, styleInfo);
@@ -286,11 +290,45 @@ namespace PageLeaf.Services
 
 
             // 更新されたスタイルシートを文字列として出力
+            string generatedCss;
             using (var writer = new StringWriter())
             {
-                stylesheet.ToCss(writer, new PrettyStyleFormatter()); // PrettyStyleFormatter を使用
-                return writer.ToString();
+                stylesheet.ToCss(writer, new PageLeaf.Utilities.PrettyStyleFormatter()); // PrettyStyleFormatter を使用
+                generatedCss = writer.ToString();
             }
+
+            // 後処理で th, td スタイルをショートハンドに置換
+            var thTdBlockPattern = @"th,\s*td\s*\{[^\}]+\}";
+            var match = Regex.Match(generatedCss, thTdBlockPattern, RegexOptions.Singleline);
+
+            if (match.Success)
+            {
+                var newStyles = new List<string>();
+                bool hasBorder = !string.IsNullOrEmpty(styleInfo.TableBorderWidth) || !string.IsNullOrEmpty(styleInfo.TableBorderColor) || !string.IsNullOrEmpty(styleInfo.TableBorderStyle);
+                bool hasPadding = !string.IsNullOrEmpty(styleInfo.TableCellPadding);
+
+                if (hasBorder)
+                {
+                    var borderWidth = !string.IsNullOrEmpty(styleInfo.TableBorderWidth) ? styleInfo.TableBorderWidth : "1px";
+                    var borderStyle = !string.IsNullOrEmpty(styleInfo.TableBorderStyle) ? styleInfo.TableBorderStyle : "solid";
+                    var borderColor = !string.IsNullOrEmpty(styleInfo.TableBorderColor) ? styleInfo.TableBorderColor : "black";
+                    newStyles.Add($"  border: {borderWidth} {borderStyle} {borderColor};");
+                }
+
+                if (hasPadding)
+                {
+                    newStyles.Add($"  padding: {styleInfo.TableCellPadding};");
+                }
+
+                if (newStyles.Any())
+                {
+                    var newBlockContent = string.Join(Environment.NewLine, newStyles);
+                    var newBlock = $"th, td {{{Environment.NewLine}{newBlockContent}{Environment.NewLine}}}";
+                    generatedCss = Regex.Replace(generatedCss, thTdBlockPattern, newBlock);
+                }
+            }
+
+            return generatedCss;
         }
 
         private void UpdateOrCreateRule(ICssStyleSheet stylesheet, string selector, Action<ICssStyleRule, CssStyleInfo> setProperties, CssStyleInfo styleInfo)

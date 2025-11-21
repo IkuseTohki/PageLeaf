@@ -558,6 +558,34 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
+        public void UpdateCssContent_ShouldGenerateShorthandProperties()
+        {
+            // テスト観点: UpdateCssContentが、borderやpaddingのショートハンドプロパティを正しく生成することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = ""; // 空のCSSから開始
+            var styleInfo = new CssStyleInfo
+            {
+                TableBorderColor = "#FF8000",
+                TableBorderWidth = "5px",
+                TableBorderStyle = "solid",
+                TableCellPadding = "20px"
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            // Assert
+            // ショートハンドプロパティが含まれていることを確認
+            StringAssert.Matches(updatedCss, new System.Text.RegularExpressions.Regex(@"border:\s*5px\s+solid\s+(#FF8000|rgba\(255,\s*128,\s*0,\s*1\));"));
+            StringAssert.Matches(updatedCss, new System.Text.RegularExpressions.Regex(@"padding:\s*20px;"));
+
+            // ロングハンドプロパティが含まれていないことを確認
+            Assert.IsFalse(updatedCss.Contains("border-top-width"), "Should not contain longhand border-top-width.");
+            Assert.IsFalse(updatedCss.Contains("padding-left"), "Should not contain longhand padding-left.");
+        }
+
+        [TestMethod]
         public void UpdateCssContent_ShouldUpdateCodeStyles()
         {
             // テスト観点: UpdateCssContentメソッドが、CssStyleInfoオブジェクトに含まれるコードスタイル情報に基づいて、
