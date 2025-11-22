@@ -7,7 +7,7 @@ namespace PageLeaf.Services
     {
         MarkdownDocument CurrentDocument { get; }
         string EditorText { get; set; }
-        string HtmlContent { get; }
+        string HtmlFilePath { get; }
         DisplayMode SelectedMode { get; set; }
         bool IsMarkdownEditorVisible { get; }
         bool IsViewerVisible { get; }

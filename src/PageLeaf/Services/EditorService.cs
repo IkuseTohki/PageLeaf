@@ -2,6 +2,10 @@ using PageLeaf.Models;
 using PageLeaf.ViewModels;
 using System;
 using System.ComponentModel;
+using System.IO;
+using System.Diagnostics;
+using System.Collections.Generic; // Added
+using System.Linq; // Added
 
 namespace PageLeaf.Services
 {
@@ -16,7 +20,8 @@ namespace PageLeaf.Services
         private MarkdownDocument _currentDocument = new MarkdownDocument();
         private bool _isMarkdownEditorVisible;
         private bool _isViewerVisible;
-        private string _htmlContent = string.Empty;
+        private string _htmlFilePath = string.Empty;
+        private readonly List<string> _tempHtmlFiles = new(); // Added
 
         // EditorService が公開する IsDirty プロパティ
         public bool IsDirty => CurrentDocument.IsDirty;
@@ -62,18 +67,21 @@ namespace PageLeaf.Services
             }
         }
 
-        public string HtmlContent
+        public string HtmlFilePath
         {
-            get => _htmlContent;
+            get => _htmlFilePath;
             private set
             {
-                if (_htmlContent != value)
+                if (_htmlFilePath != value)
                 {
-                    _htmlContent = value;
+                    // Clean up the old temporary file before setting a new one
+                    CleanupOldTempFile(_htmlFilePath);
+                    _htmlFilePath = value;
                     OnPropertyChanged();
                 }
             }
         }
+
 
         public MarkdownDocument CurrentDocument
         {
@@ -162,6 +170,7 @@ namespace PageLeaf.Services
         public void NewDocument()
         {
             CurrentDocument = new MarkdownDocument();
+            CleanupTempFiles(); // New document means old temp file is no longer relevant
         }
 
         /// <summary>
@@ -187,13 +196,67 @@ namespace PageLeaf.Services
         {
             if (SelectedMode == DisplayMode.Viewer)
             {
+                if (string.IsNullOrEmpty(CurrentDocument.Content))
+                {
+                    HtmlFilePath = string.Empty; // No content, no file path
+                    return;
+                }
 #pragma warning disable CS8625 // null リテラルまたは考えられる null 値を null 非許容参照型に変換しています。
-                HtmlContent = _markdownService.ConvertToHtml(CurrentDocument.Content, _currentCssPath ?? string.Empty);
+                string html = _markdownService.ConvertToHtml(CurrentDocument.Content, _currentCssPath ?? string.Empty);
+                HtmlFilePath = SaveHtmlToTempFile(html);
 #pragma warning restore CS8625 // null リテラルまたは考えられる null 値を null 非許容参照型に変換しています。
             }
             else
             {
-                HtmlContent = string.Empty;
+                HtmlFilePath = string.Empty; // Not in viewer mode, no file path
+            }
+        }
+
+        /// <summary>
+        /// HTMLコンテンツを一時ファイルに保存し、そのパスを返します。
+        /// </summary>
+        /// <param name="htmlContent">保存するHTMLコンテンツ。</param>
+        /// <returns>保存された一時ファイルのフルパス。</returns>
+        private string SaveHtmlToTempFile(string htmlContent)
+        {
+            string tempDirectory = Path.GetTempPath();
+            string fileName = $"PageLeaf-{Guid.NewGuid()}.html";
+            string filePath = Path.Combine(tempDirectory, fileName);
+
+            File.WriteAllText(filePath, htmlContent);
+            _tempHtmlFiles.Add(filePath); // Track the created file
+            return filePath;
+        }
+
+        /// <summary>
+        /// 指定された一時ファイルを削除します。
+        /// </summary>
+        /// <param name="filePath">削除する一時ファイルのパス。</param>
+        private void CleanupOldTempFile(string? filePath)
+        {
+            if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
+            {
+                try
+                {
+                    File.Delete(filePath);
+                    _tempHtmlFiles.Remove(filePath);
+                }
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Failed to delete temporary HTML file: {filePath}. Error: {ex.Message}");
+                    // Log the error, but don't rethrow as it shouldn't stop the app.
+                }
+            }
+        }
+
+        /// <summary>
+        /// 作成されたすべての一時HTMLファイルを削除します。
+        /// </summary>
+        public void CleanupTempFiles()
+        {
+            foreach (var filePath in _tempHtmlFiles.ToList()) // ToList() to avoid modification during iteration
+            {
+                CleanupOldTempFile(filePath);
             }
         }
     }

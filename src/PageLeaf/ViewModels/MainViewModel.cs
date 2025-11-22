@@ -20,6 +20,7 @@ namespace PageLeaf.ViewModels
         private bool _isCssEditorVisible;
         private ObservableCollection<string> _availableCssFiles = null!;
         private string _selectedCssFile = null!;
+        private bool _isWebView2Initialized;
 
         public IEditorService Editor { get; }
         public CssEditorViewModel CssEditorViewModel { get; }
@@ -85,11 +86,30 @@ namespace PageLeaf.ViewModels
             }
         }
 
+        public bool IsWebView2Initialized
+        {
+            get => _isWebView2Initialized;
+            private set
+            {
+                if (_isWebView2Initialized != value)
+                {
+                    _isWebView2Initialized = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public void SetWebView2Initialized()
+        {
+            IsWebView2Initialized = true;
+        }
+
         public ICommand OpenFileCommand { get; }
         public ICommand SaveFileCommand { get; }
         public ICommand SaveAsFileCommand { get; }
         public ICommand NewDocumentCommand { get; }
         public ICommand ToggleCssEditorCommand { get; }
+
 
         public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService, IEditorService editorService, ICssService cssService, ISettingsService settingsService, ICssEditorService cssEditorService)
         {

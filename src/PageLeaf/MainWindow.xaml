@@ -7,8 +7,10 @@
         xmlns:viewmodels="clr-namespace:PageLeaf.ViewModels"
         xmlns:utils="clr-namespace:PageLeaf.Utilities"
         xmlns:views="clr-namespace:PageLeaf.Views"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
-        Title="PageLeaf Markdown Editor" Height="600" Width="1000">
+        Title="PageLeaf Markdown Editor" Height="600" Width="1000"
+        Loaded="Window_Loaded">
     <Window.InputBindings>
         <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveFileCommand}"/>
         <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveAsFileCommand}"/>
@@ -100,10 +102,10 @@
                          Margin="5"
                          Visibility="{Binding Editor.IsMarkdownEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
 
-                <WebBrowser x:Name="MarkdownViewer"
+                <wv2:WebView2 x:Name="MarkdownViewer"
                             Margin="5"
                             Visibility="{Binding Editor.IsViewerVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
-                            utils:WebBrowserHelper.Html="{Binding Editor.HtmlContent}"/>
+                            utils:WebBrowserHelper.Html="{Binding Editor.HtmlFilePath}"/>
             </Grid>
 
             <GridSplitter Grid.Column="1"

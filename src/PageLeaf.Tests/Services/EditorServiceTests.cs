@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using PageLeaf.Models;
 using PageLeaf.Services;
+using System.IO; // Added for Path.GetTempPath and File.Delete
 
 namespace PageLeaf.Tests.Services
 {
@@ -20,6 +21,16 @@ namespace PageLeaf.Tests.Services
             _mockCssService = new Mock<ICssService>();
             _mockDialogService = new Mock<IDialogService>(); // モックを初期化
             _editorService = new EditorService(_mockMarkdownService.Object, _mockCssService.Object, _mockDialogService.Object);
+        }
+
+        [TestCleanup]
+        public void Cleanup()
+        {
+            // テスト後に生成された一時ファイルを削除
+            if (!string.IsNullOrEmpty(_editorService.HtmlFilePath) && File.Exists(_editorService.HtmlFilePath))
+            {
+                File.Delete(_editorService.HtmlFilePath);
+            }
         }
 
         [TestMethod]
@@ -44,10 +55,10 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
-        public void LoadDocument_ShouldUpdateEditorTextAndHtmlContent()
+        public void LoadDocument_ShouldUpdateEditorTextAndHtmlFilePath()
         {
             // テスト観点: LoadDocument を実行すると、EditorText が更新され、
-            //             SelectedMode が Viewer であれば HtmlContent も更新されることを確認する。
+            //             SelectedMode が Viewer であれば HtmlFilePath も更新されることを確認する。
 
             // Arrange
             var newDocument = new MarkdownDocument { Content = "## New Content" };
@@ -62,19 +73,21 @@ namespace PageLeaf.Tests.Services
 
             // Assert (Mode: Markdown)
             Assert.AreEqual(newDocument.Content, editorService.EditorText);
-            Assert.AreEqual(string.Empty, editorService.HtmlContent, "MarkdownモードではHtmlContentは空のはずです");
+            Assert.AreEqual(string.Empty, editorService.HtmlFilePath, "MarkdownモードではHtmlFilePathは空のはずです");
 
             // Act (Mode: Viewer)
-            // LoadDocument を呼んだ後で Mode を変えた場合でも追従して HtmlContent が更新されることを確認
+            // LoadDocument を呼んだ後で Mode を変えた場合でも追従して HtmlFilePath が更新されることを確認
             editorService.SelectedMode = DisplayMode.Viewer;
 
             // Assert (Mode: Viewer)
             Assert.AreEqual(newDocument.Content, editorService.EditorText);
-            Assert.AreEqual(expectedHtml, editorService.HtmlContent, "ViewerモードではHtmlContentが更新されるはずです");
+            Assert.IsFalse(string.IsNullOrEmpty(editorService.HtmlFilePath), "ViewerモードではHtmlFilePathが更新されるはずです");
+            Assert.IsTrue(File.Exists(editorService.HtmlFilePath));
+            Assert.AreEqual(expectedHtml, File.ReadAllText(editorService.HtmlFilePath));
         }
 
         [TestMethod]
-        public void ApplyCss_ShouldUpdateHtmlContent_WithNewCss()
+        public void ApplyCss_ShouldUpdateHtmlFilePath_WithNewCss()
         {
             // テスト観点: ApplyCss を呼び出すと、新しいCSSパスでHTMLが再生成されることを確認する。
             // Arrange
@@ -95,7 +108,9 @@ namespace PageLeaf.Tests.Services
             // Assert
             _mockCssService.Verify(s => s.GetCssPath(cssFileName), Times.Once);
             _mockMarkdownService.Verify(m => m.ConvertToHtml("# Title", cssPath), Times.Once);
-            Assert.AreEqual(expectedHtml, _editorService.HtmlContent);
+            Assert.IsFalse(string.IsNullOrEmpty(_editorService.HtmlFilePath));
+            Assert.IsTrue(File.Exists(_editorService.HtmlFilePath));
+            Assert.AreEqual(expectedHtml, File.ReadAllText(_editorService.HtmlFilePath));
         }
 
         [TestMethod]
@@ -123,7 +138,9 @@ namespace PageLeaf.Tests.Services
 
             // Assert
             _mockMarkdownService.Verify(m => m.ConvertToHtml(newMarkdown, cssPath), Times.Once);
-            Assert.AreEqual(expectedHtml, _editorService.HtmlContent);
+            Assert.IsFalse(string.IsNullOrEmpty(_editorService.HtmlFilePath));
+            Assert.IsTrue(File.Exists(_editorService.HtmlFilePath));
+            Assert.AreEqual(expectedHtml, File.ReadAllText(_editorService.HtmlFilePath));
         }
 
         [TestMethod]
@@ -142,7 +159,7 @@ namespace PageLeaf.Tests.Services
             // Assert
             Assert.AreEqual(string.Empty, _editorService.CurrentDocument.Content);
             Assert.IsNull(_editorService.CurrentDocument.FilePath);
-            _mockMarkdownService.Verify(m => m.ConvertToHtml(string.Empty, It.IsAny<string?>()), Times.Once); // HTMLコンテンツも更新されることを確認
+            Assert.AreEqual(string.Empty, _editorService.HtmlFilePath); // HtmlFilePathもリセットされることを確認
         }
 
         [TestMethod]
@@ -218,3 +235,4 @@ namespace PageLeaf.Tests.Services
         }
     }
 }
+

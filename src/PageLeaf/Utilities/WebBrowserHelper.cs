@@ -1,5 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
+using Microsoft.Web.WebView2.Wpf;
+using System.Threading.Tasks;
+using System; // Added for Uri
 
 namespace PageLeaf.Utilities
 {
@@ -39,13 +42,29 @@ namespace PageLeaf.Utilities
         /// </summary>
         /// <param name="obj">プロパティが変更された依存関係オブジェクト。</param>
         /// <param name="e">この依存関係プロパティの変更に関するイベントデータ。</param>
-        private static void OnHtmlChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
+        private static async void OnHtmlChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
         {
-            if (obj is WebBrowser webBrowser)
+            if (obj is WebView2 webView2)
             {
-                var html = e.NewValue as string;
-                var contentToNavigate = string.IsNullOrEmpty(html) ? "<html><body></body></html>" : html;
-                webBrowser.NavigateToString(contentToNavigate);
+                var filePath = e.NewValue as string; // Changed from html to filePath
+
+                // Ensure CoreWebView2 is initialized
+                if (webView2.CoreWebView2 == null)
+                {
+                    await webView2.EnsureCoreWebView2Async(null);
+                }
+
+                // Navigate to the HTML file only if CoreWebView2 is initialized and filePath is not empty
+                if (webView2.CoreWebView2 != null && !string.IsNullOrEmpty(filePath))
+                {
+                    // For local files, we need to convert the path to a file URI
+                    webView2.Source = new Uri(filePath); // Changed to set Source property
+                }
+                else if (webView2.CoreWebView2 != null && string.IsNullOrEmpty(filePath))
+                {
+                    // If filePath is empty, navigate to a blank page
+                    webView2.NavigateToString("<html><body></body></html>");
+                }
             }
         }
     }
