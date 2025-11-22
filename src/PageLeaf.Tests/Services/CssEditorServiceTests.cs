@@ -609,5 +609,73 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("#EEEEEE", parsedUpdatedStyles.CodeBackgroundColor);
             Assert.AreEqual("Courier New", parsedUpdatedStyles.CodeFontFamily);
         }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldAddHeadingNumberingStyles_WhenEnabled()
+        {
+            // テスト観点: `EnableHeadingNumbering`がtrueの場合、`UpdateCssContent`が項番採番用のCSSルールを正しく生成することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "h1 { color: red; }";
+            var styleInfo = new CssStyleInfo
+            {
+                EnableHeadingNumbering = true
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            // Assert
+            var nl = Environment.NewLine;
+            Assert.IsTrue(updatedCss.Contains("body {" + nl + "  counter-reset: h1 0;" + nl + "}"));
+            Assert.IsTrue(updatedCss.Contains("h1 {" + nl + "  color: rgba(255, 0, 0, 1);" + nl + "  counter-increment: h1 1;" + nl + "  counter-reset: h2 0;" + nl + "}"));
+            Assert.IsTrue(updatedCss.Contains("h1::before {" + nl + "  content: counter(h1) \". \";" + nl + "}"));
+            Assert.IsTrue(updatedCss.Contains("h2::before {" + nl + "  content: counter(h1) \".\" counter(h2) \". \";" + nl + "}"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldRemoveHeadingNumberingStyles_WhenDisabled()
+        {
+            // テスト観点: `EnableHeadingNumbering`がfalseの場合、`UpdateCssContent`が既存の項番採番用CSSルールを削除することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = @"
+                body { counter-reset: h1; }
+                h1 { counter-increment: h1; counter-reset: h2; }
+                h1::before { content: counter(h1) '. '; }
+                h2 { counter-increment: h2; counter-reset: h3; }
+                h2::before { content: counter(h1) '.' counter(h2) '. '; }
+            ";
+            var styleInfo = new CssStyleInfo
+            {
+                EnableHeadingNumbering = false
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            // Assert
+            Assert.IsFalse(updatedCss.Contains("counter-reset"));
+            Assert.IsFalse(updatedCss.Contains("counter-increment"));
+            Assert.IsFalse(updatedCss.Contains("::before"));
+        }
+
+        [TestMethod]
+        public void ParseCss_ShouldDetectHeadingNumbering()
+        {
+            // テスト観点: `ParseCss`が既存のCSS内の項番採番ルールを検知し、`EnableHeadingNumbering`をtrueに設定することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = @"
+                body { counter-reset: h1; }
+                h1::before { content: counter(h1) '. '; }
+            ";
+
+            // Act
+            var styleInfo = service.ParseCss(cssContent);
+
+            // Assert
+            Assert.IsTrue(styleInfo.EnableHeadingNumbering);
+        }
     }
 }

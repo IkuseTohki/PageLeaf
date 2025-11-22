@@ -738,5 +738,57 @@ namespace PageLeaf.Tests.ViewModels
             Assert.AreEqual(_viewModel.CodeBackgroundColor, capturedStyleInfo.CodeBackgroundColor);
             Assert.AreEqual(_viewModel.CodeFontFamily, capturedStyleInfo.CodeFontFamily);
         }
+
+        [TestMethod]
+        public void SaveCssCommand_ShouldCopyEnableHeadingNumberingToCssStyleInfo()
+        {
+            // テスト観点: SaveCssCommand実行時に、ViewModelのIsHeadingNumberingEnabledプロパティの値が、
+            // ICssEditorService.UpdateCssContentに渡されるCssStyleInfoオブジェクトのEnableHeadingNumberingプロパティへ
+            // 正しくコピーされることを検証する。
+            // Arrange
+            var filePath = "C:\\temp\\test.css";
+            _viewModel.TargetCssPath = filePath;
+            _viewModel.IsHeadingNumberingEnabled = true; // ViewModelの値を設定
+
+            Models.CssStyleInfo? capturedStyleInfo = null;
+            _mockCssEditorService.Setup(s => s.UpdateCssContent(It.IsAny<string>(), It.IsAny<Models.CssStyleInfo>()))
+                                 .Callback<string, Models.CssStyleInfo>((css, styleInfo) => capturedStyleInfo = styleInfo)
+                                 .Returns(""); // Return a dummy string
+
+            // Act
+            _viewModel.SaveCssCommand.Execute(null);
+
+            // Assert
+            Assert.IsNotNull(capturedStyleInfo);
+            Assert.AreEqual(_viewModel.IsHeadingNumberingEnabled, capturedStyleInfo.EnableHeadingNumbering);
+        }
+
+        [TestMethod]
+        public void LoadStyles_ShouldLoadEnableHeadingNumberingAndRaisePropertyChanged()
+        {
+            // テスト観点: LoadStylesメソッド呼び出し時に、CssStyleInfo.EnableHeadingNumberingの値が
+            // ViewModelのIsHeadingNumberingEnabledプロパティに正しく反映され、PropertyChangedイベントが発火することを確認する。
+            // Arrange
+            var cssInfo = new Models.CssStyleInfo
+            {
+                EnableHeadingNumbering = true
+            };
+
+            bool wasRaised = false;
+            _viewModel.PropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(CssEditorViewModel.IsHeadingNumberingEnabled))
+                {
+                    wasRaised = true;
+                }
+            };
+
+            // Act
+            _viewModel.LoadStyles(cssInfo);
+
+            // Assert
+            Assert.AreEqual(cssInfo.EnableHeadingNumbering, _viewModel.IsHeadingNumberingEnabled);
+            Assert.IsTrue(wasRaised, "PropertyChanged for IsHeadingNumberingEnabled should have been raised.");
+        }
     }
 }

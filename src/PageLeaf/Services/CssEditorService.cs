@@ -158,6 +158,18 @@ namespace PageLeaf.Services
                 styleInfo.CodeFontFamily = codeRule.Style.GetPropertyValue("font-family");
             }
 
+            // 項番採番の検出
+            var bodyCounterReset = bodyRule?.Style.GetPropertyValue("counter-reset");
+            var h1BeforeRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "h1::before");
+            var h1BeforeContent = h1BeforeRule?.Style.GetPropertyValue("content");
+
+            if (bodyCounterReset != null && bodyCounterReset.Contains("h1") &&
+                h1BeforeContent != null && h1BeforeContent.Contains("counter(h1)"))
+            {
+                styleInfo.EnableHeadingNumbering = true;
+            }
+
+
             return styleInfo;
         }
 
@@ -288,6 +300,7 @@ namespace PageLeaf.Services
                 if (!string.IsNullOrEmpty(info.CodeFontFamily)) rule.Style.SetProperty("font-family", info.CodeFontFamily);
             }, styleInfo);
 
+            UpdateHeadingNumbering(stylesheet, styleInfo);
 
             // 更新されたスタイルシートを文字列として出力
             string generatedCss;
@@ -330,6 +343,76 @@ namespace PageLeaf.Services
 
             return generatedCss;
         }
+
+        private void UpdateHeadingNumbering(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
+            // Step 1: Remove all ::before rules for headings to have a clean slate.
+            for (int i = stylesheet.Rules.Length - 1; i >= 0; i--)
+            {
+                if (stylesheet.Rules[i] is ICssStyleRule rule && rule.SelectorText.StartsWith("h") && rule.SelectorText.Contains("::before"))
+                {
+                    stylesheet.RemoveAt(i);
+                }
+            }
+
+            // Step 2: Update counter properties on body and headings
+            UpdateOrCreateRule(stylesheet, "body", (rule, info) =>
+            {
+                if (info.EnableHeadingNumbering)
+                {
+                    rule.Style.SetProperty("counter-reset", "h1");
+                }
+                else
+                {
+                    rule.Style.RemoveProperty("counter-reset");
+                }
+            }, styleInfo);
+
+            for (int i = 1; i <= 6; i++)
+            {
+                var headingSelector = $"h{i}";
+                UpdateOrCreateRule(stylesheet, headingSelector, (rule, info) =>
+                {
+                    if (info.EnableHeadingNumbering)
+                    {
+                        rule.Style.SetProperty("counter-increment", $"h{i}");
+                        if (i < 6)
+                        {
+                            rule.Style.SetProperty("counter-reset", $"h{i + 1}");
+                        }
+                    }
+                    else
+                    {
+                        rule.Style.RemoveProperty("counter-increment");
+                        rule.Style.RemoveProperty("counter-reset");
+                    }
+                }, styleInfo);
+            }
+
+            // Step 3: Add ::before rules if numbering is enabled
+            if (styleInfo.EnableHeadingNumbering)
+            {
+                for (int i = 1; i <= 6; i++)
+                {
+                    var beforeSelector = $"h{i}::before";
+                    UpdateOrCreateRule(stylesheet, beforeSelector, (rule, info) =>
+                    {
+                        var contentBuilder = new StringBuilder();
+                        for (int j = 1; j <= i; j++)
+                        {
+                            contentBuilder.Append($"counter(h{j})");
+                            if (j < i)
+                            {
+                                contentBuilder.Append(" \".\" ");
+                            }
+                        }
+                        contentBuilder.Append(" \". \"");
+                        rule.Style.SetProperty("content", contentBuilder.ToString());
+                    }, styleInfo);
+                }
+            }
+        }
+
 
         private void UpdateOrCreateRule(ICssStyleSheet stylesheet, string selector, Action<ICssStyleRule, CssStyleInfo> setProperties, CssStyleInfo styleInfo)
         {

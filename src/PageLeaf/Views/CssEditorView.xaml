@@ -48,7 +48,7 @@
                         <TextBox Text="{Binding HeadingFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                         <Label Content="フォントファミリー:"/>
                         <TextBox Text="{Binding HeadingFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-                        <CheckBox Content="項番の自動採番"/>
+                        <CheckBox Content="項番の自動採番" IsChecked="{Binding IsHeadingNumberingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
                     </StackPanel>
                 </TabItem>
 

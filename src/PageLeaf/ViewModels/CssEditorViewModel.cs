@@ -35,6 +35,7 @@ namespace PageLeaf.ViewModels
         private string? _codeFontFamily;
         private string? _listMarkerType;
         private string? _listIndent;
+        private bool _isHeadingNumberingEnabled;
 
         private Dictionary<string, string> _allHeadingTextColors = new();
         private Dictionary<string, string> _allHeadingFontSizes = new();
@@ -116,6 +117,8 @@ namespace PageLeaf.ViewModels
             CodeTextColor = styleInfo.CodeTextColor;
             CodeBackgroundColor = styleInfo.CodeBackgroundColor;
             CodeFontFamily = styleInfo.CodeFontFamily;
+
+            IsHeadingNumberingEnabled = styleInfo.EnableHeadingNumbering; // Add this line
 
             UpdateHeadingProperties();
         }
@@ -379,6 +382,19 @@ namespace PageLeaf.ViewModels
             }
         }
 
+        public bool IsHeadingNumberingEnabled
+        {
+            get => _isHeadingNumberingEnabled;
+            set
+            {
+                if (_isHeadingNumberingEnabled != value)
+                {
+                    _isHeadingNumberingEnabled = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public string? QuoteTextColor
         {
             get => _quoteTextColor;
@@ -594,7 +610,8 @@ namespace PageLeaf.ViewModels
                 CodeBackgroundColor = this.CodeBackgroundColor,
                 CodeFontFamily = this.CodeFontFamily,
                 ListMarkerType = this.ListMarkerType,
-                ListIndent = this.ListIndent
+                ListIndent = this.ListIndent,
+                EnableHeadingNumbering = this.IsHeadingNumberingEnabled
             };
 
             // Heading styles (Dictionaryをコピー)
