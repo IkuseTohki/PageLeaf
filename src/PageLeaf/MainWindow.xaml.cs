@@ -14,12 +14,5 @@ namespace PageLeaf
             InitializeComponent();
             DataContext = viewModel;
         }
-
-        private void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            // Currently, there's a compilation issue with subscribing to CoreWebView2Initialized directly.
-            // A more robust solution for ViewModel notification will be explored later if needed.
-            // For now, WebBrowserHelper implicitly handles EnsureCoreWebView2Async.
-        }
     }
 }

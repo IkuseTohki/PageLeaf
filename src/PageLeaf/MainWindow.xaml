@@ -9,8 +9,7 @@
         xmlns:views="clr-namespace:PageLeaf.Views"
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         mc:Ignorable="d"
-        Title="PageLeaf Markdown Editor" Height="600" Width="1000"
-        Loaded="Window_Loaded">
+        Title="PageLeaf Markdown Editor" Height="600" Width="1000">
     <Window.InputBindings>
         <KeyBinding Key="S" Modifiers="Control" Command="{Binding SaveFileCommand}"/>
         <KeyBinding Key="S" Modifiers="Control+Shift" Command="{Binding SaveAsFileCommand}"/>
@@ -86,11 +85,11 @@
         </Border>
 
         <!-- Main Content -->
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="2" x:Name="MainGrid">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="{Binding CssEditorColumnWidth}"/>
             </Grid.ColumnDefinitions>
 
             <!-- 左側の区画 (エディタ) -->
@@ -112,11 +111,14 @@
                           Width="2"
                           HorizontalAlignment="Center"
                           VerticalAlignment="Stretch"
-                          ShowsPreview="True"/>
+                          ShowsPreview="True"
+                          Visibility="{Binding IsCssEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}"
+                          utils:GridSplitterBehavior.EnableTwoWayBinding="True"
+                          utils:GridSplitterBehavior.ColumnIndex="2"
+                          utils:GridSplitterBehavior.AssociatedWidth="{Binding CssEditorColumnWidth, Mode=TwoWay}"/>
 
             <views:CssEditorView Grid.Column="2"
-                                 DataContext="{Binding CssEditorViewModel}"
-                                 Visibility="{Binding IsCssEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                 DataContext="{Binding CssEditorViewModel}"/>
         </Grid>
     </Grid>
 </Window>

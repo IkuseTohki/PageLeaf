@@ -5,6 +5,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
+using System.Windows; // Added
 
 namespace PageLeaf.ViewModels
 {
@@ -21,6 +22,7 @@ namespace PageLeaf.ViewModels
         private ObservableCollection<string> _availableCssFiles = null!;
         private string _selectedCssFile = null!;
         private bool _isWebView2Initialized;
+        private GridLength _lastKnownCssEditorWidth; // Added
 
         public IEditorService Editor { get; }
         public CssEditorViewModel CssEditorViewModel { get; }
@@ -35,6 +37,7 @@ namespace PageLeaf.ViewModels
                 {
                     _isCssEditorVisible = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(CssEditorColumnWidth)); // Notify CssEditorColumnWidth change
                 }
             }
         }
@@ -104,6 +107,19 @@ namespace PageLeaf.ViewModels
             IsWebView2Initialized = true;
         }
 
+        public GridLength CssEditorColumnWidth
+        {
+            get => IsCssEditorVisible ? _lastKnownCssEditorWidth : new GridLength(0);
+            set
+            {
+                if (_lastKnownCssEditorWidth != value)
+                {
+                    _lastKnownCssEditorWidth = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public ICommand OpenFileCommand { get; }
         public ICommand SaveFileCommand { get; }
         public ICommand SaveAsFileCommand { get; }
@@ -156,6 +172,8 @@ namespace PageLeaf.ViewModels
             }
 
             Editor.ApplyCss(SelectedCssFile);
+
+            _lastKnownCssEditorWidth = new GridLength(300); // Initialize default width
         }
 
         private void ExecuteNewDocument(object? parameter)
