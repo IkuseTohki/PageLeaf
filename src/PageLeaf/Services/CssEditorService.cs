@@ -158,18 +158,29 @@ namespace PageLeaf.Services
                 styleInfo.CodeFontFamily = codeRule.Style.GetPropertyValue("font-family");
             }
 
-            // 項番採番の検出
-            var bodyCounterReset = bodyRule?.Style.GetPropertyValue("counter-reset");
-            var h1BeforeRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "h1::before");
-            var h1BeforeContent = h1BeforeRule?.Style.GetPropertyValue("content");
-
-            if (bodyCounterReset != null && bodyCounterReset.Contains("h1") &&
-                h1BeforeContent != null && h1BeforeContent.Contains("counter(h1)"))
+            // 項番採番の検出 (見出しレベルごと)
+            for (int i = 1; i <= 6; i++)
             {
-                styleInfo.EnableHeadingNumbering = true;
+                var headingSelector = $"h{i}";
+                var headingRule = stylesheet.Rules
+                    .OfType<ICssStyleRule>()
+                    .FirstOrDefault(r => r.SelectorText == headingSelector);
+
+                var beforeRule = stylesheet.Rules
+                    .OfType<ICssStyleRule>()
+                    .FirstOrDefault(r => r.SelectorText == $"{headingSelector}::before");
+
+                // counter-incrementと::before contentが存在するかで判断
+                if (headingRule?.Style.GetPropertyValue("counter-increment")?.Contains(headingSelector) == true &&
+                    beforeRule?.Style.GetPropertyValue("content")?.Contains($"counter({headingSelector})") == true)
+                {
+                    styleInfo.HeadingNumberingStates[headingSelector] = true;
+                }
+                else
+                {
+                    styleInfo.HeadingNumberingStates[headingSelector] = false;
+                }
             }
-
-
             return styleInfo;
         }
 
@@ -355,12 +366,15 @@ namespace PageLeaf.Services
                 }
             }
 
+            // Check if any heading numbering is enabled at all to decide if body counter-reset is needed
+            bool anyHeadingNumberingEnabled = styleInfo.HeadingNumberingStates.Any(kvp => kvp.Value);
+
             // Step 2: Update counter properties on body and headings
             UpdateOrCreateRule(stylesheet, "body", (rule, info) =>
             {
-                if (info.EnableHeadingNumbering)
+                if (anyHeadingNumberingEnabled)
                 {
-                    rule.Style.SetProperty("counter-reset", "h1");
+                    rule.Style.SetProperty("counter-reset", "h1 0"); // Reset h1 counter on body
                 }
                 else
                 {
@@ -373,15 +387,16 @@ namespace PageLeaf.Services
                 var headingSelector = $"h{i}";
                 UpdateOrCreateRule(stylesheet, headingSelector, (rule, info) =>
                 {
-                    if (info.EnableHeadingNumbering)
+                    if (info.HeadingNumberingStates.TryGetValue(headingSelector, out bool isEnabled) && isEnabled)
                     {
-                        rule.Style.SetProperty("counter-increment", $"h{i}");
+                        rule.Style.SetProperty("counter-increment", headingSelector);
+                        // Reset counter for sub-headings if current heading numbering is enabled
                         if (i < 6)
                         {
-                            rule.Style.SetProperty("counter-reset", $"h{i + 1}");
+                            rule.Style.SetProperty("counter-reset", $"h{i + 1} 0");
                         }
                     }
-                    else
+                    else // Numbering is disabled for this specific heading level
                     {
                         rule.Style.RemoveProperty("counter-increment");
                         rule.Style.RemoveProperty("counter-reset");
@@ -389,12 +404,13 @@ namespace PageLeaf.Services
                 }, styleInfo);
             }
 
-            // Step 3: Add ::before rules if numbering is enabled
-            if (styleInfo.EnableHeadingNumbering)
+            // Step 3: Add ::before rules if numbering is enabled for a specific heading
+            for (int i = 1; i <= 6; i++)
             {
-                for (int i = 1; i <= 6; i++)
+                var headingSelector = $"h{i}";
+                if (styleInfo.HeadingNumberingStates.TryGetValue(headingSelector, out bool isEnabled) && isEnabled)
                 {
-                    var beforeSelector = $"h{i}::before";
+                    var beforeSelector = $"{headingSelector}::before";
                     UpdateOrCreateRule(stylesheet, beforeSelector, (rule, info) =>
                     {
                         var contentBuilder = new StringBuilder();

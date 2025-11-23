@@ -610,72 +610,123 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("Courier New", parsedUpdatedStyles.CodeFontFamily);
         }
 
-        [TestMethod]
-        public void UpdateCssContent_ShouldAddHeadingNumberingStyles_WhenEnabled()
-        {
-            // テスト観点: `EnableHeadingNumbering`がtrueの場合、`UpdateCssContent`が項番採番用のCSSルールを正しく生成することを確認する。
-            // Arrange
-            var service = new CssEditorService();
-            var existingCss = "h1 { color: red; }";
-            var styleInfo = new CssStyleInfo
-            {
-                EnableHeadingNumbering = true
-            };
 
-            // Act
-            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
 
-            // Assert
-            var nl = Environment.NewLine;
-            Assert.IsTrue(updatedCss.Contains("body {" + nl + "  counter-reset: h1 0;" + nl + "}"));
-            Assert.IsTrue(updatedCss.Contains("h1 {" + nl + "  color: rgba(255, 0, 0, 1);" + nl + "  counter-increment: h1 1;" + nl + "  counter-reset: h2 0;" + nl + "}"));
-            Assert.IsTrue(updatedCss.Contains("h1::before {" + nl + "  content: counter(h1) \". \";" + nl + "}"));
-            Assert.IsTrue(updatedCss.Contains("h2::before {" + nl + "  content: counter(h1) \".\" counter(h2) \". \";" + nl + "}"));
-        }
+
+
 
         [TestMethod]
-        public void UpdateCssContent_ShouldRemoveHeadingNumberingStyles_WhenDisabled()
+        public void ParseCss_ShouldDetectPerHeadingNumbering()
         {
-            // テスト観点: `EnableHeadingNumbering`がfalseの場合、`UpdateCssContent`が既存の項番採番用CSSルールを削除することを確認する。
-            // Arrange
-            var service = new CssEditorService();
-            var existingCss = @"
-                body { counter-reset: h1; }
-                h1 { counter-increment: h1; counter-reset: h2; }
-                h1::before { content: counter(h1) '. '; }
-                h2 { counter-increment: h2; counter-reset: h3; }
-                h2::before { content: counter(h1) '.' counter(h2) '. '; }
-            ";
-            var styleInfo = new CssStyleInfo
-            {
-                EnableHeadingNumbering = false
-            };
-
-            // Act
-            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
-
-            // Assert
-            Assert.IsFalse(updatedCss.Contains("counter-reset"));
-            Assert.IsFalse(updatedCss.Contains("counter-increment"));
-            Assert.IsFalse(updatedCss.Contains("::before"));
-        }
-
-        [TestMethod]
-        public void ParseCss_ShouldDetectHeadingNumbering()
-        {
-            // テスト観点: `ParseCss`が既存のCSS内の項番採番ルールを検知し、`EnableHeadingNumbering`をtrueに設定することを確認する。
+            // テスト観点: `ParseCss`が、CSS内の見出しごとの項番採番ルールを検知し、`HeadingNumberingStates`を正しく設定することを確認する。
             // Arrange
             var service = new CssEditorService();
             var cssContent = @"
-                body { counter-reset: h1; }
+                body { counter-reset: h1 0; }
+                h1 { counter-increment: h1; counter-reset: h2 0; }
                 h1::before { content: counter(h1) '. '; }
+                h2 { counter-increment: h2; counter-reset: h3 0; }
+                h2::before { content: counter(h1) '.' counter(h2) '. '; }
+                h3 { color: red; } /* h3には採番ルールがない */
             ";
 
             // Act
             var styleInfo = service.ParseCss(cssContent);
 
             // Assert
-            Assert.IsTrue(styleInfo.EnableHeadingNumbering);
+            Assert.IsTrue(styleInfo.HeadingNumberingStates["h1"], "h1 numbering should be detected as true.");
+            Assert.IsTrue(styleInfo.HeadingNumberingStates["h2"], "h2 numbering should be detected as true.");
+            Assert.IsFalse(styleInfo.HeadingNumberingStates["h3"], "h3 numbering should be detected as false.");
+            Assert.IsFalse(styleInfo.HeadingNumberingStates["h4"], "h4 numbering should be detected as false.");
+            Assert.IsFalse(styleInfo.HeadingNumberingStates["h5"], "h5 numbering should be detected as false.");
+            Assert.IsFalse(styleInfo.HeadingNumberingStates["h6"], "h6 numbering should be detected as false.");
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldGeneratePerHeadingNumberingStyles()
+        {
+            // テスト観点: `CssStyleInfo.HeadingNumberingStates`が設定されている場合、`UpdateCssContent`が
+            // 指定された見出しレベルにのみ項番採番用のCSSルールを正しく生成することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "h1 { color: red; } h3 { font-size: 1.2em; }";
+            var styleInfo = new CssStyleInfo();
+            styleInfo.HeadingNumberingStates["h1"] = true; // h1だけ採番を有効にする
+            styleInfo.HeadingNumberingStates["h2"] = false;
+            styleInfo.HeadingNumberingStates["h3"] = true; // h3も採番を有効にする
+            styleInfo.HeadingNumberingStates["h4"] = false;
+            styleInfo.HeadingNumberingStates["h5"] = false;
+            styleInfo.HeadingNumberingStates["h6"] = false;
+
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+            var nl = Environment.NewLine; // 比較用に改行コードを取得
+
+            // Assert - h1とh3にのみ採番ルールが適用されていることを確認
+            // body
+            StringAssert.Contains(updatedCss, "body {" + nl + "  counter-reset: h1 0;" + nl + "}");
+
+            // h1
+            StringAssert.Contains(updatedCss, "h1 {" + nl + "  color: rgba(255, 0, 0, 1);" + nl + "  counter-increment: h1;" + nl + "  counter-reset: h2 0;" + nl + "}");
+            StringAssert.Contains(updatedCss, "h1::before {" + nl + "  content: counter(h1) \". \";" + nl + "}");
+
+            // h2 (採番無効なのでcounter-resetのみ)
+            StringAssert.Contains(updatedCss, "h2 {" + nl + "}"); // h2ルール自体は残る
+            Assert.IsFalse(updatedCss.Contains("h2 {" + nl + "  counter-increment:")); // h2のcounter-incrementはなし
+            Assert.IsFalse(updatedCss.Contains("h2::before")); // h2の::beforeはなし
+
+            // h3
+            StringAssert.Contains(updatedCss, "h3 {" + nl + "  font-size: 1.2em;" + nl + "  counter-increment: h3;" + nl + "  counter-reset: h4 0;" + nl + "}");
+            StringAssert.Contains(updatedCss, "h3::before {" + nl + "  content: counter(h1) \".\" counter(h2) \".\" counter(h3) \". \";" + nl + "}");
+
+            // h4以降 (採番無効なのでcounter-increment, counter-reset, ::before はなし)
+            Assert.IsFalse(updatedCss.Contains("h4 {")); // h4はルール自体が空であれば削除される
+            Assert.IsFalse(updatedCss.Contains("h4::before"));
+            Assert.IsFalse(updatedCss.Contains("h5::before"));
+            Assert.IsFalse(updatedCss.Contains("h6::before"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldRemovePerHeadingNumberingStyles_WhenDisabled()
+        {
+            // テスト観点: `CssStyleInfo.HeadingNumberingStates`で特定の見出しの採番が無効になった場合、
+            // `UpdateCssContent`が既存の項番採番用CSSルールを正しく削除することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            // 最初はh1とh2の採番が有効なCSS
+            var existingCss = @"
+                body { counter-reset: h1 0; }
+                h1 { counter-increment: h1; counter-reset: h2 0; }
+                h1::before { content: counter(h1) '. '; }
+                h2 { counter-increment: h2; counter-reset: h3 0; }
+                h2::before { content: counter(h1) '.' counter(h2) '. '; }
+                h3 { font-size: 1em; }
+            ";
+            var styleInfo = new CssStyleInfo();
+            // h1の採番を無効にする
+            styleInfo.HeadingNumberingStates["h1"] = false;
+            // h2の採番はそのまま有効にする
+            styleInfo.HeadingNumberingStates["h2"] = true;
+            styleInfo.HeadingNumberingStates["h3"] = false; // h3はもともと無効
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+            var nl = Environment.NewLine;
+
+            // Assert - h1の採番ルールが削除されていることを確認
+            Assert.IsFalse(updatedCss.Contains("body {" + nl + "  counter-reset: h1 0;" + nl + "}")); // bodyのcounter-resetもなし
+            Assert.IsFalse(updatedCss.Contains("h1 {" + nl + "  counter-increment:"));
+            Assert.IsFalse(updatedCss.Contains("h1::before"));
+
+            // Assert - h2の採番ルールは残っていることを確認
+            StringAssert.Contains(updatedCss, "h2 {" + nl + "  counter-increment: h2;" + nl + "  counter-reset: h3 0;" + nl + "}");
+            StringAssert.Contains(updatedCss, "h2::before {" + nl + "  content: counter(h1) \".\" counter(h2) \". \";" + nl + "}");
+
+            // Assert - h3は採番ルールがないことを確認
+            StringAssert.Contains(updatedCss, "h3 {" + nl + "  font-size: 1em;" + nl + "}");
+            Assert.IsFalse(updatedCss.Contains("h3 {" + nl + "  counter-increment:"));
+            Assert.IsFalse(updatedCss.Contains("h3::before"));
         }
     }
 }

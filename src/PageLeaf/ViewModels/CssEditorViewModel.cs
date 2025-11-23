@@ -41,6 +41,7 @@ namespace PageLeaf.ViewModels
         private Dictionary<string, string> _allHeadingFontSizes = new();
         private Dictionary<string, string> _allHeadingFontFamilies = new();
         private Dictionary<string, HeadingStyleFlags> _allHeadingStyleFlags = new();
+        private Dictionary<string, bool> _allHeadingNumberingStates = new(); // Added
         private string? _selectedHeadingLevel;
 
         public event EventHandler? CssSaved;
@@ -96,6 +97,13 @@ namespace PageLeaf.ViewModels
                 _allHeadingStyleFlags[entry.Key] = entry.Value;
             }
 
+            // Heading Numbering states
+            _allHeadingNumberingStates.Clear();
+            foreach (var entry in styleInfo.HeadingNumberingStates)
+            {
+                _allHeadingNumberingStates[entry.Key] = entry.Value;
+            }
+
             // Quote styles
             QuoteTextColor = styleInfo.QuoteTextColor;
             QuoteBackgroundColor = styleInfo.QuoteBackgroundColor;
@@ -118,7 +126,7 @@ namespace PageLeaf.ViewModels
             CodeBackgroundColor = styleInfo.CodeBackgroundColor;
             CodeFontFamily = styleInfo.CodeFontFamily;
 
-            IsHeadingNumberingEnabled = styleInfo.EnableHeadingNumbering; // Add this line
+
 
             UpdateHeadingProperties();
         }
@@ -186,6 +194,16 @@ namespace PageLeaf.ViewModels
                     IsHeadingUnderline = false;
                     IsHeadingStrikethrough = false;
                 }
+
+                // Heading Numbering State
+                if (_allHeadingNumberingStates.TryGetValue(_selectedHeadingLevel, out var isEnabled))
+                {
+                    IsHeadingNumberingEnabled = isEnabled;
+                }
+                else
+                {
+                    IsHeadingNumberingEnabled = false; // デフォルトは無効
+                }
             }
             else
             {
@@ -196,6 +214,7 @@ namespace PageLeaf.ViewModels
                 IsHeadingItalic = false;
                 IsHeadingUnderline = false;
                 IsHeadingStrikethrough = false;
+                IsHeadingNumberingEnabled = false; // 選択がない場合も無効
             }
             // 他の見出し関連プロパティもここに追加する
         }
@@ -391,6 +410,10 @@ namespace PageLeaf.ViewModels
                 {
                     _isHeadingNumberingEnabled = value;
                     OnPropertyChanged();
+                    if (_selectedHeadingLevel != null)
+                    {
+                        _allHeadingNumberingStates[_selectedHeadingLevel] = value;
+                    }
                 }
             }
         }
@@ -610,8 +633,8 @@ namespace PageLeaf.ViewModels
                 CodeBackgroundColor = this.CodeBackgroundColor,
                 CodeFontFamily = this.CodeFontFamily,
                 ListMarkerType = this.ListMarkerType,
-                ListIndent = this.ListIndent,
-                EnableHeadingNumbering = this.IsHeadingNumberingEnabled
+                ListIndent = this.ListIndent
+                // EnableHeadingNumbering = this.IsHeadingNumberingEnabled // Removed
             };
 
             // Heading styles (Dictionaryをコピー)
@@ -630,6 +653,12 @@ namespace PageLeaf.ViewModels
             foreach (var entry in _allHeadingStyleFlags)
             {
                 styleInfo.HeadingStyleFlags[entry.Key] = entry.Value;
+            }
+
+            // Heading Numbering states (Dictionaryをコピー)
+            foreach (var entry in _allHeadingNumberingStates)
+            {
+                styleInfo.HeadingNumberingStates[entry.Key] = entry.Value;
             }
 
             // 3. CSSコンテンツを更新

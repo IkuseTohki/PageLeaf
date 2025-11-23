@@ -739,40 +739,22 @@ namespace PageLeaf.Tests.ViewModels
             Assert.AreEqual(_viewModel.CodeFontFamily, capturedStyleInfo.CodeFontFamily);
         }
 
-        [TestMethod]
-        public void SaveCssCommand_ShouldCopyEnableHeadingNumberingToCssStyleInfo()
-        {
-            // テスト観点: SaveCssCommand実行時に、ViewModelのIsHeadingNumberingEnabledプロパティの値が、
-            // ICssEditorService.UpdateCssContentに渡されるCssStyleInfoオブジェクトのEnableHeadingNumberingプロパティへ
-            // 正しくコピーされることを検証する。
-            // Arrange
-            var filePath = "C:\\temp\\test.css";
-            _viewModel.TargetCssPath = filePath;
-            _viewModel.IsHeadingNumberingEnabled = true; // ViewModelの値を設定
 
-            Models.CssStyleInfo? capturedStyleInfo = null;
-            _mockCssEditorService.Setup(s => s.UpdateCssContent(It.IsAny<string>(), It.IsAny<Models.CssStyleInfo>()))
-                                 .Callback<string, Models.CssStyleInfo>((css, styleInfo) => capturedStyleInfo = styleInfo)
-                                 .Returns(""); // Return a dummy string
 
-            // Act
-            _viewModel.SaveCssCommand.Execute(null);
-
-            // Assert
-            Assert.IsNotNull(capturedStyleInfo);
-            Assert.AreEqual(_viewModel.IsHeadingNumberingEnabled, capturedStyleInfo.EnableHeadingNumbering);
-        }
 
         [TestMethod]
-        public void LoadStyles_ShouldLoadEnableHeadingNumberingAndRaisePropertyChanged()
+        public void SelectedHeadingLevel_ShouldUpdateIsHeadingNumberingEnabled()
         {
-            // テスト観点: LoadStylesメソッド呼び出し時に、CssStyleInfo.EnableHeadingNumberingの値が
-            // ViewModelのIsHeadingNumberingEnabledプロパティに正しく反映され、PropertyChangedイベントが発火することを確認する。
+            // テスト観点: SelectedHeadingLevelが変更されたときに、IsHeadingNumberingEnabledが
+            // 選択されたレベルの採番設定に正しく更新されることを確認する。
             // Arrange
-            var cssInfo = new Models.CssStyleInfo
-            {
-                EnableHeadingNumbering = true
-            };
+            var cssInfo = new Models.CssStyleInfo();
+            cssInfo.HeadingNumberingStates["h1"] = true;
+            cssInfo.HeadingNumberingStates["h2"] = false;
+            cssInfo.HeadingNumberingStates["h3"] = true;
+
+            // LoadStylesが呼ばれたときに内部状態が設定されるようにモックを設定
+            _viewModel.LoadStyles(cssInfo);
 
             bool wasRaised = false;
             _viewModel.PropertyChanged += (sender, args) =>
@@ -783,12 +765,67 @@ namespace PageLeaf.Tests.ViewModels
                 }
             };
 
-            // Act
+            // Act: h1を選択
+            _viewModel.SelectedHeadingLevel = "h1";
+            // Assert
+            Assert.IsTrue(_viewModel.IsHeadingNumberingEnabled, "IsHeadingNumberingEnabled for h1 should be true.");
+            Assert.IsTrue(wasRaised, "PropertyChanged for IsHeadingNumberingEnabled should have been raised.");
+
+            wasRaised = false;
+            // Act: h2を選択
+            _viewModel.SelectedHeadingLevel = "h2";
+            // Assert
+            Assert.IsFalse(_viewModel.IsHeadingNumberingEnabled, "IsHeadingNumberingEnabled for h2 should be false.");
+            Assert.IsTrue(wasRaised, "PropertyChanged for IsHeadingNumberingEnabled should have been raised.");
+
+            wasRaised = false;
+            // Act: h3を選択
+            _viewModel.SelectedHeadingLevel = "h3";
+            // Assert
+            Assert.IsTrue(_viewModel.IsHeadingNumberingEnabled, "IsHeadingNumberingEnabled for h3 should be true.");
+            Assert.IsTrue(wasRaised, "PropertyChanged for IsHeadingNumberingEnabled should have been raised.");
+        }
+
+        [TestMethod]
+        public void IsHeadingNumberingEnabled_ShouldUpdateHeadingNumberingStates()
+        {
+            // テスト観点: IsHeadingNumberingEnabledが変更されたときに、
+            // 現在選択されている見出しレベルの内部Dictionaryが正しく更新されることを確認する。
+            // Arrange
+            var cssInfo = new Models.CssStyleInfo();
+            cssInfo.HeadingNumberingStates["h1"] = false; // h1は最初は無効
+            cssInfo.HeadingNumberingStates["h2"] = true;  // h2は最初は有効
+            cssInfo.HeadingNumberingStates["h3"] = false; // h3は最初は無効
+
             _viewModel.LoadStyles(cssInfo);
 
-            // Assert
-            Assert.AreEqual(cssInfo.EnableHeadingNumbering, _viewModel.IsHeadingNumberingEnabled);
-            Assert.IsTrue(wasRaised, "PropertyChanged for IsHeadingNumberingEnabled should have been raised.");
+            // h1を選択し、無効であることを確認
+            _viewModel.SelectedHeadingLevel = "h1";
+            Assert.IsFalse(_viewModel.IsHeadingNumberingEnabled, "Initial IsHeadingNumberingEnabled for h1 should be false.");
+
+            // Act: h1の採番を有効にする
+            _viewModel.IsHeadingNumberingEnabled = true;
+
+            // Assert: h1が有効になり、内部Dictionaryも更新されていることを確認
+            Assert.IsTrue(_viewModel.IsHeadingNumberingEnabled, "IsHeadingNumberingEnabled for h1 should now be true.");
+            _viewModel.SelectedHeadingLevel = "h1"; // 再選択して念のためViewModelの内部状態を更新
+            Assert.IsTrue(_viewModel.IsHeadingNumberingEnabled, "IsHeadingNumberingEnabled for h1 should remain true after reselection.");
+
+            // h2を選択し、有効であることを確認
+            _viewModel.SelectedHeadingLevel = "h2";
+            Assert.IsTrue(_viewModel.IsHeadingNumberingEnabled, "Initial IsHeadingNumberingEnabled for h2 should be true.");
+
+            // Act: h2の採番を無効にする
+            _viewModel.IsHeadingNumberingEnabled = false;
+
+            // Assert: h2が無効になり、内部Dictionaryも更新されていることを確認
+            Assert.IsFalse(_viewModel.IsHeadingNumberingEnabled, "IsHeadingNumberingEnabled for h2 should now be false.");
+            _viewModel.SelectedHeadingLevel = "h2"; // 再選択
+            Assert.IsFalse(_viewModel.IsHeadingNumberingEnabled, "IsHeadingNumberingEnabled for h2 should remain false after reselection.");
+
+            // h3の初期状態を確認
+            _viewModel.SelectedHeadingLevel = "h3";
+            Assert.IsFalse(_viewModel.IsHeadingNumberingEnabled, "Initial IsHeadingNumberingEnabled for h3 should be false.");
         }
     }
 }

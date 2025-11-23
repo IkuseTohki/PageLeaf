@@ -27,7 +27,7 @@ namespace PageLeaf.Models
         public string? CodeFontFamily { get; set; }
         public string? ListMarkerType { get; set; }
         public string? ListIndent { get; set; }
-        public bool EnableHeadingNumbering { get; set; }
+        public Dictionary<string, bool> HeadingNumberingStates { get; } = new();
     }
 
     public class HeadingStyleFlags
