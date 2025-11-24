@@ -157,5 +157,54 @@ namespace PageLeaf.Tests.Services
             int trCount = System.Text.RegularExpressions.Regex.Matches(html, "<tr>").Count;
             Assert.AreEqual(4, trCount, "Expected 4 <tr> tags for header and 3 data rows.");
         }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldAddLanguageClassToCodeBlocks()
+        {
+            /// テスト観点: 言語指定されたMarkdownコードブロックが、変換後に適切な言語クラスを持つ
+            ///             `<code>` タグを生成することを確認する。
+            // Arrange
+            var service = new MarkdownService();
+            var markdown = "```csharp\nConsole.WriteLine(\"Hello\");\n```";
+
+            // Act
+            string html = service.ConvertToHtml(markdown, null);
+
+            // Assert
+            // <pre><code class="language-csharp">Console.WriteLine(&quot;Hello&quot;);
+            // </code></pre> のようなHTMLが生成されることを期待
+            StringAssert.Contains(html, "<pre><code class=\"language-csharp\">Console.WriteLine(&quot;Hello&quot;);");
+            StringAssert.Contains(html, "</code></pre>");
+        }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldLinkToHighlightJsResources()
+        {
+            /// テスト観点: ConvertToHtml メソッドが生成するHTMLに、シンタックスハイライト用の
+            ///             JavaScriptへの絶対パスリンクが正しく含まれていることを確認する。
+            // Arrange
+            var service = new MarkdownService();
+            var markdown = "```csharp\nvar x = 1;\n```";
+
+            // Act
+            string html = service.ConvertToHtml(markdown, null);
+
+            // 絶対パスの構築 (テスト内でMarkdownServiceと同じロジックを使う)
+            var scriptFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "highlight.min.js");
+            var scriptFileUri = new Uri(scriptFilePath).AbsoluteUri;
+
+            var cssFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "styles", "github.css");
+            var cssFileUri = new Uri(cssFilePath).AbsoluteUri;
+
+            // Assert
+            // 1. スタイルシートへのリンクが含まれているか
+            StringAssert.Matches(html, new Regex($@"<link\s+rel=""stylesheet""\s+href=""{Regex.Escape(cssFileUri)}"">"), "highlight.jsのCSSへの<link>タグが見つかりません。");
+
+            // 2. JavaScriptライブラリへのリンクが絶対パスで含まれているか
+            StringAssert.Matches(html, new Regex($@"<script\s+src=""{Regex.Escape(scriptFileUri)}""></script>"), "highlight.jsライブラリへの<script>タグが見つかりません。");
+
+            // 3. ハイライトを有効化するスクリプトが埋め込まれているか
+            StringAssert.Matches(html, new Regex(@"<script>hljs\.highlightAll\(\);</script>"), "ハイライトを初期化するスクリプト 'hljs.highlightAll()' が見つかりません。");
+        }
     }
 }

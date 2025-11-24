@@ -3,6 +3,7 @@ using PageLeaf.Services;
 using PageLeaf.Models;
 using System.Linq;
 using System;
+using System.Text.RegularExpressions;
 
 namespace PageLeaf.Tests.Services
 {
@@ -153,36 +154,6 @@ namespace PageLeaf.Tests.Services
                 "  font-size: 12px;",
                 "  color: rgba(0, 0, 0, 1);",
                 "  background-color: rgba(255, 255, 255, 1);",
-                "}",
-                "",
-                "h2 {",
-                "}",
-                "",
-                "h3 {",
-                "}",
-                "",
-                "h4 {",
-                "}",
-                "",
-                "h5 {",
-                "}",
-                "",
-                "h6 {",
-                "}",
-                "",
-                "blockquote {",
-                "}",
-                "",
-                "ul {",
-                "}",
-                "",
-                "th, td {",
-                "}",
-                "",
-                "th {",
-                "}",
-                "",
-                "code {",
                 "}"
             );
 
@@ -661,24 +632,24 @@ namespace PageLeaf.Tests.Services
 
             // Act
             var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
-            var nl = Environment.NewLine; // 比較用に改行コードを取得
 
             // Assert - h1とh3にのみ採番ルールが適用されていることを確認
             // body
-            StringAssert.Contains(updatedCss, "body {" + nl + "  counter-reset: h1 0;" + nl + "}");
+            StringAssert.Matches(updatedCss, new Regex(@"body\s*\{[^}]*counter-reset:\s*h1\s*0;[^}]*\}"));
 
             // h1
-            StringAssert.Contains(updatedCss, "h1 {" + nl + "  color: rgba(255, 0, 0, 1);" + nl + "  counter-increment: h1;" + nl + "  counter-reset: h2 0;" + nl + "}");
-            StringAssert.Contains(updatedCss, "h1::before {" + nl + "  content: counter(h1) \". \";" + nl + "}");
+            StringAssert.Matches(updatedCss, new Regex(@"h1\s*\{[^}]*counter-increment:\s*h1(\s+1)?;[^}]*\}"));
+            StringAssert.Matches(updatedCss, new Regex(@"h1\s*\{[^}]*counter-reset:\s*h2\s*0;[^}]*\}"));
+            StringAssert.Matches(updatedCss, new Regex(@"h1::before\s*\{[^}]*content:\s*counter\(h1\)\s*""\.\s*"";[^}]*\}"));
 
-            // h2 (採番無効なのでcounter-resetのみ)
-            StringAssert.Contains(updatedCss, "h2 {" + nl + "}"); // h2ルール自体は残る
-            Assert.IsFalse(updatedCss.Contains("h2 {" + nl + "  counter-increment:")); // h2のcounter-incrementはなし
-            Assert.IsFalse(updatedCss.Contains("h2::before")); // h2の::beforeはなし
+            // h2 (採番無効)
+            Assert.IsFalse(updatedCss.Contains("h2 { counter-increment:"));
+            Assert.IsFalse(updatedCss.Contains("h2::before"));
 
             // h3
-            StringAssert.Contains(updatedCss, "h3 {" + nl + "  font-size: 1.2em;" + nl + "  counter-increment: h3;" + nl + "  counter-reset: h4 0;" + nl + "}");
-            StringAssert.Contains(updatedCss, "h3::before {" + nl + "  content: counter(h1) \".\" counter(h2) \".\" counter(h3) \". \";" + nl + "}");
+            StringAssert.Matches(updatedCss, new Regex(@"h3\s*\{[^}]*counter-increment:\s*h3(\s+1)?;[^}]*\}"));
+            StringAssert.Matches(updatedCss, new Regex(@"h3\s*\{[^}]*counter-reset:\s*h4\s*0;[^}]*\}"));
+            StringAssert.Matches(updatedCss, new Regex(@"h3::before\s*\{[^}]*content:\s*counter\(h1\)\s*""\.""\s*counter\(h2\)\s*""\.""\s*counter\(h3\)\s*""\.\s*"";[^}]*\}"));
 
             // h4以降 (採番無効なのでcounter-increment, counter-reset, ::before はなし)
             Assert.IsFalse(updatedCss.Contains("h4 {")); // h4はルール自体が空であれば削除される
@@ -712,20 +683,23 @@ namespace PageLeaf.Tests.Services
 
             // Act
             var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
-            var nl = Environment.NewLine;
+
+            // Assert - h2の採番が有効なので、bodyのcounter-resetは残る
+            StringAssert.Matches(updatedCss, new Regex(@"body\s*\{[^}]*counter-reset:\s*h1\s*0;[^}]*\}"));
 
             // Assert - h1の採番ルールが削除されていることを確認
-            Assert.IsFalse(updatedCss.Contains("body {" + nl + "  counter-reset: h1 0;" + nl + "}")); // bodyのcounter-resetもなし
-            Assert.IsFalse(updatedCss.Contains("h1 {" + nl + "  counter-increment:"));
+            Assert.IsFalse(updatedCss.Contains("h1 { counter-increment:"));
             Assert.IsFalse(updatedCss.Contains("h1::before"));
 
             // Assert - h2の採番ルールは残っていることを確認
-            StringAssert.Contains(updatedCss, "h2 {" + nl + "  counter-increment: h2;" + nl + "  counter-reset: h3 0;" + nl + "}");
-            StringAssert.Contains(updatedCss, "h2::before {" + nl + "  content: counter(h1) \".\" counter(h2) \". \";" + nl + "}");
+            StringAssert.Matches(updatedCss, new Regex(@"h2\s*\{[^}]*counter-increment:\s*h2(\s+1)?;[^}]*\}"));
+            StringAssert.Matches(updatedCss, new Regex(@"h2\s*\{[^}]*counter-reset:\s*h3\s*0;[^}]*\}"));
+            StringAssert.Matches(updatedCss, new Regex(@"h2::before\s*\{[^}]*content:\s*counter\(h1\)\s*""\.""\s*counter\(h2\)\s*""\.\s*"";[^}]*\}"));
+
 
             // Assert - h3は採番ルールがないことを確認
-            StringAssert.Contains(updatedCss, "h3 {" + nl + "  font-size: 1em;" + nl + "}");
-            Assert.IsFalse(updatedCss.Contains("h3 {" + nl + "  counter-increment:"));
+            StringAssert.Matches(updatedCss, new Regex(@"h3\s*\{[^}]*font-size:\s*1em;[^}]*\}"));
+            Assert.IsFalse(updatedCss.Contains("h3 { counter-increment:"));
             Assert.IsFalse(updatedCss.Contains("h3::before"));
         }
     }

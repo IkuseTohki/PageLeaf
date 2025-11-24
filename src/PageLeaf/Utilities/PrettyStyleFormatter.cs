@@ -25,6 +25,11 @@ namespace PageLeaf.Utilities
                 var first = true;
                 foreach (var rule in rules)
                 {
+                    if (rule is ICssStyleRule styleRule && styleRule.Style.Length == 0)
+                    {
+                        continue;
+                    }
+
                     if (first)
                     {
                         first = false;

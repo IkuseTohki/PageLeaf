@@ -753,8 +753,11 @@ namespace PageLeaf.Tests.ViewModels
             cssInfo.HeadingNumberingStates["h2"] = false;
             cssInfo.HeadingNumberingStates["h3"] = true;
 
-            // LoadStylesが呼ばれたときに内部状態が設定されるようにモックを設定
+            // ViewModelのコンストラクタでSelectedHeadingLevelは "h1" に初期化されている。
+            // LoadStylesを呼ぶと、SelectedHeadingLevel("h1") に基づいて IsHeadingNumberingEnabled が true に設定される。
             _viewModel.LoadStyles(cssInfo);
+            Assert.IsTrue(_viewModel.IsHeadingNumberingEnabled, "Arrange failed: IsHeadingNumberingEnabled should be true for h1 initially.");
+
 
             bool wasRaised = false;
             _viewModel.PropertyChanged += (sender, args) =>
@@ -765,25 +768,25 @@ namespace PageLeaf.Tests.ViewModels
                 }
             };
 
-            // Act: h1を選択
-            _viewModel.SelectedHeadingLevel = "h1";
-            // Assert
-            Assert.IsTrue(_viewModel.IsHeadingNumberingEnabled, "IsHeadingNumberingEnabled for h1 should be true.");
-            Assert.IsTrue(wasRaised, "PropertyChanged for IsHeadingNumberingEnabled should have been raised.");
-
-            wasRaised = false;
             // Act: h2を選択
             _viewModel.SelectedHeadingLevel = "h2";
             // Assert
             Assert.IsFalse(_viewModel.IsHeadingNumberingEnabled, "IsHeadingNumberingEnabled for h2 should be false.");
-            Assert.IsTrue(wasRaised, "PropertyChanged for IsHeadingNumberingEnabled should have been raised.");
+            Assert.IsTrue(wasRaised, "PropertyChanged for IsHeadingNumberingEnabled should have been raised when switching to h2.");
 
             wasRaised = false;
             // Act: h3を選択
             _viewModel.SelectedHeadingLevel = "h3";
             // Assert
             Assert.IsTrue(_viewModel.IsHeadingNumberingEnabled, "IsHeadingNumberingEnabled for h3 should be true.");
-            Assert.IsTrue(wasRaised, "PropertyChanged for IsHeadingNumberingEnabled should have been raised.");
+            Assert.IsTrue(wasRaised, "PropertyChanged for IsHeadingNumberingEnabled should have been raised when switching to h3.");
+
+            wasRaised = false;
+            // Act: h1に戻す
+            _viewModel.SelectedHeadingLevel = "h1";
+            // Assert
+            Assert.IsTrue(_viewModel.IsHeadingNumberingEnabled, "IsHeadingNumberingEnabled for h1 should be true again.");
+            Assert.IsFalse(wasRaised, "PropertyChanged should NOT be raised when the value is the same.");
         }
 
         [TestMethod]
