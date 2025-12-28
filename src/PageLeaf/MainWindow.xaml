@@ -1,6 +1,7 @@
 ﻿<Window x:Class="PageLeaf.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:behaviors="clr-namespace:PageLeaf.Behaviors"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:local="clr-namespace:PageLeaf"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -163,6 +164,7 @@
 
             <!-- つまみボタン (Popupを使用してWebView2のAirspace問題を回避) -->
             <Popup x:Name="TogglePopup"
+                   behaviors:PopupFollowBehavior.IsEnabled="True"
                    AllowsTransparency="True"
                    IsOpen="True"
                    Placement="Left"

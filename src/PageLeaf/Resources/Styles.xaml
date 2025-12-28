@@ -26,7 +26,7 @@
 
     <!-- つまみボタン（トグル）用スタイル -->
     <Style x:Key="ToggleHandleButtonStyle" TargetType="Button">
-        <Setter Property="Width" Value="15" />
+        <Setter Property="Width" Value="14" />
         <Setter Property="Height" Value="32" />
         <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}" />
         <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
