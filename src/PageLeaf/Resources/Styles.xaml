@@ -2,7 +2,58 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:utils="clr-namespace:PageLeaf.Utilities">
 
-    <utils:DisplayModeToStringConverter x:Key="DisplayModeToStringConverter" />
+    <!-- アイコンのリソース -->
+    <Geometry x:Key="ChevronLeftIconGeometry">M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z</Geometry>
+    <Geometry x:Key="ChevronRightIconGeometry">M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z</Geometry>
+
+    <!-- 基本的な色定義 -->
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="BorderBrush" Color="#FFACACAC" />
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#FF333333" />
+
+    <!-- アイコンボタン用スタイル -->
+    <Style x:Key="IconButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#FFE0E0E0" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- つまみボタン（トグル）用スタイル -->
+    <Style x:Key="ToggleHandleButtonStyle" TargetType="Button">
+        <Setter Property="Width" Value="15" />
+        <Setter Property="Height" Value="32" />
+        <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border x:Name="RootBorder"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4,0,0,4">
+                        <ContentPresenter />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="RootBorder" Property="Background" Value="#FFF8F8F8" />
+                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="#FF888888" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 
     <Style TargetType="MenuItem">
         <Setter Property="FontSize" Value="14" />
@@ -66,6 +117,41 @@
                 <Setter Property="BorderBrush" Value="#FF707070" />
             </Trigger>
         </Style.Triggers>
+    </Style>
+
+    <!-- フォーム用ラベルスタイル -->
+    <Style x:Key="FormLabelStyle" TargetType="Label">
+        <Setter Property="Margin" Value="0,5,0,0" />
+        <Setter Property="Padding" Value="0,2" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
+    <!-- フォーム用テキストボックススタイル -->
+    <Style x:Key="FormTextBoxStyle" TargetType="TextBox">
+        <Setter Property="Margin" Value="0,2,0,5" />
+        <Setter Property="Padding" Value="3" />
+    </Style>
+
+    <!-- フォーム用コンボボックススタイル -->
+    <Style x:Key="FormComboBoxStyle"
+           BasedOn="{StaticResource BaseComboBoxStyle}"
+           TargetType="ComboBox">
+        <Setter Property="Margin" Value="0,2,0,5" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- フォーム用チェックボックススタイル -->
+    <Style x:Key="FormCheckBoxStyle" TargetType="CheckBox">
+        <Setter Property="Margin" Value="0,5" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <!-- フォーム用ヘッダースタイル -->
+    <Style x:Key="FormHeaderStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Margin" Value="0,10,0,5" />
+        <Setter Property="Foreground" Value="#FF333333" />
     </Style>
 
 </ResourceDictionary>

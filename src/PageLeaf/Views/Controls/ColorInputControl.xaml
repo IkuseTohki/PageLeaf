@@ -9,9 +9,6 @@
              d:DesignHeight="30"
              d:DesignWidth="200"
              mc:Ignorable="d">
-    <UserControl.Resources>
-        <utilities:StringToBrushConverter x:Key="StringToBrushConverter" />
-    </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />

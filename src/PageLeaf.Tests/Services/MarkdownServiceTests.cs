@@ -16,15 +16,6 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var service = new MarkdownService();
             string markdown = "# Hello";
-            string expectedHtml = "<!DOCTYPE html>\n" +
-                                  "<html>\n" +
-                                  "<head>\n" +
-                                  "<meta charset=\"UTF-8\">\n" +
-                                  "</head>\n" +
-                                  "<body>\n" +
-                                  "<h1>Hello</h1>\n" +
-                                  "</body>\n" +
-                                  "</html>\n";
 
             // Act
             string actualHtml = service.ConvertToHtml(markdown, null);

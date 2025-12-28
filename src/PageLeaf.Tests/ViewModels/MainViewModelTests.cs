@@ -4,7 +4,6 @@ using Moq;
 using PageLeaf.Models;
 using PageLeaf.Services;
 using PageLeaf.ViewModels;
-using System.Windows;
 using System.Collections.Generic;
 
 namespace PageLeaf.Tests.ViewModels
@@ -15,11 +14,11 @@ namespace PageLeaf.Tests.ViewModels
         private Mock<IEditorService> _editorServiceMock = null!;
         private Mock<IFileService> _fileServiceMock = null!;
         private Mock<IDialogService> _dialogServiceMock = null!;
-        private Mock<ICssService> _cssServiceMock = null!;
         private Mock<ISettingsService> _settingsServiceMock = null!;
-        private Mock<ICssEditorService> _cssEditorServiceMock = null!;
+        private Mock<ICssManagementService> _cssManagementServiceMock = null!;
         private Mock<ILogger<MainViewModel>> _loggerMock = null!;
         private MainViewModel _viewModel = null!;
+        private CssEditorViewModel _cssEditorViewModel = null!;
 
         [TestInitialize]
         public void TestInitialize()
@@ -27,13 +26,13 @@ namespace PageLeaf.Tests.ViewModels
             _editorServiceMock = new Mock<IEditorService>();
             _fileServiceMock = new Mock<IFileService>();
             _dialogServiceMock = new Mock<IDialogService>();
-            _cssServiceMock = new Mock<ICssService>();
             _settingsServiceMock = new Mock<ISettingsService>();
-            _cssEditorServiceMock = new Mock<ICssEditorService>();
+            _cssManagementServiceMock = new Mock<ICssManagementService>();
             _loggerMock = new Mock<ILogger<MainViewModel>>();
 
-            // MainViewModelのコンストラクタが必要とする基本的な戻り値をセットアップ
-            _cssServiceMock.Setup(s => s.GetAvailableCssFileNames()).Returns(new List<string> { "default.css" });
+            _cssEditorViewModel = new CssEditorViewModel(_cssManagementServiceMock.Object);
+
+            _cssManagementServiceMock.Setup(s => s.GetAvailableCssFileNames()).Returns(new List<string> { "default.css" });
             _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { SelectedCss = "default.css" });
 
             _viewModel = new MainViewModel(
@@ -41,23 +40,21 @@ namespace PageLeaf.Tests.ViewModels
                 _loggerMock.Object,
                 _dialogServiceMock.Object,
                 _editorServiceMock.Object,
-                _cssServiceMock.Object,
                 _settingsServiceMock.Object,
-                _cssEditorServiceMock.Object);
+                _cssManagementServiceMock.Object,
+                _cssEditorViewModel);
         }
 
         [TestMethod]
-        public void ToggleCssEditor_ShouldUpdateColumnWidthAndNotify()
+        public void ToggleCssEditor_ShouldNotify()
         {
-            // テスト観点: IsCssEditorVisibleプロパティの変更に応じて、CssEditorColumnWidthが適切に更新され、
-            //            関連するプロパティ変更通知が発行されることを確認する。
+            // テスト観点: IsCssEditorVisibleプロパティの変更に応じて、プロパティ変更通知が発行されることを確認する。
+            //            幅の制御はView側で行うため、ViewModelは可視状態のみを管理する。
 
             // Arrange
             var notifiedProperties = new List<string>();
-            _viewModel.PropertyChanged += (sender, e) => notifiedProperties.Add(e.PropertyName);
-            var testWidth = new GridLength(250, GridUnitType.Pixel);
-            _viewModel.CssEditorColumnWidth = testWidth;
-            _viewModel.IsCssEditorVisible = false; // 初期状態を非表示に
+            _viewModel.PropertyChanged += (sender, e) => notifiedProperties.Add(e.PropertyName!);
+            _viewModel.IsCssEditorVisible = false;
 
             notifiedProperties.Clear();
 
@@ -66,9 +63,7 @@ namespace PageLeaf.Tests.ViewModels
 
             // Assert: 表示状態
             Assert.IsTrue(_viewModel.IsCssEditorVisible);
-            Assert.AreEqual(testWidth, _viewModel.CssEditorColumnWidth);
             Assert.IsTrue(notifiedProperties.Contains(nameof(MainViewModel.IsCssEditorVisible)));
-            Assert.IsTrue(notifiedProperties.Contains(nameof(MainViewModel.CssEditorColumnWidth)));
 
             notifiedProperties.Clear();
 
@@ -77,39 +72,29 @@ namespace PageLeaf.Tests.ViewModels
 
             // Assert: 非表示状態
             Assert.IsFalse(_viewModel.IsCssEditorVisible);
-            Assert.AreEqual(new GridLength(0), _viewModel.CssEditorColumnWidth);
             Assert.IsTrue(notifiedProperties.Contains(nameof(MainViewModel.IsCssEditorVisible)));
-            Assert.IsTrue(notifiedProperties.Contains(nameof(MainViewModel.CssEditorColumnWidth)));
         }
 
         [TestMethod]
-        public void SetWidth_ShouldBePreservedAfterTogglingVisibility()
+        public void CssEditorColumnWidth_ShouldUpdateAndNotify()
         {
-            // テスト観点: SetCssEditorColumnWidthで設定した幅が、エディタの表示/非表示を切り替えた後も
-            //            正しく保持・復元されることを確認する。
+            // テスト観点: CssEditorColumnWidthプロパティがdouble型として正しく更新され、通知されることを確認する。
 
             // Arrange
-            var initialWidth = new GridLength(300, GridUnitType.Star);
-            var newWidth = new GridLength(450, GridUnitType.Pixel);
-
-            // 初期状態で表示
-            _viewModel.IsCssEditorVisible = true;
+            var notifiedProperties = new List<string>();
+            _viewModel.PropertyChanged += (sender, e) => notifiedProperties.Add(e.PropertyName!);
+            var initialWidth = 300.0;
+            var newWidth = 450.0;
             _viewModel.CssEditorColumnWidth = initialWidth;
-            Assert.AreEqual(initialWidth, _viewModel.CssEditorColumnWidth, "Initial width should be set.");
 
-            // Act: 新しい幅を設定
+            notifiedProperties.Clear();
+
+            // Act
             _viewModel.CssEditorColumnWidth = newWidth;
 
-            // Assert: 新しい幅が適用されている
-            Assert.AreEqual(newWidth, _viewModel.CssEditorColumnWidth, "New width should be applied.");
-
-            // Act: 非表示にしてから再度表示
-            _viewModel.IsCssEditorVisible = false;
-            Assert.AreEqual(new GridLength(0), _viewModel.CssEditorColumnWidth, "Width should be 0 when hidden.");
-            _viewModel.IsCssEditorVisible = true;
-
-            // Assert: 新しい幅が復元されている
-            Assert.AreEqual(newWidth, _viewModel.CssEditorColumnWidth, "New width should be restored after toggling visibility.");
+            // Assert
+            Assert.AreEqual(newWidth, _viewModel.CssEditorColumnWidth);
+            Assert.IsTrue(notifiedProperties.Contains(nameof(MainViewModel.CssEditorColumnWidth)));
         }
     }
 }

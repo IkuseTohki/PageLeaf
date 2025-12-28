@@ -76,5 +76,16 @@ namespace PageLeaf.Views
                 _ => SaveConfirmationResult.Cancel // デフォルトはキャンセル
             };
         }
+
+        /// <summary>
+        /// 例外が発生したことをユーザーに通知するダイアログを表示します。
+        /// </summary>
+        /// <param name="message">ユーザー向けのわかりやすいメッセージ。</param>
+        /// <param name="exception">発生した例外オブジェクト。</param>
+        public void ShowExceptionDialog(string message, Exception exception)
+        {
+            var errorWindow = new ErrorWindow(message, exception);
+            errorWindow.ShowDialog();
+        }
     }
 }

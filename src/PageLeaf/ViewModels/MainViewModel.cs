@@ -5,7 +5,6 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Input;
-using System.Windows; // Added
 
 namespace PageLeaf.ViewModels
 {
@@ -14,15 +13,14 @@ namespace PageLeaf.ViewModels
         private readonly IFileService _fileService;
         private readonly ILogger<MainViewModel> _logger;
         private readonly IDialogService _dialogService;
-        private readonly ICssService _cssService;
+        private readonly ICssManagementService _cssManagementService;
         private readonly ISettingsService _settingsService;
-        private readonly ICssEditorService _cssEditorService;
 
         private bool _isCssEditorVisible;
         private ObservableCollection<string> _availableCssFiles = null!;
         private string _selectedCssFile = null!;
         private bool _isWebView2Initialized;
-        private GridLength _lastKnownCssEditorWidth; // Added
+        private double _cssEditorColumnWidth = 300.0;
 
         public IEditorService Editor { get; }
         public CssEditorViewModel CssEditorViewModel { get; }
@@ -37,7 +35,6 @@ namespace PageLeaf.ViewModels
                 {
                     _isCssEditorVisible = value;
                     OnPropertyChanged();
-                    OnPropertyChanged(nameof(CssEditorColumnWidth)); // Notify CssEditorColumnWidth change
                 }
             }
         }
@@ -61,29 +58,22 @@ namespace PageLeaf.ViewModels
                 {
                     _selectedCssFile = value;
                     OnPropertyChanged();
-                    // 選択されたCSSファイルが変更された場合、設定を保存し、エディタビューに新しいCSSを適用する
+
+                    // 設定を保存
                     _settingsService.CurrentSettings.SelectedCss = value;
                     _settingsService.SaveSettings(_settingsService.CurrentSettings);
+
+                    // エディタ（WebView）に適用
                     Editor.ApplyCss(value);
 
                     try
                     {
-                        var cssPath = _cssService.GetCssPath(value);
-                        if (!string.IsNullOrEmpty(cssPath) && _fileService.FileExists(cssPath))
-                        {
-                            // CSSエディタのターゲットパスを更新
-                            CssEditorViewModel.TargetCssPath = cssPath;
-
-                            var cssContent = _fileService.ReadAllText(cssPath);
-                            var parsedStyles = _cssEditorService.ParseCss(cssContent);
-
-                            // CssEditorViewModelのLoadStylesメソッドを呼び出してスタイルを反映
-                            CssEditorViewModel.LoadStyles(parsedStyles);
-                        }
+                        // CSSエディタViewModelにロードさせる
+                        CssEditorViewModel.Load(value);
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Failed to read and parse CSS file: {CssFile}", value);
+                        _logger.LogError(ex, "Failed to load CSS style: {CssFile}", value);
                     }
                 }
             }
@@ -107,14 +97,14 @@ namespace PageLeaf.ViewModels
             IsWebView2Initialized = true;
         }
 
-        public GridLength CssEditorColumnWidth
+        public double CssEditorColumnWidth
         {
-            get => IsCssEditorVisible ? _lastKnownCssEditorWidth : new GridLength(0);
+            get => _cssEditorColumnWidth;
             set
             {
-                if (_lastKnownCssEditorWidth != value)
+                if (_cssEditorColumnWidth != value)
                 {
-                    _lastKnownCssEditorWidth = value;
+                    _cssEditorColumnWidth = value;
                     OnPropertyChanged();
                 }
             }
@@ -127,25 +117,32 @@ namespace PageLeaf.ViewModels
         public ICommand ToggleCssEditorCommand { get; }
 
 
-        public MainViewModel(IFileService fileService, ILogger<MainViewModel> logger, IDialogService dialogService, IEditorService editorService, ICssService cssService, ISettingsService settingsService, ICssEditorService cssEditorService)
+        public MainViewModel(
+            IFileService fileService,
+            ILogger<MainViewModel> logger,
+            IDialogService dialogService,
+            IEditorService editorService,
+            ISettingsService settingsService,
+            ICssManagementService cssManagementService,
+            CssEditorViewModel cssEditorViewModel)
         {
             ArgumentNullException.ThrowIfNull(fileService);
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(editorService);
-            ArgumentNullException.ThrowIfNull(cssService);
             ArgumentNullException.ThrowIfNull(settingsService);
-            ArgumentNullException.ThrowIfNull(cssEditorService);
+            ArgumentNullException.ThrowIfNull(cssManagementService);
+            ArgumentNullException.ThrowIfNull(cssEditorViewModel);
 
             _fileService = fileService;
             _logger = logger;
             _dialogService = dialogService;
             Editor = editorService;
-            _cssService = cssService;
             _settingsService = settingsService;
-            _cssEditorService = cssEditorService;
+            _cssManagementService = cssManagementService;
+            CssEditorViewModel = cssEditorViewModel;
 
-            CssEditorViewModel = new CssEditorViewModel(_fileService, _cssEditorService);
+            // Subscribe to event
             CssEditorViewModel.CssSaved += OnCssSaved;
 
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
@@ -158,7 +155,7 @@ namespace PageLeaf.ViewModels
                 Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>()
             );
 
-            AvailableCssFiles = new ObservableCollection<string>(_cssService.GetAvailableCssFileNames());
+            AvailableCssFiles = new ObservableCollection<string>(_cssManagementService.GetAvailableCssFileNames());
 
             // 設定から選択されたCSSを読み込む
             var loadedCss = _settingsService.CurrentSettings.SelectedCss;
@@ -171,9 +168,11 @@ namespace PageLeaf.ViewModels
                 SelectedCssFile = AvailableCssFiles.FirstOrDefault() ?? "github.css";
             }
 
+            // SelectedCssFileのセッターで Load が呼ばれるので、ここでは明示的に呼ばなくて良いが、
+            // 初期化タイミングによってはセッターロジックが期待通り動かない場合もあるので確認が必要。
+            // ObservableCollectionの初期化後なので大丈夫なはず。
+            //念のため、確実に適用しておく
             Editor.ApplyCss(SelectedCssFile);
-
-            _lastKnownCssEditorWidth = new GridLength(300); // Initialize default width
         }
 
         private void ExecuteNewDocument(object? parameter)

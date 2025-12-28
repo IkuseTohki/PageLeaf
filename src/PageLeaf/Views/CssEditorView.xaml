@@ -9,112 +9,159 @@
              d:DesignWidth="300"
              mc:Ignorable="d">
     <Grid>
-        <StackPanel>
-            <!-- Panel Toolbar -->
-            <Border Padding="5"
-                    BorderBrush="LightGray"
-                    BorderThickness="0,0,0,1">
-                <Button HorizontalAlignment="Right"
-                        Command="{Binding SaveCssCommand}"
-                        Content="保存" />
-            </Border>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-            <!-- Tab Container -->
-            <TabControl>
-                <!-- General Tab -->
-                <TabItem Header="全体">
-                    <StackPanel Margin="5">
-                        <Label Content="文字色:" />
+        <!-- Panel Toolbar -->
+        <Border Grid.Row="0"
+                Padding="5"
+                BorderBrush="LightGray"
+                BorderThickness="0,0,0,0">
+            <Button HorizontalAlignment="Right"
+                    Command="{Binding SaveCssCommand}"
+                    Content="保存" />
+        </Border>
+
+        <!-- Tab Container -->
+        <TabControl Grid.Row="1">
+            <!-- General Tab -->
+            <TabItem Header="全体">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding BodyTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="背景色:" />
+
+                        <Label Content="背景色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding BodyBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="フォントサイズ:" />
-                        <TextBox Text="{Binding BodyFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                </TabItem>
 
-                <!-- Headings Tab -->
-                <TabItem Header="見出し">
-                    <StackPanel Margin="5">
-                        <Label Content="対象見出し:" />
-                        <ComboBox ItemsSource="{Binding AvailableHeadingLevels}" SelectedItem="{Binding SelectedHeadingLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="文字色:" />
+                        <Label Content="フォントサイズ:" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding BodyFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Headings Tab -->
+            <TabItem Header="見出し">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <Label Content="対象見出し:" Style="{StaticResource FormLabelStyle}" />
+                        <ComboBox ItemsSource="{Binding AvailableHeadingLevels}"
+                                  SelectedItem="{Binding SelectedHeadingLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource FormComboBoxStyle}" />
+
+                        <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding HeadingTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="スタイル:" />
-                        <StackPanel Orientation="Horizontal">
-                            <CheckBox Content="太字" IsChecked="{Binding IsHeadingBold, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <CheckBox Content="斜体" IsChecked="{Binding IsHeadingItalic, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <CheckBox Content="下線" IsChecked="{Binding IsHeadingUnderline, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                            <CheckBox Content="取り消し線" IsChecked="{Binding IsHeadingStrikethrough, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        </StackPanel>
-                        <Label Content="フォントサイズ:" />
-                        <TextBox Text="{Binding HeadingFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="フォントファミリー:" />
-                        <TextBox Text="{Binding HeadingFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <CheckBox Content="項番の自動採番" IsChecked="{Binding IsHeadingNumberingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                </TabItem>
 
-                <!-- Quote Tab -->
-                <TabItem Header="引用">
-                    <StackPanel Margin="5">
-                        <Label Content="文字色:" />
+                        <Label Content="スタイル:" Style="{StaticResource FormLabelStyle}" />
+                        <StackPanel Orientation="Horizontal">
+                            <CheckBox Content="太字"
+                                      IsChecked="{Binding IsHeadingBold, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Style="{StaticResource FormCheckBoxStyle}" />
+                            <CheckBox Margin="10,5"
+                                      Content="斜体"
+                                      IsChecked="{Binding IsHeadingItalic, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Style="{StaticResource FormCheckBoxStyle}" />
+                            <CheckBox Content="下線"
+                                      IsChecked="{Binding IsHeadingUnderline, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Style="{StaticResource FormCheckBoxStyle}" />
+                            <CheckBox Margin="10,5"
+                                      Content="取り消し線"
+                                      IsChecked="{Binding IsHeadingStrikethrough, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                      Style="{StaticResource FormCheckBoxStyle}" />
+                        </StackPanel>
+
+                        <Label Content="フォントサイズ:" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding HeadingFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <Label Content="フォントファミリー:" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding HeadingFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <CheckBox Content="項番の自動採番"
+                                  IsChecked="{Binding IsHeadingNumberingEnabled, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource FormCheckBoxStyle}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Quote Tab -->
+            <TabItem Header="引用">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding QuoteTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="背景色:" />
+
+                        <Label Content="背景色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding QuoteBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="左枠線 色:" />
+
+                        <Label Content="左枠線 色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding QuoteBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="左枠線 太さ:" />
-                        <TextBox Text="{Binding QuoteBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="左枠線 種類:" />
-                        <ComboBox Text="{Binding QuoteBorderStyle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+
+                        <Label Content="左枠線 太さ:" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding QuoteBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <Label Content="左枠線 種類:" Style="{StaticResource FormLabelStyle}" />
+                        <ComboBox Style="{StaticResource FormComboBoxStyle}" Text="{Binding QuoteBorderStyle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <ComboBoxItem Content="solid" />
                             <ComboBoxItem Content="dotted" />
                             <ComboBoxItem Content="dashed" />
                         </ComboBox>
                     </StackPanel>
-                </TabItem>
+                </ScrollViewer>
+            </TabItem>
 
-                <!-- List Tab -->
-                <TabItem Header="リスト">
-                    <StackPanel Margin="5">
-                        <Label Content="マーカーの種類 (ul):" />
-                        <ComboBox Text="{Binding ListMarkerType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <!-- List Tab -->
+            <TabItem Header="リスト">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <Label Content="マーカーの種類 (ul):" Style="{StaticResource FormLabelStyle}" />
+                        <ComboBox Style="{StaticResource FormComboBoxStyle}" Text="{Binding ListMarkerType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                             <ComboBoxItem Content="disc" />
                             <ComboBoxItem Content="circle" />
                             <ComboBoxItem Content="square" />
                         </ComboBox>
-                        <Label Content="インデント:" />
-                        <TextBox Text="{Binding ListIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                </TabItem>
 
-                <!-- Table Tab -->
-                <TabItem Header="表">
-                    <StackPanel Margin="5">
-                        <Label Content="罫線 色:" />
+                        <Label Content="インデント:" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding ListIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Table Tab -->
+            <TabItem Header="表">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <Label Content="罫線 色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding TableBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="罫線 太さ:" />
-                        <TextBox Text="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="ヘッダー背景色:" />
-                        <controls:ColorInputControl ColorText="{Binding TableHeaderBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="セル パディング:" />
-                        <TextBox Text="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                </TabItem>
 
-                <!-- Code Tab -->
-                <TabItem Header="コード">
-                    <StackPanel Margin="5">
-                        <Label Content="文字色:" />
-                        <controls:ColorInputControl ColorText="{Binding CodeTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="背景色:" />
-                        <controls:ColorInputControl ColorText="{Binding CodeBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                        <Label Content="フォントファミリー:" />
-                        <TextBox Text="{Binding CodeFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <Label Content="罫線 太さ:" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <Label Content="ヘッダー背景色:" Style="{StaticResource FormLabelStyle}" />
+                        <controls:ColorInputControl ColorText="{Binding TableHeaderBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <Label Content="セル パディング:" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
-                </TabItem>
-            </TabControl>
-        </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Code Tab -->
+            <TabItem Header="コード">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
+                        <controls:ColorInputControl ColorText="{Binding CodeTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <Label Content="背景色:" Style="{StaticResource FormLabelStyle}" />
+                        <controls:ColorInputControl ColorText="{Binding CodeBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <Label Content="フォントファミリー:" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding CodeFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>

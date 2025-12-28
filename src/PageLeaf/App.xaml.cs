@@ -63,8 +63,10 @@ namespace PageLeaf
                     services.AddSingleton<IMarkdownService, MarkdownService>();
                     services.AddSingleton<IEditorService, EditorService>(); // EditorService を登録
                     services.AddSingleton<ICssEditorService, CssEditorService>();
+                    services.AddSingleton<ICssManagementService, CssManagementService>();
 
                     // ViewModels と Views をDIコンテナに登録
+                    services.AddSingleton<CssEditorViewModel>();
                     services.AddSingleton<MainViewModel>();
                     services.AddSingleton<MainWindow>();
                 })
@@ -73,11 +75,18 @@ namespace PageLeaf
             // グローバル例外ハンドリングを設定
             SetupGlobalExceptionHandling();
 
-            await AppHost.StartAsync();
+            try
+            {
+                await AppHost.StartAsync();
 
-
-            var mainWindow = AppHost.Services.GetRequiredService<MainWindow>();
-            mainWindow.Show();
+                var mainWindow = AppHost.Services.GetRequiredService<MainWindow>();
+                mainWindow.Show();
+            }
+            catch (Exception ex)
+            {
+                // 起動時の例外を捕捉して通知
+                HandleFatalException(ex);
+            }
         }
 
         /// <summary>
@@ -103,18 +112,55 @@ namespace PageLeaf
             // UIスレッド以外の未処理例外
             AppDomain.CurrentDomain.UnhandledException += (sender, e) =>
             {
-                var logger = AppHost?.Services.GetService<ILogger<App>>();
-                logger?.LogError(e.ExceptionObject as Exception, "Unhandled exception occurred.");
+                if (e.ExceptionObject is Exception ex)
+                {
+                    HandleFatalException(ex);
+                }
             };
 
             // UIスレッドの未処理例外
             DispatcherUnhandledException += (sender, e) =>
             {
-                var logger = AppHost?.Services.GetService<ILogger<App>>();
-                logger?.LogError(e.Exception, "Dispatcher unhandled exception occurred.");
-                // アプリケーションのクラッシュを防ぐために、例外を処理済みにマーク
+                HandleFatalException(e.Exception);
+                // アプリケーションを終了させるため、ここでは処理済みとはせず、
+                // HandleFatalException 内で終了処理を促すか、e.Handled を false のままにする。
                 e.Handled = true;
             };
+        }
+
+        /// <summary>
+        /// 致命的な例外を処理し、ユーザーに通知した後にアプリケーションを終了します。
+        /// </summary>
+        /// <param name="ex">発生した例外。</param>
+        private void HandleFatalException(Exception ex)
+        {
+            // ロギング
+            var logger = AppHost?.Services.GetService<ILogger<App>>();
+            logger?.LogCritical(ex, "Fatal exception occurred. Application will shut down.");
+
+            // ユーザー通知
+            // AppHostが構築されていない、またはサービスが取得できない場合に備えて
+            // 直接ErrorWindowを出すフォールバックも考慮する
+            var dialogService = AppHost?.Services.GetService<IDialogService>();
+            if (dialogService != null)
+            {
+                dialogService.ShowExceptionDialog("致命的なエラーが発生したため、アプリケーションを終了します。", ex);
+            }
+            else
+            {
+                var errorWindow = new Views.ErrorWindow("致命的なエラーが発生したため、アプリケーションを終了します。", ex);
+                errorWindow.ShowDialog();
+            }
+
+            // 安全な終了
+            if (Application.Current != null)
+            {
+                Application.Current.Shutdown();
+            }
+            else
+            {
+                Environment.Exit(1);
+            }
         }
     }
 }

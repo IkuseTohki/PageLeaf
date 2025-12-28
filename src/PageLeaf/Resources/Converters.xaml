@@ -3,6 +3,8 @@
                     xmlns:utilities="clr-namespace:PageLeaf.Utilities">
 
     <utilities:DisplayModeToStringConverter x:Key="DisplayModeToStringConverter" />
+    <utilities:DoubleToGridLengthConverter x:Key="DoubleToGridLengthConverter" />
+    <utilities:StringToBrushConverter x:Key="StringToBrushConverter" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
 </ResourceDictionary>

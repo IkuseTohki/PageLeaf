@@ -8,24 +8,24 @@ namespace PageLeaf.Utilities
         #region AssociatedWidth Attached Property
 
         /// <summary>
-        /// ViewModelのプロパティとGridのColumnDefinitionの幅を双方向でバインドするための添付プロパティ。
+        /// ViewModelのプロパティ(double)とGridのColumnDefinitionの幅を双方向でバインドするための添付プロパティ。
         /// </summary>
         public static readonly DependencyProperty AssociatedWidthProperty =
             DependencyProperty.RegisterAttached(
                 "AssociatedWidth",
-                typeof(GridLength),
+                typeof(double),
                 typeof(GridSplitterBehavior),
                 new FrameworkPropertyMetadata(
-                    GridLength.Auto,
+                    double.NaN,
                     FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
                     OnAssociatedWidthChanged));
 
-        public static GridLength GetAssociatedWidth(DependencyObject obj)
+        public static double GetAssociatedWidth(DependencyObject obj)
         {
-            return (GridLength)obj.GetValue(AssociatedWidthProperty);
+            return (double)obj.GetValue(AssociatedWidthProperty);
         }
 
-        public static void SetAssociatedWidth(DependencyObject obj, GridLength value)
+        public static void SetAssociatedWidth(DependencyObject obj, double value)
         {
             obj.SetValue(AssociatedWidthProperty, value);
         }
@@ -110,8 +110,17 @@ namespace PageLeaf.Utilities
                 int columnIndex = GetColumnIndex(splitter);
                 if (splitter.Parent is Grid grid && columnIndex >= 0 && grid.ColumnDefinitions.Count > columnIndex)
                 {
-                    // ViewModelからの変更をカラムの幅に反映
-                    grid.ColumnDefinitions[columnIndex].Width = (GridLength)e.NewValue;
+                    double newWidth = (double)e.NewValue;
+                    if (!double.IsNaN(newWidth) && newWidth >= 0)
+                    {
+                        // ViewModelからの変更をカラムの幅(GridLength)に反映
+                        // 既に同じPixel値であれば設定しない（無限ループ防止）
+                        var currentWidth = grid.ColumnDefinitions[columnIndex].Width;
+                        if (!currentWidth.IsAbsolute || currentWidth.Value != newWidth)
+                        {
+                            grid.ColumnDefinitions[columnIndex].Width = new GridLength(newWidth, GridUnitType.Pixel);
+                        }
+                    }
                 }
             }
         }
@@ -126,8 +135,12 @@ namespace PageLeaf.Utilities
                 int columnIndex = GetColumnIndex(splitter);
                 if (splitter.Parent is Grid grid && columnIndex >= 0 && grid.ColumnDefinitions.Count > columnIndex)
                 {
-                    // TwoWayバインディングを通じてViewModelのプロパティを更新
-                    SetAssociatedWidth(splitter, grid.ColumnDefinitions[columnIndex].Width);
+                    var width = grid.ColumnDefinitions[columnIndex].Width;
+                    if (width.IsAbsolute)
+                    {
+                        // TwoWayバインディングを通じてViewModelのプロパティ(double)を更新
+                        SetAssociatedWidth(splitter, width.Value);
+                    }
                 }
             }
         }

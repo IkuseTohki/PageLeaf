@@ -27,5 +27,12 @@ namespace PageLeaf.Services
         /// </summary>
         /// <returns>ユーザーの選択結果。</returns>
         PageLeaf.Models.SaveConfirmationResult ShowSaveConfirmationDialog();
+
+        /// <summary>
+        /// 例外が発生したことをユーザーに通知するダイアログを表示します。
+        /// </summary>
+        /// <param name="message">ユーザー向けのわかりやすいメッセージ。</param>
+        /// <param name="exception">発生した例外オブジェクト。</param>
+        void ShowExceptionDialog(string message, System.Exception exception);
     }
 }

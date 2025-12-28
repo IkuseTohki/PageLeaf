@@ -11,8 +11,7 @@ namespace PageLeaf.ViewModels
 {
     public class CssEditorViewModel : ViewModelBase
     {
-        private readonly IFileService _fileService;
-        private readonly ICssEditorService _cssEditorService;
+        private readonly ICssManagementService _cssManagementService;
 
         private string? _bodyTextColor;
         private string? _bodyBackgroundColor;
@@ -41,7 +40,7 @@ namespace PageLeaf.ViewModels
         private Dictionary<string, string> _allHeadingFontSizes = new Dictionary<string, string>();
         private Dictionary<string, string> _allHeadingFontFamilies = new Dictionary<string, string>();
         private Dictionary<string, HeadingStyleFlags> _allHeadingStyleFlags = new Dictionary<string, HeadingStyleFlags>();
-        private Dictionary<string, bool> _allHeadingNumberingStates = new Dictionary<string, bool>(); // Added
+        private Dictionary<string, bool> _allHeadingNumberingStates = new Dictionary<string, bool>();
         private string? _selectedHeadingLevel;
 
         public event EventHandler? CssSaved;
@@ -50,13 +49,13 @@ namespace PageLeaf.ViewModels
 
         public ObservableCollection<string> AvailableHeadingLevels { get; }
 
-        public CssEditorViewModel(IFileService fileService, ICssEditorService cssEditorService)
-        {
-            ArgumentNullException.ThrowIfNull(fileService);
-            ArgumentNullException.ThrowIfNull(cssEditorService);
+        public string? TargetCssFileName { get; private set; }
 
-            _fileService = fileService;
-            _cssEditorService = cssEditorService;
+        public CssEditorViewModel(ICssManagementService cssManagementService)
+        {
+            ArgumentNullException.ThrowIfNull(cssManagementService);
+
+            _cssManagementService = cssManagementService;
             SaveCssCommand = new DelegateCommand(ExecuteSaveCss);
 
             AvailableHeadingLevels = new ObservableCollection<string>(
@@ -65,7 +64,14 @@ namespace PageLeaf.ViewModels
             SelectedHeadingLevel = AvailableHeadingLevels.FirstOrDefault();
         }
 
-        public void LoadStyles(CssStyleInfo styleInfo)
+        public void Load(string cssFileName)
+        {
+            TargetCssFileName = cssFileName;
+            var styleInfo = _cssManagementService.LoadStyle(cssFileName);
+            LoadStyles(styleInfo);
+        }
+
+        private void LoadStyles(CssStyleInfo styleInfo)
         {
             // Body styles
             BodyTextColor = styleInfo.BodyTextColor;
@@ -126,8 +132,6 @@ namespace PageLeaf.ViewModels
             CodeBackgroundColor = styleInfo.CodeBackgroundColor;
             CodeFontFamily = styleInfo.CodeFontFamily;
 
-
-
             UpdateHeadingProperties();
         }
 
@@ -156,7 +160,7 @@ namespace PageLeaf.ViewModels
                 }
                 else
                 {
-                    HeadingTextColor = null; // 選択されたレベルの色がない場合
+                    HeadingTextColor = null;
                 }
 
                 // HeadingFontSize
@@ -202,7 +206,7 @@ namespace PageLeaf.ViewModels
                 }
                 else
                 {
-                    IsHeadingNumberingEnabled = false; // デフォルトは無効
+                    IsHeadingNumberingEnabled = false;
                 }
             }
             else
@@ -214,9 +218,8 @@ namespace PageLeaf.ViewModels
                 IsHeadingItalic = false;
                 IsHeadingUnderline = false;
                 IsHeadingStrikethrough = false;
-                IsHeadingNumberingEnabled = false; // 選択がない場合も無効
+                IsHeadingNumberingEnabled = false;
             }
-            // 他の見出し関連プロパティもここに追加する
         }
 
         public string? BodyTextColor
@@ -600,26 +603,18 @@ namespace PageLeaf.ViewModels
             }
         }
 
-        public string? TargetCssPath { get; set; }
-
         private void ExecuteSaveCss(object? parameter)
         {
-            if (string.IsNullOrEmpty(TargetCssPath))
+            if (string.IsNullOrEmpty(TargetCssFileName))
             {
-                // TODO: パスがない場合のエラーハンドリングを検討
                 return;
             }
 
-            // 1. ファイルを読み込む
-            var existingCss = _fileService.ReadAllText(TargetCssPath);
-
-            // 2. 更新用のスタイル情報を作成
             var styleInfo = new Models.CssStyleInfo
             {
                 BodyTextColor = this.BodyTextColor,
                 BodyBackgroundColor = this.BodyBackgroundColor,
                 BodyFontSize = this.BodyFontSize,
-                // HeadingTextColor = this.HeadingTextColor, // SelectedHeadingLevelに依存するため、Dictionaryをコピーする
                 QuoteTextColor = this.QuoteTextColor,
                 QuoteBackgroundColor = this.QuoteBackgroundColor,
                 QuoteBorderColor = this.QuoteBorderColor,
@@ -634,10 +629,8 @@ namespace PageLeaf.ViewModels
                 CodeFontFamily = this.CodeFontFamily,
                 ListMarkerType = this.ListMarkerType,
                 ListIndent = this.ListIndent
-                // EnableHeadingNumbering = this.IsHeadingNumberingEnabled // Removed
             };
 
-            // Heading styles (Dictionaryをコピー)
             foreach (var entry in _allHeadingTextColors)
             {
                 styleInfo.HeadingTextColors[entry.Key] = entry.Value;
@@ -654,22 +647,14 @@ namespace PageLeaf.ViewModels
             {
                 styleInfo.HeadingStyleFlags[entry.Key] = entry.Value;
             }
-
-            // Heading Numbering states (Dictionaryをコピー)
             foreach (var entry in _allHeadingNumberingStates)
             {
                 styleInfo.HeadingNumberingStates[entry.Key] = entry.Value;
             }
 
-            // 3. CSSコンテンツを更新
-            var updatedCss = _cssEditorService.UpdateCssContent(existingCss, styleInfo);
-
-            // 4. ファイルに書き込む
-            _fileService.WriteAllText(TargetCssPath, updatedCss);
+            _cssManagementService.SaveStyle(TargetCssFileName, styleInfo);
 
             CssSaved?.Invoke(this, EventArgs.Empty);
         }
     }
 }
-
-

@@ -104,11 +104,6 @@
                               SelectedItem="{Binding SelectedCssFile}"
                               Style="{StaticResource CssFileComboBoxStyle}" />
                 </StackPanel>
-
-                <Button Grid.Column="3"
-                        Command="{Binding ToggleCssEditorCommand}"
-                        Content="CSS編集"
-                        Style="{StaticResource ToolBarButtonStyle}" />
             </Grid>
         </Border>
 
@@ -117,12 +112,24 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="{Binding CssEditorColumnWidth}" />
+                <ColumnDefinition>
+                    <ColumnDefinition.Style>
+                        <Style TargetType="ColumnDefinition">
+                            <Setter Property="Width" Value="{Binding CssEditorColumnWidth, Mode=TwoWay, Converter={StaticResource DoubleToGridLengthConverter}}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsCssEditorVisible}" Value="False">
+                                    <Setter Property="Width" Value="0" />
+                                    <Setter Property="MinWidth" Value="0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ColumnDefinition.Style>
+                </ColumnDefinition>
             </Grid.ColumnDefinitions>
 
             <!-- 左側の区画 (エディタ) -->
             <Grid Grid.Column="0">
-                <TextBox Margin="5"
+                <TextBox Margin="0"
                          AcceptsReturn="True"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          Text="{Binding Editor.EditorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -130,22 +137,71 @@
                          Visibility="{Binding Editor.IsMarkdownEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <wv2:WebView2 x:Name="MarkdownViewer"
-                              Margin="5"
+                              Margin="0"
                               utils:WebBrowserHelper.Html="{Binding Editor.HtmlFilePath}"
                               Visibility="{Binding Editor.IsViewerVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
             </Grid>
 
+            <!-- 境界線 (GridSplitterはMainGridの直下である必要がある) -->
             <GridSplitter Grid.Column="1"
-                          Width="2"
-                          HorizontalAlignment="Center"
+                          Width="4"
+                          HorizontalAlignment="Stretch"
                           VerticalAlignment="Stretch"
-                          utils:GridSplitterBehavior.AssociatedWidth="{Binding CssEditorColumnWidth, Mode=TwoWay}"
-                          utils:GridSplitterBehavior.ColumnIndex="2"
-                          utils:GridSplitterBehavior.EnableTwoWayBinding="True"
+                          Background="Transparent"
+                          ResizeBehavior="PreviousAndNext"
                           ShowsPreview="True"
                           Visibility="{Binding IsCssEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-            <views:CssEditorView Grid.Column="2" DataContext="{Binding CssEditorViewModel}" />
+            <!-- Popupの位置を決定するためのアンカー (Column 1に配置) -->
+            <Control x:Name="PopupAnchor"
+                     Grid.Column="1"
+                     Width="0"
+                     Height="0"
+                     HorizontalAlignment="Left"
+                     VerticalAlignment="Center"
+                     Visibility="Hidden" />
+
+            <!-- つまみボタン (Popupを使用してWebView2のAirspace問題を回避) -->
+            <Popup x:Name="TogglePopup"
+                   AllowsTransparency="True"
+                   IsOpen="True"
+                   Placement="Left"
+                   PlacementTarget="{Binding ElementName=PopupAnchor}"
+                   StaysOpen="True">
+                <Popup.Style>
+                    <Style TargetType="Popup">
+                        <Setter Property="HorizontalOffset" Value="8" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsCssEditorVisible}" Value="False">
+                                <Setter Property="HorizontalOffset" Value="0" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Popup.Style>
+                <Button Padding="0"
+                        Command="{Binding ToggleCssEditorCommand}"
+                        Style="{StaticResource ToggleHandleButtonStyle}">
+                    <Path Width="8"
+                          Height="8"
+                          Fill="{StaticResource PrimaryTextBrush}"
+                          Stretch="Uniform">
+                        <Path.Style>
+                            <Style TargetType="Path">
+                                <Setter Property="Data" Value="{StaticResource ChevronLeftIconGeometry}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsCssEditorVisible}" Value="True">
+                                        <Setter Property="Data" Value="{StaticResource ChevronRightIconGeometry}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Path.Style>
+                    </Path>
+                </Button>
+            </Popup>
+
+            <Border Grid.Column="2" Visibility="{Binding IsCssEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <views:CssEditorView DataContext="{Binding CssEditorViewModel}" />
+            </Border>
         </Grid>
     </Grid>
 </Window>
