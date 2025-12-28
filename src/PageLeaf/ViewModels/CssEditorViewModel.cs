@@ -37,11 +37,11 @@ namespace PageLeaf.ViewModels
         private string? _listIndent;
         private bool _isHeadingNumberingEnabled;
 
-        private Dictionary<string, string> _allHeadingTextColors = new();
-        private Dictionary<string, string> _allHeadingFontSizes = new();
-        private Dictionary<string, string> _allHeadingFontFamilies = new();
-        private Dictionary<string, HeadingStyleFlags> _allHeadingStyleFlags = new();
-        private Dictionary<string, bool> _allHeadingNumberingStates = new(); // Added
+        private Dictionary<string, string> _allHeadingTextColors = new Dictionary<string, string>();
+        private Dictionary<string, string> _allHeadingFontSizes = new Dictionary<string, string>();
+        private Dictionary<string, string> _allHeadingFontFamilies = new Dictionary<string, string>();
+        private Dictionary<string, HeadingStyleFlags> _allHeadingStyleFlags = new Dictionary<string, HeadingStyleFlags>();
+        private Dictionary<string, bool> _allHeadingNumberingStates = new Dictionary<string, bool>(); // Added
         private string? _selectedHeadingLevel;
 
         public event EventHandler? CssSaved;

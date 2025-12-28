@@ -30,7 +30,7 @@ namespace PageLeaf.Services
             htmlBuilder.AppendLine("<!DOCTYPE html>");
             htmlBuilder.AppendLine("<html>");
             htmlBuilder.AppendLine("<head>");
-            htmlBuilder.Append(headBuilder.ToString());
+            htmlBuilder.Append(headBuilder);
             htmlBuilder.AppendLine("</head>");
             htmlBuilder.AppendLine("<body>");
             htmlBuilder.Append(htmlBody);

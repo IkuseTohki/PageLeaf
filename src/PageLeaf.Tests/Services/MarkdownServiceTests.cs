@@ -1,6 +1,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PageLeaf.Services;
 using System.Text.RegularExpressions;
+using System;
+using System.IO;
 
 namespace PageLeaf.Tests.Services
 {

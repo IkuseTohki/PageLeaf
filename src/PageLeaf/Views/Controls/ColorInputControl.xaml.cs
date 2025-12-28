@@ -26,7 +26,7 @@ namespace PageLeaf.Views.Controls
         }
 
         public static readonly DependencyProperty ColorTextProperty =
-            DependencyProperty.Register("ColorText", typeof(string), typeof(ColorInputControl), 
+            DependencyProperty.Register("ColorText", typeof(string), typeof(ColorInputControl),
                 new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         /// <summary>

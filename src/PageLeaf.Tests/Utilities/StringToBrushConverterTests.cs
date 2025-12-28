@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Windows.Media;
 using PageLeaf.Utilities;
 using System.Windows;
+using System;
 
 namespace PageLeaf.Tests.Utilities
 {

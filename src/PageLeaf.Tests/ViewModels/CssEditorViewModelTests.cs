@@ -39,7 +39,7 @@ namespace PageLeaf.Tests.ViewModels
             var filePath = "C:\\temp\\test.css";
             var initialCss = "body { color: black; }";
             var updatedCss = "body { color: red; background-color: white; }";
-            
+
             _viewModel.TargetCssPath = filePath;
             _viewModel.BodyTextColor = "red";
             _viewModel.BodyBackgroundColor = "white";
@@ -58,8 +58,8 @@ namespace PageLeaf.Tests.ViewModels
             _viewModel.LoadStyles(initialCssInfo); // ViewModelの内部Dictionaryを初期化
 
             _mockFileService.Setup(s => s.ReadAllText(filePath)).Returns(initialCss);
-            _mockCssEditorService.Setup(s => s.UpdateCssContent(initialCss, It.Is<Models.CssStyleInfo>(info => 
-                info.BodyTextColor == _viewModel.BodyTextColor && 
+            _mockCssEditorService.Setup(s => s.UpdateCssContent(initialCss, It.Is<Models.CssStyleInfo>(info =>
+                info.BodyTextColor == _viewModel.BodyTextColor &&
                 info.BodyBackgroundColor == _viewModel.BodyBackgroundColor &&
                 // HeadingTextColorsの検証
                 info.HeadingTextColors.ContainsKey("h1") && info.HeadingTextColors["h1"] == initialCssInfo.HeadingTextColors["h1"] &&
@@ -109,7 +109,8 @@ namespace PageLeaf.Tests.ViewModels
             _viewModel.TargetCssPath = filePath;
 
             bool eventRaised = false;
-            _viewModel.CssSaved += (sender, args) => {
+            _viewModel.CssSaved += (sender, args) =>
+            {
                 eventRaised = true;
             };
 

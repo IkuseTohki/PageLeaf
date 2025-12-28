@@ -8,10 +8,10 @@ namespace PageLeaf.Models
         public string? BodyBackgroundColor { get; set; }
         public string? BodyFontSize { get; set; }
         public string? HeadingTextColor { get; set; }
-        public Dictionary<string, string> HeadingTextColors { get; } = new();
-        public Dictionary<string, string> HeadingFontSizes { get; } = new();
-        public Dictionary<string, string> HeadingFontFamilies { get; } = new();
-        public Dictionary<string, HeadingStyleFlags> HeadingStyleFlags { get; } = new();
+        public Dictionary<string, string> HeadingTextColors { get; } = new Dictionary<string, string>();
+        public Dictionary<string, string> HeadingFontSizes { get; } = new Dictionary<string, string>();
+        public Dictionary<string, string> HeadingFontFamilies { get; } = new Dictionary<string, string>();
+        public Dictionary<string, HeadingStyleFlags> HeadingStyleFlags { get; } = new Dictionary<string, HeadingStyleFlags>();
         public string? QuoteTextColor { get; set; }
         public string? QuoteBackgroundColor { get; set; }
         public string? QuoteBorderColor { get; set; }
@@ -27,7 +27,7 @@ namespace PageLeaf.Models
         public string? CodeFontFamily { get; set; }
         public string? ListMarkerType { get; set; }
         public string? ListIndent { get; set; }
-        public Dictionary<string, bool> HeadingNumberingStates { get; } = new();
+        public Dictionary<string, bool> HeadingNumberingStates { get; } = new Dictionary<string, bool>();
     }
 
     public class HeadingStyleFlags

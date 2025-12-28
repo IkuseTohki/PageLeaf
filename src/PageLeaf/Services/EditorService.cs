@@ -21,7 +21,7 @@ namespace PageLeaf.Services
         private bool _isMarkdownEditorVisible;
         private bool _isViewerVisible;
         private string _htmlFilePath = string.Empty;
-        private readonly List<string> _tempHtmlFiles = new(); // Added
+        private readonly List<string> _tempHtmlFiles = new List<string>(); // Added
 
         // EditorService が公開する IsDirty プロパティ
         public bool IsDirty => CurrentDocument.IsDirty;

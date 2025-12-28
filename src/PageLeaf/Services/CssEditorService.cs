@@ -232,7 +232,7 @@ namespace PageLeaf.Services
                     {
                         rule.Style.RemoveProperty("font-family");
                     }
-                    
+
                     // Style Flags
                     if (info.HeadingStyleFlags.TryGetValue(headingSelector, out var flags))
                     {

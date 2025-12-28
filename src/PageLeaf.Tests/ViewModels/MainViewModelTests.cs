@@ -5,6 +5,7 @@ using PageLeaf.Models;
 using PageLeaf.Services;
 using PageLeaf.ViewModels;
 using System.Windows;
+using System.Collections.Generic;
 
 namespace PageLeaf.Tests.ViewModels
 {
@@ -55,7 +56,7 @@ namespace PageLeaf.Tests.ViewModels
             var notifiedProperties = new List<string>();
             _viewModel.PropertyChanged += (sender, e) => notifiedProperties.Add(e.PropertyName);
             var testWidth = new GridLength(250, GridUnitType.Pixel);
-                        _viewModel.CssEditorColumnWidth = testWidth;
+            _viewModel.CssEditorColumnWidth = testWidth;
             _viewModel.IsCssEditorVisible = false; // 初期状態を非表示に
 
             notifiedProperties.Clear();
@@ -93,11 +94,11 @@ namespace PageLeaf.Tests.ViewModels
 
             // 初期状態で表示
             _viewModel.IsCssEditorVisible = true;
-                        _viewModel.CssEditorColumnWidth = initialWidth;
+            _viewModel.CssEditorColumnWidth = initialWidth;
             Assert.AreEqual(initialWidth, _viewModel.CssEditorColumnWidth, "Initial width should be set.");
 
             // Act: 新しい幅を設定
-                        _viewModel.CssEditorColumnWidth = newWidth;
+            _viewModel.CssEditorColumnWidth = newWidth;
 
             // Assert: 新しい幅が適用されている
             Assert.AreEqual(newWidth, _viewModel.CssEditorColumnWidth, "New width should be applied.");

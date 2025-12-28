@@ -1,65 +1,69 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:utils="clr-namespace:PageLeaf.Utilities">
 
-    <utils:DisplayModeToStringConverter x:Key="DisplayModeToStringConverter"/>
+    <utils:DisplayModeToStringConverter x:Key="DisplayModeToStringConverter" />
 
     <Style TargetType="MenuItem">
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Padding" Value="5,2"/>
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="5,2" />
     </Style>
 
     <!-- 共通のComboBoxスタイル -->
-    <Style TargetType="ComboBox" x:Key="BaseComboBoxStyle">
-        <Setter Property="Margin" Value="5,0"/>
-        <Setter Property="VerticalContentAlignment" Value="Center"/>
+    <Style x:Key="BaseComboBoxStyle" TargetType="ComboBox">
+        <Setter Property="Margin" Value="5,0" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
     <!-- モード選択用ComboBoxスタイル -->
-    <Style TargetType="ComboBox" x:Key="DisplayModeComboBoxStyle" BasedOn="{StaticResource BaseComboBoxStyle}">
-        <Setter Property="Width" Value="140"/>
+    <Style x:Key="DisplayModeComboBoxStyle"
+           BasedOn="{StaticResource BaseComboBoxStyle}"
+           TargetType="ComboBox">
+        <Setter Property="Width" Value="140" />
         <Setter Property="ItemTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <TextBlock Text="{Binding Converter={StaticResource DisplayModeToStringConverter}}"/>
+                    <TextBlock Text="{Binding Converter={StaticResource DisplayModeToStringConverter}}" />
                 </DataTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
     <!-- CSSファイル選択用ComboBoxスタイル -->
-    <Style TargetType="ComboBox" x:Key="CssFileComboBoxStyle" BasedOn="{StaticResource BaseComboBoxStyle}">
-        <Setter Property="Width" Value="200"/>
+    <Style x:Key="CssFileComboBoxStyle"
+           BasedOn="{StaticResource BaseComboBoxStyle}"
+           TargetType="ComboBox">
+        <Setter Property="Width" Value="200" />
         <Setter Property="ItemTemplate">
             <Setter.Value>
                 <DataTemplate>
-                    <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" />
                 </DataTemplate>
             </Setter.Value>
         </Setter>
     </Style>
 
     <Style TargetType="ToolBar">
-        <Setter Property="Background" Value="#FFE0E0E0"/>
-        <Setter Property="Padding" Value="2"/>
+        <Setter Property="Background" Value="#FFE0E0E0" />
+        <Setter Property="Padding" Value="2" />
     </Style>
 
     <Style x:Key="ToolBarLikeBorder" TargetType="Border">
-        <Setter Property="Background" Value="#FFE0E0E0"/>
-        <Setter Property="Padding" Value="4"/>
-        <Setter Property="BorderBrush" Value="#FFACACAC"/>
-        <Setter Property="BorderThickness" Value="0,0,0,1"/>
+        <Setter Property="Background" Value="#FFE0E0E0" />
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="BorderBrush" Value="#FFACACAC" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
     </Style>
 
     <Style x:Key="ToolBarButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="Transparent"/>
-        <Setter Property="BorderBrush" Value="Transparent"/>
-        <Setter Property="Padding" Value="5,2"/>
-        <Setter Property="Margin" Value="2"/>
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="Padding" Value="5,2" />
+        <Setter Property="Margin" Value="2" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#FFC5C5C5"/>
-                <Setter Property="BorderBrush" Value="#FF707070"/>
+                <Setter Property="Background" Value="#FFC5C5C5" />
+                <Setter Property="BorderBrush" Value="#FF707070" />
             </Trigger>
         </Style.Triggers>
     </Style>
