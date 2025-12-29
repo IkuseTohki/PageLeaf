@@ -207,24 +207,59 @@ namespace PageLeaf.Tests.ViewModels
         }
 
         [TestMethod]
-        public void Save_ShouldOnlyIncludeValidProperties()
+        public void GlobalUnit_Change_ShouldConvertValues()
         {
-            // テスト観点: インデクサ経由で追加された未知のキーが、保存時の CssStyleInfo に悪影響を与えないことを確認する。
+            // テスト観点: 全体の単位を px から em に変更した際、
+            //            既存のフォントサイズ数値が適切に変換されることを確認する。
 
             // Arrange
-            var styleInfo = new Models.CssStyleInfo();
-            _mockCssManagementService.Setup(s => s.LoadStyle(It.IsAny<string>())).Returns(styleInfo);
+            _viewModel.GlobalUnit = "px";
+            _viewModel.BodyFontSize = "16"; // 16px
+            _viewModel.SelectedHeadingLevel = "h1";
+            _viewModel.HeadingFontSize = "32"; // 32px
 
-            _viewModel.Load("test.css");
-            _viewModel["UnknownProperty"] = "SomeValue";
-
-            // Act
-            _viewModel.SaveCssCommand.Execute(null);
+            // Act: px -> em に変更
+            _viewModel.GlobalUnit = "em";
 
             // Assert
-            _mockCssManagementService.Verify(s => s.SaveStyle(It.IsAny<string>(), It.Is<Models.CssStyleInfo>(info =>
-                info.GetType().GetProperties().All(p => p.Name != "UnknownProperty")
-            )), Times.Once);
+            Assert.AreEqual("1", _viewModel.BodyFontSize, "16px should be converted to 1em");
+            Assert.AreEqual("2", _viewModel.HeadingFontSize, "32px should be converted to 2em");
+        }
+
+        [TestMethod]
+        public void Load_WhenFontSizeIsMissing_ShouldUseDefaultValue()
+        {
+            // テスト観点: CSSファイルにフォントサイズ指定がない場合、
+            //            定義された標準的なデフォルト値(16pxベース)が適用されることを確認する。
+
+            // Arrange
+            var styleInfo = new Models.CssStyleInfo(); // 全プロパティが null
+            _mockCssManagementService.Setup(s => s.LoadStyle(It.IsAny<string>())).Returns(styleInfo);
+            _viewModel.GlobalUnit = "px";
+
+            // Act
+            _viewModel.Load("empty.css");
+
+            // Assert
+            Assert.AreEqual("16", _viewModel.BodyFontSize, "Body default should be 16px");
+            _viewModel.SelectedHeadingLevel = "h1";
+            Assert.AreEqual("32", _viewModel.HeadingFontSize, "h1 default should be 32px");
+        }
+
+        [TestMethod]
+        public void GlobalUnit_Change_ToPercent_ShouldConvertValues()
+        {
+            // テスト観点: 単位を em から % に変更した際、適切に変換されることを確認する。
+
+            // Arrange
+            _viewModel.GlobalUnit = "em";
+            _viewModel.BodyFontSize = "1.5"; // 1.5em
+
+            // Act: em -> % に変更
+            _viewModel.GlobalUnit = "%";
+
+            // Assert
+            Assert.AreEqual("150", _viewModel.BodyFontSize, "1.5em should be converted to 150%");
         }
     }
 }

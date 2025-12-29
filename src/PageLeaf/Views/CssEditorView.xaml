@@ -30,6 +30,11 @@
             <TabItem Header="全体">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
+                        <Label Content="共通単位:" Style="{StaticResource FormLabelStyle}" />
+                        <ComboBox ItemsSource="{Binding AvailableUnits}"
+                                  SelectedItem="{Binding GlobalUnit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource FormComboBoxStyle}" />
+
                         <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding BodyTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
@@ -37,7 +42,7 @@
                         <controls:ColorInputControl ColorText="{Binding BodyBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="フォントサイズ:" Style="{StaticResource FormLabelStyle}" />
-                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding BodyFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:FontSizeEditorControl Unit="{Binding GlobalUnit}" Value="{Binding BodyFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -73,7 +78,7 @@
                         </StackPanel>
 
                         <Label Content="フォントサイズ:" Style="{StaticResource FormLabelStyle}" />
-                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding HeadingFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:FontSizeEditorControl Unit="{Binding GlobalUnit}" Value="{Binding HeadingFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="フォントファミリー:" Style="{StaticResource FormLabelStyle}" />
                         <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding HeadingFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -99,7 +104,7 @@
                         <controls:ColorInputControl ColorText="{Binding QuoteBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="左枠線 太さ:" Style="{StaticResource FormLabelStyle}" />
-                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding QuoteBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:FontSizeEditorControl Unit="px" Value="{Binding QuoteBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="左枠線 種類:" Style="{StaticResource FormLabelStyle}" />
                         <ComboBox Style="{StaticResource FormComboBoxStyle}" Text="{Binding QuoteBorderStyle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
@@ -123,7 +128,7 @@
                         </ComboBox>
 
                         <Label Content="インデント:" Style="{StaticResource FormLabelStyle}" />
-                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding ListIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:FontSizeEditorControl Unit="px" Value="{Binding ListIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -136,13 +141,13 @@
                         <controls:ColorInputControl ColorText="{Binding TableBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="罫線 太さ:" Style="{StaticResource FormLabelStyle}" />
-                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:FontSizeEditorControl Unit="px" Value="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="ヘッダー背景色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding TableHeaderBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="セル パディング:" Style="{StaticResource FormLabelStyle}" />
-                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:FontSizeEditorControl Unit="px" Value="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
