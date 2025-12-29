@@ -6,61 +6,62 @@ using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using PageLeaf.Models;
 using System.Linq;
+using System.Reflection;
 
 namespace PageLeaf.ViewModels
 {
+    /// <summary>
+    /// CSSスタイルの編集を管理するViewModel。
+    /// プロパティへの直接アクセスに加え、インデクサによる動的なアクセスをサポートします。
+    /// </summary>
     public class CssEditorViewModel : ViewModelBase
     {
         private readonly ICssManagementService _cssManagementService;
 
-        private string? _bodyTextColor;
-        private string? _bodyBackgroundColor;
-        private string? _bodyFontSize;
+        // 文字列値（Color, FontSize, FontFamily等）を保持する辞書
+        private readonly Dictionary<string, string?> _styles = new Dictionary<string, string?>();
 
-        private string? _headingTextColor;
-        private string? _headingFontSize;
-        private string? _headingFontFamily;
-        private string? _quoteTextColor;
-        private string? _quoteBackgroundColor;
-        private string? _quoteBorderColor;
-        private string? _quoteBorderWidth;
-        private string? _quoteBorderStyle;
-        private string? _tableBorderColor;
-        private string? _tableHeaderBackgroundColor;
-        private string? _tableBorderWidth;
-        private string? _tableCellPadding;
-        private string? _codeTextColor;
-        private string? _codeBackgroundColor;
-        private string? _codeFontFamily;
-        private string? _listMarkerType;
-        private string? _listIndent;
-        private bool _isHeadingNumberingEnabled;
+        // フラグ値（Bold, Italic等）を保持する辞書。キーは "h1.IsBold" の形式。
+        private readonly Dictionary<string, bool> _flags = new Dictionary<string, bool>();
 
-        private Dictionary<string, string> _allHeadingTextColors = new Dictionary<string, string>();
-        private Dictionary<string, string> _allHeadingFontSizes = new Dictionary<string, string>();
-        private Dictionary<string, string> _allHeadingFontFamilies = new Dictionary<string, string>();
-        private Dictionary<string, HeadingStyleFlags> _allHeadingStyleFlags = new Dictionary<string, HeadingStyleFlags>();
-        private Dictionary<string, bool> _allHeadingNumberingStates = new Dictionary<string, bool>();
+        // スタイル属性のメタデータ（単一文字列プロパティ）
+        private static readonly string[] StylePropertyNames = new[]
+        {
+            "BodyTextColor", "BodyBackgroundColor", "BodyFontSize",
+            "QuoteTextColor", "QuoteBackgroundColor", "QuoteBorderColor",
+            "QuoteBorderWidth", "QuoteBorderStyle",
+            "TableBorderColor", "TableHeaderBackgroundColor", "TableBorderWidth", "TableCellPadding",
+            "CodeTextColor", "CodeBackgroundColor", "CodeFontFamily",
+            "ListMarkerType", "ListIndent"
+        };
+
+        // 見出し用の属性名
+        private static readonly string[] HeadingAttributes = new[] { "TextColor", "FontSize", "FontFamily" };
+        private static readonly string[] HeadingFlags = new[] { "IsBold", "IsItalic", "IsUnderline", "IsStrikethrough", "IsNumberingEnabled" };
+
         private string? _selectedHeadingLevel;
-
         public event EventHandler? CssSaved;
-
         public ICommand SaveCssCommand { get; }
-
         public ObservableCollection<string> AvailableHeadingLevels { get; }
-
         public string? TargetCssFileName { get; private set; }
+
+        /// <summary>
+        /// 文字列キーでスタイル値を取得または設定します。
+        /// キー形式: "BodyTextColor" または "h1.TextColor"
+        /// </summary>
+        public string? this[string key]
+        {
+            get => GetStyleValue(key);
+            set => SetStyleValue(key, value);
+        }
 
         public CssEditorViewModel(ICssManagementService cssManagementService)
         {
             ArgumentNullException.ThrowIfNull(cssManagementService);
-
             _cssManagementService = cssManagementService;
             SaveCssCommand = new DelegateCommand(ExecuteSaveCss);
 
-            AvailableHeadingLevels = new ObservableCollection<string>(
-                Enumerable.Range(1, 6).Select(i => $"h{i}")
-            );
+            AvailableHeadingLevels = new ObservableCollection<string>(Enumerable.Range(1, 6).Select(i => $"h{i}"));
             SelectedHeadingLevel = AvailableHeadingLevels.FirstOrDefault();
         }
 
@@ -73,66 +74,97 @@ namespace PageLeaf.ViewModels
 
         private void LoadStyles(CssStyleInfo styleInfo)
         {
-            // Body styles
-            BodyTextColor = styleInfo.BodyTextColor;
-            BodyBackgroundColor = styleInfo.BodyBackgroundColor;
-            BodyFontSize = styleInfo.BodyFontSize;
-
-            // Heading styles
-            _allHeadingTextColors.Clear();
-            foreach (var entry in styleInfo.HeadingTextColors)
+            var type = typeof(CssStyleInfo);
+            // 単一プロパティのロード
+            foreach (var name in StylePropertyNames)
             {
-                _allHeadingTextColors[entry.Key] = entry.Value;
+                var prop = type.GetProperty(name);
+                if (prop != null) _styles[name] = prop.GetValue(styleInfo) as string;
             }
 
-            _allHeadingFontSizes.Clear();
-            foreach (var entry in styleInfo.HeadingFontSizes)
+            // 見出し辞書の展開
+            foreach (var level in AvailableHeadingLevels)
             {
-                _allHeadingFontSizes[entry.Key] = entry.Value;
+                _styles[$"{level}.TextColor"] = styleInfo.HeadingTextColors.TryGetValue(level, out var c) ? c : null;
+                _styles[$"{level}.FontSize"] = styleInfo.HeadingFontSizes.TryGetValue(level, out var s) ? s : null;
+                _styles[$"{level}.FontFamily"] = styleInfo.HeadingFontFamilies.TryGetValue(level, out var f) ? f : null;
+
+                if (styleInfo.HeadingStyleFlags.TryGetValue(level, out var flags))
+                {
+                    _flags[$"{level}.IsBold"] = flags.IsBold;
+                    _flags[$"{level}.IsItalic"] = flags.IsItalic;
+                    _flags[$"{level}.IsUnderline"] = flags.IsUnderline;
+                    _flags[$"{level}.IsStrikethrough"] = flags.IsStrikethrough;
+                }
+                _flags[$"{level}.IsNumberingEnabled"] = styleInfo.HeadingNumberingStates.TryGetValue(level, out var n) && n;
             }
-
-            _allHeadingFontFamilies.Clear();
-            foreach (var entry in styleInfo.HeadingFontFamilies)
-            {
-                _allHeadingFontFamilies[entry.Key] = entry.Value;
-            }
-
-            _allHeadingStyleFlags.Clear();
-            foreach (var entry in styleInfo.HeadingStyleFlags)
-            {
-                _allHeadingStyleFlags[entry.Key] = entry.Value;
-            }
-
-            // Heading Numbering states
-            _allHeadingNumberingStates.Clear();
-            foreach (var entry in styleInfo.HeadingNumberingStates)
-            {
-                _allHeadingNumberingStates[entry.Key] = entry.Value;
-            }
-
-            // Quote styles
-            QuoteTextColor = styleInfo.QuoteTextColor;
-            QuoteBackgroundColor = styleInfo.QuoteBackgroundColor;
-            QuoteBorderColor = styleInfo.QuoteBorderColor;
-            QuoteBorderWidth = styleInfo.QuoteBorderWidth;
-            QuoteBorderStyle = styleInfo.QuoteBorderStyle;
-
-            // List styles
-            ListMarkerType = styleInfo.ListMarkerType;
-            ListIndent = styleInfo.ListIndent;
-
-            // Table styles
-            TableBorderColor = styleInfo.TableBorderColor;
-            TableHeaderBackgroundColor = styleInfo.TableHeaderBackgroundColor;
-            TableBorderWidth = styleInfo.TableBorderWidth;
-            TableCellPadding = styleInfo.TableCellPadding;
-
-            // Code styles
-            CodeTextColor = styleInfo.CodeTextColor;
-            CodeBackgroundColor = styleInfo.CodeBackgroundColor;
-            CodeFontFamily = styleInfo.CodeFontFamily;
 
             UpdateHeadingProperties();
+            OnPropertyChanged(string.Empty); // 全プロパティの更新通知
+        }
+
+        private string? GetStyleValue(string key) => _styles.TryGetValue(key, out var value) ? value : null;
+
+        private void SetStyleValue(string key, string? value)
+        {
+            if (!_styles.TryGetValue(key, out var current) || current != value)
+            {
+                _styles[key] = value;
+                OnPropertyChanged("Item[]"); // インデクサ全体の変更通知
+
+                // 現在選択中の見出しレベルと同期している場合の通知
+                if (_selectedHeadingLevel != null && key.StartsWith(_selectedHeadingLevel))
+                {
+                    var attr = key.Substring(_selectedHeadingLevel.Length + 1);
+                    OnPropertyChanged($"Heading{attr}");
+                }
+                else
+                {
+                    OnPropertyChanged(key);
+                }
+            }
+        }
+
+        // 基本プロパティ
+        public string? BodyTextColor { get => this[nameof(BodyTextColor)]; set => this[nameof(BodyTextColor)] = value; }
+        public string? BodyBackgroundColor { get => this[nameof(BodyBackgroundColor)]; set => this[nameof(BodyBackgroundColor)] = value; }
+        public string? BodyFontSize { get => this[nameof(BodyFontSize)]; set => this[nameof(BodyFontSize)] = value; }
+        public string? QuoteTextColor { get => this[nameof(QuoteTextColor)]; set => this[nameof(QuoteTextColor)] = value; }
+        public string? QuoteBackgroundColor { get => this[nameof(QuoteBackgroundColor)]; set => this[nameof(QuoteBackgroundColor)] = value; }
+        public string? QuoteBorderColor { get => this[nameof(QuoteBorderColor)]; set => this[nameof(QuoteBorderColor)] = value; }
+        public string? QuoteBorderWidth { get => this[nameof(QuoteBorderWidth)]; set => this[nameof(QuoteBorderWidth)] = value; }
+        public string? QuoteBorderStyle { get => this[nameof(QuoteBorderStyle)]; set => this[nameof(QuoteBorderStyle)] = value; }
+        public string? TableBorderColor { get => this[nameof(TableBorderColor)]; set => this[nameof(TableBorderColor)] = value; }
+        public string? TableHeaderBackgroundColor { get => this[nameof(TableHeaderBackgroundColor)]; set => this[nameof(TableHeaderBackgroundColor)] = value; }
+        public string? TableBorderWidth { get => this[nameof(TableBorderWidth)]; set => this[nameof(TableBorderWidth)] = value; }
+        public string? TableCellPadding { get => this[nameof(TableCellPadding)]; set => this[nameof(TableCellPadding)] = value; }
+        public string? CodeTextColor { get => this[nameof(CodeTextColor)]; set => this[nameof(CodeTextColor)] = value; }
+        public string? CodeBackgroundColor { get => this[nameof(CodeBackgroundColor)]; set => this[nameof(CodeBackgroundColor)] = value; }
+        public string? CodeFontFamily { get => this[nameof(CodeFontFamily)]; set => this[nameof(CodeFontFamily)] = value; }
+        public string? ListMarkerType { get => this[nameof(ListMarkerType)]; set => this[nameof(ListMarkerType)] = value; }
+        public string? ListIndent { get => this[nameof(ListIndent)]; set => this[nameof(ListIndent)] = value; }
+
+        // 現在選択中の見出しレベルに対するエイリアスプロパティ
+        public string? HeadingTextColor { get => this[$"{_selectedHeadingLevel}.TextColor"]; set => this[$"{_selectedHeadingLevel}.TextColor"] = value; }
+        public string? HeadingFontSize { get => this[$"{_selectedHeadingLevel}.FontSize"]; set => this[$"{_selectedHeadingLevel}.FontSize"] = value; }
+        public string? HeadingFontFamily { get => this[$"{_selectedHeadingLevel}.FontFamily"]; set => this[$"{_selectedHeadingLevel}.FontFamily"] = value; }
+
+        public bool IsHeadingBold { get => GetFlag("IsBold"); set => SetFlag("IsBold", value); }
+        public bool IsHeadingItalic { get => GetFlag("IsItalic"); set => SetFlag("IsItalic", value); }
+        public bool IsHeadingUnderline { get => GetFlag("IsUnderline"); set => SetFlag("IsUnderline", value); }
+        public bool IsHeadingStrikethrough { get => GetFlag("IsStrikethrough"); set => SetFlag("IsStrikethrough", value); }
+        public bool IsHeadingNumberingEnabled { get => GetFlag("IsNumberingEnabled"); set => SetFlag("IsNumberingEnabled", value); }
+
+        private bool GetFlag(string attr) => _selectedHeadingLevel != null && _flags.TryGetValue($"{_selectedHeadingLevel}.{attr}", out var b) && b;
+        private void SetFlag(string attr, bool value)
+        {
+            if (_selectedHeadingLevel == null) return;
+            var key = $"{_selectedHeadingLevel}.{attr}";
+            if (!_flags.TryGetValue(key, out var current) || current != value)
+            {
+                _flags[key] = value;
+                OnPropertyChanged($"IsHeading{attr}");
+            }
         }
 
         public string? SelectedHeadingLevel
@@ -151,509 +183,45 @@ namespace PageLeaf.ViewModels
 
         private void UpdateHeadingProperties()
         {
-            if (_selectedHeadingLevel != null)
-            {
-                // HeadingTextColor
-                if (_allHeadingTextColors.TryGetValue(_selectedHeadingLevel, out var color))
-                {
-                    HeadingTextColor = color;
-                }
-                else
-                {
-                    HeadingTextColor = null;
-                }
-
-                // HeadingFontSize
-                if (_allHeadingFontSizes.TryGetValue(_selectedHeadingLevel, out var fontSize))
-                {
-                    HeadingFontSize = fontSize;
-                }
-                else
-                {
-                    HeadingFontSize = null;
-                }
-
-                // HeadingFontFamily
-                if (_allHeadingFontFamilies.TryGetValue(_selectedHeadingLevel, out var fontFamily))
-                {
-                    HeadingFontFamily = fontFamily;
-                }
-                else
-                {
-                    HeadingFontFamily = null;
-                }
-
-                // HeadingStyleFlags
-                if (_allHeadingStyleFlags.TryGetValue(_selectedHeadingLevel, out var flags))
-                {
-                    IsHeadingBold = flags.IsBold;
-                    IsHeadingItalic = flags.IsItalic;
-                    IsHeadingUnderline = flags.IsUnderline;
-                    IsHeadingStrikethrough = flags.IsStrikethrough;
-                }
-                else
-                {
-                    IsHeadingBold = false;
-                    IsHeadingItalic = false;
-                    IsHeadingUnderline = false;
-                    IsHeadingStrikethrough = false;
-                }
-
-                // Heading Numbering State
-                if (_allHeadingNumberingStates.TryGetValue(_selectedHeadingLevel, out var isEnabled))
-                {
-                    IsHeadingNumberingEnabled = isEnabled;
-                }
-                else
-                {
-                    IsHeadingNumberingEnabled = false;
-                }
-            }
-            else
-            {
-                HeadingTextColor = null;
-                HeadingFontSize = null;
-                HeadingFontFamily = null;
-                IsHeadingBold = false;
-                IsHeadingItalic = false;
-                IsHeadingUnderline = false;
-                IsHeadingStrikethrough = false;
-                IsHeadingNumberingEnabled = false;
-            }
-        }
-
-        public string? BodyTextColor
-        {
-            get => _bodyTextColor;
-            set
-            {
-                if (_bodyTextColor != value)
-                {
-                    _bodyTextColor = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? BodyBackgroundColor
-        {
-            get => _bodyBackgroundColor;
-            set
-            {
-                if (_bodyBackgroundColor != value)
-                {
-                    _bodyBackgroundColor = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? BodyFontSize
-        {
-            get => _bodyFontSize;
-            set
-            {
-                if (_bodyFontSize != value)
-                {
-                    _bodyFontSize = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? HeadingTextColor
-        {
-            get => _headingTextColor;
-            set
-            {
-                if (_headingTextColor != value)
-                {
-                    _headingTextColor = value;
-                    OnPropertyChanged();
-                    if (_selectedHeadingLevel != null)
-                    {
-                        _allHeadingTextColors[_selectedHeadingLevel] = value ?? string.Empty;
-                    }
-                }
-            }
-        }
-
-        public string? HeadingFontSize
-        {
-            get => _headingFontSize;
-            set
-            {
-                if (_headingFontSize != value)
-                {
-                    _headingFontSize = value;
-                    OnPropertyChanged();
-                    if (_selectedHeadingLevel != null)
-                    {
-                        _allHeadingFontSizes[_selectedHeadingLevel] = value ?? string.Empty;
-                    }
-                }
-            }
-        }
-
-        public string? HeadingFontFamily
-        {
-            get => _headingFontFamily;
-            set
-            {
-                if (_headingFontFamily != value)
-                {
-                    _headingFontFamily = value;
-                    OnPropertyChanged();
-                    if (_selectedHeadingLevel != null)
-                    {
-                        _allHeadingFontFamilies[_selectedHeadingLevel] = value ?? string.Empty;
-                    }
-                }
-            }
-        }
-
-        private bool _isHeadingBold;
-        public bool IsHeadingBold
-        {
-            get => _isHeadingBold;
-            set
-            {
-                if (_isHeadingBold != value)
-                {
-                    _isHeadingBold = value;
-                    OnPropertyChanged();
-                    if (_selectedHeadingLevel != null)
-                    {
-                        if (!_allHeadingStyleFlags.TryGetValue(_selectedHeadingLevel, out var flags))
-                        {
-                            flags = new HeadingStyleFlags();
-                            _allHeadingStyleFlags[_selectedHeadingLevel] = flags;
-                        }
-                        flags.IsBold = value;
-                    }
-                }
-            }
-        }
-
-        private bool _isHeadingItalic;
-        public bool IsHeadingItalic
-        {
-            get => _isHeadingItalic;
-            set
-            {
-                if (_isHeadingItalic != value)
-                {
-                    _isHeadingItalic = value;
-                    OnPropertyChanged();
-                    if (_selectedHeadingLevel != null)
-                    {
-                        if (!_allHeadingStyleFlags.TryGetValue(_selectedHeadingLevel, out var flags))
-                        {
-                            flags = new HeadingStyleFlags();
-                            _allHeadingStyleFlags[_selectedHeadingLevel] = flags;
-                        }
-                        flags.IsItalic = value;
-                    }
-                }
-            }
-        }
-
-        private bool _isHeadingUnderline;
-        public bool IsHeadingUnderline
-        {
-            get => _isHeadingUnderline;
-            set
-            {
-                if (_isHeadingUnderline != value)
-                {
-                    _isHeadingUnderline = value;
-                    OnPropertyChanged();
-                    if (_selectedHeadingLevel != null)
-                    {
-                        if (!_allHeadingStyleFlags.TryGetValue(_selectedHeadingLevel, out var flags))
-                        {
-                            flags = new HeadingStyleFlags();
-                            _allHeadingStyleFlags[_selectedHeadingLevel] = flags;
-                        }
-                        flags.IsUnderline = value;
-                    }
-                }
-            }
-        }
-
-        private bool _isHeadingStrikethrough;
-        public bool IsHeadingStrikethrough
-        {
-            get => _isHeadingStrikethrough;
-            set
-            {
-                if (_isHeadingStrikethrough != value)
-                {
-                    _isHeadingStrikethrough = value;
-                    OnPropertyChanged();
-                    if (_selectedHeadingLevel != null)
-                    {
-                        if (!_allHeadingStyleFlags.TryGetValue(_selectedHeadingLevel, out var flags))
-                        {
-                            flags = new HeadingStyleFlags();
-                            _allHeadingStyleFlags[_selectedHeadingLevel] = flags;
-                        }
-                        flags.IsStrikethrough = value;
-                    }
-                }
-            }
-        }
-
-        public bool IsHeadingNumberingEnabled
-        {
-            get => _isHeadingNumberingEnabled;
-            set
-            {
-                if (_isHeadingNumberingEnabled != value)
-                {
-                    _isHeadingNumberingEnabled = value;
-                    OnPropertyChanged();
-                    if (_selectedHeadingLevel != null)
-                    {
-                        _allHeadingNumberingStates[_selectedHeadingLevel] = value;
-                    }
-                }
-            }
-        }
-
-        public string? QuoteTextColor
-        {
-            get => _quoteTextColor;
-            set
-            {
-                if (_quoteTextColor != value)
-                {
-                    _quoteTextColor = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? QuoteBackgroundColor
-        {
-            get => _quoteBackgroundColor;
-            set
-            {
-                if (_quoteBackgroundColor != value)
-                {
-                    _quoteBackgroundColor = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? QuoteBorderColor
-        {
-            get => _quoteBorderColor;
-            set
-            {
-                if (_quoteBorderColor != value)
-                {
-                    _quoteBorderColor = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? QuoteBorderWidth
-        {
-            get => _quoteBorderWidth;
-            set
-            {
-                if (_quoteBorderWidth != value)
-                {
-                    _quoteBorderWidth = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? QuoteBorderStyle
-        {
-            get => _quoteBorderStyle;
-            set
-            {
-                if (_quoteBorderStyle != value)
-                {
-                    _quoteBorderStyle = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? TableBorderColor
-        {
-            get => _tableBorderColor;
-            set
-            {
-                if (_tableBorderColor != value)
-                {
-                    _tableBorderColor = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? TableHeaderBackgroundColor
-        {
-            get => _tableHeaderBackgroundColor;
-            set
-            {
-                if (_tableHeaderBackgroundColor != value)
-                {
-                    _tableHeaderBackgroundColor = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? TableBorderWidth
-        {
-            get => _tableBorderWidth;
-            set
-            {
-                if (_tableBorderWidth != value)
-                {
-                    _tableBorderWidth = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? TableCellPadding
-        {
-            get => _tableCellPadding;
-            set
-            {
-                if (_tableCellPadding != value)
-                {
-                    _tableCellPadding = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? CodeTextColor
-        {
-            get => _codeTextColor;
-            set
-            {
-                if (_codeTextColor != value)
-                {
-                    _codeTextColor = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? CodeBackgroundColor
-        {
-            get => _codeBackgroundColor;
-            set
-            {
-                if (_codeBackgroundColor != value)
-                {
-                    _codeBackgroundColor = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? CodeFontFamily
-        {
-            get => _codeFontFamily;
-            set
-            {
-                if (_codeFontFamily != value)
-                {
-                    _codeFontFamily = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? ListMarkerType
-        {
-            get => _listMarkerType;
-            set
-            {
-                if (_listMarkerType != value)
-                {
-                    _listMarkerType = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
-
-        public string? ListIndent
-        {
-            get => _listIndent;
-            set
-            {
-                if (_listIndent != value)
-                {
-                    _listIndent = value;
-                    OnPropertyChanged();
-                }
-            }
+            OnPropertyChanged(nameof(HeadingTextColor));
+            OnPropertyChanged(nameof(HeadingFontSize));
+            OnPropertyChanged(nameof(HeadingFontFamily));
+            OnPropertyChanged(nameof(IsHeadingBold));
+            OnPropertyChanged(nameof(IsHeadingItalic));
+            OnPropertyChanged(nameof(IsHeadingUnderline));
+            OnPropertyChanged(nameof(IsHeadingStrikethrough));
+            OnPropertyChanged(nameof(IsHeadingNumberingEnabled));
         }
 
         private void ExecuteSaveCss(object? parameter)
         {
-            if (string.IsNullOrEmpty(TargetCssFileName))
+            if (string.IsNullOrEmpty(TargetCssFileName)) return;
+            var styleInfo = new CssStyleInfo();
+            var type = typeof(CssStyleInfo);
+
+            foreach (var name in StylePropertyNames)
             {
-                return;
+                var prop = type.GetProperty(name);
+                if (prop != null && _styles.TryGetValue(name, out var val)) prop.SetValue(styleInfo, val);
             }
 
-            var styleInfo = new Models.CssStyleInfo
+            foreach (var lv in AvailableHeadingLevels)
             {
-                BodyTextColor = this.BodyTextColor,
-                BodyBackgroundColor = this.BodyBackgroundColor,
-                BodyFontSize = this.BodyFontSize,
-                QuoteTextColor = this.QuoteTextColor,
-                QuoteBackgroundColor = this.QuoteBackgroundColor,
-                QuoteBorderColor = this.QuoteBorderColor,
-                QuoteBorderWidth = this.QuoteBorderWidth,
-                QuoteBorderStyle = this.QuoteBorderStyle,
-                TableBorderColor = this.TableBorderColor,
-                TableHeaderBackgroundColor = this.TableHeaderBackgroundColor,
-                TableBorderWidth = this.TableBorderWidth,
-                TableCellPadding = this.TableCellPadding,
-                CodeTextColor = this.CodeTextColor,
-                CodeBackgroundColor = this.CodeBackgroundColor,
-                CodeFontFamily = this.CodeFontFamily,
-                ListMarkerType = this.ListMarkerType,
-                ListIndent = this.ListIndent
-            };
+                if (_styles.TryGetValue($"{lv}.TextColor", out var c) && c != null) styleInfo.HeadingTextColors[lv] = c;
+                if (_styles.TryGetValue($"{lv}.FontSize", out var s) && s != null) styleInfo.HeadingFontSizes[lv] = s;
+                if (_styles.TryGetValue($"{lv}.FontFamily", out var f) && f != null) styleInfo.HeadingFontFamilies[lv] = f;
 
-            foreach (var entry in _allHeadingTextColors)
-            {
-                styleInfo.HeadingTextColors[entry.Key] = entry.Value;
-            }
-            foreach (var entry in _allHeadingFontSizes)
-            {
-                styleInfo.HeadingFontSizes[entry.Key] = entry.Value;
-            }
-            foreach (var entry in _allHeadingFontFamilies)
-            {
-                styleInfo.HeadingFontFamilies[entry.Key] = entry.Value;
-            }
-            foreach (var entry in _allHeadingStyleFlags)
-            {
-                styleInfo.HeadingStyleFlags[entry.Key] = entry.Value;
-            }
-            foreach (var entry in _allHeadingNumberingStates)
-            {
-                styleInfo.HeadingNumberingStates[entry.Key] = entry.Value;
+                styleInfo.HeadingStyleFlags[lv] = new HeadingStyleFlags
+                {
+                    IsBold = _flags.TryGetValue($"{lv}.IsBold", out var b) && b,
+                    IsItalic = _flags.TryGetValue($"{lv}.IsItalic", out var i) && i,
+                    IsUnderline = _flags.TryGetValue($"{lv}.IsUnderline", out var u) && u,
+                    IsStrikethrough = _flags.TryGetValue($"{lv}.IsStrikethrough", out var st) && st
+                };
+                if (_flags.TryGetValue($"{lv}.IsNumberingEnabled", out var n)) styleInfo.HeadingNumberingStates[lv] = n;
             }
 
             _cssManagementService.SaveStyle(TargetCssFileName, styleInfo);
-
             CssSaved?.Invoke(this, EventArgs.Empty);
         }
     }

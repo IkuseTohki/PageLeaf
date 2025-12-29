@@ -2,6 +2,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using PageLeaf.Services;
 using PageLeaf.ViewModels;
+using System.Linq;
 
 namespace PageLeaf.Tests.ViewModels
 {
@@ -152,6 +153,77 @@ namespace PageLeaf.Tests.ViewModels
             // Assert
             _mockCssManagementService.Verify(s => s.SaveStyle(fileName, It.Is<Models.CssStyleInfo>(info =>
                 info.HeadingTextColors.ContainsKey("h1") && info.HeadingTextColors["h1"] == "green"
+            )), Times.Once);
+        }
+
+        [TestMethod]
+        public void Indexer_ShouldGetAndSetStyleValue()
+        {
+            // テスト観点: インデクサを介して動的にスタイル値を設定・取得できることを確認する。
+            //            存在しないキーの場合は null を返し、エラーにならないことも確認。
+
+            // Act
+            _viewModel["BodyTextColor"] = "#FF0000";
+
+            // Assert
+            Assert.AreEqual("#FF0000", _viewModel["BodyTextColor"]);
+            Assert.AreEqual("#FF0000", _viewModel.BodyTextColor); // 既存プロパティとも同期していること
+            Assert.IsNull(_viewModel["InvalidKey"]);
+        }
+
+        [TestMethod]
+        public void Indexer_Set_ShouldRaisePropertyChanged()
+        {
+            // テスト観点: インデクサ経由で値を変更した際、インデクサ自体("Item[]")と、
+            //            該当するプロパティ名の両方で PropertyChanged イベントが発生することを確認する。
+
+            // Arrange
+            var raisedProperties = new System.Collections.Generic.List<string>();
+            _viewModel.PropertyChanged += (sender, e) => raisedProperties.Add(e.PropertyName!);
+
+            // Act
+            _viewModel["BodyFontSize"] = "16px";
+
+            // Assert
+            Assert.IsTrue(raisedProperties.Contains("Item[]"), "Indexer change notification should be raised.");
+            Assert.IsTrue(raisedProperties.Contains("BodyFontSize"), "Specific property notification should be raised.");
+        }
+
+        [TestMethod]
+        public void Load_WithNullProperties_ShouldHandleGracefully()
+        {
+            // テスト観点: CssStyleInfo のプロパティが null の場合でも、エラーにならずロードできることを確認する。
+
+            // Arrange
+            var styleInfo = new Models.CssStyleInfo { BodyTextColor = null };
+            _mockCssManagementService.Setup(s => s.LoadStyle(It.IsAny<string>())).Returns(styleInfo);
+
+            // Act
+            _viewModel.Load("test.css");
+
+            // Assert
+            Assert.IsNull(_viewModel["BodyTextColor"]);
+            Assert.IsNull(_viewModel.BodyTextColor);
+        }
+
+        [TestMethod]
+        public void Save_ShouldOnlyIncludeValidProperties()
+        {
+            // テスト観点: インデクサ経由で追加された未知のキーが、保存時の CssStyleInfo に悪影響を与えないことを確認する。
+
+            // Arrange
+            var styleInfo = new Models.CssStyleInfo();
+            _mockCssManagementService.Setup(s => s.LoadStyle(It.IsAny<string>())).Returns(styleInfo);
+
+            _viewModel.Load("test.css");
+            _viewModel["UnknownProperty"] = "SomeValue";
+
+            // Act
+            _viewModel.SaveCssCommand.Execute(null);
+
+            // Assert
+            _mockCssManagementService.Verify(s => s.SaveStyle(It.IsAny<string>(), It.Is<Models.CssStyleInfo>(info =>
+                info.GetType().GetProperties().All(p => p.Name != "UnknownProperty")
             )), Times.Once);
         }
     }
