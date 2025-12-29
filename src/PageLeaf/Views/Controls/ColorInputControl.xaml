@@ -27,8 +27,15 @@
         <TextBox Grid.Column="1" Text="{Binding ElementName=Root, Path=ColorText, UpdateSourceTrigger=PropertyChanged}" />
 
         <Button Grid.Column="2"
-                Width="30"
+                Width="24"
                 Click="SelectColor_Click"
-                Content="..." />
+                Style="{StaticResource IconButtonStyle}"
+                ToolTip="色を選択">
+            <Path Width="14"
+                  Height="14"
+                  Data="{StaticResource PaletteIconGeometry}"
+                  Fill="{StaticResource PrimaryTextBrush}"
+                  Stretch="Uniform" />
+        </Button>
     </Grid>
 </UserControl>
