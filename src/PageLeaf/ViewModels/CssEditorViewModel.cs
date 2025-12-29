@@ -37,6 +37,7 @@ namespace PageLeaf.ViewModels
 
         public event EventHandler? CssSaved;
         public ICommand SaveCssCommand { get; }
+        public ICommand ResetCommand { get; }
         public ObservableCollection<string> AvailableHeadingLevels { get; }
         public ObservableCollection<string> AvailableUnits { get; }
         public string? TargetCssFileName { get; private set; }
@@ -54,6 +55,7 @@ namespace PageLeaf.ViewModels
             ArgumentNullException.ThrowIfNull(cssManagementService);
             _cssManagementService = cssManagementService;
             SaveCssCommand = new DelegateCommand(ExecuteSaveCss);
+            ResetCommand = new DelegateCommand(ExecuteReset);
             AvailableHeadingLevels = new ObservableCollection<string>(Enumerable.Range(1, 6).Select(i => $"h{i}"));
             SelectedHeadingLevel = AvailableHeadingLevels.FirstOrDefault();
             AvailableUnits = new ObservableCollection<string> { "px", "em", "%" };
@@ -64,6 +66,14 @@ namespace PageLeaf.ViewModels
             TargetCssFileName = cssFileName;
             var styleInfo = _cssManagementService.LoadStyle(cssFileName);
             LoadStyles(styleInfo);
+        }
+
+        private void ExecuteReset(object? parameter)
+        {
+            if (!string.IsNullOrEmpty(TargetCssFileName))
+            {
+                Load(TargetCssFileName);
+            }
         }
 
         private void LoadStyles(CssStyleInfo styleInfo)

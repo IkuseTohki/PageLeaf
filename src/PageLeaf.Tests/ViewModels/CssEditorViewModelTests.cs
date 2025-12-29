@@ -261,5 +261,33 @@ namespace PageLeaf.Tests.ViewModels
             // Assert
             Assert.AreEqual("150", _viewModel.BodyFontSize, "1.5em should be converted to 150%");
         }
+        [TestMethod]
+        public void ResetCommand_ShouldReloadStylesFromService()
+        {
+            // テスト観点: ResetCommand を実行した際、TargetCssFileName を使用して
+            //            サービスからスタイルが再読み込みされることを確認する。
+
+            // Arrange
+            var fileName = "reset_test.css";
+            var initialStyle = new Models.CssStyleInfo { BodyTextColor = "black" };
+            var updatedStyle = new Models.CssStyleInfo { BodyTextColor = "white" };
+
+            _mockCssManagementService.Setup(s => s.LoadStyle(fileName)).Returns(initialStyle);
+            _viewModel.Load(fileName);
+
+            // 編集して値を汚す
+            _viewModel.BodyTextColor = "red";
+            Assert.AreEqual("red", _viewModel.BodyTextColor);
+
+            // リセット後の期待値をセットアップ
+            _mockCssManagementService.Setup(s => s.LoadStyle(fileName)).Returns(updatedStyle);
+
+            // Act
+            _viewModel.ResetCommand.Execute(null);
+
+            // Assert
+            Assert.AreEqual("white", _viewModel.BodyTextColor, "Style should be reloaded from service after reset");
+            _mockCssManagementService.Verify(s => s.LoadStyle(fileName), Times.Exactly(2));
+        }
     }
 }

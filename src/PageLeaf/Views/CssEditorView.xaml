@@ -18,10 +18,30 @@
         <Border Grid.Row="0"
                 Padding="5"
                 BorderBrush="LightGray"
-                BorderThickness="0,0,0,0">
-            <Button HorizontalAlignment="Right"
-                    Command="{Binding SaveCssCommand}"
-                    Content="保存" />
+                BorderThickness="0,0,0,1">
+            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                <Button Margin="0,0,10,0"
+                        Command="{Binding ResetCommand}"
+                        Style="{StaticResource IconButtonStyle}"
+                        ToolTip="設定をリセット (ファイルから再読み込み)">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Width="14"
+                              Height="14"
+                              Data="{StaticResource RefreshIconGeometry}"
+                              Fill="{StaticResource PrimaryTextBrush}"
+                              Stretch="Uniform" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding SaveCssCommand}"
+                        Style="{StaticResource IconButtonStyle}"
+                        ToolTip="CSSを保存">
+                    <Path Width="14"
+                          Height="14"
+                          Data="{StaticResource SaveIconGeometry}"
+                          Fill="{StaticResource PrimaryTextBrush}"
+                          Stretch="Uniform" />
+                </Button>
+            </StackPanel>
         </Border>
 
         <!-- Tab Container -->
