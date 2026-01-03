@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using PageLeaf.Models;
 using PageLeaf.Services;
+using PageLeaf.UseCases;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -15,6 +16,10 @@ namespace PageLeaf.ViewModels
         private readonly IDialogService _dialogService;
         private readonly ICssManagementService _cssManagementService;
         private readonly ISettingsService _settingsService;
+        private readonly INewDocumentUseCase _newDocumentUseCase;
+        private readonly IOpenDocumentUseCase _openDocumentUseCase;
+        private readonly ISaveDocumentUseCase _saveDocumentUseCase;
+        private readonly ISaveAsDocumentUseCase _saveAsDocumentUseCase;
 
         private bool _isCssEditorVisible;
         private ObservableCollection<string> _availableCssFiles = null!;
@@ -124,7 +129,11 @@ namespace PageLeaf.ViewModels
             IEditorService editorService,
             ISettingsService settingsService,
             ICssManagementService cssManagementService,
-            CssEditorViewModel cssEditorViewModel)
+            CssEditorViewModel cssEditorViewModel,
+            INewDocumentUseCase newDocumentUseCase,
+            IOpenDocumentUseCase openDocumentUseCase,
+            ISaveDocumentUseCase saveDocumentUseCase,
+            ISaveAsDocumentUseCase saveAsDocumentUseCase)
         {
             ArgumentNullException.ThrowIfNull(fileService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -133,6 +142,10 @@ namespace PageLeaf.ViewModels
             ArgumentNullException.ThrowIfNull(settingsService);
             ArgumentNullException.ThrowIfNull(cssManagementService);
             ArgumentNullException.ThrowIfNull(cssEditorViewModel);
+            ArgumentNullException.ThrowIfNull(newDocumentUseCase);
+            ArgumentNullException.ThrowIfNull(openDocumentUseCase);
+            ArgumentNullException.ThrowIfNull(saveDocumentUseCase);
+            ArgumentNullException.ThrowIfNull(saveAsDocumentUseCase);
 
             _fileService = fileService;
             _logger = logger;
@@ -141,6 +154,10 @@ namespace PageLeaf.ViewModels
             _settingsService = settingsService;
             _cssManagementService = cssManagementService;
             CssEditorViewModel = cssEditorViewModel;
+            _newDocumentUseCase = newDocumentUseCase;
+            _openDocumentUseCase = openDocumentUseCase;
+            _saveDocumentUseCase = saveDocumentUseCase;
+            _saveAsDocumentUseCase = saveAsDocumentUseCase;
 
             // Subscribe to event
             CssEditorViewModel.CssSaved += OnCssSaved;
@@ -178,111 +195,25 @@ namespace PageLeaf.ViewModels
         private void ExecuteNewDocument(object? parameter)
         {
             _logger.LogInformation("NewDocumentCommand executed.");
-
-            SaveConfirmationResult result = Editor.PromptForSaveIfDirty();
-
-            if (result == SaveConfirmationResult.Cancel)
-            {
-                return;
-            }
-            if (result == SaveConfirmationResult.Save)
-            {
-                ExecuteSaveFile(null);
-            }
-
-            Editor.NewDocument();
+            _newDocumentUseCase.Execute();
         }
 
         private void ExecuteOpenFile(object? parameter)
         {
             _logger.LogInformation("OpenFileCommand executed.");
-
-            SaveConfirmationResult result = Editor.PromptForSaveIfDirty();
-
-            if (result == SaveConfirmationResult.Cancel)
-            {
-                return;
-            }
-            if (result == SaveConfirmationResult.Save)
-            {
-                ExecuteSaveFile(null);
-            }
-
-            string? filePath = _dialogService.ShowOpenFileDialog(
-                "Markdownファイルを開く",
-                "Markdown files (*.md;*.markdown)|*.md;*.markdown|All files (*.*)|*.*");
-
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                try
-                {
-                    MarkdownDocument document = _fileService.Open(filePath);
-                    Editor.LoadDocument(document);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to open file: {FilePath}", filePath);
-                }
-            }
+            _openDocumentUseCase.Execute();
         }
 
         private void ExecuteSaveFile(object? parameter)
         {
             _logger.LogInformation("ExecuteSaveFile command triggered.");
-
-            if (Editor.CurrentDocument == null)
-            {
-                _logger.LogWarning("CurrentDocument is null. Save command cannot execute.");
-                return;
-            }
-
-            // ファイルパスが設定されていない、またはファイルが存在しない場合は「名前を付けて保存」に切り替える
-            if (string.IsNullOrEmpty(Editor.CurrentDocument.FilePath) || !_fileService.FileExists(Editor.CurrentDocument.FilePath))
-            {
-                _logger.LogInformation("File does not exist or has no path. Switching to Save As...");
-                ExecuteSaveAsFile(parameter);
-                return;
-            }
-
-            try
-            {
-                _fileService.Save(Editor.CurrentDocument);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "An error occurred while saving the file for {FilePath}.", Editor.CurrentDocument.FilePath);
-            }
+            _saveDocumentUseCase.Execute();
         }
 
         private void ExecuteSaveAsFile(object? parameter)
         {
             _logger.LogInformation("ExecuteSaveAsFile command triggered.");
-
-            if (Editor.CurrentDocument == null)
-            {
-                _logger.LogWarning("CurrentDocument is null. Save As command cannot execute.");
-                return;
-            }
-
-            string? newFilePath = _dialogService.ShowSaveFileDialog(
-                "名前を付けて保存",
-                "Markdown files (*.md;*.markdown)|*.md;*.markdown|All files (*.*)|*.*",
-                Editor.CurrentDocument.FilePath
-            );
-
-            if (!string.IsNullOrEmpty(newFilePath))
-            {
-                try
-                {
-                    Editor.CurrentDocument.FilePath = newFilePath;
-                    _fileService.Save(Editor.CurrentDocument);
-                    _logger.LogInformation("File saved as: {FilePath}", newFilePath);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "An error occurred while saving the file as {FilePath}.", newFilePath);
-                }
-            }
+            _saveAsDocumentUseCase.Execute();
         }
 
         private void ExecuteToggleCssEditor(object? obj)

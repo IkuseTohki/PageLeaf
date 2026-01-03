@@ -29,12 +29,4 @@ namespace PageLeaf.Models
         public string? ListIndent { get; set; }
         public Dictionary<string, bool> HeadingNumberingStates { get; } = new Dictionary<string, bool>();
     }
-
-    public class HeadingStyleFlags
-    {
-        public bool IsBold { get; set; }
-        public bool IsItalic { get; set; }
-        public bool IsUnderline { get; set; }
-        public bool IsStrikethrough { get; set; }
-    }
 }

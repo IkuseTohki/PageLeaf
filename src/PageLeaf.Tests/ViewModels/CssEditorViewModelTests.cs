@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using PageLeaf.Services;
+using PageLeaf.UseCases;
 using PageLeaf.ViewModels;
 using System.Linq;
 
@@ -10,15 +11,25 @@ namespace PageLeaf.Tests.ViewModels
     public class CssEditorViewModelTests
     {
         private Mock<ICssManagementService> _mockCssManagementService = null!;
+        private Mock<ILoadCssUseCase> _mockLoadCssUseCase = null!;
+        private Mock<ISaveCssUseCase> _mockSaveCssUseCase = null!;
         private CssEditorViewModel _viewModel = null!;
 
         [TestInitialize]
         public void Setup()
         {
             _mockCssManagementService = new Mock<ICssManagementService>();
+            _mockLoadCssUseCase = new Mock<ILoadCssUseCase>();
+            _mockSaveCssUseCase = new Mock<ISaveCssUseCase>();
+
             _mockCssManagementService.Setup(s => s.GetCssContent(It.IsAny<string>())).Returns("");
             _mockCssManagementService.Setup(s => s.GenerateCss(It.IsAny<string>(), It.IsAny<Models.CssStyleInfo>())).Returns("");
-            _viewModel = new CssEditorViewModel(_mockCssManagementService.Object);
+            _mockLoadCssUseCase.Setup(u => u.Execute(It.IsAny<string>())).Returns(("", new Models.CssStyleInfo()));
+
+            _viewModel = new CssEditorViewModel(
+                _mockCssManagementService.Object,
+                _mockLoadCssUseCase.Object,
+                _mockSaveCssUseCase.Object);
         }
 
         [TestMethod]
@@ -28,12 +39,12 @@ namespace PageLeaf.Tests.ViewModels
         }
 
         [TestMethod]
-        public void SaveCssCommand_ShouldCallServiceToSaveStyles()
+        public void SaveCssCommand_ShouldCallUseCaseToSaveStyles()
         {
             // Arrange
             var fileName = "test.css";
             var cssInfo = new Models.CssStyleInfo();
-            _mockCssManagementService.Setup(s => s.LoadStyle(fileName)).Returns(cssInfo);
+            _mockLoadCssUseCase.Setup(u => u.Execute(fileName)).Returns(("", cssInfo));
             _viewModel.Load(fileName); // TargetCssFileNameを設定
 
             _viewModel.BodyTextColor = "red";
@@ -43,7 +54,7 @@ namespace PageLeaf.Tests.ViewModels
             _viewModel.SaveCssCommand.Execute(null);
 
             // Assert
-            _mockCssManagementService.Verify(s => s.SaveStyle(fileName, It.Is<Models.CssStyleInfo>(info =>
+            _mockSaveCssUseCase.Verify(u => u.Execute(fileName, It.Is<Models.CssStyleInfo>(info =>
                 info.BodyTextColor == "red" &&
                 info.BodyBackgroundColor == "white"
                 )), Times.Once);
@@ -55,7 +66,7 @@ namespace PageLeaf.Tests.ViewModels
             // Arrange
             var fileName = "test.css";
             var cssInfo = new Models.CssStyleInfo();
-            _mockCssManagementService.Setup(s => s.LoadStyle(fileName)).Returns(cssInfo);
+            _mockLoadCssUseCase.Setup(u => u.Execute(fileName)).Returns(("", cssInfo));
             _viewModel.Load(fileName);
 
             bool eventRaised = false;
@@ -73,7 +84,7 @@ namespace PageLeaf.Tests.ViewModels
         }
 
         [TestMethod]
-        public void Load_ShouldLoadStylesFromService()
+        public void Load_ShouldLoadStylesFromUseCase()
         {
             // Arrange
             var fileName = "test.css";
@@ -82,7 +93,7 @@ namespace PageLeaf.Tests.ViewModels
                 BodyTextColor = "#123456",
                 QuoteTextColor = "#654321"
             };
-            _mockCssManagementService.Setup(s => s.LoadStyle(fileName)).Returns(styleInfo);
+            _mockLoadCssUseCase.Setup(u => u.Execute(fileName)).Returns(("some content", styleInfo));
 
             // Act
             _viewModel.Load(fileName);
@@ -124,7 +135,7 @@ namespace PageLeaf.Tests.ViewModels
             cssInfo.HeadingTextColors["h1"] = "red";
             cssInfo.HeadingTextColors["h2"] = "blue";
 
-            _mockCssManagementService.Setup(s => s.LoadStyle(fileName)).Returns(cssInfo);
+            _mockLoadCssUseCase.Setup(u => u.Execute(fileName)).Returns(("", cssInfo));
             _viewModel.Load(fileName);
 
             // Act & Assert
@@ -144,7 +155,7 @@ namespace PageLeaf.Tests.ViewModels
             var fileName = "test.css";
             var cssInfo = new Models.CssStyleInfo();
             // 初期データを設定
-            _mockCssManagementService.Setup(s => s.LoadStyle(fileName)).Returns(cssInfo);
+            _mockLoadCssUseCase.Setup(u => u.Execute(fileName)).Returns(("", cssInfo));
             _viewModel.Load(fileName);
 
             // Act
@@ -154,7 +165,7 @@ namespace PageLeaf.Tests.ViewModels
             _viewModel.SaveCssCommand.Execute(null);
 
             // Assert
-            _mockCssManagementService.Verify(s => s.SaveStyle(fileName, It.Is<Models.CssStyleInfo>(info =>
+            _mockSaveCssUseCase.Verify(u => u.Execute(fileName, It.Is<Models.CssStyleInfo>(info =>
                 info.HeadingTextColors.ContainsKey("h1") && info.HeadingTextColors["h1"] == "green"
             )), Times.Once);
         }
@@ -199,7 +210,7 @@ namespace PageLeaf.Tests.ViewModels
 
             // Arrange
             var styleInfo = new Models.CssStyleInfo { BodyTextColor = null };
-            _mockCssManagementService.Setup(s => s.LoadStyle(It.IsAny<string>())).Returns(styleInfo);
+            _mockLoadCssUseCase.Setup(u => u.Execute(It.IsAny<string>())).Returns(("", styleInfo));
 
             // Act
             _viewModel.Load("test.css");
@@ -237,7 +248,7 @@ namespace PageLeaf.Tests.ViewModels
 
             // Arrange
             var styleInfo = new Models.CssStyleInfo(); // 全プロパティが null
-            _mockCssManagementService.Setup(s => s.LoadStyle(It.IsAny<string>())).Returns(styleInfo);
+            _mockLoadCssUseCase.Setup(u => u.Execute(It.IsAny<string>())).Returns(("", styleInfo));
             _viewModel.GlobalUnit = "px";
 
             // Act
@@ -265,17 +276,17 @@ namespace PageLeaf.Tests.ViewModels
             Assert.AreEqual("150", _viewModel.BodyFontSize, "1.5em should be converted to 150%");
         }
         [TestMethod]
-        public void ResetCommand_ShouldReloadStylesFromService()
+        public void ResetCommand_ShouldReloadStylesFromUseCase()
         {
             // テスト観点: ResetCommand を実行した際、TargetCssFileName を使用して
-            //            サービスからスタイルが再読み込みされることを確認する。
+            //            UseCase からスタイルが再読み込みされることを確認する。
 
             // Arrange
             var fileName = "reset_test.css";
             var initialStyle = new Models.CssStyleInfo { BodyTextColor = "black" };
             var updatedStyle = new Models.CssStyleInfo { BodyTextColor = "white" };
 
-            _mockCssManagementService.Setup(s => s.LoadStyle(fileName)).Returns(initialStyle);
+            _mockLoadCssUseCase.Setup(u => u.Execute(fileName)).Returns(("", initialStyle));
             _viewModel.Load(fileName);
 
             // 編集して値を汚す
@@ -283,14 +294,14 @@ namespace PageLeaf.Tests.ViewModels
             Assert.AreEqual("red", _viewModel.BodyTextColor);
 
             // リセット後の期待値をセットアップ
-            _mockCssManagementService.Setup(s => s.LoadStyle(fileName)).Returns(updatedStyle);
+            _mockLoadCssUseCase.Setup(u => u.Execute(fileName)).Returns(("", updatedStyle));
 
             // Act
             _viewModel.ResetCommand.Execute(null);
 
             // Assert
-            Assert.AreEqual("white", _viewModel.BodyTextColor, "Style should be reloaded from service after reset");
-            _mockCssManagementService.Verify(s => s.LoadStyle(fileName), Times.Exactly(2));
+            Assert.AreEqual("white", _viewModel.BodyTextColor, "Style should be reloaded from UseCase after reset");
+            _mockLoadCssUseCase.Verify(u => u.Execute(fileName), Times.Exactly(2));
         }
 
         [TestMethod]
@@ -317,7 +328,7 @@ namespace PageLeaf.Tests.ViewModels
         [TestMethod]
         public void IsDirty_ShouldBeFalse_AfterSave()
         {
-            _mockCssManagementService.Setup(s => s.LoadStyle("test.css")).Returns(new Models.CssStyleInfo());
+            _mockLoadCssUseCase.Setup(u => u.Execute("test.css")).Returns(("", new Models.CssStyleInfo()));
             _viewModel.Load("test.css");
             _viewModel.BodyTextColor = "NewColor";
 
@@ -329,7 +340,7 @@ namespace PageLeaf.Tests.ViewModels
         [TestMethod]
         public void IsDirty_ShouldBeFalse_AfterReset()
         {
-            _mockCssManagementService.Setup(s => s.LoadStyle("test.css")).Returns(new Models.CssStyleInfo());
+            _mockLoadCssUseCase.Setup(u => u.Execute("test.css")).Returns(("", new Models.CssStyleInfo()));
             _viewModel.Load("test.css");
             _viewModel.BodyTextColor = "NewColor";
 
@@ -341,7 +352,7 @@ namespace PageLeaf.Tests.ViewModels
         [TestMethod]
         public void IsDirty_ShouldBeFalse_AfterLoad()
         {
-            _mockCssManagementService.Setup(s => s.LoadStyle("another.css")).Returns(new Models.CssStyleInfo());
+            _mockLoadCssUseCase.Setup(u => u.Execute("another.css")).Returns(("", new Models.CssStyleInfo()));
             _viewModel.BodyTextColor = "NewColor";
             _viewModel.Load("another.css");
             Assert.IsFalse(_viewModel.IsDirty);

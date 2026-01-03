@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using PageLeaf.Services;
+using PageLeaf.UseCases;
 using PageLeaf.ViewModels;
 using PageLeaf.Views;
 using Serilog;
@@ -64,6 +65,14 @@ namespace PageLeaf
                     services.AddSingleton<IEditorService, EditorService>(); // EditorService を登録
                     services.AddSingleton<ICssEditorService, CssEditorService>();
                     services.AddSingleton<ICssManagementService, CssManagementService>();
+
+                    // UseCases
+                    services.AddTransient<ISaveAsDocumentUseCase, SaveAsDocumentUseCase>();
+                    services.AddTransient<ISaveDocumentUseCase, SaveDocumentUseCase>();
+                    services.AddTransient<INewDocumentUseCase, NewDocumentUseCase>();
+                    services.AddTransient<IOpenDocumentUseCase, OpenDocumentUseCase>();
+                    services.AddTransient<ILoadCssUseCase, LoadCssUseCase>();
+                    services.AddTransient<ISaveCssUseCase, SaveCssUseCase>();
 
                     // ViewModels と Views をDIコンテナに登録
                     services.AddSingleton<CssEditorViewModel>();

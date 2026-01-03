@@ -5,6 +5,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using PageLeaf.Models;
+using PageLeaf.UseCases;
 using System.Linq;
 using System.Reflection;
 
@@ -13,6 +14,8 @@ namespace PageLeaf.ViewModels
     public class CssEditorViewModel : ViewModelBase
     {
         private readonly ICssManagementService _cssManagementService;
+        private readonly ILoadCssUseCase _loadCssUseCase;
+        private readonly ISaveCssUseCase _saveCssUseCase;
         private readonly Dictionary<string, string?> _styles = new Dictionary<string, string?>();
         private readonly Dictionary<string, bool> _flags = new Dictionary<string, bool>();
 
@@ -65,10 +68,19 @@ namespace PageLeaf.ViewModels
 
         public string? this[string key] { get => GetStyleValue(key); set => SetStyleValue(key, value); }
 
-        public CssEditorViewModel(ICssManagementService cssManagementService)
+        public CssEditorViewModel(
+            ICssManagementService cssManagementService,
+            ILoadCssUseCase loadCssUseCase,
+            ISaveCssUseCase saveCssUseCase)
         {
             ArgumentNullException.ThrowIfNull(cssManagementService);
+            ArgumentNullException.ThrowIfNull(loadCssUseCase);
+            ArgumentNullException.ThrowIfNull(saveCssUseCase);
+
             _cssManagementService = cssManagementService;
+            _loadCssUseCase = loadCssUseCase;
+            _saveCssUseCase = saveCssUseCase;
+
             SaveCssCommand = new DelegateCommand(ExecuteSaveCss, CanExecuteSaveCss);
             ResetCommand = new DelegateCommand(ExecuteReset, CanExecuteReset);
             AvailableHeadingLevels = new ObservableCollection<string>(Enumerable.Range(1, 6).Select(i => $"h{i}"));
@@ -79,8 +91,8 @@ namespace PageLeaf.ViewModels
         public void Load(string cssFileName)
         {
             TargetCssFileName = cssFileName;
-            _originalCssContent = _cssManagementService.GetCssContent(cssFileName);
-            var styleInfo = _cssManagementService.LoadStyle(cssFileName);
+            var (content, styleInfo) = _loadCssUseCase.Execute(cssFileName);
+            _originalCssContent = content;
             LoadStyles(styleInfo);
         }
 
@@ -233,7 +245,7 @@ namespace PageLeaf.ViewModels
         {
             if (!CanExecuteSaveCss(parameter)) return;
             var styleInfo = CreateStyleInfo();
-            _cssManagementService.SaveStyle(TargetCssFileName!, styleInfo);
+            _saveCssUseCase.Execute(TargetCssFileName!, styleInfo);
             IsDirty = false;
             CssSaved?.Invoke(this, EventArgs.Empty);
         }

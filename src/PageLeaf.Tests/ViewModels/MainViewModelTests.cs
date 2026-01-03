@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using PageLeaf.Models;
 using PageLeaf.Services;
+using PageLeaf.UseCases;
 using PageLeaf.ViewModels;
 using System.Collections.Generic;
 
@@ -17,6 +18,10 @@ namespace PageLeaf.Tests.ViewModels
         private Mock<ISettingsService> _settingsServiceMock = null!;
         private Mock<ICssManagementService> _cssManagementServiceMock = null!;
         private Mock<ILogger<MainViewModel>> _loggerMock = null!;
+        private Mock<INewDocumentUseCase> _newDocumentUseCaseMock = null!;
+        private Mock<IOpenDocumentUseCase> _openDocumentUseCaseMock = null!;
+        private Mock<ISaveDocumentUseCase> _saveDocumentUseCaseMock = null!;
+        private Mock<ISaveAsDocumentUseCase> _saveAsDocumentUseCaseMock = null!;
         private MainViewModel _viewModel = null!;
         private CssEditorViewModel _cssEditorViewModel = null!;
 
@@ -29,8 +34,15 @@ namespace PageLeaf.Tests.ViewModels
             _settingsServiceMock = new Mock<ISettingsService>();
             _cssManagementServiceMock = new Mock<ICssManagementService>();
             _loggerMock = new Mock<ILogger<MainViewModel>>();
+            _newDocumentUseCaseMock = new Mock<INewDocumentUseCase>();
+            _openDocumentUseCaseMock = new Mock<IOpenDocumentUseCase>();
+            _saveDocumentUseCaseMock = new Mock<ISaveDocumentUseCase>();
+            _saveAsDocumentUseCaseMock = new Mock<ISaveAsDocumentUseCase>();
 
-            _cssEditorViewModel = new CssEditorViewModel(_cssManagementServiceMock.Object);
+            _cssEditorViewModel = new CssEditorViewModel(
+                _cssManagementServiceMock.Object,
+                new Mock<ILoadCssUseCase>().Object,
+                new Mock<ISaveCssUseCase>().Object);
 
             _cssManagementServiceMock.Setup(s => s.GetAvailableCssFileNames()).Returns(new List<string> { "default.css" });
             _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { SelectedCss = "default.css" });
@@ -42,7 +54,11 @@ namespace PageLeaf.Tests.ViewModels
                 _editorServiceMock.Object,
                 _settingsServiceMock.Object,
                 _cssManagementServiceMock.Object,
-                _cssEditorViewModel);
+                _cssEditorViewModel,
+                _newDocumentUseCaseMock.Object,
+                _openDocumentUseCaseMock.Object,
+                _saveDocumentUseCaseMock.Object,
+                _saveAsDocumentUseCaseMock.Object);
         }
 
         [TestMethod]
