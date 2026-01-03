@@ -175,10 +175,78 @@
                         <Label Content="罫線 太さ:" Style="{StaticResource FormLabelStyle}" />
                         <controls:NumericUpDownControl Unit="px" Value="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
+                        <Label Content="罫線 種類:" Style="{StaticResource FormLabelStyle}" />
+                        <StackPanel Orientation="Horizontal">
+                            <ToggleButton CommandParameter="solid"
+                                          IsChecked="{Binding TableBorderStyle, Converter={StaticResource ComparisonConverter}, ConverterParameter=solid}"
+                                          Style="{StaticResource IconToggleButtonStyle}"
+                                          ToolTip="実線 (solid)">
+                                <Path Width="16"
+                                      Height="16"
+                                      Data="{StaticResource BorderSolidIconGeometry}"
+                                      Fill="{StaticResource PrimaryTextBrush}"
+                                      Stretch="Uniform" />
+                            </ToggleButton>
+                            <ToggleButton CommandParameter="dotted"
+                                          IsChecked="{Binding TableBorderStyle, Converter={StaticResource ComparisonConverter}, ConverterParameter=dotted}"
+                                          Style="{StaticResource IconToggleButtonStyle}"
+                                          ToolTip="点線 (dotted)">
+                                <Path Width="16"
+                                      Height="16"
+                                      Data="{StaticResource BorderDottedIconGeometry}"
+                                      Fill="{StaticResource PrimaryTextBrush}"
+                                      Stretch="Uniform" />
+                            </ToggleButton>
+                            <ToggleButton CommandParameter="dashed"
+                                          IsChecked="{Binding TableBorderStyle, Converter={StaticResource ComparisonConverter}, ConverterParameter=dashed}"
+                                          Style="{StaticResource IconToggleButtonStyle}"
+                                          ToolTip="破線 (dashed)">
+                                <Path Width="16"
+                                      Height="16"
+                                      Data="{StaticResource BorderDashedIconGeometry}"
+                                      Fill="{StaticResource PrimaryTextBrush}"
+                                      Stretch="Uniform" />
+                            </ToggleButton>
+                        </StackPanel>
+
                         <Label Content="ヘッダー背景色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding TableHeaderBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                     CommandParameter="TableHeaderBackgroundColor"
                                                     SelectColorCommand="{Binding SelectColorCommand}" />
+
+                        <Label Content="ヘッダー位置揃え:" Style="{StaticResource FormLabelStyle}" />
+                        <StackPanel Orientation="Horizontal">
+                            <ToggleButton CommandParameter="left"
+                                          IsChecked="{Binding TableHeaderAlignment, Converter={StaticResource ComparisonConverter}, ConverterParameter=left}"
+                                          Style="{StaticResource IconToggleButtonStyle}"
+                                          ToolTip="左寄せ">
+                                <Path Width="16"
+                                      Height="16"
+                                      Data="{StaticResource AlignLeftIconGeometry}"
+                                      Fill="{StaticResource PrimaryTextBrush}"
+                                      Stretch="Uniform" />
+                            </ToggleButton>
+                            <ToggleButton CommandParameter="center"
+                                          IsChecked="{Binding TableHeaderAlignment, Converter={StaticResource ComparisonConverter}, ConverterParameter=center}"
+                                          Style="{StaticResource IconToggleButtonStyle}"
+                                          ToolTip="中央寄せ">
+                                <Path Width="16"
+                                      Height="16"
+                                      Data="{StaticResource AlignCenterIconGeometry}"
+                                      Fill="{StaticResource PrimaryTextBrush}"
+                                      Stretch="Uniform" />
+                            </ToggleButton>
+                            <ToggleButton CommandParameter="right"
+                                          IsChecked="{Binding TableHeaderAlignment, Converter={StaticResource ComparisonConverter}, ConverterParameter=right}"
+                                          Style="{StaticResource IconToggleButtonStyle}"
+                                          ToolTip="右寄せ">
+                                <Path Width="16"
+                                      Height="16"
+                                      Data="{StaticResource AlignRightIconGeometry}"
+                                      Fill="{StaticResource PrimaryTextBrush}"
+                                      Stretch="Uniform" />
+                            </ToggleButton>
+                        </StackPanel>
 
                         <Label Content="セル パディング:" Style="{StaticResource FormLabelStyle}" />
                         <controls:NumericUpDownControl Unit="px" Value="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -229,11 +297,38 @@
                         <controls:NumericUpDownControl Unit="px" Value="{Binding QuoteBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="左枠線 種類:" Style="{StaticResource FormLabelStyle}" />
-                        <ComboBox Style="{StaticResource FormComboBoxStyle}" Text="{Binding QuoteBorderStyle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <ComboBoxItem Content="solid" />
-                            <ComboBoxItem Content="dotted" />
-                            <ComboBoxItem Content="dashed" />
-                        </ComboBox>
+                        <StackPanel Orientation="Horizontal">
+                            <ToggleButton CommandParameter="solid"
+                                          IsChecked="{Binding QuoteBorderStyle, Converter={StaticResource ComparisonConverter}, ConverterParameter=solid}"
+                                          Style="{StaticResource IconToggleButtonStyle}"
+                                          ToolTip="実線 (solid)">
+                                <Path Width="16"
+                                      Height="16"
+                                      Data="{StaticResource BorderSolidVerticalIconGeometry}"
+                                      Fill="{StaticResource PrimaryTextBrush}"
+                                      Stretch="Uniform" />
+                            </ToggleButton>
+                            <ToggleButton CommandParameter="dotted"
+                                          IsChecked="{Binding QuoteBorderStyle, Converter={StaticResource ComparisonConverter}, ConverterParameter=dotted}"
+                                          Style="{StaticResource IconToggleButtonStyle}"
+                                          ToolTip="点線 (dotted)">
+                                <Path Width="16"
+                                      Height="16"
+                                      Data="{StaticResource BorderDottedVerticalIconGeometry}"
+                                      Fill="{StaticResource PrimaryTextBrush}"
+                                      Stretch="Uniform" />
+                            </ToggleButton>
+                            <ToggleButton CommandParameter="dashed"
+                                          IsChecked="{Binding QuoteBorderStyle, Converter={StaticResource ComparisonConverter}, ConverterParameter=dashed}"
+                                          Style="{StaticResource IconToggleButtonStyle}"
+                                          ToolTip="破線 (dashed)">
+                                <Path Width="16"
+                                      Height="16"
+                                      Data="{StaticResource BorderDashedVerticalIconGeometry}"
+                                      Fill="{StaticResource PrimaryTextBrush}"
+                                      Stretch="Uniform" />
+                            </ToggleButton>
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>

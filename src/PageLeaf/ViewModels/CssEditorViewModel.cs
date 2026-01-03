@@ -25,7 +25,7 @@ namespace PageLeaf.ViewModels
             "BodyTextColor", "BodyBackgroundColor", "BodyFontSize",
             "QuoteTextColor", "QuoteBackgroundColor", "QuoteBorderColor",
             "QuoteBorderWidth", "QuoteBorderStyle",
-            "TableBorderColor", "TableHeaderBackgroundColor", "TableBorderWidth", "TableCellPadding",
+            "TableBorderColor", "TableHeaderBackgroundColor", "TableBorderWidth", "TableBorderStyle", "TableHeaderAlignment", "TableCellPadding",
             "CodeTextColor", "CodeBackgroundColor", "CodeFontFamily",
             "ListMarkerType", "ListIndent"
         };
@@ -219,6 +219,12 @@ namespace PageLeaf.ViewModels
 
         private void SetStyleValue(string key, string? value)
         {
+            // 枠線の種類が解除された場合はデフォルトの solid を適用する
+            if (string.IsNullOrEmpty(value) && (key == nameof(TableBorderStyle) || key == nameof(QuoteBorderStyle)))
+            {
+                value = "solid";
+            }
+
             if (!_styles.TryGetValue(key, out var current) || current != value)
             {
                 _styles[key] = value;
@@ -246,6 +252,8 @@ namespace PageLeaf.ViewModels
         public string? TableBorderColor { get => this[nameof(TableBorderColor)]; set => this[nameof(TableBorderColor)] = value; }
         public string? TableHeaderBackgroundColor { get => this[nameof(TableHeaderBackgroundColor)]; set => this[nameof(TableHeaderBackgroundColor)] = value; }
         public string? TableBorderWidth { get => this[nameof(TableBorderWidth)]; set => this[nameof(TableBorderWidth)] = value; }
+        public string? TableBorderStyle { get => this[nameof(TableBorderStyle)]; set => this[nameof(TableBorderStyle)] = value; }
+        public string? TableHeaderAlignment { get => this[nameof(TableHeaderAlignment)]; set => this[nameof(TableHeaderAlignment)] = value; }
         public string? TableCellPadding { get => this[nameof(TableCellPadding)]; set => this[nameof(TableCellPadding)] = value; }
         public string? CodeTextColor { get => this[nameof(CodeTextColor)]; set => this[nameof(CodeTextColor)] = value; }
         public string? CodeBackgroundColor { get => this[nameof(CodeBackgroundColor)]; set => this[nameof(CodeBackgroundColor)] = value; }

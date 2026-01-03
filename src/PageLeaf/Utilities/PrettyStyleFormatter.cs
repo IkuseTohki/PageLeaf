@@ -166,7 +166,8 @@ namespace PageLeaf.Utilities
         {
             if (property is ICssProperty cssProperty)
             {
-                return $"{cssProperty.Name}: {cssProperty.Value};";
+                var important = cssProperty.IsImportant ? " !important" : "";
+                return $"{cssProperty.Name}: {cssProperty.Value}{important};";
             }
             return property.ToCss(); // Fallback
         }

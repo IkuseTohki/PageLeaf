@@ -36,4 +36,22 @@
     <!-- Arrow Down -->
     <Geometry x:Key="ArrowDownIconGeometry">M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z</Geometry>
 
+    <!-- Border Solid -->
+    <Geometry x:Key="BorderSolidIconGeometry">M2,11H22V13H2V11Z</Geometry>
+
+    <!-- Border Dotted -->
+    <Geometry x:Key="BorderDottedIconGeometry">M3,11H5V13H3V11Z M8,11H10V13H8V11Z M13,11H15V13H13V11Z M18,11H20V13H18V11Z</Geometry>
+
+    <!-- Border Dashed -->
+    <Geometry x:Key="BorderDashedIconGeometry">M2,11H7V13H2V11Z M9.5,11H14.5V13H9.5V11Z M17,11H22V13H17V11Z</Geometry>
+
+    <!-- Border Solid Vertical -->
+    <Geometry x:Key="BorderSolidVerticalIconGeometry">M11,2V22H13V2H11Z</Geometry>
+
+    <!-- Border Dotted Vertical -->
+    <Geometry x:Key="BorderDottedVerticalIconGeometry">M11,3V5H13V3H11Z M11,8V10H13V8H11Z M11,13V15H13V13H11Z M11,18V20H13V18H11Z</Geometry>
+
+    <!-- Border Dashed Vertical -->
+    <Geometry x:Key="BorderDashedVerticalIconGeometry">M11,2V7H13V2H11Z M11,9.5V14.5H13V9.5H11Z M11,17V22H13V17H11Z</Geometry>
+
 </ResourceDictionary>

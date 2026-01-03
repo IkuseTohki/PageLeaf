@@ -147,6 +147,7 @@ namespace PageLeaf.Services
             if (thRule != null)
             {
                 styleInfo.TableHeaderBackgroundColor = GetColorHexFromRule(thRule, "background-color");
+                styleInfo.TableHeaderAlignment = thRule.Style.GetPropertyValue("text-align");
             }
 
             // code のスタイルを解析
@@ -298,6 +299,11 @@ namespace PageLeaf.Services
             }, styleInfo);
 
             // Table - 一旦ロングハンドで生成させる
+            UpdateOrCreateRule(stylesheet, "table", (rule, info) =>
+            {
+                rule.Style.SetProperty("border-collapse", "collapse");
+            }, styleInfo);
+
             UpdateOrCreateRule(stylesheet, "th, td", (rule, info) =>
             {
                 if (!string.IsNullOrEmpty(info.TableBorderWidth) || !string.IsNullOrEmpty(info.TableBorderColor) || !string.IsNullOrEmpty(info.TableBorderStyle))
@@ -313,6 +319,7 @@ namespace PageLeaf.Services
             UpdateOrCreateRule(stylesheet, "th", (rule, info) =>
             {
                 if (!string.IsNullOrEmpty(info.TableHeaderBackgroundColor)) rule.Style.SetProperty("background-color", info.TableHeaderBackgroundColor);
+                if (!string.IsNullOrEmpty(info.TableHeaderAlignment)) rule.Style.SetProperty("text-align", info.TableHeaderAlignment, "important");
             }, styleInfo);
 
             // Code

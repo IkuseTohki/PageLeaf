@@ -154,6 +154,10 @@ namespace PageLeaf.Tests.Services
                 "  font-size: 12px;",
                 "  color: rgba(0, 0, 0, 1);",
                 "  background-color: rgba(255, 255, 255, 1);",
+                "}",
+                "",
+                "table {",
+                "  border-collapse: collapse;",
                 "}"
             );
 
@@ -524,6 +528,26 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("2px", parsedUpdatedStyles.TableBorderWidth);
             Assert.AreEqual("#BBBBBB", parsedUpdatedStyles.TableHeaderBackgroundColor);
             Assert.AreEqual("10px", parsedUpdatedStyles.TableCellPadding);
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldApplyImportantToTableHeaderAlignment()
+        {
+            // テスト観点: 表ヘッダーの位置揃え設定が、Markdownのインラインスタイルを上書きするために
+            //            !important 付きで出力されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo
+            {
+                TableHeaderAlignment = "center"
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(string.Empty, styleInfo);
+
+            // Assert
+            // 期待される文字列が含まれているか正規表現でチェック
+            StringAssert.Matches(updatedCss, new Regex(@"th\s*\{[^}]*text-align:\s*center\s*!important;[^}]*\}"));
         }
 
         [TestMethod]
