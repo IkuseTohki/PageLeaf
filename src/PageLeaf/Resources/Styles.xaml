@@ -17,6 +17,10 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#FFE0E0E0" />
             </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+                <Setter Property="Cursor" Value="Arrow" />
+            </Trigger>
         </Style.Triggers>
     </Style>
 
@@ -111,6 +115,11 @@
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#FFC5C5C5" />
                 <Setter Property="BorderBrush" Value="#FF707070" />
+            </Trigger>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.5" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
             </Trigger>
         </Style.Triggers>
     </Style>

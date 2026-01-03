@@ -34,6 +34,7 @@ namespace PageLeaf.ViewModels
 
         private string _globalUnit = "px";
         private string? _selectedHeadingLevel;
+        private bool _isDirty;
 
         public event EventHandler? CssSaved;
         public ICommand SaveCssCommand { get; }
@@ -42,10 +43,16 @@ namespace PageLeaf.ViewModels
         public ObservableCollection<string> AvailableUnits { get; }
         public string? TargetCssFileName { get; private set; }
 
+        public bool IsDirty
+        {
+            get => _isDirty;
+            set { if (_isDirty != value) { _isDirty = value; OnPropertyChanged(); } }
+        }
+
         public string GlobalUnit
         {
             get => _globalUnit;
-            set { if (_globalUnit != value) { var old = _globalUnit; _globalUnit = value; ConvertAutoFontSizes(old, value); OnPropertyChanged(); } }
+            set { if (_globalUnit != value) { var old = _globalUnit; _globalUnit = value; ConvertAutoFontSizes(old, value); IsDirty = true; OnPropertyChanged(); } }
         }
 
         public string? this[string key] { get => GetStyleValue(key); set => SetStyleValue(key, value); }
@@ -54,8 +61,8 @@ namespace PageLeaf.ViewModels
         {
             ArgumentNullException.ThrowIfNull(cssManagementService);
             _cssManagementService = cssManagementService;
-            SaveCssCommand = new DelegateCommand(ExecuteSaveCss);
-            ResetCommand = new DelegateCommand(ExecuteReset);
+            SaveCssCommand = new DelegateCommand(ExecuteSaveCss, CanExecuteSaveCss);
+            ResetCommand = new DelegateCommand(ExecuteReset, CanExecuteReset);
             AvailableHeadingLevels = new ObservableCollection<string>(Enumerable.Range(1, 6).Select(i => $"h{i}"));
             SelectedHeadingLevel = AvailableHeadingLevels.FirstOrDefault();
             AvailableUnits = new ObservableCollection<string> { "px", "em", "%" };
@@ -68,11 +75,13 @@ namespace PageLeaf.ViewModels
             LoadStyles(styleInfo);
         }
 
+        private bool CanExecuteReset(object? parameter) => IsDirty && !string.IsNullOrEmpty(TargetCssFileName);
+
         private void ExecuteReset(object? parameter)
         {
-            if (!string.IsNullOrEmpty(TargetCssFileName))
+            if (CanExecuteReset(parameter))
             {
-                Load(TargetCssFileName);
+                Load(TargetCssFileName!);
             }
         }
 
@@ -108,6 +117,7 @@ namespace PageLeaf.ViewModels
                 }
                 _flags[$"{level}.IsNumberingEnabled"] = styleInfo.HeadingNumberingStates.TryGetValue(level, out var n) && n;
             }
+            IsDirty = false;
             OnPropertyChanged(string.Empty);
             UpdateHeadingProperties();
         }
@@ -156,6 +166,7 @@ namespace PageLeaf.ViewModels
             if (!_styles.TryGetValue(key, out var current) || current != value)
             {
                 _styles[key] = value;
+                IsDirty = true;
                 OnPropertyChanged("Item[]");
                 if (_selectedHeadingLevel != null && key.StartsWith(_selectedHeadingLevel))
                 {
@@ -194,13 +205,15 @@ namespace PageLeaf.ViewModels
         public bool IsHeadingNumberingEnabled { get => GetFlag("IsNumberingEnabled"); set => SetFlag("IsNumberingEnabled", value); }
 
         private bool GetFlag(string attr) => _selectedHeadingLevel != null && _flags.TryGetValue($"{_selectedHeadingLevel}.{attr}", out var b) && b;
-        private void SetFlag(string attr, bool value) { if (_selectedHeadingLevel == null) return; var key = $"{_selectedHeadingLevel}.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; OnPropertyChanged($"IsHeading{attr}"); } }
+        private void SetFlag(string attr, bool value) { if (_selectedHeadingLevel == null) return; var key = $"{_selectedHeadingLevel}.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; OnPropertyChanged($"IsHeading{attr}"); } }
         public string? SelectedHeadingLevel { get => _selectedHeadingLevel; set { if (_selectedHeadingLevel != value) { _selectedHeadingLevel = value; OnPropertyChanged(); UpdateHeadingProperties(); } } }
         private void UpdateHeadingProperties() { OnPropertyChanged(nameof(HeadingTextColor)); OnPropertyChanged(nameof(HeadingFontSize)); OnPropertyChanged(nameof(HeadingFontFamily)); OnPropertyChanged(nameof(IsHeadingBold)); OnPropertyChanged(nameof(IsHeadingItalic)); OnPropertyChanged(nameof(IsHeadingUnderline)); OnPropertyChanged(nameof(IsHeadingStrikethrough)); OnPropertyChanged(nameof(IsHeadingNumberingEnabled)); }
 
+        private bool CanExecuteSaveCss(object? parameter) => IsDirty && !string.IsNullOrEmpty(TargetCssFileName);
+
         private void ExecuteSaveCss(object? parameter)
         {
-            if (string.IsNullOrEmpty(TargetCssFileName)) return;
+            if (!CanExecuteSaveCss(parameter)) return;
             var styleInfo = new CssStyleInfo();
             var type = typeof(CssStyleInfo);
             foreach (var name in StylePropertyNames)
@@ -217,7 +230,8 @@ namespace PageLeaf.ViewModels
                 styleInfo.HeadingStyleFlags[lv] = new HeadingStyleFlags { IsBold = _flags.TryGetValue($"{lv}.IsBold", out var b) && b, IsItalic = _flags.TryGetValue($"{lv}.IsItalic", out var i) && i, IsUnderline = _flags.TryGetValue($"{lv}.IsUnderline", out var u) && u, IsStrikethrough = _flags.TryGetValue($"{lv}.IsStrikethrough", out var st) && st };
                 if (_flags.TryGetValue($"{lv}.IsNumberingEnabled", out var n)) styleInfo.HeadingNumberingStates[lv] = n;
             }
-            _cssManagementService.SaveStyle(TargetCssFileName, styleInfo);
+            _cssManagementService.SaveStyle(TargetCssFileName!, styleInfo);
+            IsDirty = false;
             CssSaved?.Invoke(this, EventArgs.Empty);
         }
 

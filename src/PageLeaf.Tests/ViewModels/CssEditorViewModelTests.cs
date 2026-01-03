@@ -63,6 +63,7 @@ namespace PageLeaf.Tests.ViewModels
             };
 
             // Act
+            _viewModel.BodyTextColor = "#abcdef"; // Make it dirty
             _viewModel.SaveCssCommand.Execute(null);
 
             // Assert
@@ -288,6 +289,60 @@ namespace PageLeaf.Tests.ViewModels
             // Assert
             Assert.AreEqual("white", _viewModel.BodyTextColor, "Style should be reloaded from service after reset");
             _mockCssManagementService.Verify(s => s.LoadStyle(fileName), Times.Exactly(2));
+        }
+
+        [TestMethod]
+        public void IsDirty_ShouldBeFalse_AfterInitialization()
+        {
+            Assert.IsFalse(_viewModel.IsDirty);
+        }
+
+        [TestMethod]
+        public void IsDirty_ShouldBeTrue_AfterPropertyChange()
+        {
+            _viewModel.BodyTextColor = "NewColor";
+            Assert.IsTrue(_viewModel.IsDirty);
+        }
+
+        [TestMethod]
+        public void IsDirty_ShouldBeTrue_AfterHeadingPropertyChange()
+        {
+            _viewModel.SelectedHeadingLevel = "h1";
+            _viewModel.HeadingTextColor = "NewColor";
+            Assert.IsTrue(_viewModel.IsDirty);
+        }
+
+        [TestMethod]
+        public void IsDirty_ShouldBeFalse_AfterSave()
+        {
+            _mockCssManagementService.Setup(s => s.LoadStyle("test.css")).Returns(new Models.CssStyleInfo());
+            _viewModel.Load("test.css");
+            _viewModel.BodyTextColor = "NewColor";
+
+            _viewModel.SaveCssCommand.Execute(null);
+
+            Assert.IsFalse(_viewModel.IsDirty);
+        }
+
+        [TestMethod]
+        public void IsDirty_ShouldBeFalse_AfterReset()
+        {
+            _mockCssManagementService.Setup(s => s.LoadStyle("test.css")).Returns(new Models.CssStyleInfo());
+            _viewModel.Load("test.css");
+            _viewModel.BodyTextColor = "NewColor";
+
+            _viewModel.ResetCommand.Execute(null);
+
+            Assert.IsFalse(_viewModel.IsDirty);
+        }
+
+        [TestMethod]
+        public void IsDirty_ShouldBeFalse_AfterLoad()
+        {
+            _mockCssManagementService.Setup(s => s.LoadStyle("another.css")).Returns(new Models.CssStyleInfo());
+            _viewModel.BodyTextColor = "NewColor";
+            _viewModel.Load("another.css");
+            Assert.IsFalse(_viewModel.IsDirty);
         }
     }
 }
