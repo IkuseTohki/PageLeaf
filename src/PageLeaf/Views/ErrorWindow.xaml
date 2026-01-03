@@ -28,13 +28,12 @@
         <StackPanel Grid.Row="2"
                     HorizontalAlignment="Right"
                     Orientation="Horizontal">
-            <Button Margin="0,0,10,0"
-                    Padding="10,5"
-                    Command="{Binding CopyCommand}"
-                    Content="Copy to Clipboard" />
-            <Button Padding="10,5"
-                    Content="Close"
-                    IsCancel="True" />
+            <Button Command="{Binding CopyCommand}"
+                    Content="Copy to Clipboard"
+                    Style="{StaticResource DialogButtonStyle}" />
+            <Button Content="Close"
+                    IsCancel="True"
+                    Style="{StaticResource DialogButtonStyle}" />
         </StackPanel>
     </Grid>
 </Window>

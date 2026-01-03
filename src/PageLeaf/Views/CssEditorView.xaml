@@ -49,12 +49,7 @@
             <!-- General Tab -->
             <TabItem Header="全体">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <Label Content="共通単位:" Style="{StaticResource FormLabelStyle}" />
-                        <ComboBox ItemsSource="{Binding AvailableUnits}"
-                                  SelectedItem="{Binding GlobalUnit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Style="{StaticResource FormComboBoxStyle}" />
-
+                    <StackPanel Style="{StaticResource FormContainerStyle}">
                         <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding BodyTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                     CommandParameter="BodyTextColor"
@@ -67,6 +62,11 @@
 
                         <Label Content="フォントサイズ:" Style="{StaticResource FormLabelStyle}" />
                         <controls:FontSizeEditorControl Unit="{Binding GlobalUnit}" Value="{Binding BodyFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <Label Content="共通単位:" Style="{StaticResource FormSectionLabelStyle}" />
+                        <ComboBox ItemsSource="{Binding AvailableUnits}"
+                                  SelectedItem="{Binding GlobalUnit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource FormComboBoxStyle}" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -74,7 +74,7 @@
             <!-- Headings Tab -->
             <TabItem Header="見出し">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
+                    <StackPanel Style="{StaticResource FormContainerStyle}">
                         <Label Content="対象見出し:" Style="{StaticResource FormLabelStyle}" />
                         <ComboBox ItemsSource="{Binding AvailableHeadingLevels}"
                                   SelectedItem="{Binding SelectedHeadingLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -116,10 +116,70 @@
                 </ScrollViewer>
             </TabItem>
 
+            <!-- List Tab -->
+            <TabItem Header="リスト">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Style="{StaticResource FormContainerStyle}">
+                        <Label Content="マーカーの種類 (ul):" Style="{StaticResource FormLabelStyle}" />
+                        <ComboBox Style="{StaticResource FormComboBoxStyle}" Text="{Binding ListMarkerType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                            <ComboBoxItem Content="disc" />
+                            <ComboBoxItem Content="circle" />
+                            <ComboBoxItem Content="square" />
+                        </ComboBox>
+
+                        <Label Content="インデント:" Style="{StaticResource FormLabelStyle}" />
+                        <controls:FontSizeEditorControl Unit="px" Value="{Binding ListIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Table Tab -->
+            <TabItem Header="表">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Style="{StaticResource FormContainerStyle}">
+                        <Label Content="罫線 色:" Style="{StaticResource FormLabelStyle}" />
+                        <controls:ColorInputControl ColorText="{Binding TableBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="TableBorderColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
+
+                        <Label Content="罫線 太さ:" Style="{StaticResource FormLabelStyle}" />
+                        <controls:FontSizeEditorControl Unit="px" Value="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <Label Content="ヘッダー背景色:" Style="{StaticResource FormLabelStyle}" />
+                        <controls:ColorInputControl ColorText="{Binding TableHeaderBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="TableHeaderBackgroundColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
+
+                        <Label Content="セル パディング:" Style="{StaticResource FormLabelStyle}" />
+                        <controls:FontSizeEditorControl Unit="px" Value="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Code Tab -->
+            <TabItem Header="コード">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Style="{StaticResource FormContainerStyle}">
+                        <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
+                        <controls:ColorInputControl ColorText="{Binding CodeTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="CodeTextColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
+
+                        <Label Content="背景色:" Style="{StaticResource FormLabelStyle}" />
+                        <controls:ColorInputControl ColorText="{Binding CodeBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="CodeBackgroundColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
+
+                        <Label Content="フォントファミリー:" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding CodeFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
             <!-- Quote Tab -->
             <TabItem Header="引用">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
+                    <StackPanel Style="{StaticResource FormContainerStyle}">
                         <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding QuoteTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                     CommandParameter="QuoteTextColor"
@@ -144,66 +204,6 @@
                             <ComboBoxItem Content="dotted" />
                             <ComboBoxItem Content="dashed" />
                         </ComboBox>
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-
-            <!-- List Tab -->
-            <TabItem Header="リスト">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <Label Content="マーカーの種類 (ul):" Style="{StaticResource FormLabelStyle}" />
-                        <ComboBox Style="{StaticResource FormComboBoxStyle}" Text="{Binding ListMarkerType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                            <ComboBoxItem Content="disc" />
-                            <ComboBoxItem Content="circle" />
-                            <ComboBoxItem Content="square" />
-                        </ComboBox>
-
-                        <Label Content="インデント:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:FontSizeEditorControl Unit="px" Value="{Binding ListIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-
-            <!-- Table Tab -->
-            <TabItem Header="表">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <Label Content="罫線 色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding TableBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                    CommandParameter="TableBorderColor"
-                                                    SelectColorCommand="{Binding SelectColorCommand}" />
-
-                        <Label Content="罫線 太さ:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:FontSizeEditorControl Unit="px" Value="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-
-                        <Label Content="ヘッダー背景色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding TableHeaderBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                    CommandParameter="TableHeaderBackgroundColor"
-                                                    SelectColorCommand="{Binding SelectColorCommand}" />
-
-                        <Label Content="セル パディング:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:FontSizeEditorControl Unit="px" Value="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-
-            <!-- Code Tab -->
-            <TabItem Header="コード">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="10">
-                        <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding CodeTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                    CommandParameter="CodeTextColor"
-                                                    SelectColorCommand="{Binding SelectColorCommand}" />
-
-                        <Label Content="背景色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding CodeBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                    CommandParameter="CodeBackgroundColor"
-                                                    SelectColorCommand="{Binding SelectColorCommand}" />
-
-                        <Label Content="フォントファミリー:" Style="{StaticResource FormLabelStyle}" />
-                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding CodeFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>

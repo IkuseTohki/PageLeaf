@@ -131,6 +131,20 @@
         <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
 
+    <!-- フォーム用セクションラベルスタイル (上部に余白あり) -->
+    <Style x:Key="FormSectionLabelStyle"
+           BasedOn="{StaticResource FormLabelStyle}"
+           TargetType="Label">
+        <Setter Property="Margin" Value="0,15,0,0" />
+    </Style>
+
+    <!-- ダイアログ用ボタンスタイル -->
+    <Style x:Key="DialogButtonStyle" TargetType="Button">
+        <Setter Property="Padding" Value="15,5" />
+        <Setter Property="MinWidth" Value="80" />
+        <Setter Property="Margin" Value="5,0" />
+    </Style>
+
     <!-- フォーム用テキストボックススタイル -->
     <Style x:Key="FormTextBoxStyle" TargetType="TextBox">
         <Setter Property="Margin" Value="0,2,0,5" />
@@ -152,11 +166,9 @@
     </Style>
 
     <!-- フォーム用ヘッダースタイル -->
-    <Style x:Key="FormHeaderStyle" TargetType="TextBlock">
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="Margin" Value="0,10,0,5" />
-        <Setter Property="Foreground" Value="#FF333333" />
+    <!-- フォーム用コンテナスタイル -->
+    <Style x:Key="FormContainerStyle" TargetType="StackPanel">
+        <Setter Property="Margin" Value="10" />
     </Style>
 
 </ResourceDictionary>

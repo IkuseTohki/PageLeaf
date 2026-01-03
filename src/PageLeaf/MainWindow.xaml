@@ -117,6 +117,7 @@
                     <ColumnDefinition.Style>
                         <Style TargetType="ColumnDefinition">
                             <Setter Property="Width" Value="{Binding CssEditorColumnWidth, Mode=TwoWay, Converter={StaticResource DoubleToGridLengthConverter}}" />
+                            <Setter Property="MinWidth" Value="200" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsCssEditorVisible}" Value="False">
                                     <Setter Property="Width" Value="0" />

@@ -25,7 +25,7 @@ namespace PageLeaf.ViewModels
         private ObservableCollection<string> _availableCssFiles = null!;
         private string _selectedCssFile = null!;
         private bool _isWebView2Initialized;
-        private double _cssEditorColumnWidth = 300.0;
+        private double _cssEditorColumnWidth = 230.0;
 
         public IEditorService Editor { get; }
         public CssEditorViewModel CssEditorViewModel { get; }
