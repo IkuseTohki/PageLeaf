@@ -79,5 +79,28 @@ namespace PageLeaf.Tests.Utilities
             // "auto" は数値解析不能なため、defaultValue ("16") が返るのが現在の仕様
             Assert.AreEqual("16", UnitConversionHelper.ParseAndConvert("auto", "px", "16"));
         }
+
+        [TestMethod]
+        public void ParseAndConvert_EdgeCases()
+        {
+            // テスト観点: 数値が含まれない、または極端な値のパースを確認する。
+
+            // 単位のみ
+            Assert.AreEqual("0", UnitConversionHelper.ParseAndConvert("px", "px", "0"));
+            Assert.AreEqual("0", UnitConversionHelper.ParseAndConvert("em", "px", "0"));
+
+            // 負数 (現在の実装では単純加算/減算を想定)
+            Assert.AreEqual("-16", UnitConversionHelper.ParseAndConvert("-1em", "px", "0"));
+
+            // 小数点のみ
+            Assert.AreEqual("0", UnitConversionHelper.ParseAndConvert(".", "px", "0"));
+
+            // 非常に大きな値
+            Assert.AreEqual("16000000", UnitConversionHelper.ParseAndConvert("1000000em", "px", "0"));
+
+            // null をデフォルト値として受け取れること（最近の変更）
+            Assert.IsNull(UnitConversionHelper.ParseAndConvert(null, "px", null));
+            Assert.IsNull(UnitConversionHelper.ParseAndConvert("invalid", "px", null));
+        }
     }
 }

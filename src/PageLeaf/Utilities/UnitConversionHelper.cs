@@ -31,7 +31,7 @@ namespace PageLeaf.Utilities
             if (string.IsNullOrWhiteSpace(input)) return defaultValue;
 
             // 数値と単位を分離
-            var numPart = new string(input.TakeWhile(c => char.IsDigit(c) || c == '.').ToArray());
+            var numPart = new string(input.TakeWhile(c => char.IsDigit(c) || c == '.' || c == '-').ToArray());
             var unitPart = input.Substring(numPart.Length).Trim().ToLower();
 
             if (!double.TryParse(numPart, out var value)) return defaultValue;

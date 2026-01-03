@@ -155,7 +155,16 @@
                             <ComboBoxItem Content="disc" />
                             <ComboBoxItem Content="circle" />
                             <ComboBoxItem Content="square" />
+                            <ComboBoxItem Content="none" />
                         </ComboBox>
+
+                        <Label Content="マーカーの種類 (ol):" Style="{StaticResource FormLabelStyle}" />
+                        <ComboBox ItemsSource="{Binding AvailableNumberedListMarkerTypes}"
+                                  SelectedItem="{Binding NumberedListMarkerType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource FormComboBoxStyle}" />
+
+                        <Label Content="マーカーのサイズ:" Style="{StaticResource FormLabelStyle}" />
+                        <controls:FontSizeEditorControl Unit="{Binding GlobalUnit}" Value="{Binding ListMarkerSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="インデント:" Style="{StaticResource FormLabelStyle}" />
                         <controls:NumericUpDownControl Unit="px" Value="{Binding ListIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />

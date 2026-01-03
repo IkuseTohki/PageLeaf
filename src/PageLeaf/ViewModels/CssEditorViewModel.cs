@@ -27,11 +27,11 @@ namespace PageLeaf.ViewModels
             "QuoteBorderWidth", "QuoteBorderStyle",
             "TableBorderColor", "TableHeaderBackgroundColor", "TableBorderWidth", "TableBorderStyle", "TableHeaderAlignment", "TableCellPadding",
             "CodeTextColor", "CodeBackgroundColor", "CodeFontFamily",
-            "ListMarkerType", "ListIndent"
+            "ListMarkerType", "NumberedListMarkerType", "ListMarkerSize", "ListIndent"
         };
 
         // 自動変換（GlobalUnit連動）の対象
-        private static readonly string[] AutoConvertPropertyNames = new[] { "BodyFontSize", "HeadingFontSize" };
+        private static readonly string[] AutoConvertPropertyNames = new[] { "BodyFontSize", "HeadingFontSize", "ListMarkerSize" };
 
         // 常に px 固定の対象
         private static readonly string[] PxFixedPropertyNames = new[] { "QuoteBorderWidth", "TableBorderWidth", "TableCellPadding", "ListIndent" };
@@ -49,6 +49,7 @@ namespace PageLeaf.ViewModels
         public ObservableCollection<string> AvailableHeadingLevels { get; }
         public ObservableCollection<string> AvailableUnits { get; }
         public ObservableCollection<string> AvailableAlignments { get; }
+        public ObservableCollection<string> AvailableNumberedListMarkerTypes { get; }
         public string? TargetCssFileName { get; private set; }
 
         public string PreviewCss
@@ -94,6 +95,7 @@ namespace PageLeaf.ViewModels
             SelectedHeadingLevel = AvailableHeadingLevels.FirstOrDefault();
             AvailableUnits = new ObservableCollection<string> { "px", "em", "%" };
             AvailableAlignments = new ObservableCollection<string> { "left", "center", "right" };
+            AvailableNumberedListMarkerTypes = new ObservableCollection<string> { "decimal", "decimal-leading-zero", "lower-alpha", "upper-alpha", "lower-roman", "upper-roman" };
         }
 
         private void ExecuteSelectColor(object? parameter)
@@ -178,9 +180,6 @@ namespace PageLeaf.ViewModels
             UpdatePreview();
         }
 
-        private string GetDefaultSize(string name) => name switch { "BodyFontSize" => "16", "QuoteBorderWidth" => "4", "TableBorderWidth" => "1", "TableCellPadding" => "6", "ListIndent" => "20", _ => "16" };
-        private string GetDefaultHeadingSize(string lv) => lv switch { "h1" => "32", "h2" => "24", "h3" => "18.72", "h4" => "16", "h5" => "13.28", "h6" => "10.72", _ => "16" };
-
         private void ConvertAutoFontSizes(string fromUnit, string toUnit)
         {
             // 単一プロパティの変換と通知
@@ -259,6 +258,8 @@ namespace PageLeaf.ViewModels
         public string? CodeBackgroundColor { get => this[nameof(CodeBackgroundColor)]; set => this[nameof(CodeBackgroundColor)] = value; }
         public string? CodeFontFamily { get => this[nameof(CodeFontFamily)]; set => this[nameof(CodeFontFamily)] = value; }
         public string? ListMarkerType { get => this[nameof(ListMarkerType)]; set => this[nameof(ListMarkerType)] = value; }
+        public string? NumberedListMarkerType { get => this[nameof(NumberedListMarkerType)]; set => this[nameof(NumberedListMarkerType)] = value; }
+        public string? ListMarkerSize { get => this[nameof(ListMarkerSize)]; set => this[nameof(ListMarkerSize)] = value; }
         public string? ListIndent { get => this[nameof(ListIndent)]; set => this[nameof(ListIndent)] = value; }
         public string? HeadingTextColor { get => this[$"{_selectedHeadingLevel}.TextColor"]; set => this[$"{_selectedHeadingLevel}.TextColor"] = value; }
         public string? HeadingFontSize { get => this[$"{_selectedHeadingLevel}.FontSize"]; set => this[$"{_selectedHeadingLevel}.FontSize"] = value; }

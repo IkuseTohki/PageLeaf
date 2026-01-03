@@ -413,5 +413,31 @@ namespace PageLeaf.Tests.ViewModels
             Assert.AreEqual(selectedColor, _viewModel.HeadingTextColor);
             Assert.AreEqual(selectedColor, _viewModel["h2.TextColor"]);
         }
+
+        [TestMethod]
+        public void TableBorderStyle_SetNull_ShouldBecomeSolid()
+        {
+            // テスト観点: TableBorderStyle に null または空文字をセットした際、
+            //            ガードロジックにより自動的に "solid" になることを確認する。
+
+            // Act
+            _viewModel.TableBorderStyle = null;
+
+            // Assert
+            Assert.AreEqual("solid", _viewModel.TableBorderStyle);
+        }
+
+        [TestMethod]
+        public void QuoteBorderStyle_SetNull_ShouldBecomeSolid()
+        {
+            // テスト観点: QuoteBorderStyle に null または空文字をセットした際、
+            //            ガードロジックにより自動的に "solid" になることを確認する。
+
+            // Act
+            _viewModel.QuoteBorderStyle = "";
+
+            // Assert
+            Assert.AreEqual("solid", _viewModel.QuoteBorderStyle);
+        }
     }
 }

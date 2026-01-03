@@ -124,6 +124,26 @@ namespace PageLeaf.Services
                 styleInfo.ListIndent = ulRule.Style.GetPropertyValue("padding-left");
             }
 
+            // ol のスタイルを解析
+            var olRule = stylesheet.Rules
+                .OfType<ICssStyleRule>()
+                .FirstOrDefault(r => r.SelectorText == "ol");
+
+            if (olRule != null)
+            {
+                styleInfo.NumberedListMarkerType = olRule.Style.GetPropertyValue("list-style-type");
+            }
+
+            // li::marker のスタイルを解析
+            var markerRule = stylesheet.Rules
+                .OfType<ICssStyleRule>()
+                .FirstOrDefault(r => r.SelectorText == "li::marker");
+
+            if (markerRule != null)
+            {
+                styleInfo.ListMarkerSize = markerRule.Style.GetPropertyValue("font-size");
+            }
+
             // table のスタイルを解析
             var thTdRule = stylesheet.Rules
                 .OfType<ICssStyleRule>()
@@ -207,48 +227,27 @@ namespace PageLeaf.Services
                 var headingSelector = $"h{i}";
                 UpdateOrCreateRule(stylesheet, headingSelector, (rule, info) =>
                 {
-                    // Color
-                    if (info.HeadingTextColors.TryGetValue(headingSelector, out var color) && !string.IsNullOrEmpty(color))
+                    // Helper to simplify property updates
+                    void UpdateProperty(Dictionary<string, string?>? dict, string key, string propertyName)
                     {
-                        rule.Style.SetProperty("color", color);
-                    }
-                    else if (info.HeadingTextColors.ContainsKey(headingSelector) && string.IsNullOrEmpty(color))
-                    {
-                        rule.Style.RemoveProperty("color");
-                    }
-
-                    // Font Size
-                    if (info.HeadingFontSizes.TryGetValue(headingSelector, out var fontSize) && !string.IsNullOrEmpty(fontSize))
-                    {
-                        rule.Style.SetProperty("font-size", fontSize);
-                    }
-                    else if (info.HeadingFontSizes.ContainsKey(headingSelector) && string.IsNullOrEmpty(fontSize))
-                    {
-                        rule.Style.RemoveProperty("font-size");
+                        if (dict != null && dict.TryGetValue(key, out var val))
+                        {
+                            if (!string.IsNullOrEmpty(val)) rule.Style.SetProperty(propertyName, val);
+                            else rule.Style.RemoveProperty(propertyName);
+                        }
                     }
 
-                    // Font Family
-                    if (info.HeadingFontFamilies.TryGetValue(headingSelector, out var fontFamily) && !string.IsNullOrEmpty(fontFamily))
-                    {
-                        rule.Style.SetProperty("font-family", fontFamily);
-                    }
-                    else if (info.HeadingFontFamilies.ContainsKey(headingSelector) && string.IsNullOrEmpty(fontFamily))
-                    {
-                        rule.Style.RemoveProperty("font-family");
-                    }
+                    UpdateProperty(info.HeadingTextColors, headingSelector, "color");
+                    UpdateProperty(info.HeadingFontSizes, headingSelector, "font-size");
+                    UpdateProperty(info.HeadingFontFamilies, headingSelector, "font-family");
+                    UpdateProperty(info.HeadingAlignments, headingSelector, "text-align");
 
-                    // Text Align
-                    if (info.HeadingAlignments.TryGetValue(headingSelector, out var textAlign) && !string.IsNullOrEmpty(textAlign))
-                    {
-                        rule.Style.SetProperty("text-align", textAlign);
-                    }
-                    else if (info.HeadingAlignments.ContainsKey(headingSelector) && string.IsNullOrEmpty(textAlign))
-                    {
-                        rule.Style.RemoveProperty("text-align");
-                    }
+                    // Text Align specifically for headings might need override logic in future, but for now standard helper is fine.
+                    // Special case: text-align might need !important if we want to override Markdown's default behavior, 
+                    // but usually that applies only to table headers.
 
                     // Style Flags
-                    if (info.HeadingStyleFlags.TryGetValue(headingSelector, out var flags))
+                    if (info.HeadingStyleFlags != null && info.HeadingStyleFlags.TryGetValue(headingSelector, out var flags) && flags != null)
                     {
                         rule.Style.SetProperty("font-weight", flags.IsBold ? "bold" : "normal");
                         rule.Style.SetProperty("font-style", flags.IsItalic ? "italic" : "normal");
@@ -259,7 +258,7 @@ namespace PageLeaf.Services
                         if (textDecorations.Any())
                         {
                             rule.Style.SetProperty("text-decoration", string.Join(" ", textDecorations));
-                            if (info.HeadingTextColors.TryGetValue(headingSelector, out var textColor) && !string.IsNullOrEmpty(textColor))
+                            if (info.HeadingTextColors != null && info.HeadingTextColors.TryGetValue(headingSelector, out var textColor) && !string.IsNullOrEmpty(textColor))
                             {
                                 rule.Style.SetProperty("text-decoration-color", textColor);
                             }
@@ -298,6 +297,22 @@ namespace PageLeaf.Services
                 if (!string.IsNullOrEmpty(info.ListIndent)) rule.Style.SetProperty("padding-left", info.ListIndent);
             }, styleInfo);
 
+            UpdateOrCreateRule(stylesheet, "ol", (rule, info) =>
+            {
+                if (!string.IsNullOrEmpty(info.NumberedListMarkerType)) rule.Style.SetProperty("list-style-type", info.NumberedListMarkerType);
+            }, styleInfo);
+
+            UpdateOrCreateRule(stylesheet, "li::marker", (rule, info) =>
+            {
+                if (!string.IsNullOrEmpty(info.ListMarkerSize)) rule.Style.SetProperty("font-size", info.ListMarkerSize);
+            }, styleInfo);
+
+            // チェックボックス（タスクリスト）の場合はマーカーを消す
+            UpdateOrCreateRule(stylesheet, "li:has(input[type=\"checkbox\"])", (rule, info) =>
+            {
+                rule.Style.SetProperty("list-style-type", "none");
+            }, styleInfo);
+
             // Table - 一旦ロングハンドで生成させる
             UpdateOrCreateRule(stylesheet, "table", (rule, info) =>
             {
@@ -330,7 +345,10 @@ namespace PageLeaf.Services
                 if (!string.IsNullOrEmpty(info.CodeFontFamily)) rule.Style.SetProperty("font-family", info.CodeFontFamily);
             }, styleInfo);
 
-            UpdateHeadingNumbering(stylesheet, styleInfo);
+            if (styleInfo != null)
+            {
+                UpdateHeadingNumbering(stylesheet, styleInfo);
+            }
 
             // 更新されたスタイルシートを文字列として出力
             string generatedCss;
@@ -347,20 +365,20 @@ namespace PageLeaf.Services
             if (match.Success)
             {
                 var newStyles = new List<string>();
-                bool hasBorder = !string.IsNullOrEmpty(styleInfo.TableBorderWidth) || !string.IsNullOrEmpty(styleInfo.TableBorderColor) || !string.IsNullOrEmpty(styleInfo.TableBorderStyle);
-                bool hasPadding = !string.IsNullOrEmpty(styleInfo.TableCellPadding);
+                bool hasBorder = !string.IsNullOrEmpty(styleInfo?.TableBorderWidth) || !string.IsNullOrEmpty(styleInfo?.TableBorderColor) || !string.IsNullOrEmpty(styleInfo?.TableBorderStyle);
+                bool hasPadding = !string.IsNullOrEmpty(styleInfo?.TableCellPadding);
 
                 if (hasBorder)
                 {
-                    var borderWidth = !string.IsNullOrEmpty(styleInfo.TableBorderWidth) ? styleInfo.TableBorderWidth : "1px";
-                    var borderStyle = !string.IsNullOrEmpty(styleInfo.TableBorderStyle) ? styleInfo.TableBorderStyle : "solid";
-                    var borderColor = !string.IsNullOrEmpty(styleInfo.TableBorderColor) ? styleInfo.TableBorderColor : "black";
+                    var borderWidth = !string.IsNullOrEmpty(styleInfo?.TableBorderWidth) ? styleInfo!.TableBorderWidth : "1px";
+                    var borderStyle = !string.IsNullOrEmpty(styleInfo?.TableBorderStyle) ? styleInfo!.TableBorderStyle : "solid";
+                    var borderColor = !string.IsNullOrEmpty(styleInfo?.TableBorderColor) ? styleInfo!.TableBorderColor : "black";
                     newStyles.Add($"  border: {borderWidth} {borderStyle} {borderColor};");
                 }
 
                 if (hasPadding)
                 {
-                    newStyles.Add($"  padding: {styleInfo.TableCellPadding};");
+                    newStyles.Add($"  padding: {styleInfo?.TableCellPadding};");
                 }
 
                 if (newStyles.Any())
@@ -376,17 +394,20 @@ namespace PageLeaf.Services
 
         private void UpdateHeadingNumbering(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
         {
+            if (stylesheet?.Rules == null || styleInfo == null) return;
+
             // Step 1: Remove all ::before rules for headings to have a clean slate.
             for (int i = stylesheet.Rules.Length - 1; i >= 0; i--)
             {
-                if (stylesheet.Rules[i] is ICssStyleRule rule && rule.SelectorText.StartsWith("h") && rule.SelectorText.Contains("::before"))
+                var rule = stylesheet.Rules[i];
+                if (rule is ICssStyleRule styleRule && styleRule.SelectorText != null && styleRule.SelectorText.StartsWith("h") && styleRule.SelectorText.Contains("::before"))
                 {
                     stylesheet.RemoveAt(i);
                 }
             }
 
             // Check if any heading numbering is enabled at all to decide if body counter-reset is needed
-            bool anyHeadingNumberingEnabled = styleInfo.HeadingNumberingStates.Any(kvp => kvp.Value);
+            bool anyHeadingNumberingEnabled = styleInfo.HeadingNumberingStates != null && styleInfo.HeadingNumberingStates.Any(kvp => kvp.Value);
 
             // Step 2: Update counter properties on body and headings
             UpdateOrCreateRule(stylesheet, "body", (rule, info) =>
@@ -406,7 +427,7 @@ namespace PageLeaf.Services
                 var headingSelector = $"h{i}";
                 UpdateOrCreateRule(stylesheet, headingSelector, (rule, info) =>
                 {
-                    if (info.HeadingNumberingStates.TryGetValue(headingSelector, out bool isEnabled) && isEnabled)
+                    if (info.HeadingNumberingStates != null && info.HeadingNumberingStates.TryGetValue(headingSelector, out bool isEnabled) && isEnabled)
                     {
                         rule.Style.SetProperty("counter-increment", headingSelector);
                         // Reset counter for sub-headings if current heading numbering is enabled
@@ -427,7 +448,7 @@ namespace PageLeaf.Services
             for (int i = 1; i <= 6; i++)
             {
                 var headingSelector = $"h{i}";
-                if (styleInfo.HeadingNumberingStates.TryGetValue(headingSelector, out bool isEnabled) && isEnabled)
+                if (styleInfo.HeadingNumberingStates != null && styleInfo.HeadingNumberingStates.TryGetValue(headingSelector, out bool isEnabled) && isEnabled)
                 {
                     var beforeSelector = $"{headingSelector}::before";
                     UpdateOrCreateRule(stylesheet, beforeSelector, (rule, info) =>

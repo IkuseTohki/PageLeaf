@@ -28,6 +28,8 @@ namespace PageLeaf.Models
         public string? CodeBackgroundColor { get; set; }
         public string? CodeFontFamily { get; set; }
         public string? ListMarkerType { get; set; }
+        public string? NumberedListMarkerType { get; set; }
+        public string? ListMarkerSize { get; set; }
         public string? ListIndent { get; set; }
         public Dictionary<string, bool> HeadingNumberingStates { get; } = new Dictionary<string, bool>();
     }

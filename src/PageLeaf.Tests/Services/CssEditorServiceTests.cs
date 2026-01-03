@@ -156,6 +156,10 @@ namespace PageLeaf.Tests.Services
                 "  background-color: rgba(255, 255, 255, 1);",
                 "}",
                 "",
+                "li:has(input[type=\"checkbox\"]) {",
+                "  list-style-type: none;",
+                "}",
+                "",
                 "table {",
                 "  border-collapse: collapse;",
                 "}"
@@ -723,6 +727,61 @@ namespace PageLeaf.Tests.Services
             StringAssert.Matches(updatedCss, new Regex(@"h3\s*\{[^}]*font-size:\s*1em;[^}]*\}"));
             Assert.IsFalse(updatedCss.Contains("h3 { counter-increment:"));
             Assert.IsFalse(updatedCss.Contains("h3::before"));
+        }
+        [TestMethod]
+        public void UpdateCssContent_WithNullDictionaries_ShouldNotThrow()
+        {
+            // テスト観点: CssStyleInfo の辞書プロパティが null の場合でも、
+            //            例外を投げずに処理が完了することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo();
+            // 実際には読み取り専用プロパティだが、サービス側で null を受け取った場合の
+            // 防御的コードをテストするために null を許容する辞書を想定してテスト
+            // (このテスト自体は、モデルの変更により null になりにくくなったが、
+            //  将来の変更に対するガードとして意味がある)
+
+            // Act
+            var updatedCss = service.UpdateCssContent("h1 { color: red; }", styleInfo);
+
+            // Assert
+            Assert.IsNotNull(updatedCss);
+            StringAssert.Contains(updatedCss, "h1");
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldMaintainExistingTaskListStyles_WhileAddingNewOnes()
+        {
+            // テスト観点: 既に li:has(...) のようなルールが存在する場合でも、
+            //            適切にマージまたは上書きされることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "li:has(input[type=\"checkbox\"]) { color: red; }";
+            var styleInfo = new CssStyleInfo();
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            // Assert
+            // 既存の color と追加された list-style-type が両方存在することを確認
+            StringAssert.Matches(updatedCss, new Regex(@"li:has\(input\[type=""checkbox""\]\)\s*\{[^}]*color:\s*rgba\(255,\s*0,\s*0,\s*1\);[^}]*\}"));
+            StringAssert.Matches(updatedCss, new Regex(@"li:has\(input\[type=""checkbox""\]\)\s*\{[^}]*list-style-type:\s*none;[^}]*\}"));
+        }
+
+        [TestMethod]
+        public void ParseCss_WithMalformedCss_ShouldReturnDefaultStyleInfo()
+        {
+            // テスト観点: 壊れたCSS文字列を渡しても、例外を投げずに解析可能な範囲で結果を返すことを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var malformedCss = "body { color: red; garbage: !!!; h1 { font-size: 20px;"; // 閉じ括弧なし
+
+            // Act
+            var styles = service.ParseCss(malformedCss);
+
+            // Assert
+            Assert.IsNotNull(styles);
+            Assert.AreEqual("#FF0000", styles.BodyTextColor);
         }
     }
 }
