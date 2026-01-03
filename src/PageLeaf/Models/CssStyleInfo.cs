@@ -20,6 +20,8 @@ namespace PageLeaf.Models
         public string? QuoteBorderStyle { get; set; }
         public string? TableBorderColor { get; set; }
         public string? TableHeaderBackgroundColor { get; set; }
+        public string? TableHeaderTextColor { get; set; }
+        public string? TableHeaderFontSize { get; set; }
         public string? TableBorderWidth { get; set; }
         public string? TableBorderStyle { get; set; }
         public string? TableHeaderAlignment { get; set; }

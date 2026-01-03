@@ -244,6 +244,20 @@ namespace PageLeaf.Tests.ViewModels
         }
 
         [TestMethod]
+        public void GlobalUnit_Change_ShouldConvertTableHeaderFontSize()
+        {
+            // Arrange
+            _viewModel.GlobalUnit = "px";
+            _viewModel.TableHeaderFontSize = "16";
+
+            // Act
+            _viewModel.GlobalUnit = "em";
+
+            // Assert
+            Assert.AreEqual("1", _viewModel.TableHeaderFontSize);
+        }
+
+        [TestMethod]
         public void Load_WhenFontSizeIsMissing_ShouldBeNull()
         {
             // テスト観点: CSSファイルにフォントサイズ指定がない場合、

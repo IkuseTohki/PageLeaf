@@ -25,13 +25,13 @@ namespace PageLeaf.ViewModels
             "BodyTextColor", "BodyBackgroundColor", "BodyFontSize",
             "QuoteTextColor", "QuoteBackgroundColor", "QuoteBorderColor",
             "QuoteBorderWidth", "QuoteBorderStyle",
-            "TableBorderColor", "TableHeaderBackgroundColor", "TableBorderWidth", "TableBorderStyle", "TableHeaderAlignment", "TableCellPadding",
+            "TableBorderColor", "TableHeaderBackgroundColor", "TableHeaderTextColor", "TableHeaderFontSize", "TableBorderWidth", "TableBorderStyle", "TableHeaderAlignment", "TableCellPadding",
             "CodeTextColor", "CodeBackgroundColor", "CodeFontFamily",
             "ListMarkerType", "NumberedListMarkerType", "ListMarkerSize", "ListIndent"
         };
 
         // 自動変換（GlobalUnit連動）の対象
-        private static readonly string[] AutoConvertPropertyNames = new[] { "BodyFontSize", "HeadingFontSize", "ListMarkerSize" };
+        private static readonly string[] AutoConvertPropertyNames = new[] { "BodyFontSize", "HeadingFontSize", "ListMarkerSize", "TableHeaderFontSize" };
 
         // 常に px 固定の対象
         private static readonly string[] PxFixedPropertyNames = new[] { "QuoteBorderWidth", "TableBorderWidth", "TableCellPadding", "ListIndent" };
@@ -250,6 +250,8 @@ namespace PageLeaf.ViewModels
         public string? QuoteBorderStyle { get => this[nameof(QuoteBorderStyle)]; set => this[nameof(QuoteBorderStyle)] = value; }
         public string? TableBorderColor { get => this[nameof(TableBorderColor)]; set => this[nameof(TableBorderColor)] = value; }
         public string? TableHeaderBackgroundColor { get => this[nameof(TableHeaderBackgroundColor)]; set => this[nameof(TableHeaderBackgroundColor)] = value; }
+        public string? TableHeaderTextColor { get => this[nameof(TableHeaderTextColor)]; set => this[nameof(TableHeaderTextColor)] = value; }
+        public string? TableHeaderFontSize { get => this[nameof(TableHeaderFontSize)]; set => this[nameof(TableHeaderFontSize)] = value; }
         public string? TableBorderWidth { get => this[nameof(TableBorderWidth)]; set => this[nameof(TableBorderWidth)] = value; }
         public string? TableBorderStyle { get => this[nameof(TableBorderStyle)]; set => this[nameof(TableBorderStyle)] = value; }
         public string? TableHeaderAlignment { get => this[nameof(TableHeaderAlignment)]; set => this[nameof(TableHeaderAlignment)] = value; }

@@ -167,6 +167,8 @@ namespace PageLeaf.Services
             if (thRule != null)
             {
                 styleInfo.TableHeaderBackgroundColor = GetColorHexFromRule(thRule, "background-color");
+                styleInfo.TableHeaderTextColor = GetColorHexFromRule(thRule, "color");
+                styleInfo.TableHeaderFontSize = thRule.Style.GetPropertyValue("font-size");
                 styleInfo.TableHeaderAlignment = thRule.Style.GetPropertyValue("text-align");
             }
 
@@ -334,6 +336,8 @@ namespace PageLeaf.Services
             UpdateOrCreateRule(stylesheet, "th", (rule, info) =>
             {
                 if (!string.IsNullOrEmpty(info.TableHeaderBackgroundColor)) rule.Style.SetProperty("background-color", info.TableHeaderBackgroundColor);
+                if (!string.IsNullOrEmpty(info.TableHeaderTextColor)) rule.Style.SetProperty("color", info.TableHeaderTextColor);
+                if (!string.IsNullOrEmpty(info.TableHeaderFontSize)) rule.Style.SetProperty("font-size", info.TableHeaderFontSize);
                 if (!string.IsNullOrEmpty(info.TableHeaderAlignment)) rule.Style.SetProperty("text-align", info.TableHeaderAlignment, "important");
             }, styleInfo);
 

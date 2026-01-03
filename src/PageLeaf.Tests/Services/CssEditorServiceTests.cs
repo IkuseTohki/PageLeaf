@@ -368,6 +368,8 @@ namespace PageLeaf.Tests.Services
                 }
                 th {
                     background-color: #f2f2f2;
+                    color: #333333;
+                    font-size: 1.1em;
                 }";
 
             // Act
@@ -378,6 +380,8 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("#DDDDDD", styles.TableBorderColor);
             Assert.AreEqual("8px", styles.TableCellPadding);
             Assert.AreEqual("#F2F2F2", styles.TableHeaderBackgroundColor);
+            Assert.AreEqual("#333333", styles.TableHeaderTextColor);
+            Assert.AreEqual("1.1em", styles.TableHeaderFontSize);
         }
 
         [TestMethod]
@@ -520,6 +524,8 @@ namespace PageLeaf.Tests.Services
                 TableBorderColor = "#aaaaaa",
                 TableBorderWidth = "2px",
                 TableHeaderBackgroundColor = "#bbbbbb",
+                TableHeaderTextColor = "#ffffff",
+                TableHeaderFontSize = "18px",
                 TableCellPadding = "10px"
             };
 
@@ -531,6 +537,8 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("#AAAAAA", parsedUpdatedStyles.TableBorderColor);
             Assert.AreEqual("2px", parsedUpdatedStyles.TableBorderWidth);
             Assert.AreEqual("#BBBBBB", parsedUpdatedStyles.TableHeaderBackgroundColor);
+            Assert.AreEqual("#FFFFFF", parsedUpdatedStyles.TableHeaderTextColor);
+            Assert.AreEqual("18px", parsedUpdatedStyles.TableHeaderFontSize);
             Assert.AreEqual("10px", parsedUpdatedStyles.TableCellPadding);
         }
 
