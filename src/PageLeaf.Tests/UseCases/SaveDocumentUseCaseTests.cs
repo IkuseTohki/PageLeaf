@@ -77,7 +77,7 @@ namespace PageLeaf.Tests.UseCases
         public void Execute_ShouldSaveFile_WhenFileExists()
         {
             // Arrange
-            var doc = new MarkdownDocument { FilePath = "exist.md" };
+            var doc = new MarkdownDocument { FilePath = "exist.md", IsDirty = true };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
             _fileServiceMock.Setup(x => x.FileExists("exist.md")).Returns(true);
 
@@ -86,6 +86,7 @@ namespace PageLeaf.Tests.UseCases
 
             // Assert
             Assert.IsTrue(result);
+            Assert.IsFalse(doc.IsDirty, "IsDirty should be false after successful save.");
             _fileServiceMock.Verify(x => x.Save(doc), Times.Once);
             _saveAsDocumentUseCaseMock.Verify(x => x.Execute(), Times.Never);
         }

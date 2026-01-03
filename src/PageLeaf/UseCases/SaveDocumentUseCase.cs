@@ -44,6 +44,7 @@ namespace PageLeaf.UseCases
             try
             {
                 _fileService.Save(document);
+                document.IsDirty = false;
                 return true;
             }
             catch (Exception)

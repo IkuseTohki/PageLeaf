@@ -231,7 +231,7 @@
                         <Label Content="ヘッダーフォントサイズ:" Style="{StaticResource FormLabelStyle}" />
                         <controls:FontSizeEditorControl Unit="{Binding GlobalUnit}" Value="{Binding TableHeaderFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                        <Label Content="ヘッダー位置揃え:" Style="{StaticResource FormLabelStyle}" />                        
+                        <Label Content="ヘッダー位置揃え:" Style="{StaticResource FormLabelStyle}" />
                         <StackPanel Orientation="Horizontal">
                             <ToggleButton CommandParameter="left"
                                           IsChecked="{Binding TableHeaderAlignment, Converter={StaticResource ComparisonConverter}, ConverterParameter=left}"

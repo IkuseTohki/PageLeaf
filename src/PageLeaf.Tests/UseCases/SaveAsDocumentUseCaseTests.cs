@@ -58,7 +58,7 @@ namespace PageLeaf.Tests.UseCases
         public void Execute_ShouldSaveToNewPath_WhenPathIsProvided()
         {
             // Arrange
-            var doc = new MarkdownDocument { FilePath = "old.md" };
+            var doc = new MarkdownDocument { FilePath = "old.md", IsDirty = true };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
             _dialogServiceMock.Setup(x => x.ShowSaveFileDialog(It.IsAny<string>(), It.IsAny<string>(), "old.md")).Returns("new.md");
 
@@ -68,6 +68,7 @@ namespace PageLeaf.Tests.UseCases
             // Assert
             Assert.IsTrue(result);
             Assert.AreEqual("new.md", doc.FilePath);
+            Assert.IsFalse(doc.IsDirty, "IsDirty should be false after successful Save As.");
             _fileServiceMock.Verify(x => x.Save(doc), Times.Once);
         }
 
