@@ -149,9 +149,9 @@ namespace PageLeaf.ViewModels
                 {
                     var raw = prop.GetValue(styleInfo) as string;
                     if (AutoConvertPropertyNames.Contains(name))
-                        _styles[name] = UnitConversionHelper.ParseAndConvert(raw, GlobalUnit, GetDefaultSize(name));
+                        _styles[name] = UnitConversionHelper.ParseAndConvert(raw, GlobalUnit, null);
                     else if (PxFixedPropertyNames.Contains(name))
-                        _styles[name] = UnitConversionHelper.ParseAndConvert(raw, "px", GetDefaultSize(name));
+                        _styles[name] = UnitConversionHelper.ParseAndConvert(raw, "px", null);
                     else
                         _styles[name] = raw;
                 }
@@ -161,7 +161,7 @@ namespace PageLeaf.ViewModels
             {
                 _styles[$"{level}.TextColor"] = styleInfo.HeadingTextColors.TryGetValue(level, out var c) ? c : null;
                 var rawSize = styleInfo.HeadingFontSizes.TryGetValue(level, out var s) ? s : null;
-                _styles[$"{level}.FontSize"] = UnitConversionHelper.ParseAndConvert(rawSize, GlobalUnit, GetDefaultHeadingSize(level));
+                _styles[$"{level}.FontSize"] = UnitConversionHelper.ParseAndConvert(rawSize, GlobalUnit, null);
                 _styles[$"{level}.FontFamily"] = styleInfo.HeadingFontFamilies.TryGetValue(level, out var f) ? f : null;
                 _styles[$"{level}.Alignment"] = styleInfo.HeadingAlignments.TryGetValue(level, out var a) ? a : null;
 

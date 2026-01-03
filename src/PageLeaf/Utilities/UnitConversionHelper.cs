@@ -26,7 +26,7 @@ namespace PageLeaf.Utilities
         /// <param name="input">"16px", "1.2em" などのCSS文字列。</param>
         /// <param name="targetUnit">"px", "em", "%" のいずれか。</param>
         /// <param name="defaultValue">解析失敗時のデフォルト値。</param>
-        public static string ParseAndConvert(string? input, string targetUnit, string defaultValue = "")
+        public static string? ParseAndConvert(string? input, string targetUnit, string? defaultValue = "")
         {
             if (string.IsNullOrWhiteSpace(input)) return defaultValue;
 

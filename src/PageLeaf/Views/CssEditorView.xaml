@@ -158,7 +158,7 @@
                         </ComboBox>
 
                         <Label Content="インデント:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:FontSizeEditorControl Unit="px" Value="{Binding ListIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:NumericUpDownControl Unit="px" Value="{Binding ListIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -173,7 +173,7 @@
                                                     SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="罫線 太さ:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:FontSizeEditorControl Unit="px" Value="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:NumericUpDownControl Unit="px" Value="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="ヘッダー背景色:" Style="{StaticResource FormLabelStyle}" />
                         <controls:ColorInputControl ColorText="{Binding TableHeaderBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
@@ -181,7 +181,7 @@
                                                     SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="セル パディング:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:FontSizeEditorControl Unit="px" Value="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:NumericUpDownControl Unit="px" Value="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>
@@ -226,7 +226,7 @@
                                                     SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="左枠線 太さ:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:FontSizeEditorControl Unit="px" Value="{Binding QuoteBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:NumericUpDownControl Unit="px" Value="{Binding QuoteBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="左枠線 種類:" Style="{StaticResource FormLabelStyle}" />
                         <ComboBox Style="{StaticResource FormComboBoxStyle}" Text="{Binding QuoteBorderStyle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">

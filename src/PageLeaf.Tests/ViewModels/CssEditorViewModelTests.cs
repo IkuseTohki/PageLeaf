@@ -244,10 +244,11 @@ namespace PageLeaf.Tests.ViewModels
         }
 
         [TestMethod]
-        public void Load_WhenFontSizeIsMissing_ShouldUseDefaultValue()
+        public void Load_WhenFontSizeIsMissing_ShouldBeNull()
         {
             // テスト観点: CSSファイルにフォントサイズ指定がない場合、
-            //            定義された標準的なデフォルト値(16pxベース)が適用されることを確認する。
+            //            デフォルト値を強制せず null のまま保持されることを確認する。
+            //            （ブラウザのデフォルトスタイルを上書きしないため）
 
             // Arrange
             var styleInfo = new Models.CssStyleInfo(); // 全プロパティが null
@@ -258,9 +259,9 @@ namespace PageLeaf.Tests.ViewModels
             _viewModel.Load("empty.css");
 
             // Assert
-            Assert.AreEqual("16", _viewModel.BodyFontSize, "Body default should be 16px");
+            Assert.IsNull(_viewModel.BodyFontSize, "Body should be null if not set in CSS");
             _viewModel.SelectedHeadingLevel = "h1";
-            Assert.AreEqual("32", _viewModel.HeadingFontSize, "h1 default should be 32px");
+            Assert.IsNull(_viewModel.HeadingFontSize, "h1 should be null if not set in CSS");
         }
 
         [TestMethod]
