@@ -258,6 +258,7 @@ namespace PageLeaf.Tests.Services
         {
             // テスト観点: ParseCssが、見出しのfont-weight, font-style, text-decorationプロパティを解析し、
             // CssStyleInfoのHeadingStyleFlagsディクショナリに正しく格納することを確認する。
+            // また、text-alignプロパティがHeadingAlignmentsに格納されることを確認する。
             // Arrange
             var service = new CssEditorService();
             var cssContent = @"
@@ -265,9 +266,10 @@ namespace PageLeaf.Tests.Services
                     font-weight: bold; 
                     font-style: italic; 
                     text-decoration: underline; 
+                    text-align: center;
                 } 
                 h2 { 
-                    text-decoration: line-through; 
+                    text-align: right;
                 }
                 h3 {
                     font-weight: normal;
@@ -285,15 +287,10 @@ namespace PageLeaf.Tests.Services
             Assert.IsTrue(h1Flags.IsBold);
             Assert.IsTrue(h1Flags.IsItalic);
             Assert.IsTrue(h1Flags.IsUnderline);
-            Assert.IsFalse(h1Flags.IsStrikethrough);
+            Assert.AreEqual("center", styles.HeadingAlignments["h1"]);
 
             // Assert - h2
-            Assert.IsTrue(styles.HeadingStyleFlags.ContainsKey("h2"));
-            var h2Flags = styles.HeadingStyleFlags["h2"];
-            Assert.IsFalse(h2Flags.IsBold);
-            Assert.IsFalse(h2Flags.IsItalic);
-            Assert.IsFalse(h2Flags.IsUnderline);
-            Assert.IsTrue(h2Flags.IsStrikethrough);
+            Assert.AreEqual("right", styles.HeadingAlignments["h2"]);
 
             // Assert - h3 (デフォルト値)
             Assert.IsTrue(styles.HeadingStyleFlags.ContainsKey("h3"));
@@ -301,7 +298,6 @@ namespace PageLeaf.Tests.Services
             Assert.IsFalse(h3Flags.IsBold);
             Assert.IsFalse(h3Flags.IsItalic);
             Assert.IsFalse(h3Flags.IsUnderline);
-            Assert.IsFalse(h3Flags.IsStrikethrough);
         }
 
         [TestMethod]
@@ -416,12 +412,14 @@ namespace PageLeaf.Tests.Services
             styleInfo.HeadingTextColors["h1"] = "rgba(0, 0, 255, 1)"; // Blue
             styleInfo.HeadingFontSizes["h1"] = "24px";
             styleInfo.HeadingFontFamilies["h1"] = "Arial";
+            styleInfo.HeadingAlignments["h1"] = "center";
             styleInfo.HeadingStyleFlags["h1"] = new HeadingStyleFlags { IsBold = true, IsUnderline = true };
 
             styleInfo.HeadingTextColors["h2"] = "rgba(0, 255, 0, 1)"; // Green
             styleInfo.HeadingFontSizes["h2"] = "1.5em";
             styleInfo.HeadingFontFamilies["h2"] = "Verdana";
-            styleInfo.HeadingStyleFlags["h2"] = new HeadingStyleFlags { IsItalic = true, IsStrikethrough = true };
+            styleInfo.HeadingAlignments["h2"] = "right";
+            styleInfo.HeadingStyleFlags["h2"] = new HeadingStyleFlags { IsItalic = true };
 
             // Act
             var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
@@ -431,17 +429,17 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("rgba(0, 0, 255, 1)", parsedUpdatedStyles.HeadingTextColors["h1"]);
             Assert.AreEqual("24px", parsedUpdatedStyles.HeadingFontSizes["h1"]);
             Assert.AreEqual("Arial", parsedUpdatedStyles.HeadingFontFamilies["h1"]);
+            Assert.AreEqual("center", parsedUpdatedStyles.HeadingAlignments["h1"]);
             Assert.IsTrue(parsedUpdatedStyles.HeadingStyleFlags["h1"].IsBold);
             Assert.IsTrue(parsedUpdatedStyles.HeadingStyleFlags["h1"].IsUnderline);
             Assert.IsFalse(parsedUpdatedStyles.HeadingStyleFlags["h1"].IsItalic);
-            Assert.IsFalse(parsedUpdatedStyles.HeadingStyleFlags["h1"].IsStrikethrough);
 
             // Assert h2
             Assert.AreEqual("rgba(0, 255, 0, 1)", parsedUpdatedStyles.HeadingTextColors["h2"]);
             Assert.AreEqual("1.5em", parsedUpdatedStyles.HeadingFontSizes["h2"]);
             Assert.AreEqual("Verdana", parsedUpdatedStyles.HeadingFontFamilies["h2"]);
+            Assert.AreEqual("right", parsedUpdatedStyles.HeadingAlignments["h2"]);
             Assert.IsTrue(parsedUpdatedStyles.HeadingStyleFlags["h2"].IsItalic);
-            Assert.IsTrue(parsedUpdatedStyles.HeadingStyleFlags["h2"].IsStrikethrough);
             Assert.IsFalse(parsedUpdatedStyles.HeadingStyleFlags["h2"].IsBold);
             Assert.IsFalse(parsedUpdatedStyles.HeadingStyleFlags["h2"].IsUnderline);
 

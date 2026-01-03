@@ -48,6 +48,7 @@ namespace PageLeaf.ViewModels
         public ICommand SelectColorCommand { get; }
         public ObservableCollection<string> AvailableHeadingLevels { get; }
         public ObservableCollection<string> AvailableUnits { get; }
+        public ObservableCollection<string> AvailableAlignments { get; }
         public string? TargetCssFileName { get; private set; }
 
         public string PreviewCss
@@ -92,6 +93,7 @@ namespace PageLeaf.ViewModels
             AvailableHeadingLevels = new ObservableCollection<string>(Enumerable.Range(1, 6).Select(i => $"h{i}"));
             SelectedHeadingLevel = AvailableHeadingLevels.FirstOrDefault();
             AvailableUnits = new ObservableCollection<string> { "px", "em", "%" };
+            AvailableAlignments = new ObservableCollection<string> { "left", "center", "right" };
         }
 
         private void ExecuteSelectColor(object? parameter)
@@ -161,11 +163,12 @@ namespace PageLeaf.ViewModels
                 var rawSize = styleInfo.HeadingFontSizes.TryGetValue(level, out var s) ? s : null;
                 _styles[$"{level}.FontSize"] = UnitConversionHelper.ParseAndConvert(rawSize, GlobalUnit, GetDefaultHeadingSize(level));
                 _styles[$"{level}.FontFamily"] = styleInfo.HeadingFontFamilies.TryGetValue(level, out var f) ? f : null;
+                _styles[$"{level}.Alignment"] = styleInfo.HeadingAlignments.TryGetValue(level, out var a) ? a : null;
 
                 if (styleInfo.HeadingStyleFlags.TryGetValue(level, out var flags))
                 {
                     _flags[$"{level}.IsBold"] = flags.IsBold; _flags[$"{level}.IsItalic"] = flags.IsItalic;
-                    _flags[$"{level}.IsUnderline"] = flags.IsUnderline; _flags[$"{level}.IsStrikethrough"] = flags.IsStrikethrough;
+                    _flags[$"{level}.IsUnderline"] = flags.IsUnderline;
                 }
                 _flags[$"{level}.IsNumberingEnabled"] = styleInfo.HeadingNumberingStates.TryGetValue(level, out var n) && n;
             }
@@ -252,16 +255,16 @@ namespace PageLeaf.ViewModels
         public string? HeadingTextColor { get => this[$"{_selectedHeadingLevel}.TextColor"]; set => this[$"{_selectedHeadingLevel}.TextColor"] = value; }
         public string? HeadingFontSize { get => this[$"{_selectedHeadingLevel}.FontSize"]; set => this[$"{_selectedHeadingLevel}.FontSize"] = value; }
         public string? HeadingFontFamily { get => this[$"{_selectedHeadingLevel}.FontFamily"]; set => this[$"{_selectedHeadingLevel}.FontFamily"] = value; }
+        public string? HeadingAlignment { get => this[$"{_selectedHeadingLevel}.Alignment"]; set => this[$"{_selectedHeadingLevel}.Alignment"] = value; }
         public bool IsHeadingBold { get => GetFlag("IsBold"); set => SetFlag("IsBold", value); }
         public bool IsHeadingItalic { get => GetFlag("IsItalic"); set => SetFlag("IsItalic", value); }
         public bool IsHeadingUnderline { get => GetFlag("IsUnderline"); set => SetFlag("IsUnderline", value); }
-        public bool IsHeadingStrikethrough { get => GetFlag("IsStrikethrough"); set => SetFlag("IsStrikethrough", value); }
         public bool IsHeadingNumberingEnabled { get => GetFlag("IsNumberingEnabled"); set => SetFlag("IsNumberingEnabled", value); }
 
         private bool GetFlag(string attr) => _selectedHeadingLevel != null && _flags.TryGetValue($"{_selectedHeadingLevel}.{attr}", out var b) && b;
         private void SetFlag(string attr, bool value) { if (_selectedHeadingLevel == null) return; var key = $"{_selectedHeadingLevel}.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; UpdatePreview(); OnPropertyChanged($"IsHeading{attr}"); } }
         public string? SelectedHeadingLevel { get => _selectedHeadingLevel; set { if (_selectedHeadingLevel != value) { _selectedHeadingLevel = value; OnPropertyChanged(); UpdateHeadingProperties(); } } }
-        private void UpdateHeadingProperties() { OnPropertyChanged(nameof(HeadingTextColor)); OnPropertyChanged(nameof(HeadingFontSize)); OnPropertyChanged(nameof(HeadingFontFamily)); OnPropertyChanged(nameof(IsHeadingBold)); OnPropertyChanged(nameof(IsHeadingItalic)); OnPropertyChanged(nameof(IsHeadingUnderline)); OnPropertyChanged(nameof(IsHeadingStrikethrough)); OnPropertyChanged(nameof(IsHeadingNumberingEnabled)); }
+        private void UpdateHeadingProperties() { OnPropertyChanged(nameof(HeadingTextColor)); OnPropertyChanged(nameof(HeadingFontSize)); OnPropertyChanged(nameof(HeadingFontFamily)); OnPropertyChanged(nameof(HeadingAlignment)); OnPropertyChanged(nameof(IsHeadingBold)); OnPropertyChanged(nameof(IsHeadingItalic)); OnPropertyChanged(nameof(IsHeadingUnderline)); OnPropertyChanged(nameof(IsHeadingNumberingEnabled)); }
 
         private bool CanExecuteSaveCss(object? parameter) => IsDirty && !string.IsNullOrEmpty(TargetCssFileName);
 
@@ -289,7 +292,13 @@ namespace PageLeaf.ViewModels
                 if (_styles.TryGetValue($"{lv}.TextColor", out var c) && c != null) styleInfo.HeadingTextColors[lv] = c;
                 if (_styles.TryGetValue($"{lv}.FontSize", out var s) && s != null) styleInfo.HeadingFontSizes[lv] = s + GlobalUnit;
                 if (_styles.TryGetValue($"{lv}.FontFamily", out var f) && f != null) styleInfo.HeadingFontFamilies[lv] = f;
-                styleInfo.HeadingStyleFlags[lv] = new HeadingStyleFlags { IsBold = _flags.TryGetValue($"{lv}.IsBold", out var b) && b, IsItalic = _flags.TryGetValue($"{lv}.IsItalic", out var i) && i, IsUnderline = _flags.TryGetValue($"{lv}.IsUnderline", out var u) && u, IsStrikethrough = _flags.TryGetValue($"{lv}.IsStrikethrough", out var st) && st };
+                if (_styles.TryGetValue($"{lv}.Alignment", out var a)) styleInfo.HeadingAlignments[lv] = a;
+                styleInfo.HeadingStyleFlags[lv] = new HeadingStyleFlags
+                {
+                    IsBold = _flags.TryGetValue($"{lv}.IsBold", out var b) && b,
+                    IsItalic = _flags.TryGetValue($"{lv}.IsItalic", out var i) && i,
+                    IsUnderline = _flags.TryGetValue($"{lv}.IsUnderline", out var u) && u
+                };
                 if (_flags.TryGetValue($"{lv}.IsNumberingEnabled", out var n)) styleInfo.HeadingNumberingStates[lv] = n;
             }
             return styleInfo;

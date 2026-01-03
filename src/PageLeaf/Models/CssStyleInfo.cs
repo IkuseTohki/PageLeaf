@@ -8,9 +8,10 @@ namespace PageLeaf.Models
         public string? BodyBackgroundColor { get; set; }
         public string? BodyFontSize { get; set; }
         public string? HeadingTextColor { get; set; }
-        public Dictionary<string, string> HeadingTextColors { get; } = new Dictionary<string, string>();
-        public Dictionary<string, string> HeadingFontSizes { get; } = new Dictionary<string, string>();
-        public Dictionary<string, string> HeadingFontFamilies { get; } = new Dictionary<string, string>();
+        public Dictionary<string, string?> HeadingTextColors { get; } = new Dictionary<string, string?>();
+        public Dictionary<string, string?> HeadingFontSizes { get; } = new Dictionary<string, string?>();
+        public Dictionary<string, string?> HeadingFontFamilies { get; } = new Dictionary<string, string?>();
+        public Dictionary<string, string?> HeadingAlignments { get; } = new Dictionary<string, string?>();
         public Dictionary<string, HeadingStyleFlags> HeadingStyleFlags { get; } = new Dictionary<string, HeadingStyleFlags>();
         public string? QuoteTextColor { get; set; }
         public string? QuoteBackgroundColor { get; set; }

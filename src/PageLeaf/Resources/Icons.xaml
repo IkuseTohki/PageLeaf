@@ -21,4 +21,13 @@
     <!-- Refresh/Reset Icon (Circular arrow) -->
     <Geometry x:Key="RefreshIconGeometry">M17.65,6.35C16.2,4.9,14.21,4,12,4c-4.42,0-7.99,3.58-7.99,8s3.57,8,7.99,8c3.73,0,6.84-2.55,7.73-6h-2.08 c-0.82,2.33-3.07,4-5.65,4c-3.31,0-6-2.69-6-6s2.69-6,6-6c1.66,0,3.14,0.69,4.22,1.78L13,11h7V4L17.65,6.35z</Geometry>
 
+    <!-- Align Left -->
+    <Geometry x:Key="AlignLeftIconGeometry">M3,21h18v-2H3V21z M3,17h12v-2H3V17z M3,13h18v-2H3V13z M3,9h12V7H3V9z M3,3v2h18V3H3z</Geometry>
+
+    <!-- Align Center -->
+    <Geometry x:Key="AlignCenterIconGeometry">M3,21h18v-2H3V21z M7,17h10v-2H7V17z M3,13h18v-2H3V13z M7,9h10V7H7V9z M3,3v2h18V3H3z</Geometry>
+
+    <!-- Align Right -->
+    <Geometry x:Key="AlignRightIconGeometry">M3,21h18v-2H3V21z M9,17h12v-2H9V17z M3,13h18v-2H3V13z M9,9h12V7H9V9z M3,3v2h18V3H3z</Geometry>
+
 </ResourceDictionary>

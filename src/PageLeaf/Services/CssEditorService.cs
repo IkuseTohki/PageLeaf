@@ -67,6 +67,13 @@ namespace PageLeaf.Services
                         styleInfo.HeadingFontFamilies[headingSelector] = fontFamily;
                     }
 
+                    // text-alignプロパティを解析
+                    var textAlign = headingRule.Style.GetPropertyValue("text-align");
+                    if (!string.IsNullOrEmpty(textAlign))
+                    {
+                        styleInfo.HeadingAlignments[headingSelector] = textAlign;
+                    }
+
                     // スタイルフラグを解析
                     var flags = new HeadingStyleFlags();
                     var fontWeight = headingRule.Style.GetPropertyValue("font-weight");
@@ -85,10 +92,6 @@ namespace PageLeaf.Services
                     if (textDecoration.Contains("underline"))
                     {
                         flags.IsUnderline = true;
-                    }
-                    if (textDecoration.Contains("line-through"))
-                    {
-                        flags.IsStrikethrough = true;
                     }
                     styleInfo.HeadingStyleFlags[headingSelector] = flags;
                 }
@@ -233,6 +236,16 @@ namespace PageLeaf.Services
                         rule.Style.RemoveProperty("font-family");
                     }
 
+                    // Text Align
+                    if (info.HeadingAlignments.TryGetValue(headingSelector, out var textAlign) && !string.IsNullOrEmpty(textAlign))
+                    {
+                        rule.Style.SetProperty("text-align", textAlign);
+                    }
+                    else if (info.HeadingAlignments.ContainsKey(headingSelector) && string.IsNullOrEmpty(textAlign))
+                    {
+                        rule.Style.RemoveProperty("text-align");
+                    }
+
                     // Style Flags
                     if (info.HeadingStyleFlags.TryGetValue(headingSelector, out var flags))
                     {
@@ -241,7 +254,6 @@ namespace PageLeaf.Services
 
                         var textDecorations = new List<string>();
                         if (flags.IsUnderline) textDecorations.Add("underline");
-                        if (flags.IsStrikethrough) textDecorations.Add("line-through");
 
                         if (textDecorations.Any())
                         {

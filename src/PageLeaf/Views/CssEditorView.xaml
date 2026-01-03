@@ -97,10 +97,40 @@
                             <CheckBox Content="下線"
                                       IsChecked="{Binding IsHeadingUnderline, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                       Style="{StaticResource FormCheckBoxStyle}" />
-                            <CheckBox Margin="10,5"
-                                      Content="取り消し線"
-                                      IsChecked="{Binding IsHeadingStrikethrough, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                      Style="{StaticResource FormCheckBoxStyle}" />
+                        </StackPanel>
+
+                        <Label Content="位置揃え:" Style="{StaticResource FormLabelStyle}" />
+                        <StackPanel Orientation="Horizontal">
+                            <ToggleButton CommandParameter="left"
+                                          IsChecked="{Binding HeadingAlignment, Converter={StaticResource ComparisonConverter}, ConverterParameter=left}"
+                                          Style="{StaticResource IconToggleButtonStyle}"
+                                          ToolTip="左寄せ">
+                                <Path Width="16"
+                                      Height="16"
+                                      Data="{StaticResource AlignLeftIconGeometry}"
+                                      Fill="{StaticResource PrimaryTextBrush}"
+                                      Stretch="Uniform" />
+                            </ToggleButton>
+                            <ToggleButton CommandParameter="center"
+                                          IsChecked="{Binding HeadingAlignment, Converter={StaticResource ComparisonConverter}, ConverterParameter=center}"
+                                          Style="{StaticResource IconToggleButtonStyle}"
+                                          ToolTip="中央寄せ">
+                                <Path Width="16"
+                                      Height="16"
+                                      Data="{StaticResource AlignCenterIconGeometry}"
+                                      Fill="{StaticResource PrimaryTextBrush}"
+                                      Stretch="Uniform" />
+                            </ToggleButton>
+                            <ToggleButton CommandParameter="right"
+                                          IsChecked="{Binding HeadingAlignment, Converter={StaticResource ComparisonConverter}, ConverterParameter=right}"
+                                          Style="{StaticResource IconToggleButtonStyle}"
+                                          ToolTip="右寄せ">
+                                <Path Width="16"
+                                      Height="16"
+                                      Data="{StaticResource AlignRightIconGeometry}"
+                                      Fill="{StaticResource PrimaryTextBrush}"
+                                      Stretch="Uniform" />
+                            </ToggleButton>
                         </StackPanel>
 
                         <Label Content="フォントサイズ:" Style="{StaticResource FormLabelStyle}" />

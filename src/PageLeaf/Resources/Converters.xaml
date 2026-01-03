@@ -5,6 +5,7 @@
     <utilities:DisplayModeToStringConverter x:Key="DisplayModeToStringConverter" />
     <utilities:DoubleToGridLengthConverter x:Key="DoubleToGridLengthConverter" />
     <utilities:StringToBrushConverter x:Key="StringToBrushConverter" />
+    <utilities:ComparisonConverter x:Key="ComparisonConverter" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
 </ResourceDictionary>
