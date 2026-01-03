@@ -21,6 +21,8 @@ namespace PageLeaf.Services
                 headBuilder.AppendLine($"<link rel=\"stylesheet\" href=\"{cssPath}?v={timestamp}\">");
             }
 
+            headBuilder.AppendLine("<style id=\"dynamic-style\"></style>");
+
             // highlight.jsのCSSへのリンクを追加 (絶対パスで)
             var cssFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "styles", "github.css");
             var cssFileUri = new Uri(cssFilePath).AbsoluteUri;

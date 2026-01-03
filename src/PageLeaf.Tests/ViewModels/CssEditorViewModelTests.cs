@@ -16,6 +16,8 @@ namespace PageLeaf.Tests.ViewModels
         public void Setup()
         {
             _mockCssManagementService = new Mock<ICssManagementService>();
+            _mockCssManagementService.Setup(s => s.GetCssContent(It.IsAny<string>())).Returns("");
+            _mockCssManagementService.Setup(s => s.GenerateCss(It.IsAny<string>(), It.IsAny<Models.CssStyleInfo>())).Returns("");
             _viewModel = new CssEditorViewModel(_mockCssManagementService.Object);
         }
 

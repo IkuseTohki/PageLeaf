@@ -38,5 +38,21 @@ namespace PageLeaf.Services
         /// <param name="cssFileName">対象のCSSファイル名（例: "github.css"）。</param>
         /// <returns>ファイルシステム上の絶対パス。</returns>
         string GetCssPath(string cssFileName);
+
+        /// <summary>
+        /// 指定されたCSSファイルの内容を文字列として取得します。
+        /// </summary>
+        /// <param name="cssFileName">対象のCSSファイル名。</param>
+        /// <returns>CSSファイルの内容。</returns>
+        string GetCssContent(string cssFileName);
+
+        /// <summary>
+        /// 指定されたスタイル情報に基づいて、保存せずにCSS文字列を生成します。
+        /// 既存のCSSファイルの内容をベースに更新を行います。
+        /// </summary>
+        /// <param name="existingCssContent">ベースとなるCSSコンテンツ。</param>
+        /// <param name="styleInfo">適用するスタイル情報。</param>
+        /// <returns>生成されたCSS文字列。</returns>
+        string GenerateCss(string existingCssContent, CssStyleInfo styleInfo);
     }
 }

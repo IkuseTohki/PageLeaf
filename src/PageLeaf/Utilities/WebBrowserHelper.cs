@@ -37,6 +37,19 @@ namespace PageLeaf.Utilities
             obj.SetValue(HtmlProperty, value);
         }
 
+        public static readonly DependencyProperty InjectedCssProperty =
+            DependencyProperty.RegisterAttached("InjectedCss", typeof(string), typeof(WebBrowserHelper), new PropertyMetadata(OnInjectedCssChanged));
+
+        public static string GetInjectedCss(DependencyObject obj)
+        {
+            return (string)obj.GetValue(InjectedCssProperty);
+        }
+
+        public static void SetInjectedCss(DependencyObject obj, string value)
+        {
+            obj.SetValue(InjectedCssProperty, value);
+        }
+
         /// <summary>
         /// Html 添付プロパティの値が変更されたときに呼び出されます。
         /// </summary>
@@ -46,24 +59,66 @@ namespace PageLeaf.Utilities
         {
             if (obj is WebView2 webView2)
             {
-                var filePath = e.NewValue as string; // Changed from html to filePath
+                var filePath = e.NewValue as string;
 
-                // Ensure CoreWebView2 is initialized
                 if (webView2.CoreWebView2 == null)
                 {
                     await webView2.EnsureCoreWebView2Async(null);
                 }
 
-                // Navigate to the HTML file only if CoreWebView2 is initialized and filePath is not empty
+                // Subscribe to NavigationCompleted to re-inject CSS after reload
+                webView2.NavigationCompleted -= WebView2_NavigationCompleted;
+                webView2.NavigationCompleted += WebView2_NavigationCompleted;
+
                 if (webView2.CoreWebView2 != null && !string.IsNullOrEmpty(filePath))
                 {
-                    // For local files, we need to convert the path to a file URI
-                    webView2.Source = new Uri(filePath); // Changed to set Source property
+                    webView2.Source = new Uri(filePath);
                 }
                 else if (webView2.CoreWebView2 != null && string.IsNullOrEmpty(filePath))
                 {
-                    // If filePath is empty, navigate to a blank page
                     webView2.NavigateToString("<html><body></body></html>");
+                }
+            }
+        }
+
+        private static void WebView2_NavigationCompleted(object? sender, Microsoft.Web.WebView2.Core.CoreWebView2NavigationCompletedEventArgs e)
+        {
+            if (sender is WebView2 webView2)
+            {
+                var cssContent = GetInjectedCss(webView2);
+                InjectCss(webView2, cssContent);
+            }
+        }
+
+        private static void OnInjectedCssChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
+        {
+            if (obj is WebView2 webView2)
+            {
+                var cssContent = e.NewValue as string;
+                InjectCss(webView2, cssContent);
+            }
+        }
+
+        private static async void InjectCss(WebView2 webView2, string? cssContent)
+        {
+            if (webView2.CoreWebView2 != null && !string.IsNullOrEmpty(cssContent))
+            {
+                var escapedCss = System.Text.Json.JsonSerializer.Serialize(cssContent);
+                var script = $@"
+                    (function() {{
+                        var style = document.getElementById('dynamic-style');
+                        if (style) {{
+                            style.textContent = {escapedCss};
+                        }}
+                    }})();";
+
+                try
+                {
+                    await webView2.CoreWebView2.ExecuteScriptAsync(script);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error injecting CSS: {ex.Message}");
                 }
             }
         }

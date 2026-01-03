@@ -64,7 +64,7 @@ namespace PageLeaf.Services
                 // Read existing content to preserve other styles
                 var existingContent = _fileService.FileExists(path) ? _fileService.ReadAllText(path) : string.Empty;
 
-                var newContent = _cssEditorService.UpdateCssContent(existingContent, styleInfo);
+                var newContent = GenerateCss(existingContent, styleInfo);
 
                 _fileService.WriteAllText(path, newContent);
                 _logger.LogInformation("Successfully saved style for {FileName}", cssFileName);
@@ -72,6 +72,34 @@ namespace PageLeaf.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to save style for {FileName}", cssFileName);
+                throw;
+            }
+        }
+
+        public string GetCssContent(string cssFileName)
+        {
+            try
+            {
+                var path = _cssService.GetCssPath(cssFileName);
+                if (!_fileService.FileExists(path)) return string.Empty;
+                return _fileService.ReadAllText(path);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to read CSS content for {FileName}", cssFileName);
+                throw;
+            }
+        }
+
+        public string GenerateCss(string existingCssContent, CssStyleInfo styleInfo)
+        {
+            try
+            {
+                return _cssEditorService.UpdateCssContent(existingCssContent, styleInfo);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to generate CSS");
                 throw;
             }
         }

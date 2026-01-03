@@ -140,6 +140,7 @@
                 <wv2:WebView2 x:Name="MarkdownViewer"
                               Margin="0"
                               utils:WebBrowserHelper.Html="{Binding Editor.HtmlFilePath}"
+                              utils:WebBrowserHelper.InjectedCss="{Binding CssEditorViewModel.PreviewCss}"
                               Visibility="{Binding Editor.IsViewerVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
             </Grid>
 
