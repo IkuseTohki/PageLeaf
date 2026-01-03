@@ -16,6 +16,7 @@ namespace PageLeaf.ViewModels
         private readonly ICssManagementService _cssManagementService;
         private readonly ILoadCssUseCase _loadCssUseCase;
         private readonly ISaveCssUseCase _saveCssUseCase;
+        private readonly IDialogService _dialogService;
         private readonly Dictionary<string, string?> _styles = new Dictionary<string, string?>();
         private readonly Dictionary<string, bool> _flags = new Dictionary<string, bool>();
 
@@ -44,6 +45,7 @@ namespace PageLeaf.ViewModels
         public event EventHandler? CssSaved;
         public ICommand SaveCssCommand { get; }
         public ICommand ResetCommand { get; }
+        public ICommand SelectColorCommand { get; }
         public ObservableCollection<string> AvailableHeadingLevels { get; }
         public ObservableCollection<string> AvailableUnits { get; }
         public string? TargetCssFileName { get; private set; }
@@ -71,21 +73,43 @@ namespace PageLeaf.ViewModels
         public CssEditorViewModel(
             ICssManagementService cssManagementService,
             ILoadCssUseCase loadCssUseCase,
-            ISaveCssUseCase saveCssUseCase)
+            ISaveCssUseCase saveCssUseCase,
+            IDialogService dialogService)
         {
             ArgumentNullException.ThrowIfNull(cssManagementService);
             ArgumentNullException.ThrowIfNull(loadCssUseCase);
             ArgumentNullException.ThrowIfNull(saveCssUseCase);
+            ArgumentNullException.ThrowIfNull(dialogService);
 
             _cssManagementService = cssManagementService;
             _loadCssUseCase = loadCssUseCase;
             _saveCssUseCase = saveCssUseCase;
+            _dialogService = dialogService;
 
             SaveCssCommand = new DelegateCommand(ExecuteSaveCss, CanExecuteSaveCss);
             ResetCommand = new DelegateCommand(ExecuteReset, CanExecuteReset);
+            SelectColorCommand = new DelegateCommand(ExecuteSelectColor);
             AvailableHeadingLevels = new ObservableCollection<string>(Enumerable.Range(1, 6).Select(i => $"h{i}"));
             SelectedHeadingLevel = AvailableHeadingLevels.FirstOrDefault();
             AvailableUnits = new ObservableCollection<string> { "px", "em", "%" };
+        }
+
+        private void ExecuteSelectColor(object? parameter)
+        {
+            if (parameter is string key)
+            {
+                // 見出し文字色の場合は、現在選択中のレベルに応じたキーに変換
+                string actualKey = (key == nameof(HeadingTextColor))
+                    ? $"{_selectedHeadingLevel}.TextColor"
+                    : key;
+
+                var currentColor = GetStyleValue(actualKey);
+                var newColor = _dialogService.ShowColorPickerDialog(currentColor);
+                if (newColor != null)
+                {
+                    SetStyleValue(actualKey, newColor);
+                }
+            }
         }
 
         public void Load(string cssFileName)

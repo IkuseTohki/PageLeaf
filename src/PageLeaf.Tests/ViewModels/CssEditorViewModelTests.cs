@@ -13,6 +13,7 @@ namespace PageLeaf.Tests.ViewModels
         private Mock<ICssManagementService> _mockCssManagementService = null!;
         private Mock<ILoadCssUseCase> _mockLoadCssUseCase = null!;
         private Mock<ISaveCssUseCase> _mockSaveCssUseCase = null!;
+        private Mock<IDialogService> _mockDialogService = null!;
         private CssEditorViewModel _viewModel = null!;
 
         [TestInitialize]
@@ -21,6 +22,7 @@ namespace PageLeaf.Tests.ViewModels
             _mockCssManagementService = new Mock<ICssManagementService>();
             _mockLoadCssUseCase = new Mock<ILoadCssUseCase>();
             _mockSaveCssUseCase = new Mock<ISaveCssUseCase>();
+            _mockDialogService = new Mock<IDialogService>();
 
             _mockCssManagementService.Setup(s => s.GetCssContent(It.IsAny<string>())).Returns("");
             _mockCssManagementService.Setup(s => s.GenerateCss(It.IsAny<string>(), It.IsAny<Models.CssStyleInfo>())).Returns("");
@@ -29,7 +31,8 @@ namespace PageLeaf.Tests.ViewModels
             _viewModel = new CssEditorViewModel(
                 _mockCssManagementService.Object,
                 _mockLoadCssUseCase.Object,
-                _mockSaveCssUseCase.Object);
+                _mockSaveCssUseCase.Object,
+                _mockDialogService.Object);
         }
 
         [TestMethod]
@@ -356,6 +359,58 @@ namespace PageLeaf.Tests.ViewModels
             _viewModel.BodyTextColor = "NewColor";
             _viewModel.Load("another.css");
             Assert.IsFalse(_viewModel.IsDirty);
+        }
+
+        [TestMethod]
+        public void SelectColorCommand_ShouldUpdateColor_WhenDialogReturnsColor()
+        {
+            // Arrange
+            var propertyName = "BodyTextColor";
+            var initialColor = "#000000";
+            var selectedColor = "#FFFFFF";
+            _viewModel.BodyTextColor = initialColor;
+            _mockDialogService.Setup(s => s.ShowColorPickerDialog(initialColor)).Returns(selectedColor);
+
+            // Act
+            _viewModel.SelectColorCommand.Execute(propertyName);
+
+            // Assert
+            Assert.AreEqual(selectedColor, _viewModel.BodyTextColor);
+            Assert.IsTrue(_viewModel.IsDirty);
+        }
+
+        [TestMethod]
+        public void SelectColorCommand_ShouldNotUpdateColor_WhenDialogIsCancelled()
+        {
+            // Arrange
+            var propertyName = "BodyTextColor";
+            var initialColor = "#000000";
+            _viewModel.BodyTextColor = initialColor;
+            _mockDialogService.Setup(s => s.ShowColorPickerDialog(initialColor)).Returns((string?)null);
+
+            // Act
+            _viewModel.SelectColorCommand.Execute(propertyName);
+
+            // Assert
+            Assert.AreEqual(initialColor, _viewModel.BodyTextColor);
+        }
+
+        [TestMethod]
+        public void SelectColorCommand_ShouldHandleHeadingTextColorMapping()
+        {
+            // Arrange
+            _viewModel.SelectedHeadingLevel = "h2";
+            var initialColor = "#111111";
+            var selectedColor = "#222222";
+            _viewModel.HeadingTextColor = initialColor;
+            _mockDialogService.Setup(s => s.ShowColorPickerDialog(initialColor)).Returns(selectedColor);
+
+            // Act
+            _viewModel.SelectColorCommand.Execute("HeadingTextColor");
+
+            // Assert
+            Assert.AreEqual(selectedColor, _viewModel.HeadingTextColor);
+            Assert.AreEqual(selectedColor, _viewModel["h2.TextColor"]);
         }
     }
 }

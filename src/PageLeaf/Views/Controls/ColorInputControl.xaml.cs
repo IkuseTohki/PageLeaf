@@ -1,15 +1,18 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using PageLeaf.Utilities;
+using System.Windows.Input;
 
 namespace PageLeaf.Views.Controls
 {
     /// <summary>
-    /// ColorInputControl.xaml の相互作用ロジック
+    /// 色入力を提供するユーザーコントロールです。
+    /// テキスト入力、プレビュー、および色選択ダイアログの呼び出しをサポートします。
     /// </summary>
     public partial class ColorInputControl : UserControl
     {
+        /// <summary>
+        /// <see cref="ColorInputControl"/> クラスの新しいインスタンスを初期化します。
+        /// </summary>
         public ColorInputControl()
         {
             InitializeComponent();
@@ -17,45 +20,50 @@ namespace PageLeaf.Views.Controls
 
         /// <summary>
         /// ユーザーが入力または選択した色を表す文字列を取得または設定します。
-        /// これは依存関係プロパティです。
         /// </summary>
         public string ColorText
         {
-            get { return (string)GetValue(ColorTextProperty); }
-            set { SetValue(ColorTextProperty, value); }
+            get => (string)GetValue(ColorTextProperty);
+            set => SetValue(ColorTextProperty, value);
         }
 
+        /// <summary>
+        /// ColorText 依存関係プロパティを定義します。
+        /// </summary>
         public static readonly DependencyProperty ColorTextProperty =
-            DependencyProperty.Register("ColorText", typeof(string), typeof(ColorInputControl),
+            DependencyProperty.Register(nameof(ColorText), typeof(string), typeof(ColorInputControl),
                 new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
 
         /// <summary>
-        /// 色選択ボタンがクリックされたときに呼び出されます。
-        /// カラーダイアログを表示し、選択された色でColorTextプロパティを更新します。
+        /// 色選択ボタンがクリックされたときに実行されるコマンドを取得または設定します。
         /// </summary>
-        private void SelectColor_Click(object sender, RoutedEventArgs e)
+        public ICommand SelectColorCommand
         {
-            var colorDialog = new System.Windows.Forms.ColorDialog();
-
-            // 現在の色をダイアログの初期色として設定
-            if (!string.IsNullOrEmpty(ColorText))
-            {
-                try
-                {
-                    var color = (Color)ColorConverter.ConvertFromString(ColorText);
-                    colorDialog.Color = System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
-                }
-                catch
-                {
-                    // 無視
-                }
-            }
-
-            if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                var selectedColor = colorDialog.Color;
-                ColorText = ColorConverterHelper.ToRgbString(selectedColor);
-            }
+            get => (ICommand)GetValue(SelectColorCommandProperty);
+            set => SetValue(SelectColorCommandProperty, value);
         }
+
+        /// <summary>
+        /// SelectColorCommand 依存関係プロパティを定義します。
+        /// </summary>
+        public static readonly DependencyProperty SelectColorCommandProperty =
+            DependencyProperty.Register(nameof(SelectColorCommand), typeof(ICommand), typeof(ColorInputControl),
+                new PropertyMetadata(null));
+
+        /// <summary>
+        /// コマンドに渡されるパラメータを取得または設定します。
+        /// </summary>
+        public object CommandParameter
+        {
+            get => GetValue(CommandParameterProperty);
+            set => SetValue(CommandParameterProperty, value);
+        }
+
+        /// <summary>
+        /// CommandParameter 依存関係プロパティを定義します。
+        /// </summary>
+        public static readonly DependencyProperty CommandParameterProperty =
+            DependencyProperty.Register(nameof(CommandParameter), typeof(object), typeof(ColorInputControl),
+                new PropertyMetadata(null));
     }
 }

@@ -56,10 +56,14 @@
                                   Style="{StaticResource FormComboBoxStyle}" />
 
                         <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding BodyTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:ColorInputControl ColorText="{Binding BodyTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="BodyTextColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="背景色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding BodyBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:ColorInputControl ColorText="{Binding BodyBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="BodyBackgroundColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="フォントサイズ:" Style="{StaticResource FormLabelStyle}" />
                         <controls:FontSizeEditorControl Unit="{Binding GlobalUnit}" Value="{Binding BodyFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -77,7 +81,9 @@
                                   Style="{StaticResource FormComboBoxStyle}" />
 
                         <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding HeadingTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:ColorInputControl ColorText="{Binding HeadingTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="HeadingTextColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="スタイル:" Style="{StaticResource FormLabelStyle}" />
                         <StackPanel Orientation="Horizontal">
@@ -115,13 +121,19 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
                         <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding QuoteTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:ColorInputControl ColorText="{Binding QuoteTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="QuoteTextColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="背景色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding QuoteBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:ColorInputControl ColorText="{Binding QuoteBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="QuoteBackgroundColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="左枠線 色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding QuoteBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:ColorInputControl ColorText="{Binding QuoteBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="QuoteBorderColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="左枠線 太さ:" Style="{StaticResource FormLabelStyle}" />
                         <controls:FontSizeEditorControl Unit="px" Value="{Binding QuoteBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -158,13 +170,17 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
                         <Label Content="罫線 色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding TableBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:ColorInputControl ColorText="{Binding TableBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="TableBorderColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="罫線 太さ:" Style="{StaticResource FormLabelStyle}" />
                         <controls:FontSizeEditorControl Unit="px" Value="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                         <Label Content="ヘッダー背景色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding TableHeaderBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:ColorInputControl ColorText="{Binding TableHeaderBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="TableHeaderBackgroundColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="セル パディング:" Style="{StaticResource FormLabelStyle}" />
                         <controls:FontSizeEditorControl Unit="px" Value="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -177,10 +193,14 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="10">
                         <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding CodeTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:ColorInputControl ColorText="{Binding CodeTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="CodeTextColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="背景色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding CodeBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <controls:ColorInputControl ColorText="{Binding CodeBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="CodeBackgroundColor"
+                                                    SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="フォントファミリー:" Style="{StaticResource FormLabelStyle}" />
                         <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding CodeFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />

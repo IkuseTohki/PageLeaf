@@ -84,8 +84,39 @@ namespace PageLeaf.Views
         /// <param name="exception">発生した例外オブジェクト。</param>
         public void ShowExceptionDialog(string message, Exception exception)
         {
-            var errorWindow = new ErrorWindow(message, exception);
+            var viewModel = new ViewModels.ErrorViewModel(message, exception);
+            var errorWindow = new ErrorWindow(viewModel);
             errorWindow.ShowDialog();
+        }
+
+        /// <summary>
+        /// 色選択ダイアログを表示します。
+        /// </summary>
+        /// <param name="initialColor">初期表示する色の文字列（#RRGGBB形式など）。</param>
+        /// <returns>選択された色の文字列（#RRGGBB形式）。キャンセルされた場合は null。</returns>
+        public string? ShowColorPickerDialog(string? initialColor)
+        {
+            var colorDialog = new System.Windows.Forms.ColorDialog();
+
+            if (!string.IsNullOrEmpty(initialColor))
+            {
+                try
+                {
+                    var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(initialColor);
+                    colorDialog.Color = System.Drawing.Color.FromArgb(color.A, color.R, color.G, color.B);
+                }
+                catch
+                {
+                    // 無視
+                }
+            }
+
+            if (colorDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                return Utilities.ColorConverterHelper.ToRgbString(colorDialog.Color);
+            }
+
+            return null;
         }
     }
 }

@@ -21,6 +21,7 @@
                  Margin="0,0,0,10"
                  FontFamily="Consolas"
                  IsReadOnly="True"
+                 Text="{Binding ErrorMessage, Mode=OneWay}"
                  TextWrapping="Wrap"
                  VerticalScrollBarVisibility="Auto" />
 
@@ -29,11 +30,11 @@
                     Orientation="Horizontal">
             <Button Margin="0,0,10,0"
                     Padding="10,5"
-                    Click="CopyButton_Click"
+                    Command="{Binding CopyCommand}"
                     Content="Copy to Clipboard" />
             <Button Padding="10,5"
-                    Click="CloseButton_Click"
-                    Content="Close" />
+                    Content="Close"
+                    IsCancel="True" />
         </StackPanel>
     </Grid>
 </Window>

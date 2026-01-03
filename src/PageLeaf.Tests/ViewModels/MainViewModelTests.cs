@@ -42,7 +42,8 @@ namespace PageLeaf.Tests.ViewModels
             _cssEditorViewModel = new CssEditorViewModel(
                 _cssManagementServiceMock.Object,
                 new Mock<ILoadCssUseCase>().Object,
-                new Mock<ISaveCssUseCase>().Object);
+                new Mock<ISaveCssUseCase>().Object,
+                _dialogServiceMock.Object);
 
             _cssManagementServiceMock.Setup(s => s.GetAvailableCssFileNames()).Returns(new List<string> { "default.css" });
             _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { SelectedCss = "default.css" });

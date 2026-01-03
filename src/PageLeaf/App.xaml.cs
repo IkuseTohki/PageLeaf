@@ -157,7 +157,8 @@ namespace PageLeaf
             }
             else
             {
-                var errorWindow = new Views.ErrorWindow("致命的なエラーが発生したため、アプリケーションを終了します。", ex);
+                var viewModel = new ViewModels.ErrorViewModel("致命的なエラーが発生したため、アプリケーションを終了します。", ex);
+                var errorWindow = new Views.ErrorWindow(viewModel);
                 errorWindow.ShowDialog();
             }
 

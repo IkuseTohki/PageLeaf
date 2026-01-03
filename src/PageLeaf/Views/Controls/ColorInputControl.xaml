@@ -28,7 +28,8 @@
 
         <Button Grid.Column="2"
                 Width="24"
-                Click="SelectColor_Click"
+                Command="{Binding ElementName=Root, Path=SelectColorCommand}"
+                CommandParameter="{Binding ElementName=Root, Path=CommandParameter}"
                 Style="{StaticResource IconButtonStyle}"
                 ToolTip="色を選択">
             <Path Width="14"

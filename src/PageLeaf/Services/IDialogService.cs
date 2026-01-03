@@ -29,10 +29,17 @@ namespace PageLeaf.Services
         PageLeaf.Models.SaveConfirmationResult ShowSaveConfirmationDialog();
 
         /// <summary>
-        /// 例外が発生したことをユーザーに通知するダイアログを表示します。
+        /// 例外の詳細を表示するダイアログを表示します。
         /// </summary>
-        /// <param name="message">ユーザー向けのわかりやすいメッセージ。</param>
-        /// <param name="exception">発生した例外オブジェクト。</param>
+        /// <param name="message">ユーザーに表示するメッセージ。</param>
+        /// <param name="exception">表示対象の例外。</param>
         void ShowExceptionDialog(string message, System.Exception exception);
+
+        /// <summary>
+        /// 色選択ダイアログを表示します。
+        /// </summary>
+        /// <param name="initialColor">初期表示する色の文字列（#RRGGBB形式など）。</param>
+        /// <returns>選択された色の文字列（#RRGGBB形式）。キャンセルされた場合は null。</returns>
+        string? ShowColorPickerDialog(string? initialColor);
     }
 }
