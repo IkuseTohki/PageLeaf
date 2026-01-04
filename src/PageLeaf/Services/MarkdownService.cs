@@ -3,6 +3,7 @@ using System.Text;
 using System;
 using System.IO;
 using System.Reflection;
+using PageLeaf.Utilities.MarkdownExtensions;
 
 namespace PageLeaf.Services
 {
@@ -17,11 +18,20 @@ namespace PageLeaf.Services
 
         public string ConvertToHtml(string markdown, string? cssPath)
         {
-            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            var pipeline = new MarkdownPipelineBuilder()
+                .UseAdvancedExtensions()
+                .UseCodeBlockHeader()
+                .Build();
             var htmlBody = Markdown.ToHtml(markdown ?? string.Empty, pipeline);
 
             var headBuilder = new StringBuilder();
             headBuilder.AppendLine("<meta charset=\"UTF-8\">");
+
+            // 拡張機能用のベーススタイルを追加
+            var extensionsCssPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "css", "extensions.css");
+            var extensionsCssUri = new Uri(extensionsCssPath).AbsoluteUri;
+            headBuilder.AppendLine($@"<link rel=""stylesheet"" href=""{extensionsCssUri}"">");
+
             if (!string.IsNullOrEmpty(cssPath))
             {
                 var timestamp = DateTime.Now.Ticks; // タイムスタンプを取得
@@ -49,10 +59,14 @@ namespace PageLeaf.Services
 
             // highlight.jsライブラリへのリンクを絶対パスで指定
             var scriptFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "highlight.min.js");
+            var extensionScriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "pageleaf-extensions.js");
+
             // file:// スキームのURIに変換
             var scriptFileUri = new Uri(scriptFilePath).AbsoluteUri;
+            var extensionScriptUri = new Uri(extensionScriptPath).AbsoluteUri;
 
             htmlBuilder.AppendLine($@"<script src=""{scriptFileUri}""></script>");
+            htmlBuilder.AppendLine($@"<script src=""{extensionScriptUri}""></script>");
             htmlBuilder.AppendLine("<script>hljs.highlightAll();</script>");
 
             htmlBuilder.AppendLine("</body>");
