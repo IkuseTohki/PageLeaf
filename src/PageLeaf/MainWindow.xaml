@@ -80,7 +80,7 @@
                 <MenuItem Header="{StaticResource MenuViewCssSelectHeader}" />
             </MenuItem>
             <MenuItem Header="{StaticResource MenuSettingsHeader}">
-                <MenuItem Header="{StaticResource MenuSettingsSettingsHeader}" />
+                <MenuItem Command="{Binding ShowSettingsCommand}" Header="{StaticResource MenuSettingsSettingsHeader}" />
             </MenuItem>
             <MenuItem Header="{StaticResource MenuHelpHeader}">
                 <MenuItem Header="{StaticResource MenuHelpAboutHeader}" />

@@ -66,5 +66,10 @@ namespace PageLeaf.Services
         /// </summary>
         /// <returns>ユーザーの確認結果（保存、破棄、キャンセル）。</returns>
         SaveConfirmationResult PromptForSaveIfDirty();
+
+        /// <summary>
+        /// プレビューのHTMLコンテンツを強制的に再生成して更新します。
+        /// </summary>
+        void UpdatePreview();
     }
 }

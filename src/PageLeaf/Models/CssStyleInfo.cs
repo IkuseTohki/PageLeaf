@@ -26,8 +26,13 @@ namespace PageLeaf.Models
         public string? TableBorderStyle { get; set; }
         public string? TableHeaderAlignment { get; set; }
         public string? TableCellPadding { get; set; }
-        public string? CodeTextColor { get; set; }
-        public string? CodeBackgroundColor { get; set; }
+        public string? CodeTextColor { get; set; } // General/Inline
+        public string? CodeBackgroundColor { get; set; } // General/Inline
+        public string? InlineCodeTextColor { get; set; }
+        public string? InlineCodeBackgroundColor { get; set; }
+        public string? BlockCodeTextColor { get; set; }
+        public string? BlockCodeBackgroundColor { get; set; }
+        public bool IsCodeBlockOverrideEnabled { get; set; }
         public string? CodeFontFamily { get; set; }
         public string? ListMarkerType { get; set; }
         public string? NumberedListMarkerType { get; set; }

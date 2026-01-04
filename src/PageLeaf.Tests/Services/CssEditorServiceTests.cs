@@ -591,6 +591,65 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
+        public void ParseCss_ShouldParseSeparateCodeStyles()
+        {
+            // テスト観点: code と pre code のスタイルがそれぞれ正しく解析されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = @"
+                code { color: #111111; background-color: #222222; }
+                pre code { color: #333333; background-color: #444444; }";
+
+            // Act
+            var styles = service.ParseCss(cssContent);
+
+            // Assert
+            Assert.AreEqual("#111111", styles.InlineCodeTextColor);
+            Assert.AreEqual("#222222", styles.InlineCodeBackgroundColor);
+            Assert.AreEqual("#333333", styles.BlockCodeTextColor);
+            Assert.AreEqual("#444444", styles.BlockCodeBackgroundColor);
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldApplyImportantToCodeBlock_WhenOverrideIsEnabled()
+        {
+            // テスト観点: IsCodeBlockOverrideEnabled が true の場合、pre code に !important が付与されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo
+            {
+                BlockCodeTextColor = "#FF0000",
+                IsCodeBlockOverrideEnabled = true
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(string.Empty, styleInfo);
+
+            // Assert
+            StringAssert.Matches(updatedCss, new Regex(@"pre\s+code\s*\{[^}]*color:\s*rgba\(255,\s*0,\s*0,\s*1\)\s*!important;[^}]*\}"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldRemovePropertiesFromCodeBlock_WhenOverrideIsDisabled()
+        {
+            // テスト観点: IsCodeBlockOverrideEnabled が false の場合、pre code からプロパティが削除され
+            //            ハイライトテーマが優先される状態になることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "pre code { color: red; background-color: blue; }";
+            var styleInfo = new CssStyleInfo
+            {
+                IsCodeBlockOverrideEnabled = false
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            // Assert
+            Assert.IsFalse(updatedCss.Contains("color:"), "Properties should be removed from pre code when override is disabled.");
+        }
+
+        [TestMethod]
         public void UpdateCssContent_ShouldUpdateCodeStyles()
         {
             // テスト観点: UpdateCssContentメソッドが、CssStyleInfoオブジェクトに含まれるコードスタイル情報に基づいて、

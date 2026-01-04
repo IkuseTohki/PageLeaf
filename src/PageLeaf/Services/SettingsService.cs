@@ -2,19 +2,21 @@ using Microsoft.Extensions.Logging;
 using PageLeaf.Models;
 using System;
 using System.IO;
-using System.Text.Json;
-using System.Threading.Tasks;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace PageLeaf.Services
 {
     /// <summary>
-    /// アプリケーションの設定をファイルに保存およびロードするサービスです。
+    /// アプリケーションの設定をYAMLファイルに保存およびロードするサービスです。
     /// </summary>
     public class SettingsService : ISettingsService
     {
         private readonly ILogger<SettingsService> _logger;
         private readonly string _settingsFilePath;
         private ApplicationSettings _currentSettings;
+        private readonly ISerializer _serializer;
+        private readonly IDeserializer _deserializer;
 
         /// <summary>
         /// SettingsService クラスの新しいインスタンスを初期化します。
@@ -31,8 +33,17 @@ namespace PageLeaf.Services
             {
                 Directory.CreateDirectory(baseAppDataPath);
             }
-            _settingsFilePath = Path.Combine(baseAppDataPath, "settings.json");
+            _settingsFilePath = Path.Combine(baseAppDataPath, "settings.yaml");
             _logger.LogInformation("Settings file path: {SettingsFilePath}", _settingsFilePath);
+
+            _serializer = new SerializerBuilder()
+                .WithNamingConvention(PascalCaseNamingConvention.Instance)
+                .Build();
+
+            _deserializer = new DeserializerBuilder()
+                .WithNamingConvention(PascalCaseNamingConvention.Instance)
+                .IgnoreUnmatchedProperties()
+                .Build();
 
             _currentSettings = LoadSettingsInternal();
         }
@@ -62,10 +73,8 @@ namespace PageLeaf.Services
 
             try
             {
-                var options = new JsonSerializerOptions();
-                options.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-                var jsonString = File.ReadAllText(_settingsFilePath);
-                var settings = JsonSerializer.Deserialize<ApplicationSettings>(jsonString, options);
+                var yamlString = File.ReadAllText(_settingsFilePath);
+                var settings = _deserializer.Deserialize<ApplicationSettings>(yamlString);
                 if (settings == null)
                 {
                     _logger.LogWarning("Deserialized settings were null. Returning default settings.");
@@ -91,10 +100,8 @@ namespace PageLeaf.Services
 
             try
             {
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                options.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-                var jsonString = JsonSerializer.Serialize(settings, options);
-                File.WriteAllText(_settingsFilePath, jsonString);
+                var yamlString = _serializer.Serialize(settings);
+                File.WriteAllText(_settingsFilePath, yamlString);
                 _logger.LogInformation("Settings saved successfully to {SettingsFilePath}.", _settingsFilePath);
                 _currentSettings = settings; // Update current settings after saving
             }

@@ -275,18 +275,77 @@
             <TabItem Header="コード">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Style="{StaticResource FormContainerStyle}">
+                        <!-- General -->
+                        <Label Content="共通設定" Style="{StaticResource FormSectionLabelStyle}" />
+                        <Label Content="フォントファミリー:" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding CodeFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                        <!-- Inline -->
+                        <Label Margin="0,10,0,0"
+                               Content="インラインコード"
+                               Style="{StaticResource FormSectionLabelStyle}" />
                         <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding CodeTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                    CommandParameter="CodeTextColor"
+                        <controls:ColorInputControl ColorText="{Binding InlineCodeTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="InlineCodeTextColor"
                                                     SelectColorCommand="{Binding SelectColorCommand}" />
 
                         <Label Content="背景色:" Style="{StaticResource FormLabelStyle}" />
-                        <controls:ColorInputControl ColorText="{Binding CodeBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                    CommandParameter="CodeBackgroundColor"
+                        <controls:ColorInputControl ColorText="{Binding InlineCodeBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                    CommandParameter="InlineCodeBackgroundColor"
                                                     SelectColorCommand="{Binding SelectColorCommand}" />
 
-                        <Label Content="フォントファミリー:" Style="{StaticResource FormLabelStyle}" />
-                        <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding CodeFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        <!-- Code Block -->
+                        <StackPanel>
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCodeBlockOverrideEnabled}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <Label Margin="0,10,0,0"
+                                   Content="コードブロック"
+                                   Style="{StaticResource FormSectionLabelStyle}" />
+                            <Label Content="文字色:" Style="{StaticResource FormLabelStyle}" />
+                            <controls:ColorInputControl ColorText="{Binding BlockCodeTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                        CommandParameter="BlockCodeTextColor"
+                                                        SelectColorCommand="{Binding SelectColorCommand}" />
+
+                            <Label Content="背景色:" Style="{StaticResource FormLabelStyle}" />
+                            <controls:ColorInputControl ColorText="{Binding BlockCodeBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                        CommandParameter="BlockCodeBackgroundColor"
+                                                        SelectColorCommand="{Binding SelectColorCommand}" />
+                            <TextBlock Margin="5,2,0,0"
+                                       FontSize="11"
+                                       Foreground="Gray"
+                                       Text="※設定画面で「テーマを上書きする」が有効なため表示されています。!important を付与して強制適用します。"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
+
+                        <!-- If disabled, show info -->
+                        <StackPanel>
+                            <StackPanel.Style>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsCodeBlockOverrideEnabled}" Value="False">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </StackPanel.Style>
+                            <Label Margin="0,10,0,0"
+                                   Content="コードブロック"
+                                   Style="{StaticResource FormSectionLabelStyle}" />
+                            <TextBlock Margin="5,0,0,0"
+                                       FontSize="11"
+                                       Foreground="Gray"
+                                       Text="※設定画面で「テーマに従う」が選択されているため、ここでは設定できません。テーマの色が優先されます。"
+                                       TextWrapping="Wrap" />
+                        </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
             </TabItem>

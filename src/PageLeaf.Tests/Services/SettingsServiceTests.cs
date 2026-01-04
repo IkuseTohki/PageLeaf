@@ -3,9 +3,10 @@ using PageLeaf.Models;
 using PageLeaf.Services;
 using System;
 using System.IO;
-using System.Text.Json;
 using Moq;
 using Microsoft.Extensions.Logging;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace PageLeaf.Tests.Services
 {
@@ -15,20 +16,22 @@ namespace PageLeaf.Tests.Services
         private string _testSettingsFilePath = null!;
         private string _testAppDataPath = null!;
         private Mock<ILogger<SettingsService>> _mockLogger = null!;
+        private ISerializer _serializer = null!;
 
         [TestInitialize]
         public void Setup()
         {
             _mockLogger = new Mock<ILogger<SettingsService>>();
-            // テスト用のアプリケーションデータパスを設定
             _testAppDataPath = Path.Combine(Path.GetTempPath(), "PageLeafTestAppData", Guid.NewGuid().ToString());
-            Directory.CreateDirectory(_testAppDataPath);
-            _testSettingsFilePath = Path.Combine(_testAppDataPath, "settings.json");
+            if (!Directory.Exists(_testAppDataPath))
+            {
+                Directory.CreateDirectory(_testAppDataPath);
+            }
+            _testSettingsFilePath = Path.Combine(_testAppDataPath, "settings.yaml");
 
-            // 環境変数をモックして、SettingsServiceがテスト用のパスを使用するようにする
-            // これは直接モックできないため、SettingsServiceのコンストラクタでパスを受け取るように変更するか、
-            // テスト中にEnvironment.GetFolderPathの動作を一時的に変更する必要がある。
-            // 今回はSettingsServiceのコンストラクタでパスを受け取るように実装することを前提とする。
+            _serializer = new SerializerBuilder()
+                .WithNamingConvention(PascalCaseNamingConvention.Instance)
+                .Build();
         }
 
         [TestCleanup]
@@ -64,9 +67,10 @@ namespace PageLeaf.Tests.Services
             {
                 SelectedCss = "solarized-dark.css",
             };
-            var serializeOptions = new JsonSerializerOptions();
-            serializeOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-            File.WriteAllText(_testSettingsFilePath, JsonSerializer.Serialize(expectedSettings, serializeOptions));
+
+            var yaml = _serializer.Serialize(expectedSettings);
+            File.WriteAllText(_testSettingsFilePath, yaml);
+
             var service = new SettingsService(_mockLogger.Object, _testAppDataPath);
 
             // Act
@@ -95,12 +99,7 @@ namespace PageLeaf.Tests.Services
             // Assert
             Assert.IsTrue(File.Exists(_testSettingsFilePath));
             var savedContent = File.ReadAllText(_testSettingsFilePath);
-            var deserializeOptions = new JsonSerializerOptions();
-            deserializeOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
-            var actualSettings = JsonSerializer.Deserialize<ApplicationSettings>(savedContent, deserializeOptions);
-
-            Assert.IsNotNull(actualSettings);
-            Assert.AreEqual(settingsToSave.SelectedCss, actualSettings.SelectedCss);
+            Assert.IsTrue(savedContent.Contains("SelectedCss: github.css"));
         }
 
         [TestMethod]
@@ -117,7 +116,7 @@ namespace PageLeaf.Tests.Services
 
             // Assert
             Assert.IsTrue(Directory.Exists(nonExistentAppDataPath));
-            Assert.IsTrue(File.Exists(Path.Combine(nonExistentAppDataPath, "settings.json")));
+            Assert.IsTrue(File.Exists(Path.Combine(nonExistentAppDataPath, "settings.yaml")));
 
             // Cleanup
             if (Directory.Exists(nonExistentAppDataPath))

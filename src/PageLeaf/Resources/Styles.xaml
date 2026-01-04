@@ -6,6 +6,51 @@
     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="White" />
     <SolidColorBrush x:Key="BorderBrush" Color="#FFACACAC" />
     <SolidColorBrush x:Key="PrimaryTextBrush" Color="#FF333333" />
+    <SolidColorBrush x:Key="PrimaryActionBrush" Color="#FF007ACC" />
+    <SolidColorBrush x:Key="PrimaryActionHoverBrush" Color="#FF1C97EA" />
+
+    <!-- 基本的なボタン用スタイル -->
+    <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="{StaticResource PrimaryActionBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Padding" Value="15,5" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="3">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource PrimaryActionHoverBrush}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="#FFE0E0E0" />
+        <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
+        <Setter Property="Padding" Value="15,5" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Border Background="{TemplateBinding Background}" CornerRadius="3">
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#FFD0D0D0" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 
     <!-- アイコンボタン用スタイル -->
     <Style x:Key="IconButtonStyle" TargetType="Button">

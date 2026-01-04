@@ -186,6 +186,11 @@ namespace PageLeaf.Services
             return SaveConfirmationResult.NoAction; // 変更がない場合は何もしない
         }
 
+        public void UpdatePreview()
+        {
+            UpdateHtmlContent();
+        }
+
         private void UpdateVisibility()
         {
             IsMarkdownEditorVisible = SelectedMode == DisplayMode.Markdown;

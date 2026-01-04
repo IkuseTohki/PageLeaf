@@ -120,6 +120,7 @@ namespace PageLeaf.ViewModels
         public ICommand SaveAsFileCommand { get; }
         public ICommand NewDocumentCommand { get; }
         public ICommand ToggleCssEditorCommand { get; }
+        public ICommand ShowSettingsCommand { get; }
 
 
         public MainViewModel(
@@ -167,6 +168,7 @@ namespace PageLeaf.ViewModels
             SaveAsFileCommand = new Utilities.DelegateCommand(ExecuteSaveAsFile);
             NewDocumentCommand = new Utilities.DelegateCommand(ExecuteNewDocument);
             ToggleCssEditorCommand = new Utilities.DelegateCommand(ExecuteToggleCssEditor);
+            ShowSettingsCommand = new Utilities.DelegateCommand(ExecuteShowSettings);
 
             AvailableModes = new ObservableCollection<DisplayMode>(
                 Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>()
@@ -219,6 +221,17 @@ namespace PageLeaf.ViewModels
         private void ExecuteToggleCssEditor(object? obj)
         {
             IsCssEditorVisible = !IsCssEditorVisible;
+        }
+
+        private void ExecuteShowSettings(object? parameter)
+        {
+            _dialogService.ShowSettingsDialog();
+
+            // 設定が変更された可能性があるため、各所に通知・反映
+            CssEditorViewModel.NotifySettingsChanged();
+
+            // WebViewの内容を更新（テーマ変更の反映）
+            Editor.UpdatePreview();
         }
 
         private void OnCssSaved(object? sender, EventArgs e)

@@ -14,6 +14,7 @@ namespace PageLeaf.Tests.ViewModels
         private Mock<ILoadCssUseCase> _mockLoadCssUseCase = null!;
         private Mock<ISaveCssUseCase> _mockSaveCssUseCase = null!;
         private Mock<IDialogService> _mockDialogService = null!;
+        private Mock<ISettingsService> _mockSettingsService = null!;
         private CssEditorViewModel _viewModel = null!;
 
         [TestInitialize]
@@ -23,6 +24,9 @@ namespace PageLeaf.Tests.ViewModels
             _mockLoadCssUseCase = new Mock<ILoadCssUseCase>();
             _mockSaveCssUseCase = new Mock<ISaveCssUseCase>();
             _mockDialogService = new Mock<IDialogService>();
+            _mockSettingsService = new Mock<ISettingsService>();
+
+            _mockSettingsService.Setup(s => s.CurrentSettings).Returns(new Models.ApplicationSettings());
 
             _mockCssManagementService.Setup(s => s.GetCssContent(It.IsAny<string>())).Returns("");
             _mockCssManagementService.Setup(s => s.GenerateCss(It.IsAny<string>(), It.IsAny<Models.CssStyleInfo>())).Returns("");
@@ -32,7 +36,24 @@ namespace PageLeaf.Tests.ViewModels
                 _mockCssManagementService.Object,
                 _mockLoadCssUseCase.Object,
                 _mockSaveCssUseCase.Object,
-                _mockDialogService.Object);
+                _mockDialogService.Object,
+                _mockSettingsService.Object);
+        }
+
+        [TestMethod]
+        public void CodeStyleProperties_ShouldBeAccessible()
+        {
+            // テスト観点: 新しく追加されたインライン・ブロックコード用のプロパティが正しく動作することを確認する。
+            _viewModel.InlineCodeTextColor = "#111111";
+            _viewModel.InlineCodeBackgroundColor = "#222222";
+            _viewModel.BlockCodeTextColor = "#333333";
+            _viewModel.BlockCodeBackgroundColor = "#444444";
+
+            Assert.AreEqual("#111111", _viewModel.InlineCodeTextColor);
+            Assert.AreEqual("#222222", _viewModel.InlineCodeBackgroundColor);
+            Assert.AreEqual("#333333", _viewModel.BlockCodeTextColor);
+            Assert.AreEqual("#444444", _viewModel.BlockCodeBackgroundColor);
+            Assert.IsTrue(_viewModel.IsDirty);
         }
 
         [TestMethod]

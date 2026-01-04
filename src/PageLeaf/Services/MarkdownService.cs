@@ -8,6 +8,13 @@ namespace PageLeaf.Services
 {
     public class MarkdownService : IMarkdownService
     {
+        private readonly ISettingsService _settingsService;
+
+        public MarkdownService(ISettingsService settingsService)
+        {
+            _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
+        }
+
         public string ConvertToHtml(string markdown, string? cssPath)
         {
             var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
@@ -23,8 +30,11 @@ namespace PageLeaf.Services
 
             headBuilder.AppendLine("<style id=\"dynamic-style\"></style>");
 
-            // highlight.jsのCSSへのリンクを追加 (絶対パスで)
-            var cssFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "styles", "github.css");
+            // highlight.jsのCSSへのリンクを追加 (設定から取得)
+            var themeName = _settingsService.CurrentSettings.CodeBlockTheme;
+            if (string.IsNullOrEmpty(themeName)) themeName = "github.css";
+
+            var cssFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "styles", themeName);
             var cssFileUri = new Uri(cssFilePath).AbsoluteUri;
             headBuilder.AppendLine($@"<link rel=""stylesheet"" href=""{cssFileUri}"">");
 

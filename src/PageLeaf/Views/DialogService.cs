@@ -1,6 +1,8 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using PageLeaf.Models;
 using PageLeaf.Services;
+using PageLeaf.ViewModels;
 using System;
 using System.Windows; // MessageBox
 
@@ -11,6 +13,13 @@ namespace PageLeaf.Views
     /// </summary>
     public class DialogService : IDialogService
     {
+        private readonly IServiceProvider _serviceProvider;
+
+        public DialogService(IServiceProvider serviceProvider)
+        {
+            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        }
+
         /// <summary>
         /// ファイルを開くダイアログを表示し、選択されたファイルのパスを返します。
         /// </summary>
@@ -117,6 +126,17 @@ namespace PageLeaf.Views
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// 設定画面を表示します。
+        /// </summary>
+        public void ShowSettingsDialog()
+        {
+            var viewModel = _serviceProvider.GetRequiredService<SettingsViewModel>();
+            var settingsWindow = new SettingsWindow(viewModel);
+            settingsWindow.Owner = Application.Current.MainWindow;
+            settingsWindow.ShowDialog();
         }
     }
 }

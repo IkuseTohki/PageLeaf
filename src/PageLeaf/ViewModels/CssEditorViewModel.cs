@@ -17,6 +17,7 @@ namespace PageLeaf.ViewModels
         private readonly ILoadCssUseCase _loadCssUseCase;
         private readonly ISaveCssUseCase _saveCssUseCase;
         private readonly IDialogService _dialogService;
+        private readonly ISettingsService _settingsService;
         private readonly Dictionary<string, string?> _styles = new Dictionary<string, string?>();
         private readonly Dictionary<string, bool> _flags = new Dictionary<string, bool>();
 
@@ -27,6 +28,8 @@ namespace PageLeaf.ViewModels
             "QuoteBorderWidth", "QuoteBorderStyle",
             "TableBorderColor", "TableHeaderBackgroundColor", "TableHeaderTextColor", "TableHeaderFontSize", "TableBorderWidth", "TableBorderStyle", "TableHeaderAlignment", "TableCellPadding",
             "CodeTextColor", "CodeBackgroundColor", "CodeFontFamily",
+            "InlineCodeTextColor", "InlineCodeBackgroundColor",
+            "BlockCodeTextColor", "BlockCodeBackgroundColor",
             "ListMarkerType", "NumberedListMarkerType", "ListMarkerSize", "ListIndent"
         };
 
@@ -76,17 +79,20 @@ namespace PageLeaf.ViewModels
             ICssManagementService cssManagementService,
             ILoadCssUseCase loadCssUseCase,
             ISaveCssUseCase saveCssUseCase,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            ISettingsService settingsService)
         {
             ArgumentNullException.ThrowIfNull(cssManagementService);
             ArgumentNullException.ThrowIfNull(loadCssUseCase);
             ArgumentNullException.ThrowIfNull(saveCssUseCase);
             ArgumentNullException.ThrowIfNull(dialogService);
+            ArgumentNullException.ThrowIfNull(settingsService);
 
             _cssManagementService = cssManagementService;
             _loadCssUseCase = loadCssUseCase;
             _saveCssUseCase = saveCssUseCase;
             _dialogService = dialogService;
+            _settingsService = settingsService;
 
             SaveCssCommand = new DelegateCommand(ExecuteSaveCss, CanExecuteSaveCss);
             ResetCommand = new DelegateCommand(ExecuteReset, CanExecuteReset);
@@ -258,6 +264,11 @@ namespace PageLeaf.ViewModels
         public string? TableCellPadding { get => this[nameof(TableCellPadding)]; set => this[nameof(TableCellPadding)] = value; }
         public string? CodeTextColor { get => this[nameof(CodeTextColor)]; set => this[nameof(CodeTextColor)] = value; }
         public string? CodeBackgroundColor { get => this[nameof(CodeBackgroundColor)]; set => this[nameof(CodeBackgroundColor)] = value; }
+        public string? InlineCodeTextColor { get => this[nameof(InlineCodeTextColor)]; set => this[nameof(InlineCodeTextColor)] = value; }
+        public string? InlineCodeBackgroundColor { get => this[nameof(InlineCodeBackgroundColor)]; set => this[nameof(InlineCodeBackgroundColor)] = value; }
+        public string? BlockCodeTextColor { get => this[nameof(BlockCodeTextColor)]; set => this[nameof(BlockCodeTextColor)] = value; }
+        public string? BlockCodeBackgroundColor { get => this[nameof(BlockCodeBackgroundColor)]; set => this[nameof(BlockCodeBackgroundColor)] = value; }
+        public bool IsCodeBlockOverrideEnabled => _settingsService.CurrentSettings.UseCustomCodeBlockStyle;
         public string? CodeFontFamily { get => this[nameof(CodeFontFamily)]; set => this[nameof(CodeFontFamily)] = value; }
         public string? ListMarkerType { get => this[nameof(ListMarkerType)]; set => this[nameof(ListMarkerType)] = value; }
         public string? NumberedListMarkerType { get => this[nameof(NumberedListMarkerType)]; set => this[nameof(NumberedListMarkerType)] = value; }
@@ -276,6 +287,12 @@ namespace PageLeaf.ViewModels
         private void SetFlag(string attr, bool value) { if (_selectedHeadingLevel == null) return; var key = $"{_selectedHeadingLevel}.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; UpdatePreview(); OnPropertyChanged($"IsHeading{attr}"); } }
         public string? SelectedHeadingLevel { get => _selectedHeadingLevel; set { if (_selectedHeadingLevel != value) { _selectedHeadingLevel = value; OnPropertyChanged(); UpdateHeadingProperties(); } } }
         private void UpdateHeadingProperties() { OnPropertyChanged(nameof(HeadingTextColor)); OnPropertyChanged(nameof(HeadingFontSize)); OnPropertyChanged(nameof(HeadingFontFamily)); OnPropertyChanged(nameof(HeadingAlignment)); OnPropertyChanged(nameof(IsHeadingBold)); OnPropertyChanged(nameof(IsHeadingItalic)); OnPropertyChanged(nameof(IsHeadingUnderline)); OnPropertyChanged(nameof(IsHeadingNumberingEnabled)); }
+
+        public void NotifySettingsChanged()
+        {
+            OnPropertyChanged(nameof(IsCodeBlockOverrideEnabled));
+            UpdatePreview();
+        }
 
         private bool CanExecuteSaveCss(object? parameter) => IsDirty && !string.IsNullOrEmpty(TargetCssFileName);
 
@@ -298,6 +315,7 @@ namespace PageLeaf.ViewModels
                 if (prop != null && _styles.TryGetValue(name, out var val))
                     prop.SetValue(styleInfo, AddUnit(name, val));
             }
+            styleInfo.IsCodeBlockOverrideEnabled = IsCodeBlockOverrideEnabled;
             foreach (var lv in AvailableHeadingLevels)
             {
                 if (_styles.TryGetValue($"{lv}.TextColor", out var c) && c != null) styleInfo.HeadingTextColors[lv] = c;

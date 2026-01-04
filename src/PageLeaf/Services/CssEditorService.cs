@@ -181,7 +181,20 @@ namespace PageLeaf.Services
             {
                 styleInfo.CodeTextColor = GetColorHexFromRule(codeRule, "color");
                 styleInfo.CodeBackgroundColor = GetColorHexFromRule(codeRule, "background-color");
+                styleInfo.InlineCodeTextColor = styleInfo.CodeTextColor;
+                styleInfo.InlineCodeBackgroundColor = styleInfo.CodeBackgroundColor;
                 styleInfo.CodeFontFamily = codeRule.Style.GetPropertyValue("font-family");
+            }
+
+            // pre code (コードブロック) のスタイルを解析
+            var preCodeRule = stylesheet.Rules
+                .OfType<ICssStyleRule>()
+                .FirstOrDefault(r => r.SelectorText == "pre code");
+
+            if (preCodeRule != null)
+            {
+                styleInfo.BlockCodeTextColor = GetColorHexFromRule(preCodeRule, "color");
+                styleInfo.BlockCodeBackgroundColor = GetColorHexFromRule(preCodeRule, "background-color");
             }
 
             // 項番採番の検出 (見出しレベルごと)
@@ -344,9 +357,30 @@ namespace PageLeaf.Services
             // Code
             UpdateOrCreateRule(stylesheet, "code", (rule, info) =>
             {
-                if (!string.IsNullOrEmpty(info.CodeTextColor)) rule.Style.SetProperty("color", info.CodeTextColor);
-                if (!string.IsNullOrEmpty(info.CodeBackgroundColor)) rule.Style.SetProperty("background-color", info.CodeBackgroundColor);
+                // Inline styles
+                var textColor = !string.IsNullOrEmpty(info.InlineCodeTextColor) ? info.InlineCodeTextColor : info.CodeTextColor;
+                var bgColor = !string.IsNullOrEmpty(info.InlineCodeBackgroundColor) ? info.InlineCodeBackgroundColor : info.CodeBackgroundColor;
+
+                if (!string.IsNullOrEmpty(textColor)) rule.Style.SetProperty("color", textColor);
+                if (!string.IsNullOrEmpty(bgColor)) rule.Style.SetProperty("background-color", bgColor);
                 if (!string.IsNullOrEmpty(info.CodeFontFamily)) rule.Style.SetProperty("font-family", info.CodeFontFamily);
+            }, styleInfo);
+
+            UpdateOrCreateRule(stylesheet, "pre code", (rule, info) =>
+            {
+                if (info.IsCodeBlockOverrideEnabled)
+                {
+                    if (!string.IsNullOrEmpty(info.BlockCodeTextColor)) rule.Style.SetProperty("color", info.BlockCodeTextColor, "important");
+                    if (!string.IsNullOrEmpty(info.BlockCodeBackgroundColor)) rule.Style.SetProperty("background-color", info.BlockCodeBackgroundColor, "important");
+                }
+                else
+                {
+                    // If override is disabled, we remove these properties from the rule to let highlight.js theme win
+                    // but we might want to preserve them if they were already there? 
+                    // For now, follow the requirement: theme takes precedence.
+                    rule.Style.RemoveProperty("color");
+                    rule.Style.RemoveProperty("background-color");
+                }
             }, styleInfo);
 
             if (styleInfo != null)

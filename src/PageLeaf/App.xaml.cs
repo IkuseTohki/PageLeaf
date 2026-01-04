@@ -75,6 +75,7 @@ namespace PageLeaf
                     services.AddTransient<ISaveCssUseCase, SaveCssUseCase>();
 
                     // ViewModels と Views をDIコンテナに登録
+                    services.AddTransient<SettingsViewModel>();
                     services.AddSingleton<CssEditorViewModel>();
                     services.AddSingleton<MainViewModel>();
                     services.AddSingleton<MainWindow>();
