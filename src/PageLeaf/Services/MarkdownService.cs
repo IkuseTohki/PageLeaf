@@ -16,7 +16,7 @@ namespace PageLeaf.Services
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
         }
 
-        public string ConvertToHtml(string markdown, string? cssPath)
+        public string ConvertToHtml(string markdown, string? cssPath, string? baseDirectory = null)
         {
             var pipeline = new MarkdownPipelineBuilder()
                 .UseAdvancedExtensions()
@@ -26,6 +26,22 @@ namespace PageLeaf.Services
 
             var headBuilder = new StringBuilder();
             headBuilder.AppendLine("<meta charset=\"UTF-8\">");
+
+            // ベースディレクトリの設定（画像等の相対パス解決用）
+            if (!string.IsNullOrEmpty(baseDirectory))
+            {
+                try
+                {
+                    // ディレクトリパスをURIに変換し、末尾にスラッシュを保証
+                    var baseUri = new Uri(baseDirectory).AbsoluteUri;
+                    if (!baseUri.EndsWith("/")) baseUri += "/";
+                    headBuilder.AppendLine($@"<base href=""{baseUri}"" />");
+                }
+                catch (Exception)
+                {
+                    // URI変換エラー時はbaseタグを追加しない
+                }
+            }
 
             // 拡張機能用のベーススタイルを追加
             var extensionsCssPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "css", "extensions.css");

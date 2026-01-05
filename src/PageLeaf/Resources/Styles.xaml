@@ -236,4 +236,38 @@
         <Setter Property="Margin" Value="10" />
     </Style>
 
+    <!-- SettingsWindow 用のボーダースタイル -->
+    <Style x:Key="SettingsWindowBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Padding" Value="0,0,0,10" />
+    </Style>
+
+    <!-- セクション見出し用ラベルスタイル -->
+    <Style x:Key="SectionHeaderLabelStyle" TargetType="Label">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Margin" Value="0,20,0,5" />
+    </Style>
+
+    <!-- 最初のセクション用（マージン調整） -->
+    <Style x:Key="FirstSectionHeaderLabelStyle"
+           BasedOn="{StaticResource SectionHeaderLabelStyle}"
+           TargetType="Label">
+        <Setter Property="Margin" Value="0,0,0,5" />
+    </Style>
+
+    <!-- 注釈テキスト用スタイル -->
+    <Style x:Key="AnnotationTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="Gray" />
+        <Setter Property="Margin" Value="5,2,0,10" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
 </ResourceDictionary>

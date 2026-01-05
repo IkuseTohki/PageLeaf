@@ -63,7 +63,7 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var newDocument = new MarkdownDocument { Content = "## New Content" };
             var expectedHtml = "<h2>New Content</h2>";
-            _mockMarkdownService.Setup(m => m.ConvertToHtml("## New Content", It.IsAny<string?>())).Returns(expectedHtml);
+            _mockMarkdownService.Setup(m => m.ConvertToHtml("## New Content", It.IsAny<string?>(), It.IsAny<string?>())).Returns(expectedHtml);
 
             var editorService = new EditorService(_mockMarkdownService.Object, _mockCssService.Object, _mockDialogService.Object);
 
@@ -100,14 +100,14 @@ namespace PageLeaf.Tests.Services
             var expectedHtml = "<h1>Title with CSS</h1>";
 
             _mockCssService.Setup(s => s.GetCssPath(cssFileName)).Returns(cssPath);
-            _mockMarkdownService.Setup(m => m.ConvertToHtml("# Title", cssPath)).Returns(expectedHtml);
+            _mockMarkdownService.Setup(m => m.ConvertToHtml("# Title", cssPath, It.IsAny<string?>())).Returns(expectedHtml);
 
             // Act
             _editorService.ApplyCss(cssFileName);
 
             // Assert
             _mockCssService.Verify(s => s.GetCssPath(cssFileName), Times.Once);
-            _mockMarkdownService.Verify(m => m.ConvertToHtml("# Title", cssPath), Times.Once);
+            _mockMarkdownService.Verify(m => m.ConvertToHtml("# Title", cssPath, It.IsAny<string?>()), Times.Once);
             Assert.IsFalse(string.IsNullOrEmpty(_editorService.HtmlFilePath));
             Assert.IsTrue(File.Exists(_editorService.HtmlFilePath));
             Assert.AreEqual(expectedHtml, File.ReadAllText(_editorService.HtmlFilePath));
@@ -131,13 +131,13 @@ namespace PageLeaf.Tests.Services
             // EditorText変更後のHTMLモックを設定
             var newMarkdown = "## Subtitle";
             var expectedHtml = "<h2>Subtitle with CSS</h2>";
-            _mockMarkdownService.Setup(m => m.ConvertToHtml(newMarkdown, cssPath)).Returns(expectedHtml);
+            _mockMarkdownService.Setup(m => m.ConvertToHtml(newMarkdown, cssPath, It.IsAny<string?>())).Returns(expectedHtml);
 
             // Act
             _editorService.EditorText = newMarkdown;
 
             // Assert
-            _mockMarkdownService.Verify(m => m.ConvertToHtml(newMarkdown, cssPath), Times.Once);
+            _mockMarkdownService.Verify(m => m.ConvertToHtml(newMarkdown, cssPath, It.IsAny<string?>()), Times.Once);
             Assert.IsFalse(string.IsNullOrEmpty(_editorService.HtmlFilePath));
             Assert.IsTrue(File.Exists(_editorService.HtmlFilePath));
             Assert.AreEqual(expectedHtml, File.ReadAllText(_editorService.HtmlFilePath));
@@ -232,6 +232,23 @@ namespace PageLeaf.Tests.Services
 
             // Assert
             _mockDialogService.Verify(d => d.ShowSaveConfirmationDialog(), Times.Never);
+        }
+
+        [TestMethod]
+        public void RequestInsertText_ShouldRaiseTextInsertionRequestedEvent()
+        {
+            // テスト観点: RequestInsertText を呼び出すと、TextInsertionRequested イベントが発生することを確認する。
+
+            // Arrange
+            string insertedText = "Inserted Text";
+            string? receivedText = null;
+            _editorService.TextInsertionRequested += (s, text) => receivedText = text;
+
+            // Act
+            _editorService.RequestInsertText(insertedText);
+
+            // Assert
+            Assert.AreEqual(insertedText, receivedText);
         }
     }
 }

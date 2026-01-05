@@ -22,6 +22,7 @@ namespace PageLeaf.Tests.ViewModels
         private Mock<IOpenDocumentUseCase> _openDocumentUseCaseMock = null!;
         private Mock<ISaveDocumentUseCase> _saveDocumentUseCaseMock = null!;
         private Mock<ISaveAsDocumentUseCase> _saveAsDocumentUseCaseMock = null!;
+        private Mock<IPasteImageUseCase> _pasteImageUseCaseMock = null!;
         private MainViewModel _viewModel = null!;
         private CssEditorViewModel _cssEditorViewModel = null!;
 
@@ -38,6 +39,7 @@ namespace PageLeaf.Tests.ViewModels
             _openDocumentUseCaseMock = new Mock<IOpenDocumentUseCase>();
             _saveDocumentUseCaseMock = new Mock<ISaveDocumentUseCase>();
             _saveAsDocumentUseCaseMock = new Mock<ISaveAsDocumentUseCase>();
+            _pasteImageUseCaseMock = new Mock<IPasteImageUseCase>();
 
             _cssEditorViewModel = new CssEditorViewModel(
                 _cssManagementServiceMock.Object,
@@ -60,7 +62,8 @@ namespace PageLeaf.Tests.ViewModels
                 _newDocumentUseCaseMock.Object,
                 _openDocumentUseCaseMock.Object,
                 _saveDocumentUseCaseMock.Object,
-                _saveAsDocumentUseCaseMock.Object);
+                _saveAsDocumentUseCaseMock.Object,
+                _pasteImageUseCaseMock.Object);
         }
 
         [TestMethod]

@@ -11,7 +11,8 @@ namespace PageLeaf.Services
         /// </summary>
         /// <param name="markdown">変換対象のMarkdown文字列。</param>
         /// <param name="cssPath">HTMLにリンクするCSSファイルの絶対パス。nullの場合はCSSリンクを含めません。</param>
+        /// <param name="baseDirectory">相対リンク解決のためのベースディレクトリパス。nullの場合は設定されません。</param>
         /// <returns>生成されたHTML文字列。</returns>
-        string ConvertToHtml(string markdown, string? cssPath);
+        string ConvertToHtml(string markdown, string? cssPath, string? baseDirectory = null);
     }
 }

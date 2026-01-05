@@ -30,7 +30,7 @@ namespace PageLeaf.Tests.Services
             string markdown = "# Hello";
 
             // Act
-            string actualHtml = _service.ConvertToHtml(markdown, null);
+            string actualHtml = _service.ConvertToHtml(markdown, null, null);
 
             // Assert
             StringAssert.Matches(actualHtml, new Regex(@"<h1[^>]*>Hello</h1>"));
@@ -46,7 +46,7 @@ namespace PageLeaf.Tests.Services
             string cssPath = @"C:\styles\github.css";
 
             // Act
-            string actualHtml = _service.ConvertToHtml(markdown, cssPath);
+            string actualHtml = _service.ConvertToHtml(markdown, cssPath, null);
 
             // Assert
             // Regex.Escape を使用してパスを安全にエスケープしつつ検証
@@ -62,7 +62,7 @@ namespace PageLeaf.Tests.Services
             var markdown = "**bold** *italic* ~~strike~~";
 
             // Act
-            string html = _service.ConvertToHtml(markdown, null);
+            string html = _service.ConvertToHtml(markdown, null, null);
 
             // Assert
             StringAssert.Contains(html, "<strong>bold</strong>");
@@ -78,7 +78,7 @@ namespace PageLeaf.Tests.Services
             var markdown = "* Unordered\n1. Ordered";
 
             // Act
-            string html = _service.ConvertToHtml(markdown, null);
+            string html = _service.ConvertToHtml(markdown, null, null);
 
             // Assert
             StringAssert.Contains(html, "<ul>\n<li>Unordered</li>\n</ul>");
@@ -93,7 +93,7 @@ namespace PageLeaf.Tests.Services
             var markdown = "[PageLeaf](https://example.com)\n![alt text](image.png)";
 
             // Act
-            string html = _service.ConvertToHtml(markdown, null);
+            string html = _service.ConvertToHtml(markdown, null, null);
 
             // Assert
             StringAssert.Contains(html, "<a href=\"https://example.com\">PageLeaf</a>");
@@ -108,7 +108,7 @@ namespace PageLeaf.Tests.Services
             var markdown = "> quote\n`code`\n```csharp\nvar x = 1;\n```";
 
             // Act
-            string html = _service.ConvertToHtml(markdown, null);
+            string html = _service.ConvertToHtml(markdown, null, null);
 
             // Assert
             StringAssert.Matches(html, new Regex(@"<blockquote>\s*<p>quote\s+<code>code</code></p>\s*</blockquote>"));
@@ -123,7 +123,7 @@ namespace PageLeaf.Tests.Services
             var markdown = "- [x] Done\n- [ ] Todo\n\n---";
 
             // Act
-            string html = _service.ConvertToHtml(markdown, null);
+            string html = _service.ConvertToHtml(markdown, null, null);
 
             // Assert
             StringAssert.Matches(html, new Regex(@"<input[^>]+checked=""checked""[^>]*>"));
@@ -143,7 +143,7 @@ namespace PageLeaf.Tests.Services
                            "|トロ|カンパチ|ネギトロ|";
 
             // Act
-            string html = _service.ConvertToHtml(markdown, null);
+            string html = _service.ConvertToHtml(markdown, null, null);
 
             // Assert
             StringAssert.Contains(html, "<table>");
@@ -166,7 +166,7 @@ namespace PageLeaf.Tests.Services
             var markdown = "```csharp\nConsole.WriteLine(\"Hello\");\n```";
 
             // Act
-            string html = _service.ConvertToHtml(markdown, null);
+            string html = _service.ConvertToHtml(markdown, null, null);
 
             // Assert
             StringAssert.Contains(html, "<pre><code class=\"language-csharp\">Console.WriteLine(&quot;Hello&quot;);");
@@ -183,7 +183,7 @@ namespace PageLeaf.Tests.Services
             var markdown = "```csharp" + Environment.NewLine + "var x = 1;" + Environment.NewLine + "```";
 
             // Act
-            string html = _service.ConvertToHtml(markdown, null);
+            string html = _service.ConvertToHtml(markdown, null, null);
 
             // 絶対パスの構築
             var scriptFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "highlight.min.js");
@@ -213,7 +213,7 @@ namespace PageLeaf.Tests.Services
             var markdown = "Check resources";
 
             // Act
-            string html = _service.ConvertToHtml(markdown, null);
+            string html = _service.ConvertToHtml(markdown, null, null);
 
             // Assert
             // CSS
@@ -229,6 +229,22 @@ namespace PageLeaf.Tests.Services
             StringAssert.Contains(html, "mermaid.initialize");
             StringAssert.Contains(html, "mermaid.contentLoaded()");
             StringAssert.Contains(html, "hljs.highlightAll()");
+        }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldInsertBaseTag_WhenBaseDirectoryIsProvided()
+        {
+            // テスト観点: ベースディレクトリが提供された場合、<head>に<base>タグが挿入されることを確認する。
+            var markdown = "Test";
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory; // 実際に存在するディレクトリを使用
+
+            var html = _service.ConvertToHtml(markdown, null, baseDir);
+
+            // URI変換
+            var baseUri = new Uri(baseDir).AbsoluteUri;
+            if (!baseUri.EndsWith("/")) baseUri += "/";
+
+            StringAssert.Contains(html, $"<base href=\"{baseUri}\" />");
         }
     }
 }

@@ -1,4 +1,5 @@
 using PageLeaf.Models;
+using System;
 using System.ComponentModel;
 
 namespace PageLeaf.Services
@@ -71,5 +72,16 @@ namespace PageLeaf.Services
         /// プレビューのHTMLコンテンツを強制的に再生成して更新します。
         /// </summary>
         void UpdatePreview();
+
+        /// <summary>
+        /// エディタの現在のカーソル位置にテキストを挿入することを要求します。
+        /// </summary>
+        /// <param name="text">挿入するテキスト。</param>
+        void RequestInsertText(string text);
+
+        /// <summary>
+        /// テキスト挿入が要求されたときに発生します。View側で購読して実際の挿入処理を行います。
+        /// </summary>
+        event EventHandler<string> TextInsertionRequested;
     }
 }

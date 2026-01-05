@@ -28,7 +28,7 @@ namespace PageLeaf.Tests.Services
             var markdown = "```mermaid" + Environment.NewLine + "graph TD; A-->B;" + Environment.NewLine + "```";
 
             // Act
-            string html = _service.ConvertToHtml(markdown, null);
+            string html = _service.ConvertToHtml(markdown, null, null);
 
             // Assert
             // タグが div になっていること、およびクラスが付与されていることを確認

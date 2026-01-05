@@ -20,6 +20,7 @@ namespace PageLeaf.ViewModels
         private readonly IOpenDocumentUseCase _openDocumentUseCase;
         private readonly ISaveDocumentUseCase _saveDocumentUseCase;
         private readonly ISaveAsDocumentUseCase _saveAsDocumentUseCase;
+        private readonly IPasteImageUseCase _pasteImageUseCase;
 
         private bool _isCssEditorVisible;
         private ObservableCollection<string> _availableCssFiles = null!;
@@ -121,6 +122,7 @@ namespace PageLeaf.ViewModels
         public ICommand NewDocumentCommand { get; }
         public ICommand ToggleCssEditorCommand { get; }
         public ICommand ShowSettingsCommand { get; }
+        public ICommand PasteImageCommand { get; }
 
 
         public MainViewModel(
@@ -134,7 +136,8 @@ namespace PageLeaf.ViewModels
             INewDocumentUseCase newDocumentUseCase,
             IOpenDocumentUseCase openDocumentUseCase,
             ISaveDocumentUseCase saveDocumentUseCase,
-            ISaveAsDocumentUseCase saveAsDocumentUseCase)
+            ISaveAsDocumentUseCase saveAsDocumentUseCase,
+            IPasteImageUseCase pasteImageUseCase)
         {
             ArgumentNullException.ThrowIfNull(fileService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -147,6 +150,7 @@ namespace PageLeaf.ViewModels
             ArgumentNullException.ThrowIfNull(openDocumentUseCase);
             ArgumentNullException.ThrowIfNull(saveDocumentUseCase);
             ArgumentNullException.ThrowIfNull(saveAsDocumentUseCase);
+            ArgumentNullException.ThrowIfNull(pasteImageUseCase);
 
             _fileService = fileService;
             _logger = logger;
@@ -159,6 +163,7 @@ namespace PageLeaf.ViewModels
             _openDocumentUseCase = openDocumentUseCase;
             _saveDocumentUseCase = saveDocumentUseCase;
             _saveAsDocumentUseCase = saveAsDocumentUseCase;
+            _pasteImageUseCase = pasteImageUseCase;
 
             // Subscribe to event
             CssEditorViewModel.CssSaved += OnCssSaved;
@@ -169,6 +174,7 @@ namespace PageLeaf.ViewModels
             NewDocumentCommand = new Utilities.DelegateCommand(ExecuteNewDocument);
             ToggleCssEditorCommand = new Utilities.DelegateCommand(ExecuteToggleCssEditor);
             ShowSettingsCommand = new Utilities.DelegateCommand(ExecuteShowSettings);
+            PasteImageCommand = new Utilities.DelegateCommand(ExecutePasteImage);
 
             AvailableModes = new ObservableCollection<DisplayMode>(
                 Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>()
@@ -232,6 +238,13 @@ namespace PageLeaf.ViewModels
 
             // WebViewの内容を更新（テーマ変更の反映）
             Editor.UpdatePreview();
+        }
+
+        private async void ExecutePasteImage(object? parameter)
+        {
+            _logger.LogInformation("PasteImageCommand executed.");
+            var filePath = Editor.CurrentDocument.FilePath ?? string.Empty;
+            await _pasteImageUseCase.ExecuteAsync(filePath);
         }
 
         private void OnCssSaved(object? sender, EventArgs e)

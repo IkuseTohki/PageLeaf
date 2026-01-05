@@ -65,6 +65,7 @@ namespace PageLeaf
                     services.AddSingleton<IEditorService, EditorService>(); // EditorService を登録
                     services.AddSingleton<ICssEditorService, CssEditorService>();
                     services.AddSingleton<ICssManagementService, CssManagementService>();
+                    services.AddSingleton<IImagePasteService, ImagePasteService>(); // 画像貼り付けサービス
 
                     // UseCases
                     services.AddTransient<ISaveAsDocumentUseCase, SaveAsDocumentUseCase>();
@@ -73,6 +74,7 @@ namespace PageLeaf
                     services.AddTransient<IOpenDocumentUseCase, OpenDocumentUseCase>();
                     services.AddTransient<ILoadCssUseCase, LoadCssUseCase>();
                     services.AddTransient<ISaveCssUseCase, SaveCssUseCase>();
+                    services.AddTransient<IPasteImageUseCase, PasteImageUseCase>(); // 画像貼り付けUseCase
 
                     // ViewModels と Views をDIコンテナに登録
                     services.AddTransient<SettingsViewModel>();

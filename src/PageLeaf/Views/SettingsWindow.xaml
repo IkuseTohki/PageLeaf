@@ -1,67 +1,82 @@
 ﻿<Window x:Class="PageLeaf.Views.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:behaviors="clr-namespace:PageLeaf.Behaviors"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         Title="設定"
         Width="450"
-        Height="350"
-        Background="{StaticResource WindowBackgroundBrush}"
+        behaviors:WindowDragBehavior.IsEnabled="True"
+        AllowsTransparency="True"
+        Background="Transparent"
         ResizeMode="NoResize"
+        SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
         mc:Ignorable="d">
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <Border Style="{StaticResource SettingsWindowBorderStyle}">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0"
-                   Margin="0,0,0,20"
-                   FontSize="18"
-                   FontWeight="Bold"
-                   Foreground="{StaticResource PrimaryTextBrush}"
-                   Text="アプリケーション設定" />
+            <TextBlock Grid.Row="0"
+                       Margin="0,0,0,20"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       Foreground="{StaticResource PrimaryTextBrush}"
+                       Text="アプリケーション設定" />
 
-        <StackPanel Grid.Row="1">
-            <!-- Highlight.js Theme -->
-            <Label Content="コードハイライト テーマ:" Style="{StaticResource FormLabelStyle}" />
-            <ComboBox ItemsSource="{Binding AvailableThemes}"
-                      SelectedItem="{Binding SelectedCodeBlockTheme}"
-                      Style="{StaticResource FormComboBoxStyle}" />
-            <TextBlock Margin="5,2,0,15"
-                       FontSize="11"
-                       Foreground="Gray"
-                       Text="※コードブロックに適用される highlight.js のテーマを選択します。" />
+            <StackPanel Grid.Row="1">
+                <!-- Code Highlight Settings -->
+                <Label Content="コードハイライト設定" Style="{StaticResource FirstSectionHeaderLabelStyle}" />
 
-            <!-- Override Flag -->
-            <CheckBox Content="CSSエディタの設定でテーマを上書きする"
-                      IsChecked="{Binding UseCustomCodeBlockStyle}"
-                      Style="{StaticResource FormCheckBoxStyle}" />
-            <TextBlock Margin="25,2,0,0"
-                       FontSize="11"
-                       Foreground="Gray"
-                       LineHeight="15"
-                       Text="※チェックすると、CSSエディタの「コード」タブでの設定がコードブロックに強制適用されます。チェックしない場合は、選択したテーマのデザインが優先されます。"
-                       TextWrapping="Wrap" />
-        </StackPanel>
+                <!-- Highlight.js Theme -->
+                <Label Content="コードハイライト テーマ:" Style="{StaticResource FormLabelStyle}" />
+                <ComboBox ItemsSource="{Binding AvailableThemes}"
+                          SelectedItem="{Binding SelectedCodeBlockTheme}"
+                          Style="{StaticResource FormComboBoxStyle}" />
+                <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※コードブロックに適用される highlight.js のテーマを選択します。" />
 
-        <!-- Buttons -->
-        <StackPanel Grid.Row="2"
-                    HorizontalAlignment="Right"
-                    Orientation="Horizontal">
-            <Button Width="80"
-                    Command="{Binding SaveCommand}"
-                    Content="保存"
-                    IsDefault="True"
-                    Style="{StaticResource PrimaryButtonStyle}" />
-            <Button Width="80"
-                    Margin="10,0,0,0"
-                    Command="{Binding CancelCommand}"
-                    Content="キャンセル"
-                    IsCancel="True"
-                    Style="{StaticResource SecondaryButtonStyle}" />
-        </StackPanel>
-    </Grid>
+                <!-- Override Flag -->
+                <CheckBox Content="CSSエディタの設定でテーマを上書きする"
+                          IsChecked="{Binding UseCustomCodeBlockStyle}"
+                          Style="{StaticResource FormCheckBoxStyle}" />
+                <TextBlock Margin="25,2,0,0"
+                           LineHeight="15"
+                           Style="{StaticResource AnnotationTextStyle}"
+                           Text="※チェックすると、CSSエディタの「コード」タブでの設定がコードブロックに強制適用されます。チェックしない場合は、選択したテーマのデザインが優先されます。" />
+
+                <!-- Image Settings -->
+                <Label Content="画像貼り付け設定" Style="{StaticResource SectionHeaderLabelStyle}" />
+
+                <Label Content="保存先フォルダ (相対パス):" Style="{StaticResource FormLabelStyle}" />
+                <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding ImageSaveDirectory}" />
+                <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※Markdownファイルからの相対パス。例: images" />
+
+                <Label Content="ファイル名テンプレート:" Style="{StaticResource FormLabelStyle}" />
+                <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding ImageFileNameTemplate}" />
+                <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※変数: {Date}, {Time}, {FileName}" />
+            </StackPanel>
+
+            <!-- Buttons -->
+            <StackPanel Grid.Row="2"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                <Button Width="80"
+                        Command="{Binding SaveCommand}"
+                        Content="保存"
+                        IsDefault="True"
+                        Style="{StaticResource PrimaryButtonStyle}" />
+                <Button Width="80"
+                        Margin="10,0,0,0"
+                        Command="{Binding CancelCommand}"
+                        Content="キャンセル"
+                        IsCancel="True"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+            </StackPanel>
+        </Grid>
+    </Border>
 </Window>

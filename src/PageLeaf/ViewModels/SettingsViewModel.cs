@@ -18,6 +18,8 @@ namespace PageLeaf.ViewModels
         private readonly ISettingsService _settingsService;
         private string _selectedCodeBlockTheme;
         private bool _useCustomCodeBlockStyle;
+        private string _imageSaveDirectory = "images";
+        private string _imageFileNameTemplate = "image_{Date}_{Time}";
 
         /// <summary>
         /// 利用可能なコードブロックテーマのリスト。
@@ -43,6 +45,24 @@ namespace PageLeaf.ViewModels
         }
 
         /// <summary>
+        /// 画像を保存するディレクトリ（Markdownファイルからの相対パス）。
+        /// </summary>
+        public string ImageSaveDirectory
+        {
+            get => _imageSaveDirectory;
+            set { if (_imageSaveDirectory != value) { _imageSaveDirectory = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
+        /// 画像のファイル名テンプレート。
+        /// </summary>
+        public string ImageFileNameTemplate
+        {
+            get => _imageFileNameTemplate;
+            set { if (_imageFileNameTemplate != value) { _imageFileNameTemplate = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
         /// 保存コマンド。
         /// </summary>
         public ICommand SaveCommand { get; }
@@ -65,6 +85,8 @@ namespace PageLeaf.ViewModels
             var settings = _settingsService.CurrentSettings;
             _selectedCodeBlockTheme = settings.CodeBlockTheme;
             _useCustomCodeBlockStyle = settings.UseCustomCodeBlockStyle;
+            _imageSaveDirectory = settings.ImageSaveDirectory;
+            _imageFileNameTemplate = settings.ImageFileNameTemplate;
 
             // テーマ一覧の取得
             LoadAvailableThemes();
@@ -123,6 +145,8 @@ namespace PageLeaf.ViewModels
             var settings = _settingsService.CurrentSettings;
             settings.CodeBlockTheme = SelectedCodeBlockTheme;
             settings.UseCustomCodeBlockStyle = UseCustomCodeBlockStyle;
+            settings.ImageSaveDirectory = ImageSaveDirectory;
+            settings.ImageFileNameTemplate = ImageFileNameTemplate;
 
             _settingsService.SaveSettings(settings);
             RequestClose?.Invoke(this, EventArgs.Empty);

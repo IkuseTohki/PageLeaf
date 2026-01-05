@@ -26,6 +26,9 @@
         <KeyBinding Key="N"
                     Command="{Binding NewDocumentCommand}"
                     Modifiers="Control" />
+        <KeyBinding Key="V"
+                    Command="{Binding PasteImageCommand}"
+                    Modifiers="Control+Shift" />
     </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
@@ -131,7 +134,9 @@
 
             <!-- 左側の区画 (エディタ) -->
             <Grid Grid.Column="0">
-                <TextBox Margin="0"
+                <TextBox x:Name="MarkdownEditor"
+                         Margin="0"
+                         behaviors:EditorTextInsertionBehavior.EditorService="{Binding Editor}"
                          AcceptsReturn="True"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          Text="{Binding Editor.EditorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

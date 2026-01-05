@@ -191,6 +191,13 @@ namespace PageLeaf.Services
             UpdateHtmlContent();
         }
 
+        public void RequestInsertText(string text)
+        {
+            TextInsertionRequested?.Invoke(this, text);
+        }
+
+        public event EventHandler<string>? TextInsertionRequested;
+
         private void UpdateVisibility()
         {
             IsMarkdownEditorVisible = SelectedMode == DisplayMode.Markdown;
@@ -207,7 +214,10 @@ namespace PageLeaf.Services
                     return;
                 }
 #pragma warning disable CS8625 // null リテラルまたは考えられる null 値を null 非許容参照型に変換しています。
-                string html = _markdownService.ConvertToHtml(CurrentDocument.Content, _currentCssPath ?? string.Empty);
+                var baseDir = !string.IsNullOrEmpty(CurrentDocument.FilePath)
+                    ? Path.GetDirectoryName(CurrentDocument.FilePath)
+                    : null;
+                string html = _markdownService.ConvertToHtml(CurrentDocument.Content, _currentCssPath ?? string.Empty, baseDir);
                 HtmlFilePath = SaveHtmlToTempFile(html);
 #pragma warning restore CS8625 // null リテラルまたは考えられる null 値を null 非許容参照型に変換しています。
             }

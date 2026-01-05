@@ -46,5 +46,12 @@ namespace PageLeaf.Services
         /// 設定画面を表示します。
         /// </summary>
         void ShowSettingsDialog();
+
+        /// <summary>
+        /// メッセージボックスを表示します。
+        /// </summary>
+        /// <param name="message">メッセージ本文。</param>
+        /// <param name="title">タイトル。</param>
+        void ShowMessage(string message, string title);
     }
 }
