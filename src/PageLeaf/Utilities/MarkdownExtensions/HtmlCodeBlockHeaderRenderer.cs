@@ -31,7 +31,18 @@ namespace PageLeaf.Utilities.MarkdownExtensions
                 {
                     fileName = parts[1];
                 }
+            }
 
+            // Mermaid ブロックの場合は特別な処理
+            if (language == "mermaid")
+            {
+                renderer.Write("<div class=\"mermaid\">");
+                renderer.WriteLeafRawLines(obj, false, false); // エスケープせず、生テキストを出力
+                renderer.Write("</div>");
+                return;
+            }
+            if (!string.IsNullOrEmpty(info))
+            {
                 // 元の情報を書き換えて、languageのみがclass属性に使われるようにする
                 obj.Info = language;
             }

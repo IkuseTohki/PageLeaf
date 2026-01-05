@@ -204,5 +204,31 @@ namespace PageLeaf.Tests.Services
             // 3. ハイライトを有効化するスクリプトが埋め込まれているか
             StringAssert.Matches(html, new Regex(@"<script>hljs\.highlightAll\(\);</script>"));
         }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldIncludeAllRequiredResources()
+        {
+            // テスト観点: 生成されたHTMLに、ハイライト、拡張機能、Mermaidのすべての必要なリソースが含まれていることを確認する。
+            // Arrange
+            var markdown = "Check resources";
+
+            // Act
+            string html = _service.ConvertToHtml(markdown, null);
+
+            // Assert
+            // CSS
+            StringAssert.Contains(html, "css/extensions.css");
+            StringAssert.Contains(html, "highlight/styles/github.css");
+
+            // JS
+            StringAssert.Contains(html, "highlight/highlight.min.js");
+            StringAssert.Contains(html, "highlight/pageleaf-extensions.js");
+            StringAssert.Contains(html, "mermaid/mermaid.min.js");
+
+            // Initialization
+            StringAssert.Contains(html, "mermaid.initialize");
+            StringAssert.Contains(html, "mermaid.contentLoaded()");
+            StringAssert.Contains(html, "hljs.highlightAll()");
+        }
     }
 }

@@ -60,14 +60,21 @@ namespace PageLeaf.Services
             // highlight.jsライブラリへのリンクを絶対パスで指定
             var scriptFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "highlight.min.js");
             var extensionScriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "pageleaf-extensions.js");
+            var mermaidScriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "mermaid", "mermaid.min.js");
 
             // file:// スキームのURIに変換
             var scriptFileUri = new Uri(scriptFilePath).AbsoluteUri;
             var extensionScriptUri = new Uri(extensionScriptPath).AbsoluteUri;
+            var mermaidScriptUri = new Uri(mermaidScriptPath).AbsoluteUri;
 
             htmlBuilder.AppendLine($@"<script src=""{scriptFileUri}""></script>");
             htmlBuilder.AppendLine($@"<script src=""{extensionScriptUri}""></script>");
+            htmlBuilder.AppendLine($@"<script src=""{mermaidScriptUri}""></script>");
             htmlBuilder.AppendLine("<script>hljs.highlightAll();</script>");
+            htmlBuilder.AppendLine("<script>");
+            htmlBuilder.AppendLine("  mermaid.initialize({ startOnLoad: true, theme: 'default' });");
+            htmlBuilder.AppendLine("  mermaid.contentLoaded();");
+            htmlBuilder.AppendLine("</script>");
 
             htmlBuilder.AppendLine("</body>");
             htmlBuilder.AppendLine("</html>");

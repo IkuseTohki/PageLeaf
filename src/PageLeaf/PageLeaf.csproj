@@ -40,6 +40,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>highlight\%(RecursiveDir)%(FileName)%(Extension)</Link>
     </Content>
+    <Content Include="Resources\mermaid\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>mermaid\%(RecursiveDir)%(FileName)%(Extension)</Link>
+    </Content>
   </ItemGroup>
 
 </Project>
