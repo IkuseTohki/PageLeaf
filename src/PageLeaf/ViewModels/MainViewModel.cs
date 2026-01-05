@@ -123,6 +123,7 @@ namespace PageLeaf.ViewModels
         public ICommand ToggleCssEditorCommand { get; }
         public ICommand ShowSettingsCommand { get; }
         public ICommand PasteImageCommand { get; }
+        public ICommand OpenFileByPathCommand { get; }
 
 
         public MainViewModel(
@@ -175,6 +176,7 @@ namespace PageLeaf.ViewModels
             ToggleCssEditorCommand = new Utilities.DelegateCommand(ExecuteToggleCssEditor);
             ShowSettingsCommand = new Utilities.DelegateCommand(ExecuteShowSettings);
             PasteImageCommand = new Utilities.DelegateCommand(ExecutePasteImage);
+            OpenFileByPathCommand = new Utilities.DelegateCommand(ExecuteOpenFileByPath);
 
             AvailableModes = new ObservableCollection<DisplayMode>(
                 Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>()
@@ -245,6 +247,15 @@ namespace PageLeaf.ViewModels
             _logger.LogInformation("PasteImageCommand executed.");
             var filePath = Editor.CurrentDocument.FilePath ?? string.Empty;
             await _pasteImageUseCase.ExecuteAsync(filePath);
+        }
+
+        private void ExecuteOpenFileByPath(object? parameter)
+        {
+            if (parameter is string filePath)
+            {
+                _logger.LogInformation("OpenFileByPathCommand executed for: {FilePath}", filePath);
+                _openDocumentUseCase.OpenPath(filePath);
+            }
         }
 
         private void OnCssSaved(object? sender, EventArgs e)

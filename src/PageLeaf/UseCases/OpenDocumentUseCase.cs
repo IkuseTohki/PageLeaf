@@ -36,17 +36,7 @@ namespace PageLeaf.UseCases
         /// <inheritdoc />
         public void Execute()
         {
-            var result = _editorService.PromptForSaveIfDirty();
-
-            if (result == SaveConfirmationResult.Cancel)
-            {
-                return;
-            }
-
-            if (result == SaveConfirmationResult.Save)
-            {
-                _saveDocumentUseCase.Execute();
-            }
+            if (!ConfirmSaveIfDirty()) return;
 
             string? filePath = _dialogService.ShowOpenFileDialog(
                 "Markdownファイルを開く",
@@ -54,15 +44,46 @@ namespace PageLeaf.UseCases
 
             if (!string.IsNullOrEmpty(filePath))
             {
-                try
-                {
-                    MarkdownDocument document = _fileService.Open(filePath);
-                    _editorService.LoadDocument(document);
-                }
-                catch (Exception)
-                {
-                    // 必要に応じてエラー通知を検討
-                }
+                OpenInternal(filePath);
+            }
+        }
+
+        /// <inheritdoc />
+        public void OpenPath(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath)) return;
+            if (!ConfirmSaveIfDirty()) return;
+
+            OpenInternal(filePath);
+        }
+
+        private bool ConfirmSaveIfDirty()
+        {
+            var result = _editorService.PromptForSaveIfDirty();
+
+            if (result == SaveConfirmationResult.Cancel)
+            {
+                return false;
+            }
+
+            if (result == SaveConfirmationResult.Save)
+            {
+                _saveDocumentUseCase.Execute();
+            }
+
+            return true;
+        }
+
+        private void OpenInternal(string filePath)
+        {
+            try
+            {
+                MarkdownDocument document = _fileService.Open(filePath);
+                _editorService.LoadDocument(document);
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowMessage($"ファイルを開けませんでした。\n{ex.Message}", "エラー");
             }
         }
     }

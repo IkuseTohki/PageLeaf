@@ -12,6 +12,7 @@
         Title="PageLeaf Markdown Editor"
         Width="1000"
         Height="600"
+        behaviors:FileDropBehavior.Command="{Binding OpenFileByPathCommand}"
         mc:Ignorable="d">
     <Window.InputBindings>
         <KeyBinding Key="S"

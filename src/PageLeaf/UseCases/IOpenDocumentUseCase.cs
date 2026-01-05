@@ -9,5 +9,11 @@ namespace PageLeaf.UseCases
         /// ファイル選択ダイアログを表示し、ドキュメントを読み込みます。
         /// </summary>
         void Execute();
+
+        /// <summary>
+        /// 指定されたパスのファイルを開きます。
+        /// </summary>
+        /// <param name="filePath">開くファイルのパス。</param>
+        void OpenPath(string filePath);
     }
 }
