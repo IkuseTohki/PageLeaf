@@ -59,6 +59,20 @@
                 <Label Content="ファイル名テンプレート:" Style="{StaticResource FormLabelStyle}" />
                 <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding ImageFileNameTemplate}" />
                 <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※変数: {Date}, {Time}, {FileName}" />
+
+                <!-- Editor Settings -->
+                <Label Content="エディタ設定" Style="{StaticResource SectionHeaderLabelStyle}" />
+
+                <CheckBox Content="タブの代わりにスペースを使用する"
+                          IsChecked="{Binding UseSpacesForIndent}"
+                          Style="{StaticResource FormCheckBoxStyle}" />
+
+                <Label Content="インデント幅 (スペース数):"
+                       IsEnabled="{Binding UseSpacesForIndent}"
+                       Style="{StaticResource FormLabelStyle}" />
+                <TextBox IsEnabled="{Binding UseSpacesForIndent}"
+                         Style="{StaticResource FormTextBoxStyle}"
+                         Text="{Binding IndentSize}" />
             </StackPanel>
 
             <!-- Buttons -->

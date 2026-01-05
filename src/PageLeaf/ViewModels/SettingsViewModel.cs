@@ -20,6 +20,8 @@ namespace PageLeaf.ViewModels
         private bool _useCustomCodeBlockStyle;
         private string _imageSaveDirectory = "images";
         private string _imageFileNameTemplate = "image_{Date}_{Time}";
+        private int _indentSize = 4;
+        private bool _useSpacesForIndent = true;
 
         /// <summary>
         /// 利用可能なコードブロックテーマのリスト。
@@ -63,6 +65,24 @@ namespace PageLeaf.ViewModels
         }
 
         /// <summary>
+        /// インデント幅（スペース数）。
+        /// </summary>
+        public int IndentSize
+        {
+            get => _indentSize;
+            set { if (_indentSize != value) { _indentSize = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
+        /// タブの代わりにスペースを使用するかどうか。
+        /// </summary>
+        public bool UseSpacesForIndent
+        {
+            get => _useSpacesForIndent;
+            set { if (_useSpacesForIndent != value) { _useSpacesForIndent = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
         /// 保存コマンド。
         /// </summary>
         public ICommand SaveCommand { get; }
@@ -87,6 +107,8 @@ namespace PageLeaf.ViewModels
             _useCustomCodeBlockStyle = settings.UseCustomCodeBlockStyle;
             _imageSaveDirectory = settings.ImageSaveDirectory;
             _imageFileNameTemplate = settings.ImageFileNameTemplate;
+            _indentSize = settings.IndentSize;
+            _useSpacesForIndent = settings.UseSpacesForIndent;
 
             // テーマ一覧の取得
             LoadAvailableThemes();
@@ -147,6 +169,8 @@ namespace PageLeaf.ViewModels
             settings.UseCustomCodeBlockStyle = UseCustomCodeBlockStyle;
             settings.ImageSaveDirectory = ImageSaveDirectory;
             settings.ImageFileNameTemplate = ImageFileNameTemplate;
+            settings.IndentSize = IndentSize;
+            settings.UseSpacesForIndent = UseSpacesForIndent;
 
             _settingsService.SaveSettings(settings);
             RequestClose?.Invoke(this, EventArgs.Empty);

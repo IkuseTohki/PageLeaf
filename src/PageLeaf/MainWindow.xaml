@@ -137,6 +137,7 @@
                 <TextBox x:Name="MarkdownEditor"
                          Margin="0"
                          behaviors:EditorTextInsertionBehavior.EditorService="{Binding Editor}"
+                         behaviors:MarkdownEditorBehavior.IsEnabled="True"
                          AcceptsReturn="True"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          Text="{Binding Editor.EditorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

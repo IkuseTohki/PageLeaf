@@ -66,6 +66,7 @@ namespace PageLeaf
                     services.AddSingleton<ICssEditorService, CssEditorService>();
                     services.AddSingleton<ICssManagementService, CssManagementService>();
                     services.AddSingleton<IImagePasteService, ImagePasteService>(); // 画像貼り付けサービス
+                    services.AddSingleton<IEditingSupportService, EditingSupportService>(); // 編集支援サービス
 
                     // UseCases
                     services.AddTransient<ISaveAsDocumentUseCase, SaveAsDocumentUseCase>();

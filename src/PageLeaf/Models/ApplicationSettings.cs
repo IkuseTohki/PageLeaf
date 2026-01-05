@@ -29,6 +29,16 @@ namespace PageLeaf.Models
         /// </summary>
         public string ImageFileNameTemplate { get; set; } = "image_{Date}_{Time}";
 
+        /// <summary>
+        /// インデントに使用するスペースの数。
+        /// </summary>
+        public int IndentSize { get; set; } = 4;
+
+        /// <summary>
+        /// タブの代わりにスペースを使用してインデントするかどうか。
+        /// </summary>
+        public bool UseSpacesForIndent { get; set; } = true;
+
         // Default constructor for deserialization
         public ApplicationSettings() { }
     }
