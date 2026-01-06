@@ -54,5 +54,12 @@ namespace PageLeaf.Services
         /// <param name="styleInfo">適用するスタイル情報。</param>
         /// <returns>生成されたCSS文字列。</returns>
         string GenerateCss(string existingCssContent, CssStyleInfo styleInfo);
+
+        /// <summary>
+        /// 新しいCSSスタイル（ファイル）を作成します。
+        /// </summary>
+        /// <param name="styleName">スタイル名（拡張子なしを想定）。</param>
+        /// <returns>作成されたファイル名（拡張子付き）。</returns>
+        string CreateNewStyle(string styleName);
     }
 }

@@ -1,0 +1,57 @@
+﻿<Window x:Class="PageLeaf.Views.InputDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:behaviors="clr-namespace:PageLeaf.Behaviors"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewmodels="clr-namespace:PageLeaf.ViewModels"
+        Title="{Binding Title}"
+        Width="350"
+        behaviors:WindowDragBehavior.IsEnabled="True"
+        d:DataContext="{d:DesignInstance Type=viewmodels:InputViewModel}"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        mc:Ignorable="d">
+    <Border Style="{StaticResource SettingsWindowBorderStyle}">
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <TextBlock Grid.Row="0"
+                       Margin="0,0,0,10"
+                       FontWeight="SemiBold"
+                       Foreground="{StaticResource PrimaryTextBrush}"
+                       Text="{Binding Message}" />
+
+            <TextBox Grid.Row="1"
+                     Margin="0,0,0,20"
+                     Style="{StaticResource FormTextBoxStyle}"
+                     Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}" />
+
+            <StackPanel Grid.Row="2"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                <Button Width="80"
+                        Command="{Binding OkCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                        Content="OK"
+                        IsDefault="True"
+                        Style="{StaticResource PrimaryButtonStyle}" />
+                <Button Width="80"
+                        Margin="10,0,0,0"
+                        Command="{Binding CancelCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                        Content="キャンセル"
+                        IsCancel="True"
+                        Style="{StaticResource SecondaryButtonStyle}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

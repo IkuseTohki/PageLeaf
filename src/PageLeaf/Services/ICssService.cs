@@ -13,11 +13,15 @@ namespace PageLeaf.Services
         /// <returns>利用可能なCSSファイルのファイル名（拡張子含む）のリスト。</returns>
         IEnumerable<string> GetAvailableCssFileNames();
 
-        /// <summary>
-        /// 指定されたCSSファイル名の物理パスを取得します。
-        /// </summary>
-        /// <param name="cssFileName">対象のCSSファイル名。</param>
-        /// <returns>CSSファイルへのフルパス。</returns>
+        /// <param name="cssFileName">パスを取得するCSSファイル名。</param>
+        /// <returns>CSSファイルの絶対パス。</returns>
         string GetCssPath(string cssFileName);
+
+        /// <summary>
+        /// 新しいCSSファイルをデフォルトの内容で作成します。
+        /// </summary>
+        /// <param name="fileName">作成するファイル名（拡張子抜き）。</param>
+        /// <returns>作成されたファイルの名前（拡張子込み）。</returns>
+        string CreateNewCssFile(string fileName);
     }
 }

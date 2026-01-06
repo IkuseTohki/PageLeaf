@@ -1,0 +1,62 @@
+# PageLeaf
+
+![PageLeaf Icon](spec/assets/icon_proposal_4.svg)
+
+PageLeaf は、Markdown ドキュメントのデザイン（CSS）作成・編集に特化したデスクトップツールです。
+プレビュー画面でリアルタイムにスタイルの変化を確認しながら、GUI を通じて直感的に Markdown 用の CSS を作成・カスタマイズできます。
+
+## 🍃 主な機能
+
+- **Markdown 編集 & プレビュー**: リアルタイムでレンダリング結果を確認しながら Markdown を編集可能。
+- **GUI CSS エディター**: プログラミングの知識がなくても、フォント、色、余白などのスタイルを直感的にカスタマイズ。
+- **CSS 管理**: 複数の CSS プロファイルを切り替えたり、保存・読み込みが可能。
+- **画像貼り付け支援**: クリップボードからの画像を自動保存し、Markdown リンクを即座に挿入（`Ctrl+Shift+V`）。
+- **編集支援**: オートインデント、リストの自動継続、ペア記号の自動補完など。
+- **クリーンな UI**: 設定画面やバージョン情報画面まで一貫性のあるモダンなデザイン。
+
+## 🛠 技術スタック
+
+- **言語**: C# 12 / .NET 8.0 (Windows)
+- **UI フレームワーク**: WPF (Windows Presentation Foundation)
+- **アーキテクチャ**: MVVM (Model-View-ViewModel) + クリーンアーキテクチャ
+- **主なライブラリ**:
+  - [Markdig](https://github.com/lunet-io/markdig): Markdown 解析
+  - [WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/): 高性能な HTML/CSS プレビュー
+  - [Microsoft.Extensions.DependencyInjection](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/): 依存関係の注入 (DI)
+  - [Serilog](https://serilog.net/): 構造化ロギング
+
+## 🚀 開発の始め方
+
+### 動作環境
+
+- Windows 10 / 11
+- .NET 8.0 Runtime 以上
+- Microsoft Edge WebView2 Runtime
+
+### ビルド手順
+
+1. リポジトリをクローンします。
+2. ソリューションファイルを開くか、コマンドラインで以下を実行します。
+
+```powershell
+# 復元とビルド
+dotnet build PageLeaf.sln
+
+# テストの実行
+dotnet test PageLeaf.sln
+
+# アプリケーションの実行
+dotnet run --project src/PageLeaf/PageLeaf.csproj
+```
+
+## 📂 ディレクトリ構造
+
+- `src/PageLeaf/`: メインアプリケーション
+- `src/PageLeaf.Tests/`: ユニットテストプロジェクト
+- `spec/`: 仕様書、アイコンデザイン等のアセット
+- `task/`: 開発タスク管理ドキュメント
+
+## ⚖️ ライセンス
+
+Copyright © 2026 PageLeaf Project.
+このプロジェクトは [MIT ライセンス](LICENSE) の下で公開されています。

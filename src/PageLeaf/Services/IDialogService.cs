@@ -58,5 +58,14 @@ namespace PageLeaf.Services
         /// <param name="message">メッセージ本文。</param>
         /// <param name="title">タイトル。</param>
         void ShowMessage(string message, string title);
+
+        /// <summary>
+        /// 入力ダイアログを表示し、ユーザーが入力した文字列を返します。
+        /// </summary>
+        /// <param name="title">ダイアログのタイトル。</param>
+        /// <param name="message">表示するメッセージ。</param>
+        /// <param name="defaultInput">初期入力値。</param>
+        /// <returns>入力された文字列。キャンセルされた場合は null。</returns>
+        string? ShowInputDialog(string title, string message, string defaultInput = "");
     }
 }

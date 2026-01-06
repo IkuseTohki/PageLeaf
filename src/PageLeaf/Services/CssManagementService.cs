@@ -103,5 +103,18 @@ namespace PageLeaf.Services
                 throw;
             }
         }
+
+        public string CreateNewStyle(string styleName)
+        {
+            try
+            {
+                return _cssService.CreateNewCssFile(styleName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create new style: {StyleName}", styleName);
+                throw;
+            }
+        }
     }
 }

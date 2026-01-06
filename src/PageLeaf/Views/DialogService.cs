@@ -154,5 +154,25 @@ namespace PageLeaf.Views
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
         }
+
+        public string? ShowInputDialog(string title, string message, string defaultInput = "")
+        {
+            var viewModel = new ViewModels.InputViewModel
+            {
+                Title = title,
+                Message = message,
+                InputText = defaultInput
+            };
+
+            var dialog = new InputDialog();
+            dialog.DataContext = viewModel;
+            dialog.Owner = Application.Current.MainWindow;
+
+            if (dialog.ShowDialog() == true)
+            {
+                return viewModel.InputText;
+            }
+            return null;
+        }
     }
 }

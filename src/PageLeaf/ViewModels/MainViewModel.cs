@@ -11,6 +11,7 @@ namespace PageLeaf.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
+        private const string NewStylePlaceholder = "(新規作成...)";
         private readonly IFileService _fileService;
         private readonly ILogger<MainViewModel> _logger;
         private readonly IDialogService _dialogService;
@@ -62,6 +63,13 @@ namespace PageLeaf.ViewModels
             {
                 if (_selectedCssFile != value)
                 {
+                    if (value == NewStylePlaceholder)
+                    {
+                        // 新規作成処理
+                        CreateNewStyle();
+                        return;
+                    }
+
                     _selectedCssFile = value;
                     OnPropertyChanged();
 
@@ -185,6 +193,7 @@ namespace PageLeaf.ViewModels
             );
 
             AvailableCssFiles = new ObservableCollection<string>(_cssManagementService.GetAvailableCssFileNames());
+            AvailableCssFiles.Add(NewStylePlaceholder);
 
             // 設定から選択されたCSSを読み込む
             var loadedCss = _settingsService.CurrentSettings.SelectedCss;
@@ -268,6 +277,42 @@ namespace PageLeaf.ViewModels
         private void OnCssSaved(object? sender, EventArgs e)
         {
             Editor.ApplyCss(SelectedCssFile);
+        }
+
+        private void CreateNewStyle()
+        {
+            var newName = _dialogService.ShowInputDialog("新規CSS作成", "作成するスタイル名（ファイル名）を入力してください：", "new-style");
+            if (string.IsNullOrWhiteSpace(newName))
+            {
+                // キャンセルされた場合は、元の選択状態に戻す必要があるが、
+                // ComboBoxの仕様上、SelectedItemが変更された後にここで止まると表示がズレる可能性がある。
+                // NotifyPropertyChanged を強制的に呼び出すことで、View側の表示を現在の _selectedCssFile に戻す。
+                OnPropertyChanged(nameof(SelectedCssFile));
+                return;
+            }
+
+            try
+            {
+                var createdFileName = _cssManagementService.CreateNewStyle(newName);
+
+                // リストを更新（プレースホルダーを除去して再取得し、再度プレースホルダーを追加）
+                var names = _cssManagementService.GetAvailableCssFileNames().ToList();
+                AvailableCssFiles.Clear();
+                foreach (var name in names)
+                {
+                    AvailableCssFiles.Add(name);
+                }
+                AvailableCssFiles.Add(NewStylePlaceholder);
+
+                // 作成したファイルを選択状態にする
+                SelectedCssFile = createdFileName;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to create new CSS file: {StyleName}", newName);
+                _dialogService.ShowMessage($"ファイルの作成に失敗しました：{ex.Message}", "エラー");
+                OnPropertyChanged(nameof(SelectedCssFile));
+            }
         }
     }
 }

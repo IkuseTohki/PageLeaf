@@ -67,5 +67,31 @@ namespace PageLeaf.Services
 
             return Path.Combine(_cssDirectoryPath, cssFileName);
         }
+
+        /// <summary>
+        /// 新しいCSSファイルをデフォルトの内容で作成します。
+        /// </summary>
+        public string CreateNewCssFile(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentException("File name cannot be empty.", nameof(fileName));
+
+            // 拡張子がなければ付与
+            if (!fileName.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
+            {
+                fileName += ".css";
+            }
+
+            var fullPath = Path.Combine(_cssDirectoryPath, fileName);
+            if (_fileService.FileExists(fullPath))
+            {
+                throw new InvalidOperationException($"File '{fileName}' already exists.");
+            }
+
+            // デフォルトのCSSテンプレート
+            var defaultContent = "/* New Style */\n\nbody {\n    font-family: sans-serif;\n}\n\nh1 {\n    color: #333;\n}";
+            _fileService.WriteAllText(fullPath, defaultContent);
+
+            return fileName;
+        }
     }
 }
