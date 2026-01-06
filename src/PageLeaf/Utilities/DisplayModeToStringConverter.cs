@@ -23,8 +23,6 @@ namespace PageLeaf.Utilities
                         return "ビューアーモード";
                     case DisplayMode.Markdown:
                         return "Markdown 編集モード";
-                    case DisplayMode.RealTime:
-                        return "リアルタイム編集モード";
                     default:
                         return string.Empty;
                 }

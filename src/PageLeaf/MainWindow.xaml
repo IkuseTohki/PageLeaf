@@ -58,31 +58,6 @@
                 <MenuItem Command="{Binding SaveAsFileCommand}"
                           Header="{StaticResource MenuFileSaveAsHeader}"
                           InputGestureText="Ctrl+Shift+S" />
-                <Separator />
-                <MenuItem Header="{StaticResource MenuFileExportHeader}">
-                    <MenuItem Header="{StaticResource MenuFileExportHtmlHeader}" />
-                    <MenuItem Header="{StaticResource MenuFileExportPdfHeader}" />
-                    <MenuItem Header="{StaticResource MenuFileExportWordDocxHeader}" />
-                    <MenuItem Header="{StaticResource MenuFileExportImagePngHeader}" />
-                </MenuItem>
-                <Separator />
-                <MenuItem Header="{StaticResource MenuFileExitHeader}" />
-            </MenuItem>
-            <MenuItem Header="{StaticResource MenuEditHeader}">
-                <MenuItem Header="{StaticResource MenuEditCutHeader}" />
-                <MenuItem Header="{StaticResource MenuEditCopyHeader}" />
-                <MenuItem Header="{StaticResource MenuEditPasteHeader}" />
-                <Separator />
-                <MenuItem Header="{StaticResource MenuEditUndoHeader}" />
-                <MenuItem Header="{StaticResource MenuEditRedoHeader}" />
-            </MenuItem>
-            <MenuItem Header="{StaticResource MenuViewHeader}">
-                <MenuItem Header="{StaticResource MenuViewModelHeader}">
-                    <MenuItem Header="{StaticResource MenuViewerViewModeHeader}" />
-                    <MenuItem Header="{StaticResource MenuViewMarkdownEditModeHeader}" />
-                    <MenuItem Header="{StaticResource MenuViewRealtimeEditModeHeader}" />
-                </MenuItem>
-                <MenuItem Header="{StaticResource MenuViewCssSelectHeader}" />
             </MenuItem>
             <MenuItem Header="{StaticResource MenuSettingsHeader}">
                 <MenuItem Command="{Binding ShowSettingsCommand}" Header="{StaticResource MenuSettingsSettingsHeader}" />

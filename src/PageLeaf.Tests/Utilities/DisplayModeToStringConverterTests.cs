@@ -23,7 +23,6 @@ namespace PageLeaf.Tests.Utilities
 
             Assert.AreEqual("ビューアーモード", _converter.Convert(DisplayMode.Viewer, typeof(string), null!, CultureInfo.CurrentCulture));
             Assert.AreEqual("Markdown 編集モード", _converter.Convert(DisplayMode.Markdown, typeof(string), null!, CultureInfo.CurrentCulture));
-            Assert.AreEqual("リアルタイム編集モード", _converter.Convert(DisplayMode.RealTime, typeof(string), null!, CultureInfo.CurrentCulture));
         }
 
         [TestMethod]

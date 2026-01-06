@@ -14,10 +14,5 @@ namespace PageLeaf.Models
         /// Markdown テキストの編集モード。
         /// </summary>
         Markdown,
-
-        /// <summary>
-        /// リアルタイム編集モード。
-        /// </summary>
-        RealTime
     }
 }
