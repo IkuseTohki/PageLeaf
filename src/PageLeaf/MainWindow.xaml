@@ -13,6 +13,7 @@
         Width="1000"
         Height="600"
         behaviors:FileDropBehavior.Command="{Binding OpenFileByPathCommand}"
+        Icon="{StaticResource AppIconImage}"
         mc:Ignorable="d">
     <Window.InputBindings>
         <KeyBinding Key="S"
@@ -87,7 +88,7 @@
                 <MenuItem Command="{Binding ShowSettingsCommand}" Header="{StaticResource MenuSettingsSettingsHeader}" />
             </MenuItem>
             <MenuItem Header="{StaticResource MenuHelpHeader}">
-                <MenuItem Header="{StaticResource MenuHelpAboutHeader}" />
+                <MenuItem Command="{Binding ShowAboutCommand}" Header="{StaticResource MenuHelpAboutHeader}" />
             </MenuItem>
         </Menu>
 

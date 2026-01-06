@@ -48,6 +48,11 @@ namespace PageLeaf.Services
         void ShowSettingsDialog();
 
         /// <summary>
+        /// バージョン情報を表示します。
+        /// </summary>
+        void ShowAboutDialog();
+
+        /// <summary>
         /// メッセージボックスを表示します。
         /// </summary>
         /// <param name="message">メッセージ本文。</param>

@@ -1,0 +1,73 @@
+﻿<Window x:Class="PageLeaf.Views.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:behaviors="clr-namespace:PageLeaf.Behaviors"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:viewmodels="clr-namespace:PageLeaf.ViewModels"
+        Title="PageLeaf について"
+        Width="350"
+        behaviors:WindowDragBehavior.IsEnabled="True"
+        d:DataContext="{d:DesignInstance Type=viewmodels:AboutViewModel}"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        WindowStyle="None"
+        mc:Ignorable="d">
+    <Border Style="{StaticResource SettingsWindowBorderStyle}">
+        <Grid Margin="25">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- App Icon -->
+            <Image Grid.Row="0"
+                   Width="64"
+                   Height="64"
+                   Margin="0,0,0,15"
+                   HorizontalAlignment="Center"
+                   Source="{StaticResource AppIconImage}" />
+
+            <TextBlock Grid.Row="1"
+                       HorizontalAlignment="Center"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       Foreground="{StaticResource PrimaryTextBrush}"
+                       Text="{Binding AppName}" />
+
+            <TextBlock Grid.Row="2"
+                       Margin="0,5,0,0"
+                       HorizontalAlignment="Center"
+                       FontSize="14"
+                       Foreground="{StaticResource SecondaryTextBrush}"
+                       Text="{Binding Version}" />
+
+            <StackPanel Grid.Row="3" Margin="0,20,0,25">
+                <TextBlock HorizontalAlignment="Center"
+                           Foreground="{StaticResource PrimaryTextBrush}"
+                           Text="{Binding Description}" />
+                <TextBlock Margin="0,5,0,0"
+                           HorizontalAlignment="Center"
+                           FontSize="11"
+                           Foreground="{StaticResource AnnotationTextBrush}"
+                           Text="{Binding Copyright}" />
+            </StackPanel>
+
+            <Button Grid.Row="4"
+                    Width="100"
+                    HorizontalAlignment="Center"
+                    Command="{Binding CloseCommand}"
+                    CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
+                    Content="閉じる"
+                    IsCancel="True"
+                    IsDefault="True"
+                    Style="{StaticResource PrimaryButtonStyle}" />
+        </Grid>
+    </Border>
+</Window>

@@ -139,6 +139,17 @@ namespace PageLeaf.Views
             settingsWindow.ShowDialog();
         }
 
+        /// <summary>
+        /// バージョン情報を表示します。
+        /// </summary>
+        public void ShowAboutDialog()
+        {
+            var viewModel = new ViewModels.AboutViewModel();
+            var aboutWindow = new AboutWindow(viewModel);
+            aboutWindow.Owner = Application.Current.MainWindow;
+            aboutWindow.ShowDialog();
+        }
+
         public void ShowMessage(string message, string title)
         {
             MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);

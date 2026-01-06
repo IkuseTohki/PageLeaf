@@ -122,6 +122,7 @@ namespace PageLeaf.ViewModels
         public ICommand NewDocumentCommand { get; }
         public ICommand ToggleCssEditorCommand { get; }
         public ICommand ShowSettingsCommand { get; }
+        public ICommand ShowAboutCommand { get; }
         public ICommand PasteImageCommand { get; }
         public ICommand OpenFileByPathCommand { get; }
 
@@ -175,6 +176,7 @@ namespace PageLeaf.ViewModels
             NewDocumentCommand = new Utilities.DelegateCommand(ExecuteNewDocument);
             ToggleCssEditorCommand = new Utilities.DelegateCommand(ExecuteToggleCssEditor);
             ShowSettingsCommand = new Utilities.DelegateCommand(ExecuteShowSettings);
+            ShowAboutCommand = new Utilities.DelegateCommand(ExecuteShowAbout);
             PasteImageCommand = new Utilities.DelegateCommand(ExecutePasteImage);
             OpenFileByPathCommand = new Utilities.DelegateCommand(ExecuteOpenFileByPath);
 
@@ -240,6 +242,11 @@ namespace PageLeaf.ViewModels
 
             // WebViewの内容を更新（テーマ変更の反映）
             Editor.UpdatePreview();
+        }
+
+        private void ExecuteShowAbout(object? parameter)
+        {
+            _dialogService.ShowAboutDialog();
         }
 
         private async void ExecutePasteImage(object? parameter)

@@ -8,6 +8,7 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Resources\PageLeaf.ico</ApplicationIcon>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -17,6 +18,8 @@
     <FileVersion>1.0.0.0</FileVersion>
     <Company>PageLeaf Project</Company>
     <Product>PageLeaf</Product>
+    <Description>Markdown CSS エディター &amp; ビューアー</Description>
+    <Copyright>Copyright © 2026 PageLeaf Project</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
