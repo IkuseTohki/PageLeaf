@@ -91,6 +91,30 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
+        public void test_GetAvailableCssFileNames_ShouldExcludeExtensionsCss()
+        {
+            // テスト観点: extensions.css が利用可能なCSSファイルリストから除外されることを確認する。
+            // Arrange
+            var cssFiles = new List<string>
+            {
+                "C:\\app\\css\\github.css",
+                "C:\\app\\css\\extensions.css",
+                "C:\\app\\css\\another.css"
+            };
+            _mockFileService.Setup(fs => fs.GetFiles(It.IsAny<string>(), "*.css"))
+                            .Returns(cssFiles);
+
+            _cssService = new CssService(_mockFileService.Object, _mockLogger.Object);
+
+            // Act
+            var result = _cssService.GetAvailableCssFileNames().ToList();
+
+            // Assert
+            CollectionAssert.AreEquivalent(new[] { "github.css", "another.css" }, result);
+            Assert.IsFalse(result.Contains("extensions.css"));
+        }
+
+        [TestMethod]
         public void test_GetAvailableCssFileNames_ShouldHandleFileServiceExceptionGracefully()
         {
             // テスト観点: IFileService.GetFiles が例外をスローした場合でも、CssService が適切に処理し、空のリストを返すことを確認する。

@@ -38,7 +38,10 @@ namespace PageLeaf.Services
             {
                 _logger.LogInformation("Attempting to get available CSS files from: {CssDirectoryPath}", _cssDirectoryPath);
                 var fullPaths = _fileService.GetFiles(_cssDirectoryPath, "*.css");
-                var fileNames = fullPaths.Select(Path.GetFileName).OfType<string>().ToList();
+                var fileNames = fullPaths.Select(Path.GetFileName)
+                                         .OfType<string>()
+                                         .Where(name => !string.Equals(name, "extensions.css", StringComparison.OrdinalIgnoreCase))
+                                         .ToList();
                 _logger.LogInformation("Found {Count} CSS files.", fileNames.Count);
                 return fileNames;
             }
