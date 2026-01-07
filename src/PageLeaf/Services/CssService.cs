@@ -42,6 +42,14 @@ namespace PageLeaf.Services
                                          .OfType<string>()
                                          .Where(name => !string.Equals(name, "extensions.css", StringComparison.OrdinalIgnoreCase))
                                          .ToList();
+
+                if (fileNames.Count == 0)
+                {
+                    _logger.LogInformation("No CSS files found. Creating Default.css.");
+                    var defaultCssName = CreateNewCssFile("Default.css");
+                    fileNames.Add(defaultCssName);
+                }
+
                 _logger.LogInformation("Found {Count} CSS files.", fileNames.Count);
                 return fileNames;
             }

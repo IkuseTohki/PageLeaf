@@ -49,12 +49,13 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
-        public void test_GetAvailableCssFileNames_ShouldReturnEmptyList_WhenNoCssFilesFound()
+        public void test_GetAvailableCssFileNames_ShouldCreateDefaultCss_WhenNoCssFilesFound()
         {
-            // テスト観点: CSSファイルが見つからない場合に、空のリストが返されることを確認する。
+            // テスト観点: CSSファイルが見つからない場合に、Default.cssを作成して返すことを確認する。
             // Arrange
             _mockFileService.Setup(fs => fs.GetFiles(It.IsAny<string>(), "*.css"))
                             .Returns(new List<string>());
+            _mockFileService.Setup(fs => fs.FileExists(It.IsAny<string>())).Returns(false);
 
             _cssService = new CssService(_mockFileService.Object, _mockLogger.Object);
 
@@ -63,8 +64,10 @@ namespace PageLeaf.Tests.Services
 
             // Assert
             Assert.IsNotNull(result);
-            Assert.AreEqual(0, result.Count);
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual("Default.css", result[0]);
             _mockFileService.Verify(fs => fs.GetFiles(It.IsAny<string>(), "*.css"), Times.Once);
+            _mockFileService.Verify(fs => fs.WriteAllText(It.Is<string>(path => path.EndsWith("Default.css")), It.IsAny<string>()), Times.Once);
         }
 
         [TestMethod]
