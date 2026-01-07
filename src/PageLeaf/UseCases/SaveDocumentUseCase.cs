@@ -12,6 +12,7 @@ namespace PageLeaf.UseCases
         private readonly IEditorService _editorService;
         private readonly IFileService _fileService;
         private readonly ISaveAsDocumentUseCase _saveAsDocumentUseCase;
+        private readonly IMarkdownService _markdownService;
 
         /// <summary>
         /// <see cref="SaveDocumentUseCase"/> クラスの新しいインスタンスを初期化します。
@@ -19,11 +20,13 @@ namespace PageLeaf.UseCases
         /// <param name="editorService">エディタサービス。</param>
         /// <param name="fileService">ファイルサービス。</param>
         /// <param name="saveAsDocumentUseCase">名前を付けて保存ユースケース。</param>
-        public SaveDocumentUseCase(IEditorService editorService, IFileService fileService, ISaveAsDocumentUseCase saveAsDocumentUseCase)
+        /// <param name="markdownService">Markdownサービス。</param>
+        public SaveDocumentUseCase(IEditorService editorService, IFileService fileService, ISaveAsDocumentUseCase saveAsDocumentUseCase, IMarkdownService markdownService)
         {
             _editorService = editorService;
             _fileService = fileService;
             _saveAsDocumentUseCase = saveAsDocumentUseCase;
+            _markdownService = markdownService;
         }
 
         /// <inheritdoc />
@@ -43,6 +46,20 @@ namespace PageLeaf.UseCases
 
             try
             {
+                // フロントマターの更新 (updated)
+                // 既にフロントマターがある場合のみ更新する。
+                // フロントマターがないファイルに対して自動的に追加されることは避ける。
+
+                var currentFrontMatter = _markdownService.ParseFrontMatter(document.Content);
+                if (currentFrontMatter.Count > 0)
+                {
+                    var updatedContent = _markdownService.UpdateFrontMatter(document.Content, new System.Collections.Generic.Dictionary<string, object>
+                    {
+                        { "updated", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") }
+                    });
+                    document.Content = updatedContent;
+                }
+
                 _fileService.Save(document);
                 document.IsDirty = false;
                 return true;

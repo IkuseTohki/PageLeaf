@@ -11,6 +11,7 @@ namespace PageLeaf.Tests.UseCases
     {
         private Mock<IEditorService> _editorServiceMock = null!;
         private Mock<ISaveDocumentUseCase> _saveDocumentUseCaseMock = null!;
+        private Mock<IMarkdownService> _markdownServiceMock = null!;
         private NewDocumentUseCase _useCase = null!;
 
         [TestInitialize]
@@ -18,7 +19,13 @@ namespace PageLeaf.Tests.UseCases
         {
             _editorServiceMock = new Mock<IEditorService>();
             _saveDocumentUseCaseMock = new Mock<ISaveDocumentUseCase>();
-            _useCase = new NewDocumentUseCase(_editorServiceMock.Object, _saveDocumentUseCaseMock.Object);
+            _markdownServiceMock = new Mock<IMarkdownService>();
+
+            // デフォルトの振る舞い
+            _markdownServiceMock.Setup(m => m.UpdateFrontMatter(It.IsAny<string>(), It.IsAny<System.Collections.Generic.Dictionary<string, object>>()))
+                .Returns("---\ntitle: Untitled\n---\n");
+
+            _useCase = new NewDocumentUseCase(_editorServiceMock.Object, _saveDocumentUseCaseMock.Object, _markdownServiceMock.Object);
         }
 
         [TestMethod]
@@ -75,6 +82,22 @@ namespace PageLeaf.Tests.UseCases
             // Assert
             _saveDocumentUseCaseMock.Verify(x => x.Execute(), Times.Never);
             _editorServiceMock.Verify(x => x.NewDocument(), Times.Once);
+        }
+
+        [TestMethod]
+        public void Execute_ShouldApplyTemplate_WhenNewDocumentIsCreated()
+        {
+            // Arrange
+            _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.NoAction);
+            var expectedContent = "---\ntitle: Untitled\n---\n";
+            _markdownServiceMock.Setup(x => x.UpdateFrontMatter(It.IsAny<string>(), It.IsAny<System.Collections.Generic.Dictionary<string, object>>()))
+                .Returns(expectedContent);
+
+            // Act
+            _useCase.Execute();
+
+            // Assert
+            _editorServiceMock.VerifySet(x => x.EditorText = expectedContent, Times.Once);
         }
     }
 }

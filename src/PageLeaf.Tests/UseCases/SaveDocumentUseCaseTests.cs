@@ -13,6 +13,7 @@ namespace PageLeaf.Tests.UseCases
         private Mock<IEditorService> _editorServiceMock = null!;
         private Mock<IFileService> _fileServiceMock = null!;
         private Mock<ISaveAsDocumentUseCase> _saveAsDocumentUseCaseMock = null!;
+        private Mock<IMarkdownService> _markdownServiceMock = null!;
         private SaveDocumentUseCase _useCase = null!;
 
         [TestInitialize]
@@ -21,7 +22,15 @@ namespace PageLeaf.Tests.UseCases
             _editorServiceMock = new Mock<IEditorService>();
             _fileServiceMock = new Mock<IFileService>();
             _saveAsDocumentUseCaseMock = new Mock<ISaveAsDocumentUseCase>();
-            _useCase = new SaveDocumentUseCase(_editorServiceMock.Object, _fileServiceMock.Object, _saveAsDocumentUseCaseMock.Object);
+            _markdownServiceMock = new Mock<IMarkdownService>();
+
+            // デフォルトの振る舞い
+            _markdownServiceMock.Setup(m => m.ParseFrontMatter(It.IsAny<string>()))
+                .Returns(new System.Collections.Generic.Dictionary<string, object>());
+            _markdownServiceMock.Setup(m => m.UpdateFrontMatter(It.IsAny<string>(), It.IsAny<System.Collections.Generic.Dictionary<string, object>>()))
+                .Returns((string s, System.Collections.Generic.Dictionary<string, object> d) => s);
+
+            _useCase = new SaveDocumentUseCase(_editorServiceMock.Object, _fileServiceMock.Object, _saveAsDocumentUseCaseMock.Object, _markdownServiceMock.Object);
         }
 
         [TestMethod]
@@ -106,6 +115,51 @@ namespace PageLeaf.Tests.UseCases
             // Assert
             Assert.IsFalse(result);
             _fileServiceMock.Verify(x => x.Save(doc), Times.Once);
+        }
+
+        [TestMethod]
+        public void Execute_ShouldUpdateFrontMatter_WhenExists()
+        {
+            // Arrange
+            var doc = new MarkdownDocument { FilePath = "exist.md", Content = "---\ntitle: test\n---\n" };
+            _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
+            _fileServiceMock.Setup(x => x.FileExists("exist.md")).Returns(true);
+
+            _markdownServiceMock.Setup(m => m.ParseFrontMatter(doc.Content))
+                .Returns(new System.Collections.Generic.Dictionary<string, object> { { "title", "test" } });
+
+            _markdownServiceMock.Setup(m => m.UpdateFrontMatter(It.IsAny<string>(), It.IsAny<System.Collections.Generic.Dictionary<string, object>>()))
+                .Returns("---\ntitle: test\nupdated: now\n---\n");
+
+            // Act
+            var result = _useCase.Execute();
+
+            // Assert
+            _markdownServiceMock.Verify(m => m.UpdateFrontMatter(It.IsAny<string>(), It.Is<System.Collections.Generic.Dictionary<string, object>>(d => d.ContainsKey("updated"))), Times.Once);
+            Assert.AreEqual("---\ntitle: test\nupdated: now\n---\n", doc.Content);
+        }
+
+        [TestMethod]
+        public void Execute_ShouldAddUpdatedField_WhenFrontMatterExistsButUpdatedDoesNot()
+        {
+            // テスト観点: フロントマターは存在するが updated フィールドがない場合、updated が追加されることを確認する。
+            // Arrange
+            var doc = new MarkdownDocument { FilePath = "exist.md", Content = "---\ntitle: test\n---\n" };
+            _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
+            _fileServiceMock.Setup(x => x.FileExists("exist.md")).Returns(true);
+
+            _markdownServiceMock.Setup(m => m.ParseFrontMatter(doc.Content))
+                .Returns(new System.Collections.Generic.Dictionary<string, object> { { "title", "test" } });
+
+            _markdownServiceMock.Setup(m => m.UpdateFrontMatter(It.IsAny<string>(), It.IsAny<System.Collections.Generic.Dictionary<string, object>>()))
+                .Returns("---\ntitle: test\nupdated: now\n---\n");
+
+            // Act
+            var result = _useCase.Execute();
+
+            // Assert
+            _markdownServiceMock.Verify(m => m.UpdateFrontMatter(It.IsAny<string>(), It.Is<System.Collections.Generic.Dictionary<string, object>>(d => d.ContainsKey("updated"))), Times.Once);
+            Assert.AreEqual("---\ntitle: test\nupdated: now\n---\n", doc.Content);
         }
     }
 }

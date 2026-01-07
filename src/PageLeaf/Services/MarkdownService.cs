@@ -4,6 +4,9 @@ using System;
 using System.IO;
 using System.Reflection;
 using PageLeaf.Utilities.MarkdownExtensions;
+using System.Collections.Generic;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace PageLeaf.Services
 {
@@ -20,6 +23,7 @@ namespace PageLeaf.Services
         {
             var pipeline = new MarkdownPipelineBuilder()
                 .UseAdvancedExtensions()
+                .UseYamlFrontMatter()
                 .UseCodeBlockHeader()
                 .Build();
             var htmlBody = Markdown.ToHtml(markdown ?? string.Empty, pipeline);
@@ -96,6 +100,89 @@ namespace PageLeaf.Services
             htmlBuilder.AppendLine("</html>");
 
             return htmlBuilder.ToString();
+        }
+
+        public Dictionary<string, object> ParseFrontMatter(string markdown)
+        {
+            if (string.IsNullOrEmpty(markdown) || !markdown.StartsWith("---"))
+            {
+                return new Dictionary<string, object>();
+            }
+
+            using (var reader = new StringReader(markdown))
+            {
+                var line = reader.ReadLine(); // First ---
+                if (line?.TrimEnd() != "---") return new Dictionary<string, object>();
+
+                var yamlContent = new StringBuilder();
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (line.TrimEnd() == "---")
+                    {
+                        break;
+                    }
+                    yamlContent.AppendLine(line);
+                }
+
+                if (yamlContent.Length == 0) return new Dictionary<string, object>();
+
+                try
+                {
+                    var deserializer = new DeserializerBuilder()
+                        .WithNamingConvention(NullNamingConvention.Instance)
+                        .Build();
+                    var result = deserializer.Deserialize<Dictionary<string, object>>(yamlContent.ToString());
+                    return result ?? new Dictionary<string, object>();
+                }
+                catch
+                {
+                    return new Dictionary<string, object>();
+                }
+            }
+        }
+
+        public string UpdateFrontMatter(string markdown, Dictionary<string, object> newFrontMatter)
+        {
+            var currentFrontMatter = ParseFrontMatter(markdown);
+
+            foreach (var kvp in newFrontMatter)
+            {
+                currentFrontMatter[kvp.Key] = kvp.Value;
+            }
+
+            var serializer = new SerializerBuilder()
+                .WithNamingConvention(NullNamingConvention.Instance)
+                .Build();
+            var yaml = serializer.Serialize(currentFrontMatter);
+
+            string contentBody = markdown ?? string.Empty;
+            if (contentBody.StartsWith("---"))
+            {
+                using (var reader = new StringReader(contentBody))
+                {
+                    reader.ReadLine(); // ---
+                    string? line;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        if (line.TrimEnd() == "---") break;
+                    }
+                    contentBody = reader.ReadToEnd();
+                }
+            }
+
+            // 本文の先頭の空白を除去するかどうかは議論の余地があるが、
+            // Front Matter直後の改行が複数ある場合などは維持したい。
+            // しかしReadToEndは現在位置からの全てのテキストを返すため、最初の改行が含まれる可能性がある。
+            // YamlDotNetのSerializeは末尾に改行を付ける。
+            // "---\n" + yaml + "---\n" と contentBody を結合する。
+            // contentBody が改行で始まっている場合、そのまま結合すると空行ができる。
+            // ここではシンプルに結合し、必要に応じてユーザーが調整する前提とするが、
+            // 既存の空行が増殖しないように、contentBodyの先頭の改行を1つだけトリムするのが親切かもしれない。
+
+            if (contentBody.StartsWith("\r\n")) contentBody = contentBody.Substring(2);
+            else if (contentBody.StartsWith("\n")) contentBody = contentBody.Substring(1);
+
+            return "---\n" + yaml + "---\n" + contentBody;
         }
     }
 }

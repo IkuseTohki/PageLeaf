@@ -118,9 +118,8 @@ namespace PageLeaf.Services
             {
                 if (CurrentDocument.Content != value)
                 {
-                    CurrentDocument.Content = value; // ここで MarkdownDocument.IsDirty が true になる
+                    CurrentDocument.Content = value; // ここで MarkdownDocument.IsDirty が true になり、PropertyChangedイベント経由でUpdateHtmlContentが呼ばれる
                     OnPropertyChanged();
-                    UpdateHtmlContent();
                 }
             }
         }
@@ -149,6 +148,11 @@ namespace PageLeaf.Services
             if (e.PropertyName == nameof(MarkdownDocument.IsDirty))
             {
                 OnPropertyChanged(nameof(IsDirty)); // EditorService の IsDirty の変更を通知
+            }
+            else if (e.PropertyName == nameof(MarkdownDocument.Content))
+            {
+                OnPropertyChanged(nameof(EditorText)); // EditorText の変更を通知
+                UpdateHtmlContent(); // プレビューも更新
             }
         }
 

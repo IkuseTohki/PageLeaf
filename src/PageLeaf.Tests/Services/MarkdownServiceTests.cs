@@ -246,5 +246,87 @@ namespace PageLeaf.Tests.Services
 
             StringAssert.Contains(html, $"<base href=\"{baseUri}\" />");
         }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldHideYamlFrontMatter()
+        {
+            // テスト観点: YAMLフロントマターがHTML出力に含まれないことを確認する。
+            // Arrange
+            var markdown = "---\ntitle: test\n---\n\n# Content";
+
+            // Act
+            string html = _service.ConvertToHtml(markdown, null, null);
+
+            // Assert
+            Assert.IsFalse(html.Contains("title: test"), "YAML front matter should not be present in HTML body.");
+            StringAssert.Matches(html, new Regex(@"<h1.*>Content</h1>"), "Content should be present in HTML body as h1.");
+        }
+
+        [TestMethod]
+        public void ParseFrontMatter_ShouldReturnDictionary_WhenFrontMatterExists()
+        {
+            // テスト観点: フロントマターが存在する場合、正しく辞書形式で取得できることを確認する。
+            var markdown = "---\ntitle: test\ndate: 2026-01-01\n---\n# Content";
+            var result = _service.ParseFrontMatter(markdown);
+
+            Assert.IsTrue(result.ContainsKey("title"));
+            Assert.AreEqual("test", result["title"]);
+            Assert.IsTrue(result.ContainsKey("date"));
+            // YamlDotNetのデフォルトのデシリアライズ挙動により型が変わる可能性があるため文字列表現で比較
+            Assert.AreEqual("2026-01-01", result["date"].ToString());
+        }
+
+        [TestMethod]
+        public void ParseFrontMatter_ShouldReturnEmptyDictionary_WhenNoFrontMatter()
+        {
+            // テスト観点: フロントマターが存在しない場合、空の辞書が返されることを確認する。
+            var markdown = "# Content";
+            var result = _service.ParseFrontMatter(markdown);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(0, result.Count);
+        }
+
+        [TestMethod]
+        public void UpdateFrontMatter_ShouldUpdateExistingKey()
+        {
+            // テスト観点: 既存のフロントマターのキーが更新されることを確認する。
+            var markdown = "---\ntitle: old\n---\n# Content";
+            var update = new System.Collections.Generic.Dictionary<string, object> { { "title", "new" } };
+
+            var result = _service.UpdateFrontMatter(markdown, update);
+
+            Assert.IsTrue(result.Contains("title: new"));
+            Assert.IsFalse(result.Contains("title: old"));
+            Assert.IsTrue(result.Contains("# Content"));
+        }
+
+        [TestMethod]
+        public void UpdateFrontMatter_ShouldAddNewKey_WhenKeyDoesNotExist()
+        {
+            // テスト観点: 既存のフロントマターに新しいキーが追加されることを確認する。
+            var markdown = "---\ntitle: old\n---\n# Content";
+            var update = new System.Collections.Generic.Dictionary<string, object> { { "new_key", "value" } };
+
+            var result = _service.UpdateFrontMatter(markdown, update);
+
+            Assert.IsTrue(result.Contains("title: old"));
+            Assert.IsTrue(result.Contains("new_key: value"));
+            Assert.IsTrue(result.Contains("# Content"));
+        }
+
+        [TestMethod]
+        public void UpdateFrontMatter_ShouldCreateNewFrontMatter_WhenNoneExists()
+        {
+            // テスト観点: フロントマターが存在しない場合、新規に作成されることを確認する。
+            var markdown = "# Content";
+            var update = new System.Collections.Generic.Dictionary<string, object> { { "title", "created" } };
+
+            var result = _service.UpdateFrontMatter(markdown, update);
+
+            StringAssert.StartsWith(result, "---\n");
+            Assert.IsTrue(result.Contains("title: created"));
+            Assert.IsTrue(result.EndsWith("# Content"));
+        }
     }
 }

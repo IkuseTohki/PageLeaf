@@ -250,6 +250,31 @@ namespace PageLeaf.Tests.Services
             // Assert
             Assert.AreEqual(insertedText, receivedText);
         }
+
+        [TestMethod]
+        public void CurrentDocument_ContentChangedExternally_ShouldRaiseEditorTextPropertyChanged()
+        {
+            // テスト観点: CurrentDocument の Content が直接変更された場合、EditorService が EditorText の変更通知を発行することを確認する。
+            // Arrange
+            var document = new MarkdownDocument { Content = "Initial" };
+            _editorService.LoadDocument(document);
+
+            var propertyChangedRaised = false;
+            _editorService.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(EditorService.EditorText))
+                {
+                    propertyChangedRaised = true;
+                }
+            };
+
+            // Act
+            document.Content = "Updated";
+
+            // Assert
+            Assert.IsTrue(propertyChangedRaised, "EditorTextの変更通知が発生すべきです");
+            Assert.AreEqual("Updated", _editorService.EditorText);
+        }
     }
 }
 
