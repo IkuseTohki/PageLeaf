@@ -24,7 +24,7 @@ namespace PageLeaf.Services
         {
             _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _cssDirectoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "css");
+            _cssDirectoryPath = Path.Combine(App.BaseDirectory, "css");
             _logger.LogInformation("CSS directory path initialized to: {CssDirectoryPath}", _cssDirectoryPath);
         }
 

@@ -150,7 +150,7 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var cssFileName = "github.css";
             _cssService = new CssService(_mockFileService.Object, _mockLogger.Object);
-            var expectedPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "css", cssFileName);
+            var expectedPath = Path.Combine(App.BaseDirectory, "css", cssFileName);
 
             // Act
             var result = _cssService.GetCssPath(cssFileName);

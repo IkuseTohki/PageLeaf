@@ -186,10 +186,10 @@ namespace PageLeaf.Tests.Services
             string html = _service.ConvertToHtml(markdown, null, null);
 
             // 絶対パスの構築
-            var scriptFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "highlight.min.js");
+            var scriptFilePath = Path.Combine(App.BaseDirectory, "highlight", "highlight.min.js");
             var scriptFileUri = new Uri(scriptFilePath).AbsoluteUri;
 
-            var cssFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "styles", customTheme);
+            var cssFilePath = Path.Combine(App.BaseDirectory, "highlight", "styles", customTheme);
             var cssFileUri = new Uri(cssFilePath).AbsoluteUri;
 
             // Assert
@@ -236,7 +236,7 @@ namespace PageLeaf.Tests.Services
         {
             // テスト観点: ベースディレクトリが提供された場合、<head>に<base>タグが挿入されることを確認する。
             var markdown = "Test";
-            var baseDir = AppDomain.CurrentDomain.BaseDirectory; // 実際に存在するディレクトリを使用
+            var baseDir = App.BaseDirectory; // 実際に存在するディレクトリを使用
 
             var html = _service.ConvertToHtml(markdown, null, baseDir);
 

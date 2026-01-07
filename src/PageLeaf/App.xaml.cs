@@ -19,6 +19,24 @@ namespace PageLeaf
     public partial class App : Application
     {
         /// <summary>
+        /// アプリケーションのベースディレクトリを取得します。
+        /// SingleFile発行時は実行ファイルの場所、それ以外は AppDomain.CurrentDomain.BaseDirectory を返します。
+        /// </summary>
+        public static string BaseDirectory
+        {
+            get
+            {
+                var processPath = Environment.ProcessPath;
+                if (!string.IsNullOrEmpty(processPath) &&
+                    Path.GetFileNameWithoutExtension(processPath).Equals("PageLeaf", StringComparison.OrdinalIgnoreCase))
+                {
+                    return Path.GetDirectoryName(processPath)!;
+                }
+                return AppDomain.CurrentDomain.BaseDirectory;
+            }
+        }
+
+        /// <summary>
         /// DIコンテナやロギングなどのアプリケーションサービスをホストします。
         /// </summary>
         public static IHost? AppHost { get; private set; }
@@ -39,7 +57,7 @@ namespace PageLeaf
                 .UseSerilog((hostContext, services, configuration) =>
                 {
                     // ログファイルのパスを設定
-                    var logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs", "PageLeaf-.txt");
+                    var logPath = Path.Combine(BaseDirectory, "logs", "PageLeaf-.txt");
 
                     configuration
                         .MinimumLevel.Debug()

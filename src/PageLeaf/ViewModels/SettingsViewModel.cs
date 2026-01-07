@@ -123,7 +123,7 @@ namespace PageLeaf.ViewModels
             {
                 // 実行ディレクトリからの相対パスでテーマを探す
                 // 開発環境と実行環境の両方を考慮
-                var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+                var baseDir = App.BaseDirectory;
                 var themesDir = Path.Combine(baseDir, "highlight", "styles");
 
                 if (!Directory.Exists(themesDir))

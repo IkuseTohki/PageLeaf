@@ -44,7 +44,7 @@ namespace PageLeaf.Services
             }
 
             // 拡張機能用のベーススタイルを追加
-            var extensionsCssPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "css", "extensions.css");
+            var extensionsCssPath = Path.Combine(App.BaseDirectory, "css", "extensions.css");
             var extensionsCssUri = new Uri(extensionsCssPath).AbsoluteUri;
             headBuilder.AppendLine($@"<link rel=""stylesheet"" href=""{extensionsCssUri}"">");
 
@@ -60,7 +60,7 @@ namespace PageLeaf.Services
             var themeName = _settingsService.CurrentSettings.CodeBlockTheme;
             if (string.IsNullOrEmpty(themeName)) themeName = "github.css";
 
-            var cssFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "styles", themeName);
+            var cssFilePath = Path.Combine(App.BaseDirectory, "highlight", "styles", themeName);
             var cssFileUri = new Uri(cssFilePath).AbsoluteUri;
             headBuilder.AppendLine($@"<link rel=""stylesheet"" href=""{cssFileUri}"">");
 
@@ -74,9 +74,9 @@ namespace PageLeaf.Services
             htmlBuilder.Append(htmlBody);
 
             // highlight.jsライブラリへのリンクを絶対パスで指定
-            var scriptFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "highlight.min.js");
-            var extensionScriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "highlight", "pageleaf-extensions.js");
-            var mermaidScriptPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "mermaid", "mermaid.min.js");
+            var scriptFilePath = Path.Combine(App.BaseDirectory, "highlight", "highlight.min.js");
+            var extensionScriptPath = Path.Combine(App.BaseDirectory, "highlight", "pageleaf-extensions.js");
+            var mermaidScriptPath = Path.Combine(App.BaseDirectory, "mermaid", "mermaid.min.js");
 
             // file:// スキームのURIに変換
             var scriptFileUri = new Uri(scriptFilePath).AbsoluteUri;
