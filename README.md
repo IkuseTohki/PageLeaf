@@ -1,6 +1,6 @@
 # PageLeaf
 
-![PageLeaf Icon](spec/assets/icon_proposal_4.svg)
+![PageLeaf Icon](spec/assets/icon.svg)
 
 PageLeaf は、Markdown ドキュメントのデザイン（CSS）作成・編集に特化したデスクトップツールです。
 プレビュー画面でリアルタイムにスタイルの変化を確認しながら、GUI を通じて直感的に Markdown 用の CSS を作成・カスタマイズできます。

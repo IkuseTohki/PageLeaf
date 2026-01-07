@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" fill="none" />
+  <!-- 本の表紙（青色） -->
+  <path d="M10,30 Q50,40 90,30 L90,80 Q50,90 10,80 Z" fill="#007ACC" />
+  <!-- ページ（白色） -->
+  <path d="M15,33 Q50,42 85,33 L85,77 Q50,87 15,77 Z" fill="#FFFFFF" />
+  <!-- 中央の溝 -->
+  <line x1="50" y1="42" x2="50" y2="83" stroke="#E0E0E0" stroke-width="1.5" stroke-linecap="round" />
+  
+  <!-- 若葉 -->
+  <g transform="translate(62, 72)">
+    <!-- 左：大 -->
+    <path d="M0,0 C-8,-12 -32,-18 -32,-42 C-12,-42 0,-25 0,0" fill="#4CAF50" />
+    <!-- 葉脈（左3本、外側へのカーブ） -->
+    <path d="M0,0 Q-5,-25 -24,-36" stroke="#FFFFFF" stroke-width="1.5" fill="none" stroke-linecap="round" />
+    <path d="M-4,-12 Q-10,-8 -18,-7" stroke="#FFFFFF" stroke-width="0.8" fill="none" />
+    <path d="M-8,-21 Q-14,-17 -24,-16" stroke="#FFFFFF" stroke-width="0.8" fill="none" />
+    <path d="M-12,-30 Q-18,-26 -29,-25" stroke="#FFFFFF" stroke-width="0.8" fill="none" />
+    
+    <!-- 右：小（さらにサイズを縮小） -->
+    <path d="M0,0 C4,-4 16,-8 16,-22 C8,-22 0,-14 0,0" fill="#8BC34A" />
+    <!-- 葉脈（真ん中の線のみ、外側へのカーブ） -->
+    <path d="M0,0 Q4,-12 11,-18" stroke="#FFFFFF" stroke-width="1.2" fill="none" stroke-linecap="round" />
+  </g>
+</svg>
