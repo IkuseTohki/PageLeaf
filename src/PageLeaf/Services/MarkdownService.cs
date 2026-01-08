@@ -7,6 +7,8 @@ using PageLeaf.Utilities.MarkdownExtensions;
 using System.Collections.Generic;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
+using Markdig.Syntax;
+using Markdig.Renderers.Html;
 
 namespace PageLeaf.Services
 {
@@ -183,6 +185,68 @@ namespace PageLeaf.Services
             else if (contentBody.StartsWith("\n")) contentBody = contentBody.Substring(1);
 
             return "---\n" + yaml + "---\n" + contentBody;
+        }
+
+        public List<PageLeaf.Models.TocItem> ExtractHeaders(string markdown)
+        {
+            var list = new List<PageLeaf.Models.TocItem>();
+            if (string.IsNullOrEmpty(markdown)) return list;
+
+            var pipeline = new MarkdownPipelineBuilder()
+                .UseAdvancedExtensions()
+                .UseYamlFrontMatter()
+                .UseCodeBlockHeader() // ID生成の一貫性を保つため
+                .Build();
+
+            var document = Markdown.Parse(markdown, pipeline);
+
+            foreach (var block in document)
+            {
+                if (block is Markdig.Syntax.HeadingBlock headingBlock)
+                {
+                    if (headingBlock.Level <= 3)
+                    {
+                        var text = GetInlineText(headingBlock.Inline);
+                        var id = headingBlock.GetAttributes().Id;
+
+                        // AdvancedExtensions には AutoIdentifiers が含まれているため、
+                        // 基本的には ID が自動生成されるはずです。
+
+                        list.Add(new PageLeaf.Models.TocItem
+                        {
+                            Level = headingBlock.Level,
+                            Text = text,
+                            Id = id ?? string.Empty,
+                            LineNumber = headingBlock.Line
+                        });
+                    }
+                }
+            }
+            return list;
+        }
+
+        /// <summary>インライン要素からテキストのみを抽出します。</summary>
+        private string GetInlineText(Markdig.Syntax.Inlines.ContainerInline? inline)
+        {
+            if (inline == null) return string.Empty;
+            var sb = new StringBuilder();
+            foreach (var child in inline)
+            {
+                if (child is Markdig.Syntax.Inlines.LiteralInline literal)
+                {
+                    sb.Append(literal.Content);
+                }
+                else if (child is Markdig.Syntax.Inlines.CodeInline code)
+                {
+                    sb.Append(code.Content);
+                }
+                else if (child is Markdig.Syntax.Inlines.ContainerInline container)
+                {
+                    sb.Append(GetInlineText(container));
+                }
+                // 必要に応じて他のインライン型（強調、リンク等）の処理を追加
+            }
+            return sb.ToString();
         }
     }
 }

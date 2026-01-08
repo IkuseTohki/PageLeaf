@@ -29,5 +29,12 @@ namespace PageLeaf.Services
         /// <param name="newFrontMatter">設定するフロントマターの内容。</param>
         /// <returns>更新されたMarkdown文字列。</returns>
         string UpdateFrontMatter(string markdown, System.Collections.Generic.Dictionary<string, object> newFrontMatter);
+
+        /// <summary>
+        /// 指定されたMarkdownテキストから見出し（H1-H3）を抽出します。
+        /// </summary>
+        /// <param name="markdown">Markdown文字列。</param>
+        /// <returns>抽出された見出しリスト。</returns>
+        System.Collections.Generic.List<PageLeaf.Models.TocItem> ExtractHeaders(string markdown);
     }
 }

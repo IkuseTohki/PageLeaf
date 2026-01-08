@@ -6,6 +6,7 @@
     <utilities:DoubleToGridLengthConverter x:Key="DoubleToGridLengthConverter" />
     <utilities:StringToBrushConverter x:Key="StringToBrushConverter" />
     <utilities:ComparisonConverter x:Key="ComparisonConverter" />
+    <utilities:LevelToMarginConverter x:Key="LevelToMarginConverter" />
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
 </ResourceDictionary>

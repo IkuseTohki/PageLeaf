@@ -17,31 +17,60 @@
         <!-- Panel Toolbar -->
         <Border Grid.Row="0"
                 Padding="5"
-                BorderBrush="LightGray"
+                Background="{StaticResource PanelBackgroundBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
                 BorderThickness="0,0,0,1">
-            <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
-                <Button Margin="0,0,10,0"
-                        Command="{Binding ResetCommand}"
-                        Style="{StaticResource IconButtonStyle}"
-                        ToolTip="設定をリセット (ファイルから再読み込み)">
-                    <StackPanel Orientation="Horizontal">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Icon and Selector -->
+                <StackPanel Grid.Column="0"
+                            VerticalAlignment="Center"
+                            Orientation="Horizontal">
+                    <Image Width="20"
+                           Height="20"
+                           Margin="5,0,8,0"
+                           Source="{StaticResource CssLogoImage}"
+                           ToolTip="CSS設定" />
+
+                    <ComboBox Width="150"
+                              ItemsSource="{Binding DataContext.AvailableCssFiles, RelativeSource={RelativeSource AncestorType=Window}}"
+                              SelectedItem="{Binding DataContext.SelectedCssFile, RelativeSource={RelativeSource AncestorType=Window}}"
+                              Style="{StaticResource CssFileComboBoxStyle}"
+                              ToolTip="スタイル選択" />
+                </StackPanel>
+
+                <!-- Actions -->
+                <StackPanel Grid.Column="2"
+                            HorizontalAlignment="Right"
+                            Orientation="Horizontal">
+                    <Button Margin="0,0,10,0"
+                            Command="{Binding ResetCommand}"
+                            Style="{StaticResource IconButtonStyle}"
+                            ToolTip="設定をリセット (ファイルから再読み込み)">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Width="14"
+                                  Height="14"
+                                  Data="{StaticResource RefreshIconGeometry}"
+                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Stretch="Uniform" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding SaveCssCommand}"
+                            Style="{StaticResource IconButtonStyle}"
+                            ToolTip="CSSを保存">
                         <Path Width="14"
                               Height="14"
-                              Data="{StaticResource RefreshIconGeometry}"
+                              Data="{StaticResource SaveIconGeometry}"
                               Fill="{StaticResource PrimaryTextBrush}"
                               Stretch="Uniform" />
-                    </StackPanel>
-                </Button>
-                <Button Command="{Binding SaveCssCommand}"
-                        Style="{StaticResource IconButtonStyle}"
-                        ToolTip="CSSを保存">
-                    <Path Width="14"
-                          Height="14"
-                          Data="{StaticResource SaveIconGeometry}"
-                          Fill="{StaticResource PrimaryTextBrush}"
-                          Stretch="Uniform" />
-                </Button>
-            </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
         </Border>
 
         <!-- Tab Container -->

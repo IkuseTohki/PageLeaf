@@ -134,7 +134,7 @@ namespace PageLeaf.Services
             _cssService = cssService;
             _dialogService = dialogService; // IDialogService を設定
 
-            SelectedMode = DisplayMode.Markdown; // 初期モード
+            SelectedMode = DisplayMode.Viewer; // 初期モード
 
             // CurrentDocument の PropertyChanged イベントを購読し、IsDirty の変更を検知
             _currentDocument.PropertyChanged += CurrentDocument_PropertyChanged;

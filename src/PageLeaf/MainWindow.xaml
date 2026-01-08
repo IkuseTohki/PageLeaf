@@ -31,13 +31,17 @@
         <KeyBinding Key="V"
                     Command="{Binding PasteImageCommand}"
                     Modifiers="Control+Shift" />
+        <KeyBinding Key="Left"
+                    Command="{Binding ToggleDisplayModeCommand}"
+                    Modifiers="Alt+Shift" />
+        <KeyBinding Key="Right"
+                    Command="{Binding ToggleDisplayModeCommand}"
+                    Modifiers="Alt+Shift" />
     </Window.InputBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <!-- Menu -->
-            <RowDefinition Height="Auto" />
-            <!-- ToolBar -->
             <RowDefinition Height="*" />
             <!-- Main Content -->
         </Grid.RowDefinitions>
@@ -67,29 +71,8 @@
             </MenuItem>
         </Menu>
 
-        <!-- ToolBar -->
-        <Border Grid.Row="1" Style="{StaticResource ToolBarLikeBorder}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0" Orientation="Horizontal">
-                    <ComboBox ItemsSource="{Binding AvailableModes}"
-                              SelectedItem="{Binding Editor.SelectedMode}"
-                              Style="{StaticResource DisplayModeComboBoxStyle}" />
-                    <ComboBox ItemsSource="{Binding AvailableCssFiles}"
-                              SelectedItem="{Binding SelectedCssFile}"
-                              Style="{StaticResource CssFileComboBoxStyle}" />
-                </StackPanel>
-            </Grid>
-        </Border>
-
         <!-- Main Content -->
-        <Grid x:Name="MainGrid" Grid.Row="2">
+        <Grid x:Name="MainGrid" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -97,7 +80,7 @@
                     <ColumnDefinition.Style>
                         <Style TargetType="ColumnDefinition">
                             <Setter Property="Width" Value="{Binding CssEditorColumnWidth, Mode=TwoWay, Converter={StaticResource DoubleToGridLengthConverter}}" />
-                            <Setter Property="MinWidth" Value="200" />
+                            <Setter Property="MinWidth" Value="250" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsCssEditorVisible}" Value="False">
                                     <Setter Property="Width" Value="0" />
@@ -126,6 +109,97 @@
                               utils:WebBrowserHelper.Html="{Binding Editor.HtmlFilePath}"
                               utils:WebBrowserHelper.InjectedCss="{Binding CssEditorViewModel.PreviewCss}"
                               Visibility="{Binding Editor.IsViewerVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                <!-- Overlay Buttons Anchor -->
+                <Grid Margin="0,5,100,0"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Top">
+                    <Rectangle x:Name="OverlayButtonsAnchor"
+                               Width="0"
+                               Height="0" />
+                </Grid>
+
+                <!-- Overlay Buttons (Popup to show over WebView2) -->
+                <Popup behaviors:PopupFollowBehavior.IsEnabled="True"
+                       AllowsTransparency="True"
+                       IsOpen="True"
+                       Placement="Bottom"
+                       PlacementTarget="{Binding ElementName=OverlayButtonsAnchor}"
+                       StaysOpen="True">
+                    <StackPanel Background="Transparent" Orientation="Horizontal">
+                        <!-- Edit/Preview Toggle (Left) -->
+                        <Button Margin="0,0,8,0"
+                                Command="{Binding ToggleDisplayModeCommand}"
+                                Style="{StaticResource FloatingButtonStyle}"
+                                ToolTip="表示モード切替 (Alt+Shift+←/→)">
+                            <Path Width="16"
+                                  Height="16"
+                                  Fill="{StaticResource AccentBlueBrush}"
+                                  Stretch="Uniform">
+                                <Path.Style>
+                                    <Style TargetType="Path">
+                                        <Setter Property="Data" Value="{StaticResource PenIconGeometry}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Editor.SelectedMode}" Value="Markdown">
+                                                <Setter Property="Data" Value="{StaticResource EyeIconGeometry}" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Path.Style>
+                            </Path>
+                        </Button>
+
+                        <!-- TOC Button (Right) -->
+                        <ToggleButton x:Name="TocButton"
+                                      Command="{Binding ToggleTocCommand}"
+                                      IsChecked="{Binding IsTocOpen, Mode=OneWay}"
+                                      Style="{StaticResource FloatingToggleButtonStyle}"
+                                      ToolTip="目次 (TOC)">
+                            <Path Width="16"
+                                  Height="16"
+                                  Data="{StaticResource ListIconGeometry}"
+                                  Fill="{StaticResource AccentBlueBrush}"
+                                  Stretch="Uniform" />
+                        </ToggleButton>
+                    </StackPanel>
+                </Popup>
+
+                <!-- TOC Popup -->
+                <Popup behaviors:PopupFollowBehavior.IsEnabled="True"
+                       AllowsTransparency="True"
+                       IsOpen="{Binding IsTocOpen}"
+                       Placement="Bottom"
+                       PlacementTarget="{Binding ElementName=TocButton}"
+                       PopupAnimation="Fade"
+                       StaysOpen="False">
+                    <Border MinWidth="200"
+                            MaxHeight="400"
+                            Padding="5"
+                            Background="{StaticResource PanelBackgroundBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <ItemsControl ItemsSource="{Binding TocItems}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Button Padding="5,2"
+                                                HorizontalAlignment="Stretch"
+                                                HorizontalContentAlignment="Left"
+                                                Background="Transparent"
+                                                BorderThickness="0"
+                                                Command="{Binding DataContext.NavigateToHeaderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}">
+                                            <TextBlock Margin="{Binding Level, Converter={StaticResource LevelToMarginConverter}}"
+                                                       Text="{Binding Text}"
+                                                       TextTrimming="CharacterEllipsis" />
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </Border>
+                </Popup>
             </Grid>
 
             <!-- 境界線 (GridSplitterはMainGridの直下である必要がある) -->

@@ -328,5 +328,58 @@ namespace PageLeaf.Tests.Services
             Assert.IsTrue(result.Contains("title: created"));
             Assert.IsTrue(result.EndsWith("# Content"));
         }
+
+        [TestMethod]
+        public void ExtractHeaders_ShouldReturnH1toH3()
+        {
+            // テスト観点: H1からH3までの見出しが正しく抽出されることを確認する。
+            var markdown = "# Header 1\n## Header 2\n### Header 3\n#### Header 4\nText";
+            var result = _service.ExtractHeaders(markdown);
+
+            Assert.AreEqual(3, result.Count);
+            Assert.AreEqual(1, result[0].Level);
+            Assert.AreEqual("Header 1", result[0].Text);
+            Assert.AreEqual(2, result[1].Level);
+            Assert.AreEqual("Header 2", result[1].Text);
+            Assert.AreEqual(3, result[2].Level);
+            Assert.AreEqual("Header 3", result[2].Text);
+        }
+
+        [TestMethod]
+        public void ExtractHeaders_ShouldGenerateIds()
+        {
+            // テスト観点: 見出しに対応するIDが生成されていることを確認する。
+            // MarkdigのAutoIdentifiersはデフォルトで小文字化・ハイフン連結を行うはず
+            var markdown = "# My Header";
+            var result = _service.ExtractHeaders(markdown);
+
+            Assert.AreEqual(1, result.Count);
+            Assert.AreEqual("my-header", result[0].Id);
+        }
+
+        [TestMethod]
+        public void ExtractHeaders_ShouldGenerateIdsForJapanese()
+        {
+            // テスト観点: 日本語の見出しに対してもIDが生成されることを確認する。
+            var markdown = "# 日本語の見出し";
+            var result = _service.ExtractHeaders(markdown);
+
+            Assert.AreEqual(1, result.Count);
+            // MarkdigのAutoIdentifiers(AutoLink)のデフォルトでは日本語はIDにならない場合があるため確認
+            // 何らかのIDが生成されていることを期待
+            Assert.IsFalse(string.IsNullOrEmpty(result[0].Id), $"ID should not be empty for Japanese headers. Actual: '{result[0].Id}'");
+        }
+
+        [TestMethod]
+        public void ExtractHeaders_ShouldIncludeLineNumbers()
+        {
+            // テスト観点: 見出しの行番号が正しく取得されていることを確認する。
+            var markdown = "First line\n\n# Header at line 2\n\n## Header at line 4";
+            var result = _service.ExtractHeaders(markdown);
+
+            Assert.AreEqual(2, result.Count);
+            Assert.AreEqual(2, result[0].LineNumber); // Markdigの行番号は0始まり
+            Assert.AreEqual(4, result[1].LineNumber);
+        }
     }
 }

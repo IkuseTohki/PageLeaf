@@ -23,6 +23,7 @@ namespace PageLeaf.Tests.ViewModels
         private Mock<ISaveDocumentUseCase> _saveDocumentUseCaseMock = null!;
         private Mock<ISaveAsDocumentUseCase> _saveAsDocumentUseCaseMock = null!;
         private Mock<IPasteImageUseCase> _pasteImageUseCaseMock = null!;
+        private Mock<IMarkdownService> _markdownServiceMock = null!;
         private MainViewModel _viewModel = null!;
         private CssEditorViewModel _cssEditorViewModel = null!;
 
@@ -40,6 +41,7 @@ namespace PageLeaf.Tests.ViewModels
             _saveDocumentUseCaseMock = new Mock<ISaveDocumentUseCase>();
             _saveAsDocumentUseCaseMock = new Mock<ISaveAsDocumentUseCase>();
             _pasteImageUseCaseMock = new Mock<IPasteImageUseCase>();
+            _markdownServiceMock = new Mock<IMarkdownService>();
 
             _cssEditorViewModel = new CssEditorViewModel(
                 _cssManagementServiceMock.Object,
@@ -63,7 +65,111 @@ namespace PageLeaf.Tests.ViewModels
                 _openDocumentUseCaseMock.Object,
                 _saveDocumentUseCaseMock.Object,
                 _saveAsDocumentUseCaseMock.Object,
-                _pasteImageUseCaseMock.Object);
+                _pasteImageUseCaseMock.Object,
+                _markdownServiceMock.Object);
+        }
+
+        [TestMethod]
+        public void ToggleDisplayMode_ShouldSwitchMode()
+        {
+            // テスト観点: 表示モードがトグルされることを確認する。
+            // Arrange
+            _editorServiceMock.SetupProperty(e => e.SelectedMode, DisplayMode.Viewer);
+
+            // Act: Viewer -> Markdown
+            _viewModel.ToggleDisplayModeCommand.Execute(null);
+
+            // Assert
+            Assert.AreEqual(DisplayMode.Markdown, _editorServiceMock.Object.SelectedMode);
+
+            // Act: Markdown -> Viewer
+            _viewModel.ToggleDisplayModeCommand.Execute(null);
+
+            // Assert
+            Assert.AreEqual(DisplayMode.Viewer, _editorServiceMock.Object.SelectedMode);
+        }
+
+        [TestMethod]
+        public void ToggleDisplayMode_ShouldRequestFocus()
+        {
+            // テスト観点: モード切替時にフォーカス要求イベントが発行されることを確認する。
+            // Arrange
+            _editorServiceMock.SetupProperty(e => e.SelectedMode, DisplayMode.Viewer);
+            DisplayMode? requestedMode = null;
+            _viewModel.RequestFocus += (s, mode) => requestedMode = mode;
+
+            // Act: Viewer -> Markdown
+            _viewModel.ToggleDisplayModeCommand.Execute(null);
+
+            // Assert
+            Assert.AreEqual(DisplayMode.Markdown, requestedMode);
+
+            // Act: Markdown -> Viewer
+            _viewModel.ToggleDisplayModeCommand.Execute(null);
+
+            // Assert
+            Assert.AreEqual(DisplayMode.Viewer, requestedMode);
+        }
+
+        [TestMethod]
+        public void ToggleToc_ShouldLoadHeaders_WhenOpening()
+        {
+            // テスト観点: TOCを開くときにMarkdownServiceからヘッダーをロードすることを確認する。
+            // Arrange
+            _viewModel.IsTocOpen = false;
+            var headers = new List<TocItem> { new TocItem { Text = "H1", Level = 1, Id = "h1" } };
+            _editorServiceMock.Setup(e => e.EditorText).Returns("# H1");
+            _markdownServiceMock.Setup(m => m.ExtractHeaders("# H1")).Returns(headers);
+
+            // Act
+            _viewModel.ToggleTocCommand.Execute(null);
+
+            // Assert
+            Assert.IsTrue(_viewModel.IsTocOpen);
+            Assert.AreEqual(1, _viewModel.TocItems.Count);
+            Assert.AreEqual("H1", _viewModel.TocItems[0].Text);
+            _markdownServiceMock.Verify(m => m.ExtractHeaders("# H1"), Times.Once);
+        }
+
+        [TestMethod]
+        public void ToggleToc_ShouldNotLoadHeaders_WhenClosing()
+        {
+            // テスト観点: TOCを閉じるときにはヘッダーの再ロードは不要であることを確認する。
+            // Arrange
+            _editorServiceMock.Setup(e => e.EditorText).Returns("");
+            _markdownServiceMock.Setup(m => m.ExtractHeaders(It.IsAny<string>())).Returns(new List<TocItem>());
+
+            // 一旦開く（このときはロードされる）
+            _viewModel.IsTocOpen = true;
+            _markdownServiceMock.Invocations.Clear(); // 呼び出し履歴クリア
+
+            // Act
+            _viewModel.ToggleTocCommand.Execute(null);
+
+            // Assert
+            Assert.IsFalse(_viewModel.IsTocOpen);
+            _markdownServiceMock.Verify(m => m.ExtractHeaders(It.IsAny<string>()), Times.Never);
+        }
+
+        [TestMethod]
+        public void NavigateToHeader_ShouldCloseTocAndRequestScroll()
+        {
+            // テスト観点: ヘッダーへナビゲートすると、TOCが閉じられ、スクロールリクエストイベントが発行されることを確認する。
+            // Arrange
+            _editorServiceMock.Setup(e => e.EditorText).Returns("");
+            _markdownServiceMock.Setup(m => m.ExtractHeaders(It.IsAny<string>())).Returns(new List<TocItem>());
+
+            _viewModel.IsTocOpen = true;
+            string? scrolledId = null;
+            _viewModel.RequestScrollToHeader += (s, item) => scrolledId = item.Id;
+            var item = new TocItem { Id = "target-id" };
+
+            // Act
+            _viewModel.NavigateToHeaderCommand.Execute(item);
+
+            // Assert
+            Assert.IsFalse(_viewModel.IsTocOpen);
+            Assert.AreEqual("target-id", scrolledId);
         }
 
         [TestMethod]

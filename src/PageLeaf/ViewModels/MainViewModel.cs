@@ -22,16 +22,52 @@ namespace PageLeaf.ViewModels
         private readonly ISaveDocumentUseCase _saveDocumentUseCase;
         private readonly ISaveAsDocumentUseCase _saveAsDocumentUseCase;
         private readonly IPasteImageUseCase _pasteImageUseCase;
+        private readonly IMarkdownService _markdownService;
 
         private bool _isCssEditorVisible;
         private ObservableCollection<string> _availableCssFiles = null!;
         private string _selectedCssFile = null!;
         private bool _isWebView2Initialized;
         private double _cssEditorColumnWidth = 230.0;
+        private bool _isTocOpen; // 目次が開いているかどうか
+        private ObservableCollection<TocItem> _tocItems = new ObservableCollection<TocItem>(); // 目次アイテム
 
         public IEditorService Editor { get; }
         public CssEditorViewModel CssEditorViewModel { get; }
         public ObservableCollection<DisplayMode> AvailableModes { get; }
+
+        /// <summary>
+        /// 目次ポップアップが開いているかどうかを取得または設定します。
+        /// </summary>
+        public bool IsTocOpen
+        {
+            get => _isTocOpen;
+            set
+            {
+                if (_isTocOpen != value)
+                {
+                    _isTocOpen = value;
+                    OnPropertyChanged();
+                    if (_isTocOpen)
+                    {
+                        LoadToc();
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 目次アイテムのリスト。
+        /// </summary>
+        public ObservableCollection<TocItem> TocItems
+        {
+            get => _tocItems;
+            set
+            {
+                _tocItems = value;
+                OnPropertyChanged();
+            }
+        }
 
         public bool IsCssEditorVisible
         {
@@ -133,6 +169,12 @@ namespace PageLeaf.ViewModels
         public ICommand ShowAboutCommand { get; }
         public ICommand PasteImageCommand { get; }
         public ICommand OpenFileByPathCommand { get; }
+        /// <summary>表示モード（エディタ/プレビュー）を切り替えるコマンド。</summary>
+        public ICommand ToggleDisplayModeCommand { get; }
+        /// <summary>目次の表示/非表示を切り替えるコマンド。</summary>
+        public ICommand ToggleTocCommand { get; }
+        /// <summary>目次から特定の見出しへナビゲートするコマンド。</summary>
+        public ICommand NavigateToHeaderCommand { get; }
 
 
         public MainViewModel(
@@ -147,7 +189,8 @@ namespace PageLeaf.ViewModels
             IOpenDocumentUseCase openDocumentUseCase,
             ISaveDocumentUseCase saveDocumentUseCase,
             ISaveAsDocumentUseCase saveAsDocumentUseCase,
-            IPasteImageUseCase pasteImageUseCase)
+            IPasteImageUseCase pasteImageUseCase,
+            IMarkdownService markdownService)
         {
             ArgumentNullException.ThrowIfNull(fileService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -161,6 +204,7 @@ namespace PageLeaf.ViewModels
             ArgumentNullException.ThrowIfNull(saveDocumentUseCase);
             ArgumentNullException.ThrowIfNull(saveAsDocumentUseCase);
             ArgumentNullException.ThrowIfNull(pasteImageUseCase);
+            ArgumentNullException.ThrowIfNull(markdownService);
 
             _fileService = fileService;
             _logger = logger;
@@ -174,8 +218,9 @@ namespace PageLeaf.ViewModels
             _saveDocumentUseCase = saveDocumentUseCase;
             _saveAsDocumentUseCase = saveAsDocumentUseCase;
             _pasteImageUseCase = pasteImageUseCase;
+            _markdownService = markdownService;
 
-            // Subscribe to event
+            // イベント購読
             CssEditorViewModel.CssSaved += OnCssSaved;
 
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
@@ -187,6 +232,9 @@ namespace PageLeaf.ViewModels
             ShowAboutCommand = new Utilities.DelegateCommand(ExecuteShowAbout);
             PasteImageCommand = new Utilities.DelegateCommand(ExecutePasteImage);
             OpenFileByPathCommand = new Utilities.DelegateCommand(ExecuteOpenFileByPath);
+            ToggleDisplayModeCommand = new Utilities.DelegateCommand(ExecuteToggleDisplayMode);
+            ToggleTocCommand = new Utilities.DelegateCommand(ExecuteToggleToc);
+            NavigateToHeaderCommand = new Utilities.DelegateCommand(ExecuteNavigateToHeader);
 
             AvailableModes = new ObservableCollection<DisplayMode>(
                 Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>()
@@ -271,6 +319,51 @@ namespace PageLeaf.ViewModels
             {
                 _logger.LogInformation("OpenFileByPathCommand executed for: {FilePath}", filePath);
                 _openDocumentUseCase.OpenPath(filePath);
+            }
+        }
+
+        private void ExecuteToggleDisplayMode(object? parameter)
+        {
+            if (Editor.SelectedMode == DisplayMode.Markdown)
+            {
+                Editor.SelectedMode = DisplayMode.Viewer;
+            }
+            else
+            {
+                Editor.SelectedMode = DisplayMode.Markdown;
+            }
+            RequestFocus?.Invoke(this, Editor.SelectedMode);
+        }
+
+        private void ExecuteToggleToc(object? parameter)
+        {
+            IsTocOpen = !IsTocOpen;
+        }
+
+        private void ExecuteNavigateToHeader(object? parameter)
+        {
+            if (parameter is TocItem item)
+            {
+                // ビュー側でスクロール処理を行うためにイベントを発行
+                RequestScrollToHeader?.Invoke(this, item);
+                IsTocOpen = false; // ナビゲート後は目次を閉じる
+            }
+        }
+
+        /// <summary>特定の見出しへのスクロールを要求するイベント。</summary>
+        public event EventHandler<TocItem>? RequestScrollToHeader;
+
+        /// <summary>フォーカス要求イベント。引数はフォーカスすべきモード。</summary>
+        public event EventHandler<DisplayMode>? RequestFocus;
+
+        /// <summary>現在のドキュメントから目次をロードします。</summary>
+        private void LoadToc()
+        {
+            var headers = _markdownService.ExtractHeaders(Editor.EditorText);
+            TocItems.Clear();
+            foreach (var header in headers)
+            {
+                TocItems.Add(header);
             }
         }
 

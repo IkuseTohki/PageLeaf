@@ -47,6 +47,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>mermaid\%(RecursiveDir)%(FileName)%(Extension)</Link>
     </Content>
+    <Resource Include="Resources\css.png" />
   </ItemGroup>
 
 </Project>
