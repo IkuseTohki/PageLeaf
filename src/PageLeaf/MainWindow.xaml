@@ -122,7 +122,7 @@
                 <!-- Overlay Buttons (Popup to show over WebView2) -->
                 <Popup behaviors:PopupFollowBehavior.IsEnabled="True"
                        AllowsTransparency="True"
-                       IsOpen="True"
+                       IsOpen="{Binding IsActive, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneWay}"
                        Placement="Bottom"
                        PlacementTarget="{Binding ElementName=OverlayButtonsAnchor}"
                        StaysOpen="True">
@@ -209,7 +209,7 @@
             <Popup x:Name="TogglePopup"
                    behaviors:PopupFollowBehavior.IsEnabled="True"
                    AllowsTransparency="True"
-                   IsOpen="True"
+                   IsOpen="{Binding IsActive, RelativeSource={RelativeSource AncestorType=Window}, Mode=OneWay}"
                    Placement="Left"
                    PlacementTarget="{Binding ElementName=PopupAnchor}"
                    StaysOpen="True">
