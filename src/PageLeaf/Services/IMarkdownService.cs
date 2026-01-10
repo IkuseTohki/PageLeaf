@@ -23,18 +23,25 @@ namespace PageLeaf.Services
         System.Collections.Generic.Dictionary<string, object> ParseFrontMatter(string markdown);
 
         /// <summary>
-        /// 指定されたMarkdownテキストのフロントマターを更新（または新規作成）します。
-        /// </summary>
-        /// <param name="markdown">更新対象のMarkdown文字列。</param>
-        /// <param name="newFrontMatter">設定するフロントマターの内容。</param>
-        /// <returns>更新されたMarkdown文字列。</returns>
-        string UpdateFrontMatter(string markdown, System.Collections.Generic.Dictionary<string, object> newFrontMatter);
-
-        /// <summary>
         /// 指定されたMarkdownテキストから見出し（H1-H3）を抽出します。
         /// </summary>
         /// <param name="markdown">Markdown文字列。</param>
         /// <returns>抽出された見出しリスト。</returns>
         System.Collections.Generic.List<PageLeaf.Models.TocItem> ExtractHeaders(string markdown);
+
+        /// <summary>
+        /// Markdown全体からフロントマターと本文を分離します。
+        /// </summary>
+        /// <param name="markdown">Markdown全体の内容。</param>
+        /// <returns>フロントマター（辞書）と本文（文字列）のタプル。</returns>
+        (System.Collections.Generic.Dictionary<string, object> FrontMatter, string Body) Split(string markdown);
+
+        /// <summary>
+        /// フロントマターと本文を結合して1つのMarkdownテキストを生成します。
+        /// </summary>
+        /// <param name="frontMatter">フロントマター。</param>
+        /// <param name="body">本文。</param>
+        /// <returns>結合されたMarkdownテキスト。</returns>
+        string Join(System.Collections.Generic.Dictionary<string, object> frontMatter, string body);
     }
 }

@@ -2,203 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:utils="clr-namespace:PageLeaf.Utilities">
 
-    <!-- 基本的な色定義 -->
-    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="White" />
-    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#FFF8F8F8" />
-    <!-- 少しグレーがかった白 -->
-    <SolidColorBrush x:Key="BorderBrush" Color="#FFACACAC" />
-    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#FF333333" />
-    <SolidColorBrush x:Key="PrimaryActionBrush" Color="#FF007ACC" />
-    <SolidColorBrush x:Key="AccentBlueBrush" Color="#FF0078D4" />
-    <!-- Modern Blue -->
-    <SolidColorBrush x:Key="SecondaryActionBrush" Color="#FF666666" />
-    <SolidColorBrush x:Key="PrimaryActionHoverBrush" Color="#FF1C97EA" />
-    <SolidColorBrush x:Key="SecondaryTextBrush" Color="Gray" />
-    <SolidColorBrush x:Key="AnnotationTextBrush" Color="Gray" />
-
-    <!-- ComboBox用ブラシ定義 -->
-    <SolidColorBrush x:Key="ComboBoxBackgroundBrush" Color="#FFF2F2F2" />
-    <SolidColorBrush x:Key="ComboBoxHoverBackgroundBrush" Color="#FFE5E5E5" />
-    <SolidColorBrush x:Key="ComboBoxPressedBackgroundBrush" Color="#FFD5D5D5" />
-    <SolidColorBrush x:Key="ComboBoxDropDownBackgroundBrush" Color="White" />
-    <SolidColorBrush x:Key="ComboBoxItemHoverBackgroundBrush" Color="#FFF0F0F0" />
-
     <!-- 画像リソース定義 -->
     <BitmapImage x:Key="CssLogoImage" UriSource="/Resources/css.png" />
-
-    <!-- 基本的なボタン用スタイル -->
-    <Style x:Key="BaseButtonStyle" TargetType="Button">
-        <Setter Property="Padding" Value="15,5" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Padding="{TemplateBinding Padding}"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="3">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style x:Key="PrimaryButtonStyle"
-           BasedOn="{StaticResource BaseButtonStyle}"
-           TargetType="Button">
-        <Setter Property="Background" Value="{StaticResource PrimaryActionBrush}" />
-        <Setter Property="Foreground" Value="White" />
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource PrimaryActionHoverBrush}" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    <Style x:Key="SecondaryButtonStyle"
-           BasedOn="{StaticResource BaseButtonStyle}"
-           TargetType="Button">
-        <Setter Property="Background" Value="#FFE0E0E0" />
-        <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#FFD0D0D0" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    <!-- アイコンボタン用スタイル -->
-    <Style x:Key="IconButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#FFE0E0E0" />
-            </Trigger>
-            <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Opacity" Value="0.5" />
-                <Setter Property="Cursor" Value="Arrow" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    <!-- 選択状態を持つアイコンボタン用スタイル -->
-    <Style x:Key="IconToggleButtonStyle" TargetType="ToggleButton">
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Padding" Value="4" />
-        <Setter Property="Margin" Value="0,0,8,0" />
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#FFE0E0E0" />
-                <Setter Property="BorderBrush" Value="#FFACACAC" />
-            </Trigger>
-            <Trigger Property="IsChecked" Value="True">
-                <Setter Property="Background" Value="#FFD0D0D0" />
-                <Setter Property="BorderBrush" Value="#FF888888" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    <!-- つまみボタン（トグル）用スタイル -->
-    <Style x:Key="ToggleHandleButtonStyle" TargetType="Button">
-        <Setter Property="Width" Value="16" />
-        <Setter Property="Height" Value="32" />
-        <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="RootBorder"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
-                        <ContentPresenter />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="#FFF8F8F8" />
-                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="#FF888888" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- フローティングトグルボタン用スタイル -->
-    <Style x:Key="FloatingToggleButtonStyle" TargetType="ToggleButton">
-        <Setter Property="Width" Value="32" />
-        <Setter Property="Height" Value="32" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="ToggleButton">
-                    <Border x:Name="RootBorder"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="#1A000000" />
-                        </Trigger>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="#33000000" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- フローティングボタン用スタイル -->
-    <Style x:Key="FloatingButtonStyle" TargetType="Button">
-        <Setter Property="Width" Value="32" />
-        <Setter Property="Height" Value="32" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="RootBorder"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="#1A000000" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
 
     <Style TargetType="MenuItem">
         <Setter Property="FontSize" Value="14" />
@@ -337,13 +142,7 @@
            BasedOn="{StaticResource BaseComboBoxStyle}"
            TargetType="ComboBox">
         <Setter Property="Width" Value="140" />
-        <Setter Property="ItemTemplate">
-            <Setter.Value>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Converter={StaticResource DisplayModeToStringConverter}}" />
-                </DataTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="ItemTemplate" Value="{StaticResource DisplayModeItemTemplate}" />
     </Style>
 
     <!-- CSSファイル選択用ComboBoxスタイル -->
@@ -351,13 +150,7 @@
            BasedOn="{StaticResource BaseComboBoxStyle}"
            TargetType="ComboBox">
         <Setter Property="Width" Value="200" />
-        <Setter Property="ItemTemplate">
-            <Setter.Value>
-                <DataTemplate>
-                    <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" />
-                </DataTemplate>
-            </Setter.Value>
-        </Setter>
+        <Setter Property="ItemTemplate" Value="{StaticResource CssFileItemTemplate}" />
     </Style>
 
     <Style TargetType="ToolBar">
@@ -469,6 +262,114 @@
         <Setter Property="Foreground" Value="Gray" />
         <Setter Property="Margin" Value="5,2,0,10" />
         <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!-- フロントマター用Expanderスタイル -->
+    <Style x:Key="FrontMatterExpanderStyle" TargetType="Expander">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,1,0,0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Expander">
+                    <Border Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="24" />
+                                <RowDefinition x:Name="ContentRow" Height="0" />
+                            </Grid.RowDefinitions>
+
+                            <ToggleButton x:Name="HeaderSite"
+                                          Grid.Row="0"
+                                          Padding="4,0"
+                                          HorizontalContentAlignment="Stretch"
+                                          IsChecked="{Binding IsExpanded, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Background="Transparent">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="20" />
+                                                    <ColumnDefinition Width="*" />
+                                                </Grid.ColumnDefinitions>
+                                                <Path x:Name="Arrow"
+                                                      Grid.Column="0"
+                                                      Width="8"
+                                                      Height="8"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"
+                                                      Data="M0,0 L8,4 L0,8 Z"
+                                                      Fill="{StaticResource SecondaryActionBrush}"
+                                                      Stretch="Uniform">
+                                                    <Path.RenderTransform>
+                                                        <RotateTransform Angle="0" CenterX="4" CenterY="4" />
+                                                    </Path.RenderTransform>
+                                                </Path>
+                                                <ContentPresenter Grid.Column="1"
+                                                                  VerticalAlignment="Center"
+                                                                  Content="{TemplateBinding Content}" />
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Arrow" Property="Fill" Value="{StaticResource PrimaryActionBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="IsChecked" Value="True">
+                                                <Trigger.EnterActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetName="Arrow"
+                                                                             Storyboard.TargetProperty="(Path.RenderTransform).(RotateTransform.Angle)"
+                                                                             To="90"
+                                                                             Duration="0:0:0.1" />
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </Trigger.EnterActions>
+                                                <Trigger.ExitActions>
+                                                    <BeginStoryboard>
+                                                        <Storyboard>
+                                                            <DoubleAnimation Storyboard.TargetName="Arrow"
+                                                                             Storyboard.TargetProperty="(Path.RenderTransform).(RotateTransform.Angle)"
+                                                                             To="0"
+                                                                             Duration="0:0:0.1" />
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </Trigger.ExitActions>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                                <ContentPresenter Content="{TemplateBinding Header}" ContentTemplate="{TemplateBinding HeaderTemplate}" />
+                            </ToggleButton>
+
+                            <ContentPresenter x:Name="ExpandSite"
+                                              Grid.Row="1"
+                                              Visibility="Collapsed" />
+                        </Grid>
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsExpanded" Value="True">
+                            <Setter TargetName="ContentRow" Property="Height" Value="*" />
+                            <Setter TargetName="ExpandSite" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="HeaderSite" Property="Background" Value="#0D000000" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="HeaderTemplate" Value="{StaticResource FrontMatterExpanderHeaderTemplate}" />
+    </Style>
+
+    <!-- パネル共通ツールバースタイル -->
+    <Style x:Key="PanelToolbarBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Padding" Value="5,2" />
+        <Setter Property="Height" Value="28" />
     </Style>
 
 </ResourceDictionary>

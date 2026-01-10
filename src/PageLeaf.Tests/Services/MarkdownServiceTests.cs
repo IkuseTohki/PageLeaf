@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using Moq;
 using PageLeaf.Models;
+using System.Collections.Generic;
 
 namespace PageLeaf.Tests.Services
 {
@@ -235,11 +236,14 @@ namespace PageLeaf.Tests.Services
         public void ConvertToHtml_ShouldInsertBaseTag_WhenBaseDirectoryIsProvided()
         {
             // テスト観点: ベースディレクトリが提供された場合、<head>に<base>タグが挿入されることを確認する。
+            // Arrange
             var markdown = "Test";
             var baseDir = App.BaseDirectory; // 実際に存在するディレクトリを使用
 
+            // Act
             var html = _service.ConvertToHtml(markdown, null, baseDir);
 
+            // Assert
             // URI変換
             var baseUri = new Uri(baseDir).AbsoluteUri;
             if (!baseUri.EndsWith("/")) baseUri += "/";
@@ -266,9 +270,13 @@ namespace PageLeaf.Tests.Services
         public void ParseFrontMatter_ShouldReturnDictionary_WhenFrontMatterExists()
         {
             // テスト観点: フロントマターが存在する場合、正しく辞書形式で取得できることを確認する。
+            // Arrange
             var markdown = "---\ntitle: test\ndate: 2026-01-01\n---\n# Content";
+
+            // Act
             var result = _service.ParseFrontMatter(markdown);
 
+            // Assert
             Assert.IsTrue(result.ContainsKey("title"));
             Assert.AreEqual("test", result["title"]);
             Assert.IsTrue(result.ContainsKey("date"));
@@ -280,62 +288,80 @@ namespace PageLeaf.Tests.Services
         public void ParseFrontMatter_ShouldReturnEmptyDictionary_WhenNoFrontMatter()
         {
             // テスト観点: フロントマターが存在しない場合、空の辞書が返されることを確認する。
+            // Arrange
             var markdown = "# Content";
+
+            // Act
             var result = _service.ParseFrontMatter(markdown);
 
+            // Assert
             Assert.IsNotNull(result);
             Assert.AreEqual(0, result.Count);
         }
 
         [TestMethod]
-        public void UpdateFrontMatter_ShouldUpdateExistingKey()
+        public void Split_ShouldSeparateFrontMatterAndBody()
         {
-            // テスト観点: 既存のフロントマターのキーが更新されることを確認する。
-            var markdown = "---\ntitle: old\n---\n# Content";
-            var update = new System.Collections.Generic.Dictionary<string, object> { { "title", "new" } };
+            // テスト観点: フロントマターと本文が正しく分離されることを確認する。
+            // Arrange
+            var nl = Environment.NewLine;
+            var markdown = "---" + nl + "title: test" + nl + "---" + nl + nl + "# Body";
 
-            var result = _service.UpdateFrontMatter(markdown, update);
+            // Act
+            var (frontMatter, body) = _service.Split(markdown);
 
-            Assert.IsTrue(result.Contains("title: new"));
-            Assert.IsFalse(result.Contains("title: old"));
-            Assert.IsTrue(result.Contains("# Content"));
+            // Assert
+            Assert.AreEqual(1, frontMatter.Count);
+            Assert.AreEqual("test", frontMatter["title"]);
+            Assert.AreEqual(nl + "# Body", body);
         }
 
         [TestMethod]
-        public void UpdateFrontMatter_ShouldAddNewKey_WhenKeyDoesNotExist()
+        public void Join_ShouldCombineFrontMatterAndBody()
         {
-            // テスト観点: 既存のフロントマターに新しいキーが追加されることを確認する。
-            var markdown = "---\ntitle: old\n---\n# Content";
-            var update = new System.Collections.Generic.Dictionary<string, object> { { "new_key", "value" } };
+            // テスト観点: 辞書と本文が正しく結合されることを確認する。
+            // Arrange
+            var nl = Environment.NewLine;
+            var frontMatter = new Dictionary<string, object> { { "title", "test" } };
+            var body = "# Body";
 
-            var result = _service.UpdateFrontMatter(markdown, update);
+            // Act
+            var result = _service.Join(frontMatter, body);
 
-            Assert.IsTrue(result.Contains("title: old"));
-            Assert.IsTrue(result.Contains("new_key: value"));
-            Assert.IsTrue(result.Contains("# Content"));
+            // Assert
+            StringAssert.StartsWith(result, "---" + nl);
+            StringAssert.Contains(result, "title: test" + nl);
+            StringAssert.Contains(result, nl + "---" + nl + "# Body");
         }
 
         [TestMethod]
-        public void UpdateFrontMatter_ShouldCreateNewFrontMatter_WhenNoneExists()
+        public void SplitAndJoin_ShouldPreserveStructure_IncludingEmptyLines()
         {
-            // テスト観点: フロントマターが存在しない場合、新規に作成されることを確認する。
-            var markdown = "# Content";
-            var update = new System.Collections.Generic.Dictionary<string, object> { { "title", "created" } };
+            // テスト観点: 分離して再度結合した際に、構造（空行など）が維持されることを確認する。
+            // Arrange
+            var nl = Environment.NewLine;
+            var markdown = "---" + nl + "title: test" + nl + "---" + nl + nl + "# Content";
 
-            var result = _service.UpdateFrontMatter(markdown, update);
+            // Act
+            var (fm, body) = _service.Split(markdown);
+            var result = _service.Join(fm, body);
 
-            StringAssert.StartsWith(result, "---\n");
-            Assert.IsTrue(result.Contains("title: created"));
-            Assert.IsTrue(result.EndsWith("# Content"));
+            // Assert
+            StringAssert.Contains(result, "title: test");
+            StringAssert.Contains(result, "---" + nl + nl + "# Content");
         }
 
         [TestMethod]
         public void ExtractHeaders_ShouldReturnH1toH3()
         {
             // テスト観点: H1からH3までの見出しが正しく抽出されることを確認する。
+            // Arrange
             var markdown = "# Header 1\n## Header 2\n### Header 3\n#### Header 4\nText";
+
+            // Act
             var result = _service.ExtractHeaders(markdown);
 
+            // Assert
             Assert.AreEqual(3, result.Count);
             Assert.AreEqual(1, result[0].Level);
             Assert.AreEqual("Header 1", result[0].Text);
@@ -350,9 +376,13 @@ namespace PageLeaf.Tests.Services
         {
             // テスト観点: 見出しに対応するIDが生成されていることを確認する。
             // MarkdigのAutoIdentifiersはデフォルトで小文字化・ハイフン連結を行うはず
+            // Arrange
             var markdown = "# My Header";
+
+            // Act
             var result = _service.ExtractHeaders(markdown);
 
+            // Assert
             Assert.AreEqual(1, result.Count);
             Assert.AreEqual("my-header", result[0].Id);
         }
@@ -361,9 +391,13 @@ namespace PageLeaf.Tests.Services
         public void ExtractHeaders_ShouldGenerateIdsForJapanese()
         {
             // テスト観点: 日本語の見出しに対してもIDが生成されることを確認する。
+            // Arrange
             var markdown = "# 日本語の見出し";
+
+            // Act
             var result = _service.ExtractHeaders(markdown);
 
+            // Assert
             Assert.AreEqual(1, result.Count);
             // MarkdigのAutoIdentifiers(AutoLink)のデフォルトでは日本語はIDにならない場合があるため確認
             // 何らかのIDが生成されていることを期待
@@ -374,9 +408,13 @@ namespace PageLeaf.Tests.Services
         public void ExtractHeaders_ShouldIncludeLineNumbers()
         {
             // テスト観点: 見出しの行番号が正しく取得されていることを確認する。
+            // Arrange
             var markdown = "First line\n\n# Header at line 2\n\n## Header at line 4";
+
+            // Act
             var result = _service.ExtractHeaders(markdown);
 
+            // Assert
             Assert.AreEqual(2, result.Count);
             Assert.AreEqual(2, result[0].LineNumber); // Markdigの行番号は0始まり
             Assert.AreEqual(4, result[1].LineNumber);

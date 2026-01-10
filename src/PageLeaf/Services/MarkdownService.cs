@@ -41,7 +41,7 @@ namespace PageLeaf.Services
                     // ディレクトリパスをURIに変換し、末尾にスラッシュを保証
                     var baseUri = new Uri(baseDirectory).AbsoluteUri;
                     if (!baseUri.EndsWith("/")) baseUri += "/";
-                    headBuilder.AppendLine($@"<base href=""{baseUri}"" />");
+                    headBuilder.AppendLine($"<base href=\"{baseUri}\" />");
                 }
                 catch (Exception)
                 {
@@ -52,7 +52,7 @@ namespace PageLeaf.Services
             // 拡張機能用のベーススタイルを追加
             var extensionsCssPath = Path.Combine(App.BaseDirectory, "css", "extensions.css");
             var extensionsCssUri = new Uri(extensionsCssPath).AbsoluteUri;
-            headBuilder.AppendLine($@"<link rel=""stylesheet"" href=""{extensionsCssUri}"">");
+            headBuilder.AppendLine($"<link rel=\"stylesheet\" href=\"{extensionsCssUri}\">");
 
             if (!string.IsNullOrEmpty(cssPath))
             {
@@ -68,7 +68,7 @@ namespace PageLeaf.Services
 
             var cssFilePath = Path.Combine(App.BaseDirectory, "highlight", "styles", themeName);
             var cssFileUri = new Uri(cssFilePath).AbsoluteUri;
-            headBuilder.AppendLine($@"<link rel=""stylesheet"" href=""{cssFileUri}"">");
+            headBuilder.AppendLine($"<link rel=\"stylesheet\" href=\"{cssFileUri}\">");
 
             var htmlBuilder = new StringBuilder();
             htmlBuilder.AppendLine("<!DOCTYPE html>");
@@ -89,9 +89,9 @@ namespace PageLeaf.Services
             var extensionScriptUri = new Uri(extensionScriptPath).AbsoluteUri;
             var mermaidScriptUri = new Uri(mermaidScriptPath).AbsoluteUri;
 
-            htmlBuilder.AppendLine($@"<script src=""{scriptFileUri}""></script>");
-            htmlBuilder.AppendLine($@"<script src=""{extensionScriptUri}""></script>");
-            htmlBuilder.AppendLine($@"<script src=""{mermaidScriptUri}""></script>");
+            htmlBuilder.AppendLine($"<script src=\"{scriptFileUri}\"></script>");
+            htmlBuilder.AppendLine($"<script src=\"{extensionScriptUri}\"></script>");
+            htmlBuilder.AppendLine($"<script src=\"{mermaidScriptUri}\"></script>");
             htmlBuilder.AppendLine("<script>hljs.highlightAll();</script>");
             htmlBuilder.AppendLine("<script>");
             htmlBuilder.AppendLine("  mermaid.initialize({ startOnLoad: true, theme: 'default' });");
@@ -106,12 +106,12 @@ namespace PageLeaf.Services
 
         public Dictionary<string, object> ParseFrontMatter(string markdown)
         {
-            if (string.IsNullOrEmpty(markdown) || !markdown.StartsWith("---"))
+            if (string.IsNullOrEmpty(markdown) || !markdown.TrimStart().StartsWith("---"))
             {
                 return new Dictionary<string, object>();
             }
 
-            using (var reader = new StringReader(markdown))
+            using (var reader = new StringReader(markdown.TrimStart()))
             {
                 var line = reader.ReadLine(); // First ---
                 if (line?.TrimEnd() != "---") return new Dictionary<string, object>();
@@ -143,48 +143,50 @@ namespace PageLeaf.Services
             }
         }
 
-        public string UpdateFrontMatter(string markdown, Dictionary<string, object> newFrontMatter)
+        public (Dictionary<string, object> FrontMatter, string Body) Split(string markdown)
         {
-            var currentFrontMatter = ParseFrontMatter(markdown);
-
-            foreach (var kvp in newFrontMatter)
+            if (string.IsNullOrEmpty(markdown))
             {
-                currentFrontMatter[kvp.Key] = kvp.Value;
+                return (new Dictionary<string, object>(), string.Empty);
+            }
+
+            var frontMatter = ParseFrontMatter(markdown);
+            var body = markdown;
+
+            if (markdown.TrimStart().StartsWith("---"))
+            {
+                var firstDash = markdown.IndexOf("---");
+                var secondDash = markdown.IndexOf("---", firstDash + 3);
+                if (secondDash != -1)
+                {
+                    var endOfDash = secondDash + 3;
+                    // 終了 "---" 直後の改行コードを1つだけスキップする
+                    if (markdown.Length > endOfDash)
+                    {
+                        if (markdown.Substring(endOfDash).StartsWith("\r\n")) endOfDash += 2;
+                        else if (markdown.Substring(endOfDash).StartsWith("\n")) endOfDash += 1;
+                    }
+                    body = markdown.Substring(endOfDash);
+                }
+            }
+
+            return (frontMatter, body);
+        }
+
+        public string Join(Dictionary<string, object> frontMatter, string body)
+        {
+            if (frontMatter == null || frontMatter.Count == 0)
+            {
+                return body;
             }
 
             var serializer = new SerializerBuilder()
                 .WithNamingConvention(NullNamingConvention.Instance)
                 .Build();
-            var yaml = serializer.Serialize(currentFrontMatter);
+            var yaml = serializer.Serialize(frontMatter);
+            var nl = Environment.NewLine;
 
-            string contentBody = markdown ?? string.Empty;
-            if (contentBody.StartsWith("---"))
-            {
-                using (var reader = new StringReader(contentBody))
-                {
-                    reader.ReadLine(); // ---
-                    string? line;
-                    while ((line = reader.ReadLine()) != null)
-                    {
-                        if (line.TrimEnd() == "---") break;
-                    }
-                    contentBody = reader.ReadToEnd();
-                }
-            }
-
-            // 本文の先頭の空白を除去するかどうかは議論の余地があるが、
-            // Front Matter直後の改行が複数ある場合などは維持したい。
-            // しかしReadToEndは現在位置からの全てのテキストを返すため、最初の改行が含まれる可能性がある。
-            // YamlDotNetのSerializeは末尾に改行を付ける。
-            // "---\n" + yaml + "---\n" と contentBody を結合する。
-            // contentBody が改行で始まっている場合、そのまま結合すると空行ができる。
-            // ここではシンプルに結合し、必要に応じてユーザーが調整する前提とするが、
-            // 既存の空行が増殖しないように、contentBodyの先頭の改行を1つだけトリムするのが親切かもしれない。
-
-            if (contentBody.StartsWith("\r\n")) contentBody = contentBody.Substring(2);
-            else if (contentBody.StartsWith("\n")) contentBody = contentBody.Substring(1);
-
-            return "---\n" + yaml + "---\n" + contentBody;
+            return "---" + nl + yaml + "---" + nl + body;
         }
 
         public List<PageLeaf.Models.TocItem> ExtractHeaders(string markdown)

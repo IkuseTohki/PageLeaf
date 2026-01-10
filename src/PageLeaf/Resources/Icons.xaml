@@ -63,4 +63,10 @@
     <!-- List Icon (TOC) -->
     <Geometry x:Key="ListIconGeometry">M3,13H5V11H3V13ZM3,17H5V15H3V17ZM3,9H5V7H3V9ZM7,13H21V11H7V13ZM7,17H21V15H7V17ZM7,9H21V7H7V9Z</Geometry>
 
+    <!-- Close / Delete Icon -->
+    <Geometry x:Key="CloseIconGeometry">M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z</Geometry>
+
+    <!-- Add Icon -->
+    <Geometry x:Key="AddIconGeometry">M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z</Geometry>
+
 </ResourceDictionary>

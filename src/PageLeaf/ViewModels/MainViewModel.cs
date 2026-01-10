@@ -34,6 +34,7 @@ namespace PageLeaf.ViewModels
 
         public IEditorService Editor { get; }
         public CssEditorViewModel CssEditorViewModel { get; }
+        public FrontMatterViewModel FrontMatterViewModel { get; }
         public ObservableCollection<DisplayMode> AvailableModes { get; }
 
         /// <summary>
@@ -219,6 +220,8 @@ namespace PageLeaf.ViewModels
             _saveAsDocumentUseCase = saveAsDocumentUseCase;
             _pasteImageUseCase = pasteImageUseCase;
             _markdownService = markdownService;
+
+            FrontMatterViewModel = new FrontMatterViewModel(editorService);
 
             // イベント購読
             CssEditorViewModel.CssSaved += OnCssSaved;

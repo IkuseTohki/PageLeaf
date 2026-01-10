@@ -27,8 +27,6 @@ namespace PageLeaf.Tests.UseCases
             // デフォルトの振る舞い
             _markdownServiceMock.Setup(m => m.ParseFrontMatter(It.IsAny<string>()))
                 .Returns(new System.Collections.Generic.Dictionary<string, object>());
-            _markdownServiceMock.Setup(m => m.UpdateFrontMatter(It.IsAny<string>(), It.IsAny<System.Collections.Generic.Dictionary<string, object>>()))
-                .Returns((string s, System.Collections.Generic.Dictionary<string, object> d) => s);
 
             _useCase = new SaveDocumentUseCase(_editorServiceMock.Object, _fileServiceMock.Object, _saveAsDocumentUseCaseMock.Object, _markdownServiceMock.Object);
         }
@@ -96,7 +94,8 @@ namespace PageLeaf.Tests.UseCases
             // Assert
             Assert.IsTrue(result);
             Assert.IsFalse(doc.IsDirty, "IsDirty should be false after successful save.");
-            _fileServiceMock.Verify(x => x.Save(doc), Times.Once);
+            // 保存用には別インスタンスが作られるため、プロパティで検証
+            _fileServiceMock.Verify(x => x.Save(It.Is<MarkdownDocument>(d => d.FilePath == "exist.md")), Times.Once);
             _saveAsDocumentUseCaseMock.Verify(x => x.Execute(), Times.Never);
         }
 
@@ -107,36 +106,38 @@ namespace PageLeaf.Tests.UseCases
             var doc = new MarkdownDocument { FilePath = "exist.md" };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
             _fileServiceMock.Setup(x => x.FileExists("exist.md")).Returns(true);
-            _fileServiceMock.Setup(x => x.Save(doc)).Throws(new Exception("Save failed"));
+            _fileServiceMock.Setup(x => x.Save(It.IsAny<MarkdownDocument>())).Throws(new Exception("Save failed"));
 
             // Act
             var result = _useCase.Execute();
 
             // Assert
             Assert.IsFalse(result);
-            _fileServiceMock.Verify(x => x.Save(doc), Times.Once);
+            _fileServiceMock.Verify(x => x.Save(It.IsAny<MarkdownDocument>()), Times.Once);
         }
 
         [TestMethod]
         public void Execute_ShouldUpdateFrontMatter_WhenExists()
         {
             // Arrange
-            var doc = new MarkdownDocument { FilePath = "exist.md", Content = "---\ntitle: test\n---\n" };
+            var doc = new MarkdownDocument
+            {
+                FilePath = "exist.md",
+                Content = "# Body",
+                FrontMatter = new System.Collections.Generic.Dictionary<string, object> { { "title", "test" } }
+            };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
             _fileServiceMock.Setup(x => x.FileExists("exist.md")).Returns(true);
 
-            _markdownServiceMock.Setup(m => m.ParseFrontMatter(doc.Content))
-                .Returns(new System.Collections.Generic.Dictionary<string, object> { { "title", "test" } });
-
-            _markdownServiceMock.Setup(m => m.UpdateFrontMatter(It.IsAny<string>(), It.IsAny<System.Collections.Generic.Dictionary<string, object>>()))
-                .Returns("---\ntitle: test\nupdated: now\n---\n");
+            _markdownServiceMock.Setup(m => m.Join(It.IsAny<System.Collections.Generic.Dictionary<string, object>>(), doc.Content))
+                .Returns("---\ntitle: test\nupdated: now\n---\n# Body");
 
             // Act
             var result = _useCase.Execute();
 
             // Assert
-            _markdownServiceMock.Verify(m => m.UpdateFrontMatter(It.IsAny<string>(), It.Is<System.Collections.Generic.Dictionary<string, object>>(d => d.ContainsKey("updated"))), Times.Once);
-            Assert.AreEqual("---\ntitle: test\nupdated: now\n---\n", doc.Content);
+            _markdownServiceMock.Verify(m => m.Join(It.Is<System.Collections.Generic.Dictionary<string, object>>(d => d.ContainsKey("updated")), doc.Content), Times.Once);
+            _fileServiceMock.Verify(x => x.Save(It.Is<MarkdownDocument>(d => d.Content == "---\ntitle: test\nupdated: now\n---\n# Body")), Times.Once);
         }
 
         [TestMethod]
@@ -144,22 +145,24 @@ namespace PageLeaf.Tests.UseCases
         {
             // テスト観点: フロントマターは存在するが updated フィールドがない場合、updated が追加されることを確認する。
             // Arrange
-            var doc = new MarkdownDocument { FilePath = "exist.md", Content = "---\ntitle: test\n---\n" };
+            var doc = new MarkdownDocument
+            {
+                FilePath = "exist.md",
+                Content = "# Body",
+                FrontMatter = new System.Collections.Generic.Dictionary<string, object> { { "title", "test" } }
+            };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
             _fileServiceMock.Setup(x => x.FileExists("exist.md")).Returns(true);
 
-            _markdownServiceMock.Setup(m => m.ParseFrontMatter(doc.Content))
-                .Returns(new System.Collections.Generic.Dictionary<string, object> { { "title", "test" } });
-
-            _markdownServiceMock.Setup(m => m.UpdateFrontMatter(It.IsAny<string>(), It.IsAny<System.Collections.Generic.Dictionary<string, object>>()))
-                .Returns("---\ntitle: test\nupdated: now\n---\n");
+            _markdownServiceMock.Setup(m => m.Join(It.IsAny<System.Collections.Generic.Dictionary<string, object>>(), doc.Content))
+                .Returns("---\ntitle: test\nupdated: now\n---\n# Body");
 
             // Act
             var result = _useCase.Execute();
 
             // Assert
-            _markdownServiceMock.Verify(m => m.UpdateFrontMatter(It.IsAny<string>(), It.Is<System.Collections.Generic.Dictionary<string, object>>(d => d.ContainsKey("updated"))), Times.Once);
-            Assert.AreEqual("---\ntitle: test\nupdated: now\n---\n", doc.Content);
+            Assert.IsTrue(doc.FrontMatter.ContainsKey("updated"), "Updated field should be added to dictionary");
+            _markdownServiceMock.Verify(m => m.Join(doc.FrontMatter, doc.Content), Times.Once);
         }
     }
 }

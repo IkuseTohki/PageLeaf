@@ -21,10 +21,6 @@ namespace PageLeaf.Tests.UseCases
             _saveDocumentUseCaseMock = new Mock<ISaveDocumentUseCase>();
             _markdownServiceMock = new Mock<IMarkdownService>();
 
-            // デフォルトの振る舞い
-            _markdownServiceMock.Setup(m => m.UpdateFrontMatter(It.IsAny<string>(), It.IsAny<System.Collections.Generic.Dictionary<string, object>>()))
-                .Returns("---\ntitle: Untitled\n---\n");
-
             _useCase = new NewDocumentUseCase(_editorServiceMock.Object, _saveDocumentUseCaseMock.Object, _markdownServiceMock.Object);
         }
 
@@ -33,6 +29,7 @@ namespace PageLeaf.Tests.UseCases
         {
             // Arrange
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.NoAction);
+            _editorServiceMock.Setup(x => x.CurrentDocument).Returns(new MarkdownDocument());
 
             // Act
             _useCase.Execute();
@@ -61,6 +58,7 @@ namespace PageLeaf.Tests.UseCases
         {
             // Arrange
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.Save);
+            _editorServiceMock.Setup(x => x.CurrentDocument).Returns(new MarkdownDocument());
 
             // Act
             _useCase.Execute();
@@ -75,6 +73,7 @@ namespace PageLeaf.Tests.UseCases
         {
             // Arrange
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.Discard);
+            _editorServiceMock.Setup(x => x.CurrentDocument).Returns(new MarkdownDocument());
 
             // Act
             _useCase.Execute();
@@ -88,16 +87,18 @@ namespace PageLeaf.Tests.UseCases
         public void Execute_ShouldApplyTemplate_WhenNewDocumentIsCreated()
         {
             // Arrange
+            var doc = new MarkdownDocument();
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.NoAction);
-            var expectedContent = "---\ntitle: Untitled\n---\n";
-            _markdownServiceMock.Setup(x => x.UpdateFrontMatter(It.IsAny<string>(), It.IsAny<System.Collections.Generic.Dictionary<string, object>>()))
-                .Returns(expectedContent);
+            _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
 
             // Act
             _useCase.Execute();
 
             // Assert
-            _editorServiceMock.VerifySet(x => x.EditorText = expectedContent, Times.Once);
+            Assert.AreEqual("Untitled", doc.FrontMatter["title"]);
+            Assert.IsTrue(doc.FrontMatter.ContainsKey("created"));
+            Assert.IsTrue(doc.FrontMatter.ContainsKey("updated"));
+            StringAssert.StartsWith(doc.Content, "# Untitled");
         }
     }
 }

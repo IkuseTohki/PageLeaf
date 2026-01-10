@@ -15,11 +15,7 @@
         </Grid.RowDefinitions>
 
         <!-- Panel Toolbar -->
-        <Border Grid.Row="0"
-                Padding="5"
-                Background="{StaticResource PanelBackgroundBrush}"
-                BorderBrush="{StaticResource BorderBrush}"
-                BorderThickness="0,0,0,1">
+        <Border Grid.Row="0" Style="{StaticResource PanelToolbarBorderStyle}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />

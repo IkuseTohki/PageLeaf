@@ -100,7 +100,7 @@
                          behaviors:MarkdownEditorBehavior.IsEnabled="True"
                          AcceptsReturn="True"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
-                         Text="{Binding Editor.EditorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Text="{Binding Editor.EditorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, NotifyOnTargetUpdated=True}"
                          TextWrapping="Wrap"
                          Visibility="{Binding Editor.IsMarkdownEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
@@ -180,23 +180,7 @@
                             BorderThickness="1"
                             CornerRadius="4">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <ItemsControl ItemsSource="{Binding TocItems}">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate>
-                                        <Button Padding="5,2"
-                                                HorizontalAlignment="Stretch"
-                                                HorizontalContentAlignment="Left"
-                                                Background="Transparent"
-                                                BorderThickness="0"
-                                                Command="{Binding DataContext.NavigateToHeaderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                CommandParameter="{Binding}">
-                                            <TextBlock Margin="{Binding Level, Converter={StaticResource LevelToMarginConverter}}"
-                                                       Text="{Binding Text}"
-                                                       TextTrimming="CharacterEllipsis" />
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
+                            <ItemsControl ItemTemplate="{StaticResource TocItemTemplate}" ItemsSource="{Binding TocItems}" />
                         </ScrollViewer>
                     </Border>
                 </Popup>
@@ -261,7 +245,26 @@
             </Popup>
 
             <Border Grid.Column="2" Visibility="{Binding IsCssEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <views:CssEditorView DataContext="{Binding CssEditorViewModel}" />
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" MinHeight="100" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <!-- CSS Editor -->
+                    <views:CssEditorView Grid.Row="0" DataContext="{Binding CssEditorViewModel}" />
+
+                    <!-- Vertical Splitter for Side Panel -->
+                    <GridSplitter Grid.Row="1"
+                                  Height="4"
+                                  HorizontalAlignment="Stretch"
+                                  VerticalAlignment="Center"
+                                  Background="Transparent"
+                                  ResizeBehavior="PreviousAndNext" />
+
+                    <!-- Front Matter Editor -->
+                    <views:FrontMatterEditorView Grid.Row="2" DataContext="{Binding FrontMatterViewModel}" />
+                </Grid>
             </Border>
         </Grid>
     </Grid>

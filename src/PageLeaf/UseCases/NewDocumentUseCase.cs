@@ -51,8 +51,10 @@ namespace PageLeaf.UseCases
                 { "updated", now }
             };
 
-            var contentWithTemplate = _markdownService.UpdateFrontMatter("", initialFrontMatter);
-            _editorService.EditorText = contentWithTemplate;
+            // フロントマターと本文を個別にセット
+            var doc = _editorService.CurrentDocument;
+            doc.FrontMatter = initialFrontMatter;
+            doc.Content = "# Untitled" + System.Environment.NewLine;
 
             // テンプレートが適用された状態なので、変更あり(IsDirty=true)の状態になる。
             // これにより、即座に閉じようとした場合に保存確認が表示される。

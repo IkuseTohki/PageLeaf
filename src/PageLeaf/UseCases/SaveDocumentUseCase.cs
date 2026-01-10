@@ -48,19 +48,29 @@ namespace PageLeaf.UseCases
             {
                 // フロントマターの更新 (updated)
                 // 既にフロントマターがある場合のみ更新する。
-                // フロントマターがないファイルに対して自動的に追加されることは避ける。
-
-                var currentFrontMatter = _markdownService.ParseFrontMatter(document.Content);
-                if (currentFrontMatter.Count > 0)
+                if (document.FrontMatter.Count > 0)
                 {
-                    var updatedContent = _markdownService.UpdateFrontMatter(document.Content, new System.Collections.Generic.Dictionary<string, object>
-                    {
-                        { "updated", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") }
-                    });
-                    document.Content = updatedContent;
+                    // 参照を新しくすることで変更通知を飛ばす
+                    var newFrontMatter = new System.Collections.Generic.Dictionary<string, object>(document.FrontMatter);
+                    newFrontMatter["updated"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+                    document.FrontMatter = newFrontMatter;
                 }
 
-                _fileService.Save(document);
+                // 保存用に結合
+                var fullContent = _markdownService.Join(document.FrontMatter, document.Content);
+
+                // FileService.Save は document オブジェクトを受け取るため、
+                // 一時的に全文を持たせる必要があるが、エディタ側の同期を避けるため
+                // 別のインスタンスを作成するか、FileService側の引数を検討する。
+                // ここではクローンに近いドキュメントオブジェクトを作成して保存に回す。
+                var saveTarget = new MarkdownDocument
+                {
+                    FilePath = document.FilePath,
+                    Content = fullContent,
+                    Encoding = document.Encoding
+                };
+
+                _fileService.Save(saveTarget);
                 document.IsDirty = false;
                 return true;
             }

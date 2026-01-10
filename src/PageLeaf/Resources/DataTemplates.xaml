@@ -1,0 +1,174 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:models="clr-namespace:PageLeaf.Models"
+                    xmlns:utilities="clr-namespace:PageLeaf.Utilities">
+
+    <!-- フロントマター プロパティ (デフォルト) -->
+    <DataTemplate x:Key="FrontMatterPropertyDefaultTemplate">
+        <StackPanel Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <!-- プロパティ名 (キー) -->
+                <TextBox Grid.Column="0"
+                         Padding="0"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         FontSize="10"
+                         FontWeight="Bold"
+                         Foreground="{StaticResource SecondaryTextBrush}"
+                         IsReadOnly="{Binding IsKeyReadOnly}"
+                         Text="{Binding Key, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsKeyReadOnly}" Value="True">
+                                    <Setter Property="Opacity" Value="0.7" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
+
+                <Button Grid.Column="1"
+                        VerticalAlignment="Center"
+                        Command="{Binding DataContext.RemovePropertyCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                        CommandParameter="{Binding}"
+                        Style="{StaticResource IconButtonStyle}"
+                        ToolTip="削除"
+                        Visibility="{Binding CanRemove, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Path Width="8"
+                          Height="8"
+                          Data="{StaticResource CloseIconGeometry}"
+                          Fill="{StaticResource SecondaryActionBrush}"
+                          Stretch="Uniform" />
+                </Button>
+            </Grid>
+
+            <!-- 値の入力欄 -->
+            <TextBox Margin="0,2,0,0"
+                     Padding="0,2"
+                     Background="Transparent"
+                     BorderBrush="{StaticResource BorderBrush}"
+                     BorderThickness="0,0,0,1"
+                     FontSize="12"
+                     IsReadOnly="{Binding IsValueReadOnly}"
+                     Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+    </DataTemplate>
+
+    <!-- フロントマター プロパティ (タグ用) -->
+    <DataTemplate x:Key="FrontMatterPropertyTagsTemplate">
+        <StackPanel Margin="0,0,0,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <!-- プロパティ名 (キー) -->
+                <TextBox Grid.Column="0"
+                         Padding="0"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         FontSize="10"
+                         FontWeight="Bold"
+                         Foreground="{StaticResource SecondaryTextBrush}"
+                         IsReadOnly="True"
+                         Text="{Binding Key, Mode=OneWay}" />
+            </Grid>
+
+            <!-- タグリスト -->
+            <StackPanel Margin="0,2,0,0">
+                <ItemsControl ItemsSource="{Binding Tags}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Margin="0,2,4,2"
+                                    Padding="6,1,4,1"
+                                    Background="#1A0078D4"
+                                    BorderBrush="{StaticResource AccentBlueBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="10">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock VerticalAlignment="Center"
+                                               FontSize="10"
+                                               Foreground="{StaticResource AccentBlueBrush}"
+                                               Text="{Binding}" />
+                                    <Button Margin="4,0,0,0"
+                                            VerticalAlignment="Center"
+                                            Command="{Binding DataContext.RemoveTagCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                            Style="{StaticResource IconButtonStyle}">
+                                        <Button.CommandParameter>
+                                            <MultiBinding Converter="{StaticResource MultiValueConverter}">
+                                                <Binding Path="DataContext" RelativeSource="{RelativeSource AncestorType=ItemsControl}" />
+                                                <Binding Path="." />
+                                            </MultiBinding>
+                                        </Button.CommandParameter>
+                                        <Path Width="6"
+                                              Height="6"
+                                              Data="{StaticResource CloseIconGeometry}"
+                                              Fill="{StaticResource AccentBlueBrush}"
+                                              Stretch="Uniform" />
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <!-- タグ追加用入力欄 -->
+                <TextBox Margin="0,4,0,0"
+                         Padding="2"
+                         FontSize="11"
+                         Foreground="{StaticResource SecondaryTextBrush}"
+                         Text="{Binding NewTagText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         ToolTip="タグを入力してEnterで追加">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter"
+                                    Command="{Binding DataContext.AddTagCommand, RelativeSource={RelativeSource AncestorType={x:Type UserControl}}}"
+                                    CommandParameter="{Binding}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+            </StackPanel>
+        </StackPanel>
+    </DataTemplate>
+
+    <!-- 目次 (TOC) アイテム -->
+    <DataTemplate x:Key="TocItemTemplate">
+        <Button Padding="5,2"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Left"
+                Background="Transparent"
+                BorderThickness="0"
+                Command="{Binding DataContext.NavigateToHeaderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                CommandParameter="{Binding}">
+            <TextBlock Margin="{Binding Level, Converter={StaticResource LevelToMarginConverter}}"
+                       Text="{Binding Text}"
+                       TextTrimming="CharacterEllipsis" />
+        </Button>
+    </DataTemplate>
+
+    <!-- 表示モード 選択アイテム -->
+    <DataTemplate x:Key="DisplayModeItemTemplate">
+        <TextBlock Text="{Binding Converter={StaticResource DisplayModeToStringConverter}}" />
+    </DataTemplate>
+
+    <!-- CSSファイル 選択アイテム -->
+    <DataTemplate x:Key="CssFileItemTemplate">
+        <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" />
+    </DataTemplate>
+
+    <!-- フロントマター Expander ヘッダー -->
+    <DataTemplate x:Key="FrontMatterExpanderHeaderTemplate">
+        <TextBlock FontSize="11"
+                   FontWeight="Bold"
+                   Foreground="{StaticResource PrimaryTextBrush}"
+                   Text="{Binding}"
+                   TextOptions.TextFormattingMode="Display" />
+    </DataTemplate>
+</ResourceDictionary>

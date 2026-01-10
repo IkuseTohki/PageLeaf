@@ -14,6 +14,7 @@ namespace PageLeaf.Tests.UseCases
         private Mock<IFileService> _fileServiceMock = null!;
         private Mock<IDialogService> _dialogServiceMock = null!;
         private Mock<ISaveDocumentUseCase> _saveDocumentUseCaseMock = null!;
+        private Mock<IMarkdownService> _markdownServiceMock = null!;
         private OpenDocumentUseCase _useCase = null!;
 
         [TestInitialize]
@@ -23,11 +24,18 @@ namespace PageLeaf.Tests.UseCases
             _fileServiceMock = new Mock<IFileService>();
             _dialogServiceMock = new Mock<IDialogService>();
             _saveDocumentUseCaseMock = new Mock<ISaveDocumentUseCase>();
+            _markdownServiceMock = new Mock<IMarkdownService>();
+
+            // Splitのデフォルト動作を設定
+            _markdownServiceMock.Setup(x => x.Split(It.IsAny<string>()))
+                .Returns((new System.Collections.Generic.Dictionary<string, object>(), "body"));
+
             _useCase = new OpenDocumentUseCase(
                 _editorServiceMock.Object,
                 _fileServiceMock.Object,
                 _dialogServiceMock.Object,
-                _saveDocumentUseCaseMock.Object);
+                _saveDocumentUseCaseMock.Object,
+                _markdownServiceMock.Object);
         }
 
         [TestMethod]

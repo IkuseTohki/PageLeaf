@@ -13,6 +13,7 @@ namespace PageLeaf.UseCases
         private readonly IFileService _fileService;
         private readonly IDialogService _dialogService;
         private readonly ISaveDocumentUseCase _saveDocumentUseCase;
+        private readonly IMarkdownService _markdownService;
 
         /// <summary>
         /// <see cref="OpenDocumentUseCase"/> クラスの新しいインスタンスを初期化します。
@@ -21,16 +22,19 @@ namespace PageLeaf.UseCases
         /// <param name="fileService">ファイルサービス。</param>
         /// <param name="dialogService">ダイアログサービス。</param>
         /// <param name="saveDocumentUseCase">保存ユースケース。</param>
+        /// <param name="markdownService">Markdownサービス。</param>
         public OpenDocumentUseCase(
             IEditorService editorService,
             IFileService fileService,
             IDialogService dialogService,
-            ISaveDocumentUseCase saveDocumentUseCase)
+            ISaveDocumentUseCase saveDocumentUseCase,
+            IMarkdownService markdownService)
         {
             _editorService = editorService;
             _fileService = fileService;
             _dialogService = dialogService;
             _saveDocumentUseCase = saveDocumentUseCase;
+            _markdownService = markdownService;
         }
 
         /// <inheritdoc />
@@ -79,6 +83,12 @@ namespace PageLeaf.UseCases
             try
             {
                 MarkdownDocument document = _fileService.Open(filePath);
+
+                // 生のContentを分離
+                var (frontMatter, body) = _markdownService.Split(document.Content);
+                document.FrontMatter = frontMatter;
+                document.Content = body;
+
                 _editorService.LoadDocument(document);
             }
             catch (Exception ex)
