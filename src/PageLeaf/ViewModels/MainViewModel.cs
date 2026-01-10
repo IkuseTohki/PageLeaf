@@ -274,6 +274,7 @@ namespace PageLeaf.ViewModels
         {
             _logger.LogInformation("OpenFileCommand executed.");
             _openDocumentUseCase.Execute();
+            ApplyDocumentMetadata();
         }
 
         private void ExecuteSaveFile(object? parameter)
@@ -322,6 +323,35 @@ namespace PageLeaf.ViewModels
             {
                 _logger.LogInformation("OpenFileByPathCommand executed for: {FilePath}", filePath);
                 _openDocumentUseCase.OpenPath(filePath);
+                ApplyDocumentMetadata();
+            }
+        }
+
+        private void ApplyDocumentMetadata()
+        {
+            var doc = Editor.CurrentDocument;
+            if (doc != null && !string.IsNullOrEmpty(doc.SuggestedCss))
+            {
+                ApplySuggestedCss(doc.SuggestedCss);
+            }
+        }
+
+        private void ApplySuggestedCss(string cssFileName)
+        {
+            if (!cssFileName.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
+            {
+                cssFileName += ".css";
+            }
+
+            var matchedFile = AvailableCssFiles.FirstOrDefault(f => string.Equals(f, cssFileName, StringComparison.OrdinalIgnoreCase));
+
+            if (matchedFile != null)
+            {
+                SelectedCssFile = matchedFile;
+            }
+            else
+            {
+                _logger.LogWarning("Suggested CSS file '{CssFile}' not found in available list.", cssFileName);
             }
         }
 

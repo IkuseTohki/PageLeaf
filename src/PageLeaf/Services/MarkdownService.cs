@@ -66,6 +66,24 @@ namespace PageLeaf.Services
             var themeName = _settingsService.CurrentSettings.CodeBlockTheme;
             if (string.IsNullOrEmpty(themeName)) themeName = "github.css";
 
+            // フロントマターの指定があれば優先する
+            var frontMatter = ParseFrontMatter(markdown ?? string.Empty);
+            if (frontMatter.TryGetValue("syntax_highlight", out var fmThemeObj) && fmThemeObj is string fmTheme && !string.IsNullOrWhiteSpace(fmTheme))
+            {
+                var candidateTheme = fmTheme;
+                if (!candidateTheme.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
+                {
+                    candidateTheme += ".css";
+                }
+
+                // ファイルの実在確認
+                var candidatePath = Path.Combine(App.BaseDirectory, "highlight", "styles", candidateTheme);
+                if (File.Exists(candidatePath))
+                {
+                    themeName = candidateTheme;
+                }
+            }
+
             var cssFilePath = Path.Combine(App.BaseDirectory, "highlight", "styles", themeName);
             var cssFileUri = new Uri(cssFilePath).AbsoluteUri;
             headBuilder.AppendLine($"<link rel=\"stylesheet\" href=\"{cssFileUri}\">");

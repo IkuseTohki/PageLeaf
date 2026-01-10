@@ -115,5 +115,48 @@ namespace PageLeaf.Tests.UseCases
             // Assert
             _editorServiceMock.Verify(x => x.LoadDocument(It.IsAny<MarkdownDocument>()), Times.Never);
         }
+
+        [TestMethod]
+        public void Execute_ShouldLoadDocument_WhenFrontMatterHasCssProperty()
+        {
+            // テスト観点: フロントマターにcssプロパティがある場合でも、正常にドキュメントがロードされることを確認する。
+            // Arrange
+            _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.NoAction);
+            _dialogServiceMock.Setup(x => x.ShowOpenFileDialog(It.IsAny<string>(), It.IsAny<string>())).Returns("test.md");
+
+            var docContent = "---\ncss: report.css\n---\n# Body";
+            var doc = new MarkdownDocument { Content = docContent };
+            _fileServiceMock.Setup(x => x.Open("test.md")).Returns(doc);
+
+            var frontMatter = new System.Collections.Generic.Dictionary<string, object> { { "css", "report.css" } };
+            _markdownServiceMock.Setup(x => x.Split(docContent)).Returns((frontMatter, "# Body"));
+
+            // Act
+            _useCase.Execute();
+
+            // Assert
+            _editorServiceMock.Verify(x => x.LoadDocument(It.Is<MarkdownDocument>(d => d.FrontMatter["css"].ToString() == "report.css")), Times.Once);
+        }
+
+        [TestMethod]
+        public void OpenPath_ShouldLoadDocument_WhenFrontMatterHasCssProperty()
+        {
+            // テスト観点: OpenPath実行時、フロントマターにcssプロパティがある場合でも、正常にドキュメントがロードされることを確認する。
+            // Arrange
+            _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.NoAction);
+
+            var docContent = "---\ncss: report.css\n---\n# Body";
+            var doc = new MarkdownDocument { Content = docContent };
+            _fileServiceMock.Setup(x => x.Open("test.md")).Returns(doc);
+
+            var frontMatter = new System.Collections.Generic.Dictionary<string, object> { { "css", "report.css" } };
+            _markdownServiceMock.Setup(x => x.Split(docContent)).Returns((frontMatter, "# Body"));
+
+            // Act
+            _useCase.OpenPath("test.md");
+
+            // Assert
+            _editorServiceMock.Verify(x => x.LoadDocument(It.Is<MarkdownDocument>(d => d.FrontMatter["css"].ToString() == "report.css")), Times.Once);
+        }
     }
 }

@@ -247,9 +247,19 @@
             <Border Grid.Column="2" Visibility="{Binding IsCssEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="*" MinHeight="100" />
+                        <RowDefinition Height="2*" MinHeight="100" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*">
+                            <RowDefinition.Style>
+                                <Style TargetType="RowDefinition">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding FrontMatterViewModel.IsExpanded}" Value="False">
+                                            <Setter Property="MaxHeight" Value="24" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </RowDefinition.Style>
+                        </RowDefinition>
                     </Grid.RowDefinitions>
                     <!-- CSS Editor -->
                     <views:CssEditorView Grid.Row="0" DataContext="{Binding CssEditorViewModel}" />

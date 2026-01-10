@@ -15,7 +15,9 @@ namespace PageLeaf.Models
             "title",
             "tags",
             "created",
-            "updated"
+            "updated",
+            "css",
+            "syntax_highlight"
         };
 
         // 値を変更できない（システム管理）予約語セット

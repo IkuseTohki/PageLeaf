@@ -207,6 +207,42 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
+        public void ConvertToHtml_ShouldPrioritizeFrontMatterHighlightTheme()
+        {
+            // テスト観点: フロントマターで syntax_highlight が指定されている場合、引数で渡されたテーマよりも優先されることを確認する。
+            // Arrange
+            // 実際に存在する可能性の高いテーマ名（githubなど）をシミュレート
+            var markdown = "---\nsyntax_highlight: github\n---\n```csharp\ncode\n```";
+            var defaultTheme = "vs2015.css";
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { CodeBlockTheme = defaultTheme });
+
+            // Act
+            var html = _service.ConvertToHtml(markdown, null, null);
+
+            // Assert
+            StringAssert.Contains(html, "highlight/styles/github");
+            Assert.IsFalse(html.Contains("highlight/styles/vs2015"), "Default theme should be ignored.");
+        }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldFallbackToDefaultTheme_WhenFrontMatterThemeDoesNotExist()
+        {
+            // テスト観点: フロントマターで指定されたテーマファイルが存在しない場合、
+            //             設定で指定されたデフォルトテーマを使用することを確認する。
+            // Arrange
+            var markdown = "---\nsyntax_highlight: invalid-theme-name\n---\n```csharp\ncode\n```";
+            var defaultTheme = "github.css";
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { CodeBlockTheme = defaultTheme });
+
+            // Act
+            var html = _service.ConvertToHtml(markdown, null, null);
+
+            // Assert
+            StringAssert.Contains(html, "highlight/styles/github.css");
+            Assert.IsFalse(html.Contains("highlight/styles/invalid-theme-name"), "Invalid theme should be ignored.");
+        }
+
+        [TestMethod]
         public void ConvertToHtml_ShouldIncludeAllRequiredResources()
         {
             // テスト観点: 生成されたHTMLに、ハイライト、拡張機能、Mermaidのすべての必要なリソースが含まれていることを確認する。

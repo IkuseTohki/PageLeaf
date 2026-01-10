@@ -221,7 +221,11 @@ namespace PageLeaf.Services
                 var baseDir = !string.IsNullOrEmpty(CurrentDocument.FilePath)
                     ? Path.GetDirectoryName(CurrentDocument.FilePath)
                     : null;
-                string html = _markdownService.ConvertToHtml(CurrentDocument.Content, _currentCssPath ?? string.Empty, baseDir);
+
+                // 本文とフロントマターを結合して渡す
+                string fullMarkdown = _markdownService.Join(CurrentDocument.FrontMatter, CurrentDocument.Content);
+                string html = _markdownService.ConvertToHtml(fullMarkdown, _currentCssPath ?? string.Empty, baseDir);
+
                 HtmlFilePath = SaveHtmlToTempFile(html);
 #pragma warning restore CS8625 // null リテラルまたは考えられる null 値を null 非許容参照型に変換しています。
             }

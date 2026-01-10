@@ -20,6 +20,11 @@ namespace PageLeaf.Tests.Services
             _mockMarkdownService = new Mock<IMarkdownService>();
             _mockCssService = new Mock<ICssService>();
             _mockDialogService = new Mock<IDialogService>(); // モックを初期化
+
+            // デフォルトでは Join は本文をそのまま返すように設定
+            _mockMarkdownService.Setup(m => m.Join(It.IsAny<System.Collections.Generic.Dictionary<string, object>>(), It.IsAny<string>()))
+                .Returns((System.Collections.Generic.Dictionary<string, object> fm, string b) => b);
+
             _editorService = new EditorService(_mockMarkdownService.Object, _mockCssService.Object, _mockDialogService.Object);
         }
 
@@ -141,6 +146,29 @@ namespace PageLeaf.Tests.Services
             Assert.IsFalse(string.IsNullOrEmpty(_editorService.HtmlFilePath));
             Assert.IsTrue(File.Exists(_editorService.HtmlFilePath));
             Assert.AreEqual(expectedHtml, File.ReadAllText(_editorService.HtmlFilePath));
+        }
+
+        [TestMethod]
+        public void UpdateHtmlContent_ShouldIncludeFrontMatter_WhenCallingMarkdownService()
+        {
+            // テスト観点: HTML変換時に、本文(Content)だけでなくフロントマターも結合された状態で
+            //             MarkdownService.ConvertToHtml が呼び出されていることを確認する。
+            // Arrange
+            var frontMatter = new System.Collections.Generic.Dictionary<string, object> { { "syntax_highlight", "monokai" } };
+            var document = new MarkdownDocument { Content = "# Body", FrontMatter = frontMatter };
+            _editorService.LoadDocument(document);
+            _editorService.SelectedMode = DisplayMode.Viewer;
+
+            // 期待される結合済みMarkdown
+            var expectedFullMarkdown = "---\nsyntax_highlight: monokai\n---\n# Body";
+            _mockMarkdownService.Setup(m => m.Join(frontMatter, "# Body")).Returns(expectedFullMarkdown);
+
+            // Act
+            _editorService.UpdatePreview();
+
+            // Assert
+            // ConvertToHtml の第1引数が結合されたMarkdownであることを検証
+            _mockMarkdownService.Verify(m => m.ConvertToHtml(expectedFullMarkdown, It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
         }
 
         [TestMethod]

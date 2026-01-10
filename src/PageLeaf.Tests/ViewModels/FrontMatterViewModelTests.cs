@@ -197,6 +197,18 @@ namespace PageLeaf.Tests.ViewModels
             Assert.IsTrue(tags.IsKeyReadOnly);
             Assert.IsFalse(tags.CanRemove);
             Assert.IsTrue(tags.IsTags);
+
+            // css: キーは読み取り専用、値は編集可能
+            var css = new FrontMatterProperty { Key = "css" };
+            Assert.IsTrue(css.IsKeyReadOnly, "cssのキーは読み取り専用であるべきです");
+            Assert.IsFalse(css.IsValueReadOnly, "cssの値は編集可能であるべきです");
+            Assert.IsFalse(css.CanRemove, "cssは削除不可であるべきです");
+
+            // syntax_highlight: キーは読み取り専用、値は編集可能
+            var highlight = new FrontMatterProperty { Key = "syntax_highlight" };
+            Assert.IsTrue(highlight.IsKeyReadOnly, "syntax_highlightのキーは読み取り専用であるべきです");
+            Assert.IsFalse(highlight.IsValueReadOnly, "syntax_highlightの値は編集可能であるべきです");
+            Assert.IsFalse(highlight.CanRemove, "syntax_highlightは削除不可であるべきです");
         }
     }
 }

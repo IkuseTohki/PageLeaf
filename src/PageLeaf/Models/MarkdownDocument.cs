@@ -40,10 +40,23 @@ namespace PageLeaf.Models
                 {
                     _frontMatter = value;
                     OnPropertyChanged(nameof(FrontMatter));
+                    // フロントマターが更新されると派生プロパティも変わるため通知
+                    OnPropertyChanged(nameof(SuggestedCss));
+                    OnPropertyChanged(nameof(PreferredSyntaxHighlight));
                     IsDirty = true;
                 }
             }
         }
+
+        /// <summary>
+        /// フロントマターで指定された推奨 CSS ファイル名を取得します。指定がない場合は null です。
+        /// </summary>
+        public string? SuggestedCss => FrontMatter.TryGetValue("css", out var v) ? v?.ToString() : null;
+
+        /// <summary>
+        /// フロントマターで指定された優先シンタックスハイライトテーマ名を取得します。指定がない場合は null です。
+        /// </summary>
+        public string? PreferredSyntaxHighlight => FrontMatter.TryGetValue("syntax_highlight", out var v) ? v?.ToString() : null;
 
         public string? FilePath
         {
