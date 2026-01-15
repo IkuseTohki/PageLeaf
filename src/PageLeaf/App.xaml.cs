@@ -7,6 +7,7 @@ using PageLeaf.ViewModels;
 using PageLeaf.Views;
 using Serilog;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using AngleSharp.Css.Values;
@@ -26,7 +27,18 @@ namespace PageLeaf
         {
             get
             {
-                var processPath = Environment.ProcessPath;
+                // .NET Core 3.1 互換のため、Environment.ProcessPath の代わりに Process.GetCurrentProcess().MainModule.FileName を使用
+                string? processPath = null;
+                try
+                {
+                    using var process = Process.GetCurrentProcess();
+                    processPath = process.MainModule?.FileName;
+                }
+                catch
+                {
+                    // 取得できない場合は無視してフォールバック
+                }
+
                 if (!string.IsNullOrEmpty(processPath) &&
                     Path.GetFileNameWithoutExtension(processPath).Equals("PageLeaf", StringComparison.OrdinalIgnoreCase))
                 {
