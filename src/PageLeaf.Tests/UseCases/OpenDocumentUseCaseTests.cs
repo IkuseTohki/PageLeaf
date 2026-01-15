@@ -41,6 +41,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldCallOpenDialog_WhenNotDirty()
         {
+            // テスト観点: ドキュメントに変更がない場合、保存確認を行わずにファイルを開くダイアログが表示されることを確認する。
             // Arrange
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.NoAction);
             _dialogServiceMock.Setup(x => x.ShowOpenFileDialog(It.IsAny<string>(), It.IsAny<string>())).Returns("test.md");
@@ -58,6 +59,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldCancel_WhenUserCancelsSavePrompt()
         {
+            // テスト観点: 保存確認でキャンセルが選択された場合、ファイルを開く処理が中止されることを確認する。
             // Arrange
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.Cancel);
 
@@ -71,8 +73,10 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldSaveAndOpen_WhenUserSelectsSave()
         {
+            // テスト観点: 保存確認で「保存」が選択された場合、保存処理の後にファイルを開くダイアログが表示され、ドキュメントが読み込まれることを確認する。
             // Arrange
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.Save);
+            _saveDocumentUseCaseMock.Setup(x => x.Execute()).Returns(true);
             _dialogServiceMock.Setup(x => x.ShowOpenFileDialog(It.IsAny<string>(), It.IsAny<string>())).Returns("test.md");
             var doc = new MarkdownDocument();
             _fileServiceMock.Setup(x => x.Open("test.md")).Returns(doc);
@@ -86,8 +90,26 @@ namespace PageLeaf.Tests.UseCases
         }
 
         [TestMethod]
+        public void Execute_ShouldAbort_WhenSaveFails()
+        {
+            // テスト観点: 保存確認で「保存」を選択したが、保存処理自体が失敗（またはキャンセル）した場合、
+            //            ファイルを開く処理が中断されることを確認する。
+            // Arrange
+            _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.Save);
+            _saveDocumentUseCaseMock.Setup(x => x.Execute()).Returns(false); // 保存失敗
+
+            // Act
+            _useCase.Execute();
+
+            // Assert
+            _saveDocumentUseCaseMock.Verify(x => x.Execute(), Times.Once);
+            _dialogServiceMock.Verify(x => x.ShowOpenFileDialog(It.IsAny<string>(), It.IsAny<string>()), Times.Never);
+        }
+
+        [TestMethod]
         public void Execute_ShouldOpenWithoutSave_WhenUserSelectsDiscard()
         {
+            // テスト観点: 保存確認で「破棄」が選択された場合、保存処理を行わずにファイルを開くダイアログが表示され、ドキュメントが読み込まれることを確認する。
             // Arrange
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.Discard);
             _dialogServiceMock.Setup(x => x.ShowOpenFileDialog(It.IsAny<string>(), It.IsAny<string>())).Returns("test.md");
@@ -105,6 +127,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldNotLoad_WhenOpenDialogIsCancelled()
         {
+            // テスト観点: ファイルを開くダイアログでキャンセルされた場合、ドキュメントの読み込みが行われないことを確認する。
             // Arrange
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.NoAction);
             _dialogServiceMock.Setup(x => x.ShowOpenFileDialog(It.IsAny<string>(), It.IsAny<string>())).Returns((string?)null);

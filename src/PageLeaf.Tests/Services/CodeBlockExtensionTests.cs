@@ -35,5 +35,25 @@ namespace PageLeaf.Tests.Services
             StringAssert.Contains(html, "test.cs");
             StringAssert.Contains(html, "class=\"code-block-copy-button\"");
         }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldIncludeHeaderWithEmptyFileName_WhenCodeBlockHasNoFileName()
+        {
+            // テスト観点: 言語指定のみでファイル名がない場合でも、コピーボタン用のヘッダーが表示され、ファイル名は空であることを確認する。
+            // Arrange
+            var markdown = "```csharp" + Environment.NewLine + "test" + Environment.NewLine + "```";
+
+            // Act
+            string html = _service.ConvertToHtml(markdown, null);
+
+            // Assert
+            // ヘッダー（コピーボタンのコンテナ）は常に表示される仕様
+            StringAssert.Contains(html, "class=\"code-block-header\"");
+            // ファイル名表示用のspanは存在するが、中身は空であること（ファイル名が含まれていないこと）
+            // "test.cs" などのファイル名が含まれていないことを確認
+            Assert.IsFalse(html.Contains("test.cs"));
+            // コピーボタンが含まれていること
+            StringAssert.Contains(html, "class=\"code-block-copy-button\"");
+        }
     }
 }

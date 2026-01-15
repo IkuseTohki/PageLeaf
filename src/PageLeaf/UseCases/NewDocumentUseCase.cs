@@ -37,7 +37,11 @@ namespace PageLeaf.UseCases
 
             if (result == SaveConfirmationResult.Save)
             {
-                _saveDocumentUseCase.Execute();
+                if (!_saveDocumentUseCase.Execute())
+                {
+                    // 保存がキャンセルまたは失敗した場合は中断
+                    return;
+                }
             }
 
             _editorService.NewDocument();
@@ -53,6 +57,8 @@ namespace PageLeaf.UseCases
 
             // フロントマターと本文を個別にセット
             var doc = _editorService.CurrentDocument;
+            if (doc == null) return;
+
             doc.FrontMatter = initialFrontMatter;
             doc.Content = "# Untitled" + System.Environment.NewLine;
 

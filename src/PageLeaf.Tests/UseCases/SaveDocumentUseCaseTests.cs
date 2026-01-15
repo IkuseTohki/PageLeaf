@@ -34,6 +34,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldReturnFalse_WhenCurrentDocumentIsNull()
         {
+            // テスト観点: 現在のドキュメントがnullの場合、処理が失敗しfalseが返されることを確認する。
             // Arrange
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns((MarkdownDocument)null!);
 
@@ -48,6 +49,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldCallSaveAs_WhenFilePathIsEmpty()
         {
+            // テスト観点: ファイルパスが設定されていない（新規作成時など）場合、「名前を付けて保存」処理が呼び出されることを確認する。
             // Arrange
             var doc = new MarkdownDocument { FilePath = string.Empty };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
@@ -65,6 +67,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldCallSaveAs_WhenFileDoesNotExist()
         {
+            // テスト観点: 指定されたファイルパスにファイルが存在しない場合、「名前を付けて保存」処理が呼び出されることを確認する。
             // Arrange
             var doc = new MarkdownDocument { FilePath = "not_exist.md" };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
@@ -83,6 +86,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldSaveFile_WhenFileExists()
         {
+            // テスト観点: ファイルが存在する場合、上書き保存処理が実行され、IsDirtyフラグがクリアされることを確認する。
             // Arrange
             var doc = new MarkdownDocument { FilePath = "exist.md", IsDirty = true };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
@@ -102,6 +106,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldReturnFalse_WhenSaveThrowsException()
         {
+            // テスト観点: 保存処理中に例外が発生した場合、例外が捕捉されfalseが返されることを確認する。
             // Arrange
             var doc = new MarkdownDocument { FilePath = "exist.md" };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
@@ -119,6 +124,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldUpdateFrontMatter_WhenExists()
         {
+            // テスト観点: ドキュメントにフロントマターが存在する場合、updatedフィールドが更新された状態で保存されることを確認する。
             // Arrange
             var doc = new MarkdownDocument
             {

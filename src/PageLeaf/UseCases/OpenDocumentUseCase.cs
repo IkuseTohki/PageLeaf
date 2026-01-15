@@ -72,7 +72,10 @@ namespace PageLeaf.UseCases
 
             if (result == SaveConfirmationResult.Save)
             {
-                _saveDocumentUseCase.Execute();
+                if (!_saveDocumentUseCase.Execute())
+                {
+                    return false;
+                }
             }
 
             return true;

@@ -27,6 +27,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldReturnFalse_WhenCurrentDocumentIsNull()
         {
+            // テスト観点: 現在のドキュメントがnullの場合、処理が失敗しfalseが返されることを確認する。
             // Arrange
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns((MarkdownDocument)null!);
 
@@ -41,6 +42,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldNotSave_WhenDialogIsCancelled()
         {
+            // テスト観点: ファイル保存ダイアログでキャンセルされた場合、保存処理が行われずfalseが返されることを確認する。
             // Arrange
             var doc = new MarkdownDocument { FilePath = "old.md" };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
@@ -57,6 +59,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldSaveToNewPath_WhenPathIsProvided()
         {
+            // テスト観点: ファイル保存ダイアログで新しいパスが指定された場合、そのパスに保存され、ドキュメントの状態が更新されることを確認する。
             // Arrange
             var doc = new MarkdownDocument { FilePath = "old.md", IsDirty = true };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
@@ -75,6 +78,7 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldReturnFalse_WhenSaveThrowsException()
         {
+            // テスト観点: 保存処理中に例外が発生した場合、例外が捕捉されfalseが返されることを確認する。
             // Arrange
             var doc = new MarkdownDocument { FilePath = "old.md" };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
