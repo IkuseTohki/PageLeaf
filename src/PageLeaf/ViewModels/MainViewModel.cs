@@ -365,7 +365,7 @@ namespace PageLeaf.ViewModels
             {
                 Editor.SelectedMode = DisplayMode.Markdown;
             }
-            RequestFocus?.Invoke(this, Editor.SelectedMode);
+            Editor.RequestFocus(Editor.SelectedMode);
         }
 
         private void ExecuteToggleToc(object? parameter)
@@ -378,16 +378,10 @@ namespace PageLeaf.ViewModels
             if (parameter is TocItem item)
             {
                 // ビュー側でスクロール処理を行うためにイベントを発行
-                RequestScrollToHeader?.Invoke(this, item);
+                Editor.RequestScrollToHeader(item);
                 IsTocOpen = false; // ナビゲート後は目次を閉じる
             }
         }
-
-        /// <summary>特定の見出しへのスクロールを要求するイベント。</summary>
-        public event EventHandler<TocItem>? RequestScrollToHeader;
-
-        /// <summary>フォーカス要求イベント。引数はフォーカスすべきモード。</summary>
-        public event EventHandler<DisplayMode>? RequestFocus;
 
         /// <summary>現在のドキュメントから目次をロードします。</summary>
         private void LoadToc()

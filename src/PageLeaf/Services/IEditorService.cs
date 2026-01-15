@@ -80,8 +80,30 @@ namespace PageLeaf.Services
         void RequestInsertText(string text);
 
         /// <summary>
+        /// 指定された表示モードにフォーカスすることを要求します。
+        /// </summary>
+        /// <param name="mode">フォーカスするモード。</param>
+        void RequestFocus(DisplayMode mode);
+
+        /// <summary>
+        /// 指定された見出しへスクロールすることを要求します。
+        /// </summary>
+        /// <param name="item">スクロール先の見出しアイテム。</param>
+        void RequestScrollToHeader(TocItem item);
+
+        /// <summary>
         /// テキスト挿入が要求されたときに発生します。View側で購読して実際の挿入処理を行います。
         /// </summary>
         event EventHandler<string> TextInsertionRequested;
+
+        /// <summary>
+        /// フォーカスが要求されたときに発生します。
+        /// </summary>
+        event EventHandler<DisplayMode> FocusRequested;
+
+        /// <summary>
+        /// 見出しへのスクロールが要求されたときに発生します。
+        /// </summary>
+        event EventHandler<TocItem> ScrollToHeaderRequested;
     }
 }

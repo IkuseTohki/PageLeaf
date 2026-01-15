@@ -92,23 +92,21 @@ namespace PageLeaf.Tests.ViewModels
         [TestMethod]
         public void ToggleDisplayMode_ShouldRequestFocus()
         {
-            // テスト観点: モード切替時にフォーカス要求イベントが発行されることを確認する。
+            // テスト観点: モード切替時にフォーカス要求が発行されることを確認する。
             // Arrange
             _editorServiceMock.SetupProperty(e => e.SelectedMode, DisplayMode.Viewer);
-            DisplayMode? requestedMode = null;
-            _viewModel.RequestFocus += (s, mode) => requestedMode = mode;
 
             // Act: Viewer -> Markdown
             _viewModel.ToggleDisplayModeCommand.Execute(null);
 
             // Assert
-            Assert.AreEqual(DisplayMode.Markdown, requestedMode);
+            _editorServiceMock.Verify(e => e.RequestFocus(DisplayMode.Markdown), Times.Once);
 
             // Act: Markdown -> Viewer
             _viewModel.ToggleDisplayModeCommand.Execute(null);
 
             // Assert
-            Assert.AreEqual(DisplayMode.Viewer, requestedMode);
+            _editorServiceMock.Verify(e => e.RequestFocus(DisplayMode.Viewer), Times.Once);
         }
 
         [TestMethod]
@@ -154,14 +152,12 @@ namespace PageLeaf.Tests.ViewModels
         [TestMethod]
         public void NavigateToHeader_ShouldCloseTocAndRequestScroll()
         {
-            // テスト観点: ヘッダーへナビゲートすると、TOCが閉じられ、スクロールリクエストイベントが発行されることを確認する。
+            // テスト観点: ヘッダーへナビゲートすると、TOCが閉じられ、スクロールリクエストが発行されることを確認する。
             // Arrange
             _editorServiceMock.Setup(e => e.EditorText).Returns("");
             _markdownServiceMock.Setup(m => m.ExtractHeaders(It.IsAny<string>())).Returns(new List<TocItem>());
 
             _viewModel.IsTocOpen = true;
-            string? scrolledId = null;
-            _viewModel.RequestScrollToHeader += (s, item) => scrolledId = item.Id;
             var item = new TocItem { Id = "target-id" };
 
             // Act
@@ -169,7 +165,7 @@ namespace PageLeaf.Tests.ViewModels
 
             // Assert
             Assert.IsFalse(_viewModel.IsTocOpen);
-            Assert.AreEqual("target-id", scrolledId);
+            _editorServiceMock.Verify(e => e.RequestScrollToHeader(item), Times.Once);
         }
 
         [TestMethod]

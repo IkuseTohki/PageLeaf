@@ -200,7 +200,19 @@ namespace PageLeaf.Services
             TextInsertionRequested?.Invoke(this, text);
         }
 
+        public void RequestFocus(DisplayMode mode)
+        {
+            FocusRequested?.Invoke(this, mode);
+        }
+
+        public void RequestScrollToHeader(TocItem item)
+        {
+            ScrollToHeaderRequested?.Invoke(this, item);
+        }
+
         public event EventHandler<string>? TextInsertionRequested;
+        public event EventHandler<DisplayMode>? FocusRequested;
+        public event EventHandler<TocItem>? ScrollToHeaderRequested;
 
         private void UpdateVisibility()
         {

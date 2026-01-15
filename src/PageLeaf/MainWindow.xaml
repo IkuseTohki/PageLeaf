@@ -96,6 +96,9 @@
             <Grid Grid.Column="0">
                 <TextBox x:Name="MarkdownEditor"
                          Margin="0"
+                         behaviors:EditorFocusBehavior.EditorService="{Binding Editor}"
+                         behaviors:EditorFocusBehavior.TargetMode="Markdown"
+                         behaviors:EditorScrollBehavior.EditorService="{Binding Editor}"
                          behaviors:EditorTextInsertionBehavior.EditorService="{Binding Editor}"
                          behaviors:MarkdownEditorBehavior.IsEnabled="True"
                          AcceptsReturn="True"
@@ -106,6 +109,9 @@
 
                 <wv2:WebView2 x:Name="MarkdownViewer"
                               Margin="0"
+                              behaviors:EditorFocusBehavior.EditorService="{Binding Editor}"
+                              behaviors:EditorFocusBehavior.TargetMode="Viewer"
+                              behaviors:EditorScrollBehavior.EditorService="{Binding Editor}"
                               utils:WebBrowserHelper.Html="{Binding Editor.HtmlFilePath}"
                               utils:WebBrowserHelper.InjectedCss="{Binding CssEditorViewModel.PreviewCss}"
                               Visibility="{Binding Editor.IsViewerVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
