@@ -260,7 +260,7 @@
                                 <Style TargetType="RowDefinition">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding FrontMatterViewModel.IsExpanded}" Value="False">
-                                            <Setter Property="MaxHeight" Value="24" />
+                                            <Setter Property="MaxHeight" Value="36" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
@@ -276,7 +276,8 @@
                                   HorizontalAlignment="Stretch"
                                   VerticalAlignment="Center"
                                   Background="Transparent"
-                                  ResizeBehavior="PreviousAndNext" />
+                                  ResizeBehavior="PreviousAndNext"
+                                  Visibility="{Binding FrontMatterViewModel.IsExpanded, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                     <!-- Front Matter Editor -->
                     <views:FrontMatterEditorView Grid.Row="2" DataContext="{Binding FrontMatterViewModel}" />

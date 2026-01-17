@@ -11,6 +11,19 @@ using System.Reflection;
 
 namespace PageLeaf.ViewModels
 {
+    /// <summary>
+    /// CSSエディタのタブカテゴリを定義します。
+    /// </summary>
+    public enum CssEditorTab
+    {
+        General,
+        Headings,
+        Quote,
+        List,
+        Table,
+        Code
+    }
+
     public class CssEditorViewModel : ViewModelBase
     {
         private readonly ICssManagementService _cssManagementService;
@@ -44,6 +57,7 @@ namespace PageLeaf.ViewModels
         private bool _isDirty;
         private string _originalCssContent = string.Empty;
         private string _previewCss = string.Empty;
+        private CssEditorTab _selectedTab = CssEditorTab.General;
 
         public event EventHandler? CssSaved;
         public ICommand SaveCssCommand { get; }
@@ -71,6 +85,15 @@ namespace PageLeaf.ViewModels
         {
             get => _globalUnit;
             set { if (_globalUnit != value) { var old = _globalUnit; _globalUnit = value; ConvertAutoFontSizes(old, value); IsDirty = true; UpdatePreview(); OnPropertyChanged(); } }
+        }
+
+        /// <summary>
+        /// 現在選択されているタブ。
+        /// </summary>
+        public CssEditorTab SelectedTab
+        {
+            get => _selectedTab;
+            set { if (_selectedTab != value) { _selectedTab = value; OnPropertyChanged(); } }
         }
 
         public string? this[string key] { get => GetStyleValue(key); set => SetStyleValue(key, value); }

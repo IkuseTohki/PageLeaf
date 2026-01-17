@@ -25,24 +25,24 @@
             <ScrollViewer Grid.Row="0"
                           MaxHeight="300"
                           VerticalScrollBarVisibility="Auto">
-                <ItemsControl Margin="10,5"
+                <ItemsControl Margin="15,10"
                               ItemTemplateSelector="{StaticResource FrontMatterPropertyTemplateSelector}"
                               ItemsSource="{Binding Properties}" />
             </ScrollViewer>
 
             <Button Grid.Row="1"
-                    Margin="10,5"
+                    Margin="15,5,15,15"
                     HorizontalAlignment="Left"
                     Command="{Binding AddPropertyCommand}"
                     Style="{StaticResource IconButtonStyle}">
                 <StackPanel Orientation="Horizontal">
                     <Path Width="10"
                           Height="10"
-                          Margin="0,0,5,0"
+                          Margin="0,0,6,0"
                           Data="{StaticResource AddIconGeometry}"
                           Fill="{StaticResource PrimaryActionBrush}"
                           Stretch="Uniform" />
-                    <TextBlock FontSize="10"
+                    <TextBlock FontSize="11"
                                FontWeight="Bold"
                                Foreground="{StaticResource PrimaryActionBrush}"
                                Text="ADD PROPERTY" />

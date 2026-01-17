@@ -7,15 +7,16 @@
              d:DesignHeight="30"
              d:DesignWidth="200"
              mc:Ignorable="d">
-    <Grid>
+    <Grid HorizontalAlignment="Left">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
         <ComboBox Grid.Column="0"
+                  Width="80"
                   IsEditable="True"
-                  Style="{StaticResource FormComboBoxStyle}"
+                  Style="{StaticResource CompactFormComboBoxStyle}"
                   Text="{Binding ElementName=Root, Path=Value, UpdateSourceTrigger=PropertyChanged}">
             <ComboBoxItem Content="12" />
             <ComboBoxItem Content="14" />
@@ -37,10 +38,10 @@
         </ComboBox>
 
         <TextBlock Grid.Column="1"
-                   Margin="5,0,0,5"
+                   Margin="5,0,0,12"
                    VerticalAlignment="Center"
-                   FontWeight="Bold"
-                   Foreground="Gray"
+                   FontWeight="SemiBold"
+                   Foreground="{StaticResource SecondaryTextBrush}"
                    Text="{Binding ElementName=Root, Path=Unit}"
                    Visibility="{Binding ElementName=Root, Path=IsUnitVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
     </Grid>

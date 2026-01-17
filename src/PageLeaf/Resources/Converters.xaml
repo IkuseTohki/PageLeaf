@@ -9,6 +9,6 @@
     <utilities:LevelToMarginConverter x:Key="LevelToMarginConverter" />
     <utilities:MultiValueConverter x:Key="MultiValueConverter" />
     <utilities:StringToUpperCaseConverter x:Key="StringToUpperCaseConverter" />
-    <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <utilities:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
 
 </ResourceDictionary>
