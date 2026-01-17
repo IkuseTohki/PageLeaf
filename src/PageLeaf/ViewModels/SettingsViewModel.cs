@@ -113,6 +113,11 @@ namespace PageLeaf.ViewModels
         }
 
         /// <summary>
+        /// 自動挿入されるフロントマターのプロパティリスト。
+        /// </summary>
+        public ObservableCollection<FrontMatterProperty> DefaultFrontMatterProperties { get; } = new ObservableCollection<FrontMatterProperty>();
+
+        /// <summary>
         /// 保存コマンド。
         /// </summary>
         public ICommand SaveCommand { get; }
@@ -121,6 +126,16 @@ namespace PageLeaf.ViewModels
         /// キャンセルコマンド。
         /// </summary>
         public ICommand CancelCommand { get; }
+
+        /// <summary>
+        /// フロントマタープロパティを追加するコマンド。
+        /// </summary>
+        public ICommand AddFrontMatterPropertyCommand { get; }
+
+        /// <summary>
+        /// フロントマタープロパティを削除するコマンド。
+        /// </summary>
+        public ICommand RemoveFrontMatterPropertyCommand { get; }
 
         /// <summary>
         /// 設定が保存されたときに発生するイベント。
@@ -141,11 +156,43 @@ namespace PageLeaf.ViewModels
             _useSpacesForIndent = settings.UseSpacesForIndent;
             _autoInsertFrontMatter = settings.AutoInsertFrontMatter;
 
+            // 追加フロントマタープロパティのロード
+            DefaultFrontMatterProperties.Clear();
+            if (settings.AdditionalFrontMatter != null)
+            {
+                foreach (var prop in settings.AdditionalFrontMatter)
+                {
+                    DefaultFrontMatterProperties.Add(new FrontMatterProperty { Key = prop.Key, Value = prop.Value });
+                }
+            }
+
             // テーマ一覧の取得
             LoadAvailableThemes();
 
             SaveCommand = new DelegateCommand((o) => Save());
             CancelCommand = new DelegateCommand((o) => RequestClose?.Invoke(this, EventArgs.Empty));
+            AddFrontMatterPropertyCommand = new DelegateCommand((o) => AddFrontMatterProperty());
+            RemoveFrontMatterPropertyCommand = new DelegateCommand((o) => RemoveFrontMatterProperty(o));
+        }
+
+        private void AddFrontMatterProperty()
+        {
+            string baseKey = "new_property";
+            string key = baseKey;
+            int count = 1;
+            while (DefaultFrontMatterProperties.Any(p => p.Key == key))
+            {
+                key = $"{baseKey}_{count++}";
+            }
+            DefaultFrontMatterProperties.Add(new FrontMatterProperty { Key = key, Value = "" });
+        }
+
+        private void RemoveFrontMatterProperty(object? parameter)
+        {
+            if (parameter is FrontMatterProperty property)
+            {
+                DefaultFrontMatterProperties.Remove(property);
+            }
         }
 
         private void LoadAvailableThemes()
@@ -203,6 +250,12 @@ namespace PageLeaf.ViewModels
             settings.IndentSize = IndentSize;
             settings.UseSpacesForIndent = UseSpacesForIndent;
             settings.AutoInsertFrontMatter = AutoInsertFrontMatter;
+
+            // 追加フロントマタープロパティの保存 (順序維持)
+            settings.AdditionalFrontMatter = DefaultFrontMatterProperties
+                .Where(p => !string.IsNullOrWhiteSpace(p.Key))
+                .Select(p => new FrontMatterAdditionalProperty { Key = p.Key, Value = p.Value?.ToString() ?? "" })
+                .ToList();
 
             _settingsService.SaveSettings(settings);
             RequestClose?.Invoke(this, EventArgs.Empty);

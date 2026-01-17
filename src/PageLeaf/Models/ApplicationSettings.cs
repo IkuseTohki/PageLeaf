@@ -1,6 +1,14 @@
-
 namespace PageLeaf.Models
 {
+    /// <summary>
+    /// 設定に保存するための追加フロントマタープロパティ。
+    /// </summary>
+    public class FrontMatterAdditionalProperty
+    {
+        public string Key { get; set; } = string.Empty;
+        public string Value { get; set; } = string.Empty;
+    }
+
     public class ApplicationSettings
     {
         /// <summary>
@@ -43,6 +51,12 @@ namespace PageLeaf.Models
         /// 新規作成時にフロントマターを自動挿入するかどうか。
         /// </summary>
         public bool AutoInsertFrontMatter { get; set; } = true;
+
+        /// <summary>
+        /// 自動挿入される追加のフロントマタープロパティ。
+        /// </summary>
+        public System.Collections.Generic.List<FrontMatterAdditionalProperty> AdditionalFrontMatter { get; set; } =
+            new System.Collections.Generic.List<FrontMatterAdditionalProperty>();
 
         // Default constructor for deserialization
         public ApplicationSettings() { }

@@ -256,6 +256,22 @@
         </Setter>
     </Style>
 
+    <!-- フォーム用テキストボックススタイル (Small: 80px) -->
+    <Style x:Key="FormTextBoxSmallStyle"
+           BasedOn="{StaticResource FormTextBoxStyle}"
+           TargetType="TextBox">
+        <Setter Property="Width" Value="80" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- フォーム用テキストボックススタイル (Medium: 300px) -->
+    <Style x:Key="FormTextBoxMediumStyle"
+           BasedOn="{StaticResource FormTextBoxStyle}"
+           TargetType="TextBox">
+        <Setter Property="Width" Value="300" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
     <!-- フォーム用コンボボックススタイル -->
     <Style x:Key="FormComboBoxStyle"
            BasedOn="{StaticResource BaseComboBoxStyle}"
@@ -263,6 +279,14 @@
         <Setter Property="Margin" Value="0,0,0,20" />
         <Setter Property="Padding" Value="8,6" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- フォーム用コンボボックススタイル (Medium: 300px) -->
+    <Style x:Key="FormComboBoxMediumStyle"
+           BasedOn="{StaticResource FormComboBoxStyle}"
+           TargetType="ComboBox">
+        <Setter Property="Width" Value="300" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
     </Style>
 
     <!-- フォーム用チェックボックススタイル -->
@@ -319,6 +343,16 @@
     <!-- フォーム用コンテナスタイル -->
     <Style x:Key="FormContainerStyle" TargetType="StackPanel">
         <Setter Property="Margin" Value="10" />
+    </Style>
+
+    <!-- プロパティグリッド等のコンテナ用ボーダースタイル -->
+    <Style x:Key="PropertyGridContainerStyle" TargetType="Border">
+        <Setter Property="Margin" Value="0,0,0,10" />
+        <Setter Property="Padding" Value="10" />
+        <Setter Property="Background" Value="#05000000" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="4" />
     </Style>
 
     <!-- SettingsWindow 用のボーダースタイル -->
@@ -401,7 +435,7 @@
     <Style x:Key="AnnotationTextStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11" />
         <Setter Property="Foreground" Value="#666666" />
-        <Setter Property="Margin" Value="0,-16,0,20" />
+        <Setter Property="Margin" Value="0,-12,0,15" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 

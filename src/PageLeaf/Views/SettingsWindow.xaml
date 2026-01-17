@@ -66,9 +66,8 @@
                         <Label Content="インデント幅 (スペース数)"
                                IsEnabled="{Binding UseSpacesForIndent}"
                                Style="{StaticResource FormLabelStyle}" />
-                        <TextBox behaviors:StyleBehavior.MergeStyle="{StaticResource InputControlSmallStyle}"
-                                 IsEnabled="{Binding UseSpacesForIndent}"
-                                 Style="{StaticResource FormTextBoxStyle}"
+                        <TextBox IsEnabled="{Binding UseSpacesForIndent}"
+                                 Style="{StaticResource FormTextBoxSmallStyle}"
                                  Text="{Binding IndentSize}" />
                         <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※Tabキーを押した際に入力される空白の量を指定します。" />
 
@@ -76,7 +75,42 @@
                         <CheckBox Content="新規作成時にフロントマターを自動挿入する"
                                   IsChecked="{Binding AutoInsertFrontMatter}"
                                   Style="{StaticResource FormCheckBoxStyle}" />
-                        <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※チェックすると、新規作成時に作成日時やタイトルを含むメタデータブロックが自動的に挿入されます。" />
+
+                        <StackPanel IsEnabled="{Binding AutoInsertFrontMatter}">
+                            <Label Content="追加で挿入するプロパティ" Style="{StaticResource FormLabelStyle}" />
+                            <Border Style="{StaticResource PropertyGridContainerStyle}">
+                                <StackPanel>
+                                    <ItemsControl ItemTemplate="{StaticResource SettingsFrontMatterPropertyTemplate}" ItemsSource="{Binding DefaultFrontMatterProperties}" />
+                                    <Button HorizontalAlignment="Left"
+                                            Command="{Binding AddFrontMatterPropertyCommand}"
+                                            Style="{StaticResource IconButtonStyle}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Path Width="10"
+                                                  Height="10"
+                                                  Margin="0,0,5,0"
+                                                  Data="{StaticResource AddIconGeometry}"
+                                                  Fill="{StaticResource PrimaryActionBrush}"
+                                                  Stretch="Uniform" />
+                                            <TextBlock FontSize="11"
+                                                       FontWeight="Bold"
+                                                       Foreground="{StaticResource PrimaryActionBrush}"
+                                                       Text="プロパティを追加" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </Border>
+                            <TextBlock Margin="5,5,0,12"
+                                       LineHeight="16"
+                                       Style="{StaticResource AnnotationTextStyle}">
+                                <Run Text="※使用可能なプレースホルダー:" />
+                                <LineBreak />
+                                <Run Text="  {Now} : 現在日時 (yyyy-MM-dd HH:mm:ss)" />
+                                <LineBreak />
+                                <Run Text="  {Date} : 現在日付 (yyyy-MM-dd)" />
+                                <LineBreak />
+                                <Run Text="  {Time} : 現在時刻 (HH:mm:ss)" />
+                            </TextBlock>
+                        </StackPanel>
                     </StackPanel>
 
                     <!-- Image Settings -->
@@ -84,15 +118,11 @@
                         <Label Content="画像貼り付け設定" Style="{StaticResource FirstSectionHeaderLabelStyle}" />
 
                         <Label Content="保存先フォルダ (相対パス)" Style="{StaticResource FormLabelStyle}" />
-                        <TextBox behaviors:StyleBehavior.MergeStyle="{StaticResource InputControlMediumStyle}"
-                                 Style="{StaticResource FormTextBoxStyle}"
-                                 Text="{Binding ImageSaveDirectory}" />
+                        <TextBox Style="{StaticResource FormTextBoxMediumStyle}" Text="{Binding ImageSaveDirectory}" />
                         <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※Markdownファイルからの相対パス。例: images" />
 
                         <Label Content="ファイル名テンプレート" Style="{StaticResource FormLabelStyle}" />
-                        <TextBox behaviors:StyleBehavior.MergeStyle="{StaticResource InputControlMediumStyle}"
-                                 Style="{StaticResource FormTextBoxStyle}"
-                                 Text="{Binding ImageFileNameTemplate}" />
+                        <TextBox Style="{StaticResource FormTextBoxMediumStyle}" Text="{Binding ImageFileNameTemplate}" />
                         <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※使用可能な変数: {Date}, {Time}, {FileName}" />
                     </StackPanel>
 
@@ -101,16 +131,15 @@
                         <Label Content="コードハイライト設定" Style="{StaticResource FirstSectionHeaderLabelStyle}" />
 
                         <Label Content="コードハイライト テーマ" Style="{StaticResource FormLabelStyle}" />
-                        <ComboBox behaviors:StyleBehavior.MergeStyle="{StaticResource InputControlMediumStyle}"
-                                  ItemsSource="{Binding AvailableThemes}"
+                        <ComboBox ItemsSource="{Binding AvailableThemes}"
                                   SelectedItem="{Binding SelectedCodeBlockTheme}"
-                                  Style="{StaticResource FormComboBoxStyle}" />
+                                  Style="{StaticResource FormComboBoxMediumStyle}" />
                         <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※コードブロックに適用される highlight.js のテーマを選択します。" />
 
                         <CheckBox Content="CSSエディタの設定でテーマを上書きする"
                                   IsChecked="{Binding UseCustomCodeBlockStyle}"
                                   Style="{StaticResource FormCheckBoxStyle}" />
-                        <TextBlock Margin="25,2,0,20"
+                        <TextBlock Margin="25,-12,0,20"
                                    HorizontalAlignment="Left"
                                    LineHeight="15"
                                    Style="{StaticResource AnnotationTextStyle}"

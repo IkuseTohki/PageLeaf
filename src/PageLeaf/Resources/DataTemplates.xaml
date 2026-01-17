@@ -171,4 +171,50 @@
                    Text="{Binding}"
                    TextOptions.TextFormattingMode="Display" />
     </DataTemplate>
+
+    <!-- 設定画面用: 追加フロントマタープロパティ -->
+    <DataTemplate x:Key="SettingsFrontMatterPropertyTemplate">
+        <Grid Margin="0,0,0,8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0"
+                    Margin="0,0,5,0"
+                    Background="White"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="3">
+                <TextBox Padding="4,2"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         FontSize="12"
+                         Text="{Binding Key, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </Border>
+            <Border Grid.Column="1"
+                    Background="White"
+                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="1"
+                    CornerRadius="3">
+                <TextBox Padding="4,2"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         FontSize="12"
+                         Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </Border>
+            <Button Grid.Column="2"
+                    Margin="5,0,0,0"
+                    Command="{Binding DataContext.RemoveFrontMatterPropertyCommand, RelativeSource={RelativeSource AncestorType={x:Type Window}}}"
+                    CommandParameter="{Binding}"
+                    Style="{StaticResource IconButtonStyle}"
+                    ToolTip="削除">
+                <Path Width="10"
+                      Height="10"
+                      Data="{StaticResource CloseIconGeometry}"
+                      Fill="{StaticResource SecondaryActionBrush}"
+                      Stretch="Uniform" />
+            </Button>
+        </Grid>
+    </DataTemplate>
 </ResourceDictionary>

@@ -118,7 +118,7 @@ namespace PageLeaf.Tests.UseCases
         public void Execute_ShouldApplyTemplate_WhenNewDocumentIsCreated()
         {
             // テスト観点: 新規作成時に、テンプレートの自動挿入設定が有効であれば、
-            //            フロントマターや初期コンテンツが適用されることを確認する。
+            //            標準プロパティ（title, created, updated等）が適用されることを確認する。
             // Arrange
             var settings = new ApplicationSettings { AutoInsertFrontMatter = true };
             _settingsServiceMock.Setup(x => x.CurrentSettings).Returns(settings);
@@ -134,6 +134,8 @@ namespace PageLeaf.Tests.UseCases
             Assert.AreEqual("Untitled", doc.FrontMatter["title"]);
             Assert.IsTrue(doc.FrontMatter.ContainsKey("created"));
             Assert.IsTrue(doc.FrontMatter.ContainsKey("updated"));
+            Assert.IsTrue(doc.FrontMatter.ContainsKey("css"));
+            Assert.IsTrue(doc.FrontMatter.ContainsKey("syntax_highlight"));
             StringAssert.StartsWith(doc.Content, "# Untitled");
         }
 
@@ -156,6 +158,39 @@ namespace PageLeaf.Tests.UseCases
             // Assert
             Assert.AreEqual(0, doc.FrontMatter.Count);
             Assert.AreEqual(string.Empty, doc.Content);
+        }
+
+        [TestMethod]
+        public void Execute_ShouldApplyCustomFrontMatter_FromSettings()
+        {
+            // テスト観点: アプリ管理の標準プロパティに加えて、設定で定義された追加プロパティが
+            //            新規作成時に適用されることを確認する。
+            // Arrange
+            var additionalFrontMatter = new System.Collections.Generic.List<FrontMatterAdditionalProperty>
+            {
+                new FrontMatterAdditionalProperty { Key = "author", Value = "Test Author" },
+                new FrontMatterAdditionalProperty { Key = "tags", Value = "test" }
+            };
+            var settings = new ApplicationSettings
+            {
+                AutoInsertFrontMatter = true,
+                AdditionalFrontMatter = additionalFrontMatter
+            };
+            _settingsServiceMock.Setup(x => x.CurrentSettings).Returns(settings);
+
+            var doc = new MarkdownDocument();
+            _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.NoAction);
+            _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
+
+            // Act
+            _useCase.Execute();
+
+            // Assert
+            // 標準プロパティ
+            Assert.AreEqual("Untitled", doc.FrontMatter["title"]);
+            // 追加プロパティ
+            Assert.AreEqual("Test Author", doc.FrontMatter["author"]);
+            Assert.AreEqual("test", doc.FrontMatter["tags"]);
         }
     }
 }

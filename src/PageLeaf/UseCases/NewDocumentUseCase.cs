@@ -80,15 +80,49 @@ namespace PageLeaf.UseCases
                 return;
             }
 
-            var now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            doc.FrontMatter = new System.Collections.Generic.Dictionary<string, object>
-            {
-                { "title", "Untitled" },
-                { "created", now },
-                { "updated", now }
-            };
+            var settings = _settingsService.CurrentSettings;
+            var resultFrontMatter = new System.Collections.Generic.Dictionary<string, object>();
 
-            doc.Content = "# Untitled" + System.Environment.NewLine;
+            // 1. アプリ管理の標準プロパティを生成
+            resultFrontMatter["title"] = "Untitled";
+            resultFrontMatter["created"] = ReplacePlaceholders("{Now}");
+            resultFrontMatter["updated"] = ReplacePlaceholders("{Now}");
+            resultFrontMatter["css"] = "";
+            resultFrontMatter["syntax_highlight"] = "";
+
+            // 2. ユーザー定義の追加プロパティをマージ (標準プロパティの上書きも許可)
+            if (settings.AdditionalFrontMatter != null)
+            {
+                foreach (var prop in settings.AdditionalFrontMatter)
+                {
+                    if (!string.IsNullOrWhiteSpace(prop.Key))
+                    {
+                        resultFrontMatter[prop.Key] = ReplacePlaceholders(prop.Value);
+                    }
+                }
+            }
+
+            doc.FrontMatter = resultFrontMatter;
+
+            // title プロパティがあれば見出しとして使用、なければ Untitled
+            string title = resultFrontMatter.TryGetValue("title", out var t) ? t.ToString() ?? "Untitled" : "Untitled";
+            doc.Content = $"# {title}" + System.Environment.NewLine;
+        }
+
+        /// <summary>
+        /// 文字列内のプレースホルダーを現在の値に置換します。
+        /// </summary>
+        /// <param name="value">置換対象の文字列。</param>
+        /// <returns>置換後の文字列。</returns>
+        private string ReplacePlaceholders(string value)
+        {
+            if (string.IsNullOrEmpty(value)) return value;
+
+            var now = System.DateTime.Now;
+            return value
+                .Replace("{Now}", now.ToString("yyyy-MM-dd HH:mm:ss"))
+                .Replace("{Date}", now.ToString("yyyy-MM-dd"))
+                .Replace("{Time}", now.ToString("HH:mm:ss"));
         }
     }
 }

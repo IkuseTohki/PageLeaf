@@ -126,7 +126,6 @@
 
                 <!-- Headings Tab -->
                 <StackPanel Visibility="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Headings}}">
-                    <Label Content="対象選択" Style="{StaticResource FirstCompactFormGroupHeaderStyle}" />
                     <Label Content="対象見出し" Style="{StaticResource CompactFormLabelStyle}" />
                     <ComboBox ItemsSource="{Binding AvailableHeadingLevels}"
                               SelectedItem="{Binding SelectedHeadingLevel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
