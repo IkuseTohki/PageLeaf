@@ -742,7 +742,8 @@ namespace PageLeaf.Tests.Services
             // h3
             StringAssert.Matches(updatedCss, new Regex(@"h3\s*\{[^}]*counter-increment:\s*h3(\s+1)?;[^}]*\}"));
             StringAssert.Matches(updatedCss, new Regex(@"h3\s*\{[^}]*counter-reset:\s*h4\s*0;[^}]*\}"));
-            StringAssert.Matches(updatedCss, new Regex(@"h3::before\s*\{[^}]*content:\s*counter\(h1\)\s*""\.""\s*counter\(h2\)\s*""\.""\s*counter\(h3\)\s*""\.\s*"";[^}]*\}"));
+            // H2が無効なので、H1とH3のみが content に含まれるべき
+            StringAssert.Matches(updatedCss, new Regex(@"h3::before\s*\{[^}]*content:\s*counter\(h1\)\s*""\.""\s*counter\(h3\)\s*""\.\s*"";[^}]*\}"));
 
             // h4以降 (採番無効なのでcounter-increment, counter-reset, ::before はなし)
             Assert.IsFalse(updatedCss.Contains("h4 {")); // h4はルール自体が空であれば削除される
@@ -787,13 +788,36 @@ namespace PageLeaf.Tests.Services
             // Assert - h2の採番ルールは残っていることを確認
             StringAssert.Matches(updatedCss, new Regex(@"h2\s*\{[^}]*counter-increment:\s*h2(\s+1)?;[^}]*\}"));
             StringAssert.Matches(updatedCss, new Regex(@"h2\s*\{[^}]*counter-reset:\s*h3\s*0;[^}]*\}"));
-            StringAssert.Matches(updatedCss, new Regex(@"h2::before\s*\{[^}]*content:\s*counter\(h1\)\s*""\.""\s*counter\(h2\)\s*""\.\s*"";[^}]*\}"));
+            // H1が無効な場合、H2の採番は "1. " から始まるべき（"0.1. " ではなく）
+            StringAssert.Matches(updatedCss, new Regex(@"h2::before\s*\{[^}]*content:\s*counter\(h2\)\s*""\.\s*"";[^}]*\}"));
 
 
             // Assert - h3は採番ルールがないことを確認
             StringAssert.Matches(updatedCss, new Regex(@"h3\s*\{[^}]*font-size:\s*1em;[^}]*\}"));
             Assert.IsFalse(updatedCss.Contains("h3 { counter-increment:"));
             Assert.IsFalse(updatedCss.Contains("h3::before"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldNotIncludeDisabledUpperLevelCounters_InContent()
+        {
+            // テスト観点: 上位レベルの見出し採番が無効な場合、下位レベルの content プロパティに
+            //            その上位レベルのカウンタが含まれないことを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "";
+            var styleInfo = new CssStyleInfo();
+            // h1, h2 は無効、h3 は有効にする
+            styleInfo.HeadingNumberingStates["h1"] = false;
+            styleInfo.HeadingNumberingStates["h2"] = false;
+            styleInfo.HeadingNumberingStates["h3"] = true;
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            // Assert
+            // h3::before の content は counter(h3) だけを含むべき
+            StringAssert.Matches(updatedCss, new Regex(@"h3::before\s*\{[^}]*content:\s*counter\(h3\)\s*""\.\s*"";[^}]*\}"));
         }
         [TestMethod]
         public void UpdateCssContent_WithNullDictionaries_ShouldNotThrow()

@@ -492,15 +492,18 @@ namespace PageLeaf.Services
                     UpdateOrCreateRule(stylesheet, beforeSelector, (rule, info) =>
                     {
                         var contentBuilder = new StringBuilder();
+                        bool isFirst = true;
                         for (int j = 1; j <= i; j++)
                         {
-                            contentBuilder.Append($"counter(h{j})");
-                            if (j < i)
+                            var currentH = $"h{j}";
+                            if (info.HeadingNumberingStates != null && info.HeadingNumberingStates.TryGetValue(currentH, out bool isHEnabled) && isHEnabled)
                             {
-                                contentBuilder.Append(" \".\" ");
+                                if (!isFirst) contentBuilder.Append("\".\"");
+                                contentBuilder.Append($"counter({currentH})");
+                                isFirst = false;
                             }
                         }
-                        contentBuilder.Append(" \". \"");
+                        contentBuilder.Append("\". \"");
                         rule.Style.SetProperty("content", contentBuilder.ToString());
                     }, styleInfo);
                 }
