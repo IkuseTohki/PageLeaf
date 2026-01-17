@@ -32,6 +32,7 @@ namespace PageLeaf.ViewModels
         private string _imageFileNameTemplate = "image_{Date}_{Time}";
         private int _indentSize = 4;
         private bool _useSpacesForIndent = true;
+        private bool _autoInsertFrontMatter = true;
         private SettingsCategory _currentCategory = SettingsCategory.Editor;
 
         /// <summary>
@@ -103,6 +104,15 @@ namespace PageLeaf.ViewModels
         }
 
         /// <summary>
+        /// 新規作成時にフロントマターを自動挿入するかどうか。
+        /// </summary>
+        public bool AutoInsertFrontMatter
+        {
+            get => _autoInsertFrontMatter;
+            set { if (_autoInsertFrontMatter != value) { _autoInsertFrontMatter = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
         /// 保存コマンド。
         /// </summary>
         public ICommand SaveCommand { get; }
@@ -129,6 +139,7 @@ namespace PageLeaf.ViewModels
             _imageFileNameTemplate = settings.ImageFileNameTemplate;
             _indentSize = settings.IndentSize;
             _useSpacesForIndent = settings.UseSpacesForIndent;
+            _autoInsertFrontMatter = settings.AutoInsertFrontMatter;
 
             // テーマ一覧の取得
             LoadAvailableThemes();
@@ -191,6 +202,7 @@ namespace PageLeaf.ViewModels
             settings.ImageFileNameTemplate = ImageFileNameTemplate;
             settings.IndentSize = IndentSize;
             settings.UseSpacesForIndent = UseSpacesForIndent;
+            settings.AutoInsertFrontMatter = AutoInsertFrontMatter;
 
             _settingsService.SaveSettings(settings);
             RequestClose?.Invoke(this, EventArgs.Empty);

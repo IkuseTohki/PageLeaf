@@ -12,6 +12,7 @@ namespace PageLeaf.Tests.UseCases
         private Mock<IEditorService> _editorServiceMock = null!;
         private Mock<ISaveDocumentUseCase> _saveDocumentUseCaseMock = null!;
         private Mock<IMarkdownService> _markdownServiceMock = null!;
+        private Mock<ISettingsService> _settingsServiceMock = null!;
         private NewDocumentUseCase _useCase = null!;
 
         [TestInitialize]
@@ -20,8 +21,16 @@ namespace PageLeaf.Tests.UseCases
             _editorServiceMock = new Mock<IEditorService>();
             _saveDocumentUseCaseMock = new Mock<ISaveDocumentUseCase>();
             _markdownServiceMock = new Mock<IMarkdownService>();
+            _settingsServiceMock = new Mock<ISettingsService>();
 
-            _useCase = new NewDocumentUseCase(_editorServiceMock.Object, _saveDocumentUseCaseMock.Object, _markdownServiceMock.Object);
+            // デフォルト設定
+            _settingsServiceMock.Setup(x => x.CurrentSettings).Returns(new ApplicationSettings());
+
+            _useCase = new NewDocumentUseCase(
+                _editorServiceMock.Object,
+                _saveDocumentUseCaseMock.Object,
+                _markdownServiceMock.Object,
+                _settingsServiceMock.Object);
         }
 
         [TestMethod]
@@ -108,8 +117,12 @@ namespace PageLeaf.Tests.UseCases
         [TestMethod]
         public void Execute_ShouldApplyTemplate_WhenNewDocumentIsCreated()
         {
-            // テスト観点: 新規作成時に、テンプレート（フロントマターや初期コンテンツ）が適用されることを確認する。
+            // テスト観点: 新規作成時に、テンプレートの自動挿入設定が有効であれば、
+            //            フロントマターや初期コンテンツが適用されることを確認する。
             // Arrange
+            var settings = new ApplicationSettings { AutoInsertFrontMatter = true };
+            _settingsServiceMock.Setup(x => x.CurrentSettings).Returns(settings);
+
             var doc = new MarkdownDocument();
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.NoAction);
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
@@ -122,6 +135,27 @@ namespace PageLeaf.Tests.UseCases
             Assert.IsTrue(doc.FrontMatter.ContainsKey("created"));
             Assert.IsTrue(doc.FrontMatter.ContainsKey("updated"));
             StringAssert.StartsWith(doc.Content, "# Untitled");
+        }
+
+        [TestMethod]
+        public void Execute_ShouldNotApplyTemplate_WhenAutoInsertIsDisabled()
+        {
+            // テスト観点: 設定でフロントマターの自動挿入がオフになっている場合、
+            //            新規作成時にフロントマターや初期コンテンツが挿入されないことを確認する。
+            // Arrange
+            var settings = new ApplicationSettings { AutoInsertFrontMatter = false };
+            _settingsServiceMock.Setup(x => x.CurrentSettings).Returns(settings);
+
+            var doc = new MarkdownDocument();
+            _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.NoAction);
+            _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
+
+            // Act
+            _useCase.Execute();
+
+            // Assert
+            Assert.AreEqual(0, doc.FrontMatter.Count);
+            Assert.AreEqual(string.Empty, doc.Content);
         }
     }
 }

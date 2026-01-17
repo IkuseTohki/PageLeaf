@@ -71,6 +71,12 @@
                                  Style="{StaticResource FormTextBoxStyle}"
                                  Text="{Binding IndentSize}" />
                         <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※Tabキーを押した際に入力される空白の量を指定します。" />
+
+                        <Label Content="フロントマター設定" Style="{StaticResource SectionHeaderLabelStyle}" />
+                        <CheckBox Content="新規作成時にフロントマターを自動挿入する"
+                                  IsChecked="{Binding AutoInsertFrontMatter}"
+                                  Style="{StaticResource FormCheckBoxStyle}" />
+                        <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※チェックすると、新規作成時に作成日時やタイトルを含むメタデータブロックが自動的に挿入されます。" />
                     </StackPanel>
 
                     <!-- Image Settings -->

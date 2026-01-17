@@ -11,6 +11,7 @@ namespace PageLeaf.UseCases
         private readonly IEditorService _editorService;
         private readonly ISaveDocumentUseCase _saveDocumentUseCase;
         private readonly IMarkdownService _markdownService;
+        private readonly ISettingsService _settingsService;
 
         /// <summary>
         /// <see cref="NewDocumentUseCase"/> クラスの新しいインスタンスを初期化します。
@@ -18,52 +19,76 @@ namespace PageLeaf.UseCases
         /// <param name="editorService">エディタサービス。</param>
         /// <param name="saveDocumentUseCase">保存ユースケース。</param>
         /// <param name="markdownService">Markdownサービス。</param>
-        public NewDocumentUseCase(IEditorService editorService, ISaveDocumentUseCase saveDocumentUseCase, IMarkdownService markdownService)
+        /// <param name="settingsService">設定サービス。</param>
+        public NewDocumentUseCase(
+            IEditorService editorService,
+            ISaveDocumentUseCase saveDocumentUseCase,
+            IMarkdownService markdownService,
+            ISettingsService settingsService)
         {
             _editorService = editorService;
             _saveDocumentUseCase = saveDocumentUseCase;
             _markdownService = markdownService;
+            _settingsService = settingsService;
         }
 
         /// <inheritdoc />
         public void Execute()
         {
-            var result = _editorService.PromptForSaveIfDirty();
-
-            if (result == SaveConfirmationResult.Cancel)
+            if (!HandleSaveConfirmation())
             {
                 return;
             }
 
-            if (result == SaveConfirmationResult.Save)
-            {
-                if (!_saveDocumentUseCase.Execute())
-                {
-                    // 保存がキャンセルまたは失敗した場合は中断
-                    return;
-                }
-            }
-
             _editorService.NewDocument();
 
-            // テンプレート適用 (フロントマターの自動挿入)
+            if (_settingsService.CurrentSettings.AutoInsertFrontMatter)
+            {
+                ApplyDefaultTemplate();
+            }
+        }
+
+        /// <summary>
+        /// 必要に応じて保存確認を行い、処理を継続してよいかどうかを判断します。
+        /// </summary>
+        /// <returns>処理を継続する場合は true、中断する場合は false。</returns>
+        private bool HandleSaveConfirmation()
+        {
+            var result = _editorService.PromptForSaveIfDirty();
+
+            if (result == SaveConfirmationResult.Cancel)
+            {
+                return false;
+            }
+
+            if (result == SaveConfirmationResult.Save)
+            {
+                return _saveDocumentUseCase.Execute();
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 新規ドキュメントにデフォルトのテンプレート（フロントマターとタイトル）を適用します。
+        /// </summary>
+        private void ApplyDefaultTemplate()
+        {
+            var doc = _editorService.CurrentDocument;
+            if (doc == null)
+            {
+                return;
+            }
+
             var now = System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-            var initialFrontMatter = new System.Collections.Generic.Dictionary<string, object>
+            doc.FrontMatter = new System.Collections.Generic.Dictionary<string, object>
             {
                 { "title", "Untitled" },
                 { "created", now },
                 { "updated", now }
             };
 
-            // フロントマターと本文を個別にセット
-            var doc = _editorService.CurrentDocument;
-            if (doc == null) return;
-
-            doc.FrontMatter = initialFrontMatter;
             doc.Content = "# Untitled" + System.Environment.NewLine;
-
-            // テンプレートが適用された状態なので、変更あり(IsDirty=true)の状態になる。
-            // これにより、即座に閉じようとした場合に保存確認が表示される。
         }
     }
 }
