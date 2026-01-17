@@ -22,18 +22,18 @@ namespace PageLeaf.Services
         /// SettingsService クラスの新しいインスタンスを初期化します。
         /// </summary>
         /// <param name="logger">ロガー。</param>
-        /// <param name="appDataPath">設定ファイルを保存するアプリケーションデータフォルダのパス。</param>
-        public SettingsService(ILogger<SettingsService> logger, string? appDataPath = null)
+        /// <param name="basePath">設定ファイルを保存するディレクトリのパス。nullの場合は実行ディレクトリが使用されます。</param>
+        public SettingsService(ILogger<SettingsService> logger, string? basePath = null)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            // アプリケーションデータフォルダのパスを決定
-            var baseAppDataPath = appDataPath ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "PageLeaf");
-            if (!Directory.Exists(baseAppDataPath))
+            // 設定ファイルの保存ディレクトリを決定（デフォルトは実行ファイルと同階層）
+            var finalPath = basePath ?? AppDomain.CurrentDomain.BaseDirectory;
+            if (!Directory.Exists(finalPath))
             {
-                Directory.CreateDirectory(baseAppDataPath);
+                Directory.CreateDirectory(finalPath);
             }
-            _settingsFilePath = Path.Combine(baseAppDataPath, "settings.yaml");
+            _settingsFilePath = Path.Combine(finalPath, "settings.yaml");
             _logger.LogInformation("Settings file path: {SettingsFilePath}", _settingsFilePath);
 
             _serializer = new SerializerBuilder()

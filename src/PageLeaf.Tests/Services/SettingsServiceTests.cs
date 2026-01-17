@@ -159,5 +159,33 @@ namespace PageLeaf.Tests.Services
             Assert.IsNotNull(settings);
             Assert.AreEqual("", settings.SelectedCss);
         }
+
+        [TestMethod]
+        public void test_DefaultSettingsFilePath_ShouldBeInBaseDirectory()
+        {
+            // テスト観点: appDataPath が null の場合、設定ファイルが実行ディレクトリ配下に設定されることを確認する。
+            // Arrange
+            var service = new SettingsService(_mockLogger.Object, null);
+
+            // Act
+            var expectedPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.yaml");
+
+            // テスト実行前にファイルが存在しないことを確認
+            if (File.Exists(expectedPath)) File.Delete(expectedPath);
+
+            try
+            {
+                // Act
+                service.SaveSettings(new ApplicationSettings());
+
+                // Assert
+                Assert.IsTrue(File.Exists(expectedPath), $"Settings file should be created at {expectedPath}");
+            }
+            finally
+            {
+                // Cleanup
+                if (File.Exists(expectedPath)) File.Delete(expectedPath);
+            }
+        }
     }
 }
