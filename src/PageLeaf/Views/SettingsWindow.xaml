@@ -4,89 +4,128 @@
         xmlns:behaviors="clr-namespace:PageLeaf.Behaviors"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:PageLeaf.ViewModels"
         Title="設定"
-        Width="450"
+        Width="680"
+        Height="500"
         behaviors:WindowDragBehavior.IsEnabled="True"
         AllowsTransparency="True"
         Background="Transparent"
         ResizeMode="NoResize"
-        SizeToContent="Height"
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         mc:Ignorable="d">
     <Border Style="{StaticResource SettingsWindowBorderStyle}">
-        <Grid Margin="20,10">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <TextBlock Grid.Row="0"
-                       Margin="0,0,0,20"
-                       FontSize="18"
-                       FontWeight="Bold"
-                       Foreground="{StaticResource PrimaryTextBrush}"
-                       Text="アプリケーション設定" />
+            <!-- Sidebar Navigation -->
+            <Border Grid.Row="0"
+                    Grid.RowSpan="2"
+                    Grid.Column="0"
+                    Style="{StaticResource SidebarPanelBorderStyle}">
+                <StackPanel Margin="10,20">
+                    <TextBlock Style="{StaticResource SettingsTitleTextStyle}" Text="設定" />
 
-            <StackPanel Grid.Row="1">
-                <!-- Code Highlight Settings -->
-                <Label Content="コードハイライト設定" Style="{StaticResource FirstSectionHeaderLabelStyle}" />
+                    <RadioButton Content="エディタ"
+                                 IsChecked="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Editor}}"
+                                 Style="{StaticResource SidebarMenuItemStyle}"
+                                 Tag="🖊️" />
+                    <RadioButton Content="画像・ファイル"
+                                 IsChecked="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Image}}"
+                                 Style="{StaticResource SidebarMenuItemStyle}"
+                                 Tag="🖼️" />
+                    <RadioButton Content="表示 (コード)"
+                                 IsChecked="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Code}}"
+                                 Style="{StaticResource SidebarMenuItemStyle}"
+                                 Tag="🎨" />
+                </StackPanel>
+            </Border>
 
-                <!-- Highlight.js Theme -->
-                <Label Content="コードハイライト テーマ:" Style="{StaticResource FormLabelStyle}" />
-                <ComboBox ItemsSource="{Binding AvailableThemes}"
-                          SelectedItem="{Binding SelectedCodeBlockTheme}"
-                          Style="{StaticResource FormComboBoxStyle}" />
-                <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※コードブロックに適用される highlight.js のテーマを選択します。" />
+            <!-- Content Area -->
+            <ScrollViewer Grid.Row="0"
+                          Grid.Column="1"
+                          Margin="25,25,25,10"
+                          VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <!-- Editor Settings -->
+                    <StackPanel Visibility="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Editor}}">
+                        <Label Content="エディタ設定" Style="{StaticResource FirstSectionHeaderLabelStyle}" />
 
-                <!-- Override Flag -->
-                <CheckBox Content="CSSエディタの設定でテーマを上書きする"
-                          IsChecked="{Binding UseCustomCodeBlockStyle}"
-                          Style="{StaticResource FormCheckBoxStyle}" />
-                <TextBlock Margin="25,2,0,0"
-                           LineHeight="15"
-                           Style="{StaticResource AnnotationTextStyle}"
-                           Text="※チェックすると、CSSエディタの「コード」タブでの設定がコードブロックに強制適用されます。チェックしない場合は、選択したテーマのデザインが優先されます。" />
+                        <CheckBox Content="タブの代わりにスペースを使用する"
+                                  IsChecked="{Binding UseSpacesForIndent}"
+                                  Style="{StaticResource FormCheckBoxStyle}" />
 
-                <!-- Image Settings -->
-                <Label Content="画像貼り付け設定" Style="{StaticResource SectionHeaderLabelStyle}" />
+                        <Label Content="インデント幅 (スペース数)"
+                               IsEnabled="{Binding UseSpacesForIndent}"
+                               Style="{StaticResource FormLabelStyle}" />
+                        <TextBox behaviors:StyleBehavior.MergeStyle="{StaticResource InputControlSmallStyle}"
+                                 IsEnabled="{Binding UseSpacesForIndent}"
+                                 Style="{StaticResource FormTextBoxStyle}"
+                                 Text="{Binding IndentSize}" />
+                        <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※Tabキーを押した際に入力される空白の量を指定します。" />
+                    </StackPanel>
 
-                <Label Content="保存先フォルダ (相対パス):" Style="{StaticResource FormLabelStyle}" />
-                <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding ImageSaveDirectory}" />
-                <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※Markdownファイルからの相対パス。例: images" />
+                    <!-- Image Settings -->
+                    <StackPanel Visibility="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Image}}">
+                        <Label Content="画像貼り付け設定" Style="{StaticResource FirstSectionHeaderLabelStyle}" />
 
-                <Label Content="ファイル名テンプレート:" Style="{StaticResource FormLabelStyle}" />
-                <TextBox Style="{StaticResource FormTextBoxStyle}" Text="{Binding ImageFileNameTemplate}" />
-                <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※変数: {Date}, {Time}, {FileName}" />
+                        <Label Content="保存先フォルダ (相対パス)" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox behaviors:StyleBehavior.MergeStyle="{StaticResource InputControlMediumStyle}"
+                                 Style="{StaticResource FormTextBoxStyle}"
+                                 Text="{Binding ImageSaveDirectory}" />
+                        <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※Markdownファイルからの相対パス。例: images" />
 
-                <!-- Editor Settings -->
-                <Label Content="エディタ設定" Style="{StaticResource SectionHeaderLabelStyle}" />
+                        <Label Content="ファイル名テンプレート" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox behaviors:StyleBehavior.MergeStyle="{StaticResource InputControlMediumStyle}"
+                                 Style="{StaticResource FormTextBoxStyle}"
+                                 Text="{Binding ImageFileNameTemplate}" />
+                        <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※使用可能な変数: {Date}, {Time}, {FileName}" />
+                    </StackPanel>
 
-                <CheckBox Content="タブの代わりにスペースを使用する"
-                          IsChecked="{Binding UseSpacesForIndent}"
-                          Style="{StaticResource FormCheckBoxStyle}" />
+                    <!-- Code Highlight Settings -->
+                    <StackPanel Visibility="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Code}}">
+                        <Label Content="コードハイライト設定" Style="{StaticResource FirstSectionHeaderLabelStyle}" />
 
-                <Label Content="インデント幅 (スペース数):"
-                       IsEnabled="{Binding UseSpacesForIndent}"
-                       Style="{StaticResource FormLabelStyle}" />
-                <TextBox IsEnabled="{Binding UseSpacesForIndent}"
-                         Style="{StaticResource FormTextBoxStyle}"
-                         Text="{Binding IndentSize}" />
-            </StackPanel>
+                        <Label Content="コードハイライト テーマ" Style="{StaticResource FormLabelStyle}" />
+                        <ComboBox behaviors:StyleBehavior.MergeStyle="{StaticResource InputControlMediumStyle}"
+                                  ItemsSource="{Binding AvailableThemes}"
+                                  SelectedItem="{Binding SelectedCodeBlockTheme}"
+                                  Style="{StaticResource FormComboBoxStyle}" />
+                        <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※コードブロックに適用される highlight.js のテーマを選択します。" />
 
-            <!-- Buttons -->
-            <StackPanel Grid.Row="2"
-                        Margin="0,10,0,0"
+                        <CheckBox Content="CSSエディタの設定でテーマを上書きする"
+                                  IsChecked="{Binding UseCustomCodeBlockStyle}"
+                                  Style="{StaticResource FormCheckBoxStyle}" />
+                        <TextBlock Margin="25,2,0,20"
+                                   HorizontalAlignment="Left"
+                                   LineHeight="15"
+                                   Style="{StaticResource AnnotationTextStyle}"
+                                   Text="※チェックすると、CSSエディタの「コード」タブでの設定がコードブロックに強制適用されます。" />
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+
+            <!-- Footer Buttons -->
+            <StackPanel Grid.Row="1"
+                        Grid.Column="1"
+                        Margin="0,0,25,20"
                         HorizontalAlignment="Right"
                         Orientation="Horizontal">
-                <Button Width="80"
+                <Button Width="90"
                         Command="{Binding SaveCommand}"
                         Content="保存"
                         IsDefault="True"
                         Style="{StaticResource PrimaryButtonStyle}" />
-                <Button Width="80"
-                        Margin="10,0,0,0"
+                <Button Width="90"
+                        Margin="12,0,0,0"
                         Command="{Binding CancelCommand}"
                         Content="キャンセル"
                         IsCancel="True"

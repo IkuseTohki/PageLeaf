@@ -185,9 +185,11 @@
 
     <!-- フォーム用ラベルスタイル -->
     <Style x:Key="FormLabelStyle" TargetType="Label">
-        <Setter Property="Margin" Value="0,5,0,0" />
-        <Setter Property="Padding" Value="0,2" />
-        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Margin" Value="0,0,0,6" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="#444444" />
     </Style>
 
     <!-- フォーム用セクションラベルスタイル (上部に余白あり) -->
@@ -206,22 +208,97 @@
 
     <!-- フォーム用テキストボックススタイル -->
     <Style x:Key="FormTextBoxStyle" TargetType="TextBox">
-        <Setter Property="Margin" Value="0,2,0,5" />
-        <Setter Property="Padding" Value="3" />
+        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="Padding" Value="8" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4"
+                            SnapsToDevicePixels="True">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Focusable="false"
+                                      HorizontalScrollBarVisibility="Hidden"
+                                      VerticalScrollBarVisibility="Hidden" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter TargetName="border" Property="Opacity" Value="0.56" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryActionBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="true">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryActionBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- フォーム用コンボボックススタイル -->
     <Style x:Key="FormComboBoxStyle"
            BasedOn="{StaticResource BaseComboBoxStyle}"
            TargetType="ComboBox">
-        <Setter Property="Margin" Value="0,2,0,5" />
+        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="Padding" Value="8,6" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
     </Style>
 
     <!-- フォーム用チェックボックススタイル -->
     <Style x:Key="FormCheckBoxStyle" TargetType="CheckBox">
-        <Setter Property="Margin" Value="0,5" />
+        <Setter Property="Margin" Value="0,0,0,20" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <BulletDecorator Background="Transparent" SnapsToDevicePixels="true">
+                        <BulletDecorator.Bullet>
+                            <Border x:Name="columnHeaderBorder"
+                                    Width="16"
+                                    Height="16"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="3">
+                                <Grid>
+                                    <Path x:Name="optionMark"
+                                          Margin="2"
+                                          Data="M1,4.5 L4,7.5 L9,1"
+                                          Stroke="{StaticResource PrimaryActionBrush}"
+                                          StrokeThickness="2"
+                                          Visibility="Collapsed" />
+                                </Grid>
+                            </Border>
+                        </BulletDecorator.Bullet>
+                        <ContentPresenter Margin="8,0,0,0"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          RecognizesAccessKey="True"
+                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                    </BulletDecorator>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="true">
+                            <Setter TargetName="optionMark" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="columnHeaderBorder" Property="BorderBrush" Value="{StaticResource PrimaryActionBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter TargetName="columnHeaderBorder" Property="BorderBrush" Value="{StaticResource PrimaryActionBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Foreground" Value="#FFADADAD" />
+                            <Setter TargetName="columnHeaderBorder" Property="Background" Value="#FFF4F4F4" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
     </Style>
 
     <!-- フォーム用ヘッダースタイル -->
@@ -233,34 +310,70 @@
     <!-- SettingsWindow 用のボーダースタイル -->
     <Style x:Key="SettingsWindowBorderStyle" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource WindowBackgroundBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource WindowBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="8" />
-        <Setter Property="Padding" Value="0,0,0,10" />
+        <Setter Property="Effect">
+            <Setter.Value>
+                <DropShadowEffect BlurRadius="25"
+                                  Opacity="0.1"
+                                  ShadowDepth="10"
+                                  Color="Black" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- サイドバーパネル用ボーダースタイル -->
+    <Style x:Key="SidebarPanelBorderStyle" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource PanelBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
+        <Setter Property="CornerRadius" Value="8,0,0,8" />
+    </Style>
+
+    <!-- 設定画面タイトル用テキストスタイル -->
+    <Style x:Key="SettingsTitleTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
+        <Setter Property="Margin" Value="10,0,0,20" />
+    </Style>
+
+    <!-- 入力コントロール幅スタイル (Small: 80px) -->
+    <Style x:Key="InputControlSmallStyle" TargetType="Control">
+        <Setter Property="Width" Value="80" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- 入力コントロール幅スタイル (Medium: 300px) -->
+    <Style x:Key="InputControlMediumStyle" TargetType="Control">
+        <Setter Property="Width" Value="300" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
     </Style>
 
     <!-- セクション見出し用ラベルスタイル -->
     <Style x:Key="SectionHeaderLabelStyle" TargetType="Label">
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="Normal" />
         <Setter Property="Foreground" Value="{StaticResource PrimaryTextBrush}" />
-        <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+        <Setter Property="BorderBrush" Value="#EEEEEE" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
-        <Setter Property="Margin" Value="0,20,0,5" />
+        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="Padding" Value="0,0,0,10" />
     </Style>
 
-    <!-- 最初のセクション用（マージン調整） -->
+    <!-- 最初のセクション用（マージン調整 - HTML案では共通） -->
     <Style x:Key="FirstSectionHeaderLabelStyle"
            BasedOn="{StaticResource SectionHeaderLabelStyle}"
            TargetType="Label">
-        <Setter Property="Margin" Value="0,0,0,5" />
+        <Setter Property="Margin" Value="0,0,0,20" />
     </Style>
 
     <!-- 注釈テキスト用スタイル -->
     <Style x:Key="AnnotationTextStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11" />
-        <Setter Property="Foreground" Value="Gray" />
-        <Setter Property="Margin" Value="5,2,0,10" />
+        <Setter Property="Foreground" Value="#666666" />
+        <Setter Property="Margin" Value="0,-16,0,20" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
 

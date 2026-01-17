@@ -11,6 +11,16 @@ using PageLeaf.Utilities;
 namespace PageLeaf.ViewModels
 {
     /// <summary>
+    /// 設定のカテゴリを定義します。
+    /// </summary>
+    public enum SettingsCategory
+    {
+        Editor,
+        Image,
+        Code
+    }
+
+    /// <summary>
     /// アプリケーション設定画面のビューモデルです。
     /// </summary>
     public class SettingsViewModel : ViewModelBase
@@ -22,6 +32,16 @@ namespace PageLeaf.ViewModels
         private string _imageFileNameTemplate = "image_{Date}_{Time}";
         private int _indentSize = 4;
         private bool _useSpacesForIndent = true;
+        private SettingsCategory _currentCategory = SettingsCategory.Editor;
+
+        /// <summary>
+        /// 現在選択されているカテゴリ。
+        /// </summary>
+        public SettingsCategory CurrentCategory
+        {
+            get => _currentCategory;
+            set { if (_currentCategory != value) { _currentCategory = value; OnPropertyChanged(); } }
+        }
 
         /// <summary>
         /// 利用可能なコードブロックテーマのリスト。

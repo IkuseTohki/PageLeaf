@@ -2,17 +2,22 @@
 
     <!-- 基本的な色定義 -->
     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="White" />
-    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#FFF8F8F8" />
-    <!-- 少しグレーがかった白 -->
-    <SolidColorBrush x:Key="BorderBrush" Color="#FFACACAC" />
-    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#FF333333" />
-    <SolidColorBrush x:Key="PrimaryActionBrush" Color="#FF007ACC" />
-    <SolidColorBrush x:Key="AccentBlueBrush" Color="#FF0078D4" />
-    <!-- Modern Blue -->
-    <SolidColorBrush x:Key="SecondaryActionBrush" Color="#FF666666" />
-    <SolidColorBrush x:Key="PrimaryActionHoverBrush" Color="#FF1C97EA" />
-    <SolidColorBrush x:Key="SecondaryTextBrush" Color="Gray" />
-    <SolidColorBrush x:Key="AnnotationTextBrush" Color="Gray" />
+    <SolidColorBrush x:Key="WindowBorderBrush" Color="#DDDDDD" />
+    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#F7F9FA" />
+    <!-- HTMLデザインのサイドバー色 -->
+    <SolidColorBrush x:Key="BorderBrush" Color="#E1E1E1" />
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#333333" />
+    <SolidColorBrush x:Key="PrimaryActionBrush" Color="#0078D4" />
+    <!-- HTMLデザインの保存ボタン色 -->
+    <SolidColorBrush x:Key="AccentBlueBrush" Color="#0078D4" />
+    <SolidColorBrush x:Key="SecondaryActionBrush" Color="#666666" />
+    <SolidColorBrush x:Key="PrimaryActionHoverBrush" Color="#0063B1" />
+    <SolidColorBrush x:Key="SecondaryTextBrush" Color="#666666" />
+    <SolidColorBrush x:Key="AnnotationTextBrush" Color="#666666" />
+
+    <SolidColorBrush x:Key="SidebarHoverBrush" Color="#EAEAEA" />
+    <SolidColorBrush x:Key="SidebarSelectedBrush" Color="#E5F1FB" />
+    <SolidColorBrush x:Key="SidebarSelectedTextBrush" Color="#005FB8" />
 
     <!-- ComboBox用ブラシ定義 -->
     <SolidColorBrush x:Key="ComboBoxBackgroundBrush" Color="#FFF2F2F2" />
