@@ -82,6 +82,25 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
+        public void test_SaveAndLoad_LibraryResourceSource()
+        {
+            // テスト観点: LibraryResourceSource プロパティが正しく保存および読み込みされることを確認する。
+            // Arrange
+            var settings = new ApplicationSettings
+            {
+                LibraryResourceSource = ResourceSource.Cdn
+            };
+            var service = new SettingsService(_mockLogger.Object, _testAppDataPath);
+
+            // Act
+            service.SaveSettings(settings);
+            var loadedSettings = service.LoadSettings();
+
+            // Assert
+            Assert.AreEqual(ResourceSource.Cdn, loadedSettings.LibraryResourceSource);
+        }
+
+        [TestMethod]
         public void test_SaveSettings_ShouldSaveSettingsToFile()
         {
             // テスト観点: SaveSettingsが設定をファイルに正しく保存することを確認する。

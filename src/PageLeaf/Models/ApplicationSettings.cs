@@ -58,6 +58,11 @@ namespace PageLeaf.Models
         public System.Collections.Generic.List<FrontMatterAdditionalProperty> AdditionalFrontMatter { get; set; } =
             new System.Collections.Generic.List<FrontMatterAdditionalProperty>();
 
+        /// <summary>
+        /// ライブラリ（Highlight.js, Mermaid）の読み込み先。
+        /// </summary>
+        public ResourceSource LibraryResourceSource { get; set; } = ResourceSource.Local;
+
         // Default constructor for deserialization
         public ApplicationSettings() { }
     }

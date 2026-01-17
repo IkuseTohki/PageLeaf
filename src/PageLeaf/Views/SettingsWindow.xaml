@@ -4,6 +4,7 @@
         xmlns:behaviors="clr-namespace:PageLeaf.Behaviors"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:models="clr-namespace:PageLeaf.Models"
         xmlns:vm="clr-namespace:PageLeaf.ViewModels"
         Title="設定"
         Width="680"
@@ -144,6 +145,29 @@
                                    LineHeight="15"
                                    Style="{StaticResource AnnotationTextStyle}"
                                    Text="※チェックすると、CSSエディタの「コード」タブでの設定がコードブロックに強制適用されます。" />
+
+                        <Label Content="ライブラリ（Highlight.js / Mermaid）読み込み先" Style="{StaticResource SectionHeaderLabelStyle}" />
+                        <StackPanel Margin="5,0,0,10" Orientation="Horizontal">
+                            <CheckBox IsChecked="{Binding IsCdnEnabled}" Style="{StaticResource ModernSwitchStyle}" />
+                            <TextBlock Margin="10,0,0,0" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Text" Value="ローカル" />
+                                        <Setter Property="Foreground" Value="{StaticResource SecondaryTextBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding IsCdnEnabled}" Value="True">
+                                                <Setter Property="Text" Value="CDN" />
+                                                <Setter Property="Foreground" Value="{StaticResource PrimaryActionBrush}" />
+                                                <Setter Property="FontWeight" Value="Bold" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </StackPanel>
+                        <TextBlock Margin="5,15,0,0"
+                                   Style="{StaticResource AnnotationTextStyle}"
+                                   Text="※CDNを選択すると、インターネット経由で最新のライブラリを読み込みます（オフライン時は表示できません）。" />
                     </StackPanel>
                 </Grid>
             </ScrollViewer>

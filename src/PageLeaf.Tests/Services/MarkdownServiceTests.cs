@@ -288,6 +288,26 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
+        public void ConvertToHtml_ShouldUseCdnLinks_WhenResourceSourceIsCdnInSettings()
+        {
+            // テスト観点: アプリケーション設定で ResourceSource が Cdn の場合、CDNのリンクが含まれることを確認する。
+            // Arrange
+            var settings = new ApplicationSettings { LibraryResourceSource = ResourceSource.Cdn };
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(settings);
+
+            var markdown = "# Test";
+
+            // Act
+            var html = _service.ConvertToHtml(markdown, null);
+
+            // Assert
+            // highlight.min.js, mermaid.min.js のCDNリンクが含まれていることを確認
+            Assert.IsTrue(html.Contains("https://cdn.jsdelivr.net/"), "Should contain CDN link (jsDelivr)");
+            Assert.IsTrue(html.Contains("styles/github.css"), "Should contain highlight.js theme link");
+            Assert.IsTrue(html.Contains("mermaid.min.js"), "Should contain mermaid script link");
+        }
+
+        [TestMethod]
         public void ConvertToHtml_ShouldHideYamlFrontMatter()
         {
             // テスト観点: YAMLフロントマターがHTML出力に含まれないことを確認する。

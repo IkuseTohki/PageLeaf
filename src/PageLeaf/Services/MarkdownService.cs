@@ -9,11 +9,18 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using Markdig.Syntax;
 using Markdig.Renderers.Html;
+using PageLeaf.Models;
 
 namespace PageLeaf.Services
 {
     public class MarkdownService : IMarkdownService
     {
+        private const string DefaultTheme = "github.css";
+        // jsDelivrを使用してメジャーバージョン11の最新を取得
+        private const string HighlightCdnBase = "https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11/build/";
+        // npmの最新版（latest）を指すように修正
+        private const string MermaidCdnUrl = "https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js";
+
         private readonly ISettingsService _settingsService;
 
         public MarkdownService(ISettingsService settingsService)
@@ -21,17 +28,70 @@ namespace PageLeaf.Services
             _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
         }
 
+        private struct EffectiveSettings
+        {
+            public string ThemeName { get; set; }
+            public ResourceSource ResourceSource { get; set; }
+        }
+
         public string ConvertToHtml(string markdown, string? cssPath, string? baseDirectory = null)
         {
-            var pipeline = new MarkdownPipelineBuilder()
+            var frontMatter = ParseFrontMatter(markdown ?? string.Empty);
+            var settings = GetEffectiveSettings(frontMatter);
+
+            var pipeline = CreatePipeline();
+            var htmlBody = Markdown.ToHtml(markdown ?? string.Empty, pipeline);
+
+            var htmlBuilder = new StringBuilder();
+            htmlBuilder.AppendLine("<!DOCTYPE html>");
+            htmlBuilder.AppendLine("<html>");
+            htmlBuilder.AppendLine("<head>");
+            htmlBuilder.Append(BuildHead(cssPath, baseDirectory, settings));
+            htmlBuilder.AppendLine("</head>");
+            htmlBuilder.AppendLine("<body>");
+            htmlBuilder.Append(htmlBody);
+            htmlBuilder.Append(BuildScripts(settings));
+            htmlBuilder.AppendLine("</body>");
+            htmlBuilder.AppendLine("</html>");
+
+            return htmlBuilder.ToString();
+        }
+
+        private MarkdownPipeline CreatePipeline()
+        {
+            return new MarkdownPipelineBuilder()
                 .UseAdvancedExtensions()
                 .UseYamlFrontMatter()
                 .UseCodeBlockHeader()
                 .Build();
-            var htmlBody = Markdown.ToHtml(markdown ?? string.Empty, pipeline);
+        }
 
-            var headBuilder = new StringBuilder();
-            headBuilder.AppendLine("<meta charset=\"UTF-8\">");
+        private EffectiveSettings GetEffectiveSettings(Dictionary<string, object> frontMatter)
+        {
+            var appSettings = _settingsService.CurrentSettings;
+            var settings = new EffectiveSettings
+            {
+                ThemeName = !string.IsNullOrEmpty(appSettings.CodeBlockTheme) ? appSettings.CodeBlockTheme : DefaultTheme,
+                ResourceSource = appSettings.LibraryResourceSource
+            };
+
+            // フロントマターによる上書き (テーマ)
+            if (frontMatter.TryGetValue("syntax_highlight", out var fmThemeObj) && fmThemeObj is string fmTheme && !string.IsNullOrWhiteSpace(fmTheme))
+            {
+                var candidateTheme = fmTheme.EndsWith(".css", StringComparison.OrdinalIgnoreCase) ? fmTheme : fmTheme + ".css";
+                if (File.Exists(Path.Combine(App.BaseDirectory, "highlight", "styles", candidateTheme)))
+                {
+                    settings.ThemeName = candidateTheme;
+                }
+            }
+
+            return settings;
+        }
+
+        private string BuildHead(string? cssPath, string? baseDirectory, EffectiveSettings settings)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("<meta charset=\"UTF-8\">");
 
             // ベースディレクトリの設定（画像等の相対パス解決用）
             if (!string.IsNullOrEmpty(baseDirectory))
@@ -41,7 +101,7 @@ namespace PageLeaf.Services
                     // ディレクトリパスをURIに変換し、末尾にスラッシュを保証
                     var baseUri = new Uri(baseDirectory).AbsoluteUri;
                     if (!baseUri.EndsWith("/")) baseUri += "/";
-                    headBuilder.AppendLine($"<base href=\"{baseUri}\" />");
+                    sb.AppendLine($"<base href=\"{baseUri}\" />");
                 }
                 catch (Exception)
                 {
@@ -50,76 +110,53 @@ namespace PageLeaf.Services
             }
 
             // 拡張機能用のベーススタイルを追加
-            var extensionsCssPath = Path.Combine(App.BaseDirectory, "css", "extensions.css");
-            var extensionsCssUri = new Uri(extensionsCssPath).AbsoluteUri;
-            headBuilder.AppendLine($"<link rel=\"stylesheet\" href=\"{extensionsCssUri}\">");
+            var extensionsCssUri = new Uri(Path.Combine(App.BaseDirectory, "css", "extensions.css")).AbsoluteUri;
+            sb.AppendLine($"<link rel=\"stylesheet\" href=\"{extensionsCssUri}\">");
 
             if (!string.IsNullOrEmpty(cssPath))
             {
-                var timestamp = DateTime.Now.Ticks; // タイムスタンプを取得
-                headBuilder.AppendLine($"<link rel=\"stylesheet\" href=\"{cssPath}?v={timestamp}\">");
+                sb.AppendLine($"<link rel=\"stylesheet\" href=\"{cssPath}?v={DateTime.Now.Ticks}\">");
             }
 
-            headBuilder.AppendLine("<style id=\"dynamic-style\"></style>");
+            sb.AppendLine("<style id=\"dynamic-style\"></style>");
 
-            // highlight.jsのCSSへのリンクを追加 (設定から取得)
-            var themeName = _settingsService.CurrentSettings.CodeBlockTheme;
-            if (string.IsNullOrEmpty(themeName)) themeName = "github.css";
+            string themeUri = settings.ResourceSource == ResourceSource.Cdn
+                ? $"{HighlightCdnBase}styles/{settings.ThemeName}"
+                : new Uri(Path.Combine(App.BaseDirectory, "highlight", "styles", settings.ThemeName)).AbsoluteUri;
 
-            // フロントマターの指定があれば優先する
-            var frontMatter = ParseFrontMatter(markdown ?? string.Empty);
-            if (frontMatter.TryGetValue("syntax_highlight", out var fmThemeObj) && fmThemeObj is string fmTheme && !string.IsNullOrWhiteSpace(fmTheme))
+            sb.AppendLine($"<link rel=\"stylesheet\" href=\"{themeUri}\">");
+
+            return sb.ToString();
+        }
+
+        private string BuildScripts(EffectiveSettings settings)
+        {
+            string highlightUri;
+            string mermaidUri;
+            string extensionUri = new Uri(Path.Combine(App.BaseDirectory, "highlight", "pageleaf-extensions.js")).AbsoluteUri;
+
+            if (settings.ResourceSource == ResourceSource.Cdn)
             {
-                var candidateTheme = fmTheme;
-                if (!candidateTheme.EndsWith(".css", StringComparison.OrdinalIgnoreCase))
-                {
-                    candidateTheme += ".css";
-                }
-
-                // ファイルの実在確認
-                var candidatePath = Path.Combine(App.BaseDirectory, "highlight", "styles", candidateTheme);
-                if (File.Exists(candidatePath))
-                {
-                    themeName = candidateTheme;
-                }
+                highlightUri = $"{HighlightCdnBase}highlight.min.js";
+                mermaidUri = MermaidCdnUrl;
+            }
+            else
+            {
+                highlightUri = new Uri(Path.Combine(App.BaseDirectory, "highlight", "highlight.min.js")).AbsoluteUri;
+                mermaidUri = new Uri(Path.Combine(App.BaseDirectory, "mermaid", "mermaid.min.js")).AbsoluteUri;
             }
 
-            var cssFilePath = Path.Combine(App.BaseDirectory, "highlight", "styles", themeName);
-            var cssFileUri = new Uri(cssFilePath).AbsoluteUri;
-            headBuilder.AppendLine($"<link rel=\"stylesheet\" href=\"{cssFileUri}\">");
+            var sb = new StringBuilder();
+            sb.AppendLine($"<script src=\"{highlightUri}\"></script>");
+            sb.AppendLine($"<script src=\"{extensionUri}\"></script>");
+            sb.AppendLine($"<script src=\"{mermaidUri}\"></script>");
+            sb.AppendLine("<script>hljs.highlightAll();</script>");
+            sb.AppendLine("<script>");
+            sb.AppendLine("  mermaid.initialize({ startOnLoad: true, theme: 'default' });");
+            sb.AppendLine("  mermaid.contentLoaded();");
+            sb.AppendLine("</script>");
 
-            var htmlBuilder = new StringBuilder();
-            htmlBuilder.AppendLine("<!DOCTYPE html>");
-            htmlBuilder.AppendLine("<html>");
-            htmlBuilder.AppendLine("<head>");
-            htmlBuilder.Append(headBuilder);
-            htmlBuilder.AppendLine("</head>");
-            htmlBuilder.AppendLine("<body>");
-            htmlBuilder.Append(htmlBody);
-
-            // highlight.jsライブラリへのリンクを絶対パスで指定
-            var scriptFilePath = Path.Combine(App.BaseDirectory, "highlight", "highlight.min.js");
-            var extensionScriptPath = Path.Combine(App.BaseDirectory, "highlight", "pageleaf-extensions.js");
-            var mermaidScriptPath = Path.Combine(App.BaseDirectory, "mermaid", "mermaid.min.js");
-
-            // file:// スキームのURIに変換
-            var scriptFileUri = new Uri(scriptFilePath).AbsoluteUri;
-            var extensionScriptUri = new Uri(extensionScriptPath).AbsoluteUri;
-            var mermaidScriptUri = new Uri(mermaidScriptPath).AbsoluteUri;
-
-            htmlBuilder.AppendLine($"<script src=\"{scriptFileUri}\"></script>");
-            htmlBuilder.AppendLine($"<script src=\"{extensionScriptUri}\"></script>");
-            htmlBuilder.AppendLine($"<script src=\"{mermaidScriptUri}\"></script>");
-            htmlBuilder.AppendLine("<script>hljs.highlightAll();</script>");
-            htmlBuilder.AppendLine("<script>");
-            htmlBuilder.AppendLine("  mermaid.initialize({ startOnLoad: true, theme: 'default' });");
-            htmlBuilder.AppendLine("  mermaid.contentLoaded();");
-            htmlBuilder.AppendLine("</script>");
-
-            htmlBuilder.AppendLine("</body>");
-            htmlBuilder.AppendLine("</html>");
-
-            return htmlBuilder.ToString();
+            return sb.ToString();
         }
 
         public Dictionary<string, object> ParseFrontMatter(string markdown)

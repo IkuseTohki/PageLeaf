@@ -33,6 +33,7 @@ namespace PageLeaf.ViewModels
         private int _indentSize = 4;
         private bool _useSpacesForIndent = true;
         private bool _autoInsertFrontMatter = true;
+        private ResourceSource _libraryResourceSource = ResourceSource.Local;
         private SettingsCategory _currentCategory = SettingsCategory.Editor;
 
         /// <summary>
@@ -42,6 +43,32 @@ namespace PageLeaf.ViewModels
         {
             get => _currentCategory;
             set { if (_currentCategory != value) { _currentCategory = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
+        /// ライブラリ（Highlight.js, Mermaid）の読み込み先。
+        /// </summary>
+        public ResourceSource LibraryResourceSource
+        {
+            get => _libraryResourceSource;
+            set
+            {
+                if (_libraryResourceSource != value)
+                {
+                    _libraryResourceSource = value;
+                    OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsCdnEnabled));
+                }
+            }
+        }
+
+        /// <summary>
+        /// CDNが有効かどうか（UIのスイッチ用）。
+        /// </summary>
+        public bool IsCdnEnabled
+        {
+            get => LibraryResourceSource == ResourceSource.Cdn;
+            set => LibraryResourceSource = value ? ResourceSource.Cdn : ResourceSource.Local;
         }
 
         /// <summary>
@@ -155,6 +182,7 @@ namespace PageLeaf.ViewModels
             _indentSize = settings.IndentSize;
             _useSpacesForIndent = settings.UseSpacesForIndent;
             _autoInsertFrontMatter = settings.AutoInsertFrontMatter;
+            _libraryResourceSource = settings.LibraryResourceSource;
 
             // 追加フロントマタープロパティのロード
             DefaultFrontMatterProperties.Clear();
@@ -250,6 +278,7 @@ namespace PageLeaf.ViewModels
             settings.IndentSize = IndentSize;
             settings.UseSpacesForIndent = UseSpacesForIndent;
             settings.AutoInsertFrontMatter = AutoInsertFrontMatter;
+            settings.LibraryResourceSource = LibraryResourceSource;
 
             // 追加フロントマタープロパティの保存 (順序維持)
             settings.AdditionalFrontMatter = DefaultFrontMatterProperties
