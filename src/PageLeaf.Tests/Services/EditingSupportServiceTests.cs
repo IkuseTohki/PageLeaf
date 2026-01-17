@@ -275,5 +275,13 @@ namespace PageLeaf.Tests.Services
             var result = _service.ConvertToMarkdownTable(input);
             Assert.AreEqual(expected, result);
         }
+
+        [TestMethod]
+        public void GetPageBreakString_ShouldReturnCorrectHtml()
+        {
+            // テスト観点: 改ページ用のHTMLタグを正しく返す。
+            var expected = "<div style=\"page-break-after: always;\"></div>";
+            Assert.AreEqual(expected, _service.GetPageBreakString());
+        }
     }
 }

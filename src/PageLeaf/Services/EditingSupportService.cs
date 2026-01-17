@@ -277,6 +277,14 @@ namespace PageLeaf.Services
 
             return result.ToString();
         }
+
+        /// <summary>
+        /// 改ページ用のHTMLタグ文字列を取得します。
+        /// </summary>
+        public string GetPageBreakString()
+        {
+            return "<div style=\"page-break-after: always;\"></div>";
+        }
     }
 }
 

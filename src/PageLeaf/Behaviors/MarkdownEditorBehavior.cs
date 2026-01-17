@@ -82,7 +82,14 @@ namespace PageLeaf.Behaviors
             // Enterキーの処理
             if (e.Key == Key.Enter)
             {
-                HandleEnterKey(textBox, e);
+                if (Keyboard.Modifiers == ModifierKeys.Shift)
+                {
+                    HandleShiftEnter(textBox, e);
+                }
+                else
+                {
+                    HandleEnterKey(textBox, e);
+                }
             }
             // Tabキーの処理
             else if (e.Key == Key.Tab)
@@ -281,8 +288,31 @@ namespace PageLeaf.Behaviors
                 }
             }
         }
+
+        private static void HandleShiftEnter(TextBox textBox, KeyEventArgs e)
+        {
+            var service = App.AppHost?.Services.GetService<IEditingSupportService>();
+            if (service == null) return;
+
+            e.Handled = true;
+
+            // 改ページ用タグの取得
+            var pageBreak = service.GetPageBreakString();
+
+            // 視認性を考慮し、後に改行を入れて挿入する
+            var insertText = pageBreak + "\r\n";
+
+            int caretIndex = textBox.CaretIndex;
+            textBox.SelectedText = insertText;
+
+            // カーソルを挿入後の位置へ
+            textBox.CaretIndex = caretIndex + insertText.Length;
+            textBox.SelectionLength = 0;
+        }
+
         private static void HandleEnterKey(TextBox textBox, KeyEventArgs e)
         {
+
             // 修飾キーが押されている場合は標準動作
             if (Keyboard.Modifiers != ModifierKeys.None) return;
 

@@ -68,5 +68,11 @@ namespace PageLeaf.Services
         /// <param name="text">変換対象のテキスト。</param>
         /// <returns>Markdown テーブル文字列。表形式でない場合は null。</returns>
         string? ConvertToMarkdownTable(string text);
+
+        /// <summary>
+        /// 改ページ用のHTMLタグ文字列を取得します。
+        /// </summary>
+        /// <returns>改ページ用のHTMLタグ。</returns>
+        string GetPageBreakString();
     }
 }
