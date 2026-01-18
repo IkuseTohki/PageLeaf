@@ -1,8 +1,9 @@
-# PageLeaf
+﻿# PageLeaf
 
 ![PageLeaf Icon](spec/assets/icon.svg)
 
 PageLeaf は、Markdown ドキュメントのデザイン（CSS）作成・編集に特化したデスクトップツールです。
+
 プレビュー画面でリアルタイムにスタイルの変化を確認しながら、GUI を通じて直感的に Markdown 用の CSS を作成・カスタマイズできます。
 
 ## 🍃 主な機能
@@ -19,6 +20,10 @@ PageLeaf は、Markdown ドキュメントのデザイン（CSS）作成・編�
   - CSS やハイライトテーマをドキュメントごとに指定可能。
   - `title` プロパティをプレビューの最上部に独立した要素として表示可能。
 - **リソースの読み込み先切り替え**: シンタックスハイライトや図解ライブラリを、オフライン向けの「ローカル」または常に最新機能が使える「CDN」から選択可能。
+
+## 📸 スクリーンショット
+
+![Image](docs/images/image_README_20260118_213640.png)
 
 ## ⚙️ 設定
 
@@ -49,8 +54,6 @@ PageLeaf は**ポータブル**な設計となっており、設定ファイル�
   - [Markdig](https://github.com/lunet-io/markdig): Markdown 解析
   - [WebView2](https://developer.microsoft.com/en-us/microsoft-edge/webview2/): 高性能な HTML/CSS プレビュー
   - [Highlight.js](https://highlightjs.org/) / [Mermaid](https://mermaid.js.org/): コードハイライトと図解レンダリング
-  - [Microsoft.Extensions.DependencyInjection](https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/): 依存関係の注入 (DI)
-  - [Serilog](https://serilog.net/): 構造化ロギング
 
 ## 🚀 開発の始め方
 
@@ -85,5 +88,5 @@ dotnet run --project src/PageLeaf/PageLeaf.csproj
 
 ## ⚖️ ライセンス
 
-Copyright © 2026 PageLeaf Project.
+Copyright © 2026 PageLeaf Project.  
 このプロジェクトは [MIT ライセンス](LICENSE) の下で公開されています。
