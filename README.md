@@ -79,13 +79,6 @@ dotnet test PageLeaf.sln
 dotnet run --project src/PageLeaf/PageLeaf.csproj
 ```
 
-## 📂 ディレクトリ構造
-
-- `src/PageLeaf/`: メインアプリケーション
-- `src/PageLeaf.Tests/`: ユニットテストプロジェクト
-- `spec/`: 仕様書、アイコンデザイン等のアセット
-- `task/`: 開発タスク管理ドキュメント
-
 ## ⚖️ ライセンス
 
 Copyright © 2026 PageLeaf Project.  
