@@ -1,0 +1,273 @@
+﻿<UserControl x:Class="PageLeaf.Views.Controls.CssNumericEditorControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             x:Name="Root"
+             d:DesignHeight="30"
+             d:DesignWidth="200"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <!-- 一体型コントロール用のスリムなComboBoxスタイル -->
+        <Style x:Key="SlimComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Padding" Value="2,0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Name="ToggleButton"
+                                          ClickMode="Press"
+                                          Focusable="False"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Name="Border"
+                                                Background="Transparent"
+                                                BorderThickness="0" />
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <TextBox x:Name="PART_EditableTextBox"
+                                     Margin="3,0,18,0"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Center"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Focusable="True"
+                                     IsReadOnly="{TemplateBinding IsReadOnly}"
+                                     Style="{x:Null}" />
+                            <!-- 矢印ボタン (マウスオーバー時のみ表示) -->
+                            <Path Name="Arrow"
+                                  Width="7"
+                                  Height="4"
+                                  Margin="0,0,6,0"
+                                  HorizontalAlignment="Right"
+                                  VerticalAlignment="Center"
+                                  Data="M 0 0 L 3.5 4 L 7 0 Z"
+                                  Fill="{StaticResource SecondaryTextBrush}"
+                                  IsHitTestVisible="False"
+                                  Opacity="0" />
+                            <Popup Name="Popup"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   Placement="Bottom"
+                                   PopupAnimation="Slide">
+                                <Grid Name="DropDown"
+                                      MinWidth="{TemplateBinding ActualWidth}"
+                                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder"
+                                            Background="White"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="2" />
+                                    <ScrollViewer Margin="1" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Arrow" Property="Opacity" Value="1" />
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="Arrow" Property="Opacity" Value="1" />
+                            </Trigger>
+                            <!-- スピナー表示時は数値側の矢印を隠す（Tagで判定） -->
+                            <DataTrigger Binding="{Binding ElementName=Root, Path=ShowSpinner}" Value="True">
+                                <DataTrigger.Setters>
+                                    <Setter TargetName="Arrow" Property="Visibility" Value="Collapsed" />
+                                </DataTrigger.Setters>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- 単位用：スピナーに関わらず矢印を表示するスタイル -->
+        <Style x:Key="UnitComboBoxStyle"
+               BasedOn="{StaticResource SlimComboBoxStyle}"
+               TargetType="ComboBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton Name="ToggleButton"
+                                          ClickMode="Press"
+                                          Focusable="False"
+                                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton">
+                                        <Border Name="Border"
+                                                Background="Transparent"
+                                                BorderThickness="0" />
+                                    </ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <TextBox x:Name="PART_EditableTextBox"
+                                     Margin="3,0,18,0"
+                                     HorizontalAlignment="Stretch"
+                                     VerticalAlignment="Center"
+                                     HorizontalContentAlignment="Center"
+                                     Background="Transparent"
+                                     BorderThickness="0"
+                                     Focusable="True"
+                                     IsReadOnly="{TemplateBinding IsReadOnly}"
+                                     Style="{x:Null}" />
+                            <Path Name="Arrow"
+                                  Width="7"
+                                  Height="4"
+                                  Margin="0,0,6,0"
+                                  HorizontalAlignment="Right"
+                                  VerticalAlignment="Center"
+                                  Data="M 0 0 L 3.5 4 L 7 0 Z"
+                                  Fill="{StaticResource SecondaryTextBrush}"
+                                  IsHitTestVisible="False"
+                                  Opacity="0" />
+                            <Popup Name="Popup"
+                                   AllowsTransparency="True"
+                                   Focusable="False"
+                                   IsOpen="{TemplateBinding IsDropDownOpen}"
+                                   Placement="Bottom"
+                                   PopupAnimation="Slide">
+                                <Grid Name="DropDown"
+                                      MinWidth="{TemplateBinding ActualWidth}"
+                                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <Border x:Name="DropDownBorder"
+                                            Background="White"
+                                            BorderBrush="{StaticResource BorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="2" />
+                                    <ScrollViewer Margin="1" SnapsToDevicePixels="True">
+                                        <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Grid>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Arrow" Property="Opacity" Value="1" />
+                            </Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True">
+                                <Setter TargetName="Arrow" Property="Opacity" Value="1" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
+    <Border Width="120"
+            Height="28"
+            HorizontalAlignment="Left"
+            Background="White"
+            BorderBrush="{StaticResource BorderBrush}"
+            BorderThickness="1"
+            CornerRadius="4"
+            SnapsToDevicePixels="True">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- 数値入力エリア -->
+            <Grid Grid.Column="0">
+                <!-- スピナーありの場合：シンプルなTextBox -->
+                <TextBox Padding="3,0"
+                         VerticalAlignment="Center"
+                         Background="Transparent"
+                         BorderThickness="0"
+                         Text="{Binding ElementName=Root, Path=InternalValue, UpdateSourceTrigger=PropertyChanged}"
+                         Visibility="{Binding ElementName=Root, Path=ShowSpinner, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+                <!-- スピナーなしの場合：候補リスト付きComboBox -->
+                <ComboBox IsEditable="True"
+                          Style="{StaticResource SlimComboBoxStyle}"
+                          Text="{Binding ElementName=Root, Path=InternalValue, UpdateSourceTrigger=PropertyChanged}"
+                          Visibility="{Binding ElementName=Root, Path=ShowSpinner, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}">
+                    <ComboBoxItem Content="9" />
+                    <ComboBoxItem Content="10.5" />
+                    <ComboBoxItem Content="12" />
+                    <ComboBoxItem Content="14" />
+                    <ComboBoxItem Content="16" />
+                    <ComboBoxItem Content="20" />
+                    <ComboBoxItem Content="24" />
+                    <ComboBoxItem Content="1.0" />
+                    <ComboBoxItem Content="1.2" />
+                    <ComboBoxItem Content="1.5" />
+                    <ComboBoxItem Content="100" />
+                    <ComboBoxItem Content="120" />
+                </ComboBox>
+            </Grid>
+
+            <!-- スピンボタン (マウスオーバー時のみ表示) -->
+            <StackPanel Grid.Column="1"
+                        Margin="2,0"
+                        VerticalAlignment="Center">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Opacity" Value="0" />
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <MultiDataTrigger>
+                                <MultiDataTrigger.Conditions>
+                                    <Condition Binding="{Binding ElementName=Root, Path=IsMouseOver}" Value="True" />
+                                    <Condition Binding="{Binding ElementName=Root, Path=ShowSpinner}" Value="True" />
+                                </MultiDataTrigger.Conditions>
+                                <Setter Property="Opacity" Value="1" />
+                                <Setter Property="Visibility" Value="Visible" />
+                            </MultiDataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+                <Button Width="16"
+                        Height="12"
+                        Click="UpButton_Click"
+                        Style="{StaticResource IconButtonStyle}">
+                    <Path Width="6"
+                          Height="6"
+                          Data="{StaticResource ArrowUpIconGeometry}"
+                          Fill="{StaticResource SecondaryTextBrush}"
+                          Stretch="Uniform" />
+                </Button>
+                <Button Width="16"
+                        Height="12"
+                        Click="DownButton_Click"
+                        Style="{StaticResource IconButtonStyle}">
+                    <Path Width="6"
+                          Height="6"
+                          Data="{StaticResource ArrowDownIconGeometry}"
+                          Fill="{StaticResource SecondaryTextBrush}"
+                          Stretch="Uniform" />
+                </Button>
+            </StackPanel>
+
+            <!-- セパレーター -->
+            <Rectangle Grid.Column="2"
+                       Width="1"
+                       Margin="0,4"
+                       Fill="{StaticResource BorderBrush}" />
+
+            <!-- 単位選択 -->
+            <ComboBox Grid.Column="3"
+                      Width="45"
+                      HorizontalContentAlignment="Center"
+                      IsEditable="True"
+                      Style="{StaticResource UnitComboBoxStyle}"
+                      Text="{Binding ElementName=Root, Path=InternalUnit, UpdateSourceTrigger=PropertyChanged}">
+                <ComboBoxItem Content="px" />
+                <ComboBoxItem Content="em" />
+                <ComboBoxItem Content="%" />
+            </ComboBox>
+        </Grid>
+    </Border>
+</UserControl>

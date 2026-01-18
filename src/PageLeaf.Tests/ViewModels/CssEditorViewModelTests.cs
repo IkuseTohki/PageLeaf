@@ -245,40 +245,6 @@ namespace PageLeaf.Tests.ViewModels
         }
 
         [TestMethod]
-        public void GlobalUnit_Change_ShouldConvertValues()
-        {
-            // テスト観点: 全体の単位を px から em に変更した際、
-            //            既存のフォントサイズ数値が適切に変換されることを確認する。
-
-            // Arrange
-            _viewModel.GlobalUnit = "px";
-            _viewModel.BodyFontSize = "16"; // 16px
-            _viewModel.SelectedHeadingLevel = "h1";
-            _viewModel.HeadingFontSize = "32"; // 32px
-
-            // Act: px -> em に変更
-            _viewModel.GlobalUnit = "em";
-
-            // Assert
-            Assert.AreEqual("1", _viewModel.BodyFontSize, "16px should be converted to 1em");
-            Assert.AreEqual("2", _viewModel.HeadingFontSize, "32px should be converted to 2em");
-        }
-
-        [TestMethod]
-        public void GlobalUnit_Change_ShouldConvertTableHeaderFontSize()
-        {
-            // Arrange
-            _viewModel.GlobalUnit = "px";
-            _viewModel.TableHeaderFontSize = "16";
-
-            // Act
-            _viewModel.GlobalUnit = "em";
-
-            // Assert
-            Assert.AreEqual("1", _viewModel.TableHeaderFontSize);
-        }
-
-        [TestMethod]
         public void Load_WhenFontSizeIsMissing_ShouldBeNull()
         {
             // テスト観点: CSSファイルにフォントサイズ指定がない場合、
@@ -288,7 +254,6 @@ namespace PageLeaf.Tests.ViewModels
             // Arrange
             var styleInfo = new PageLeaf.Models.CssStyleInfo(); // 全プロパティが null
             _mockLoadCssUseCase.Setup(u => u.Execute(It.IsAny<string>())).Returns(("", styleInfo));
-            _viewModel.GlobalUnit = "px";
 
             // Act
             _viewModel.Load("empty.css");
@@ -299,21 +264,6 @@ namespace PageLeaf.Tests.ViewModels
             Assert.IsNull(_viewModel.HeadingFontSize, "h1 should be null if not set in CSS");
         }
 
-        [TestMethod]
-        public void GlobalUnit_Change_ToPercent_ShouldConvertValues()
-        {
-            // テスト観点: 単位を em から % に変更した際、適切に変換されることを確認する。
-
-            // Arrange
-            _viewModel.GlobalUnit = "em";
-            _viewModel.BodyFontSize = "1.5"; // 1.5em
-
-            // Act: em -> % に変更
-            _viewModel.GlobalUnit = "%";
-
-            // Assert
-            Assert.AreEqual("150", _viewModel.BodyFontSize, "1.5em should be converted to 150%");
-        }
         [TestMethod]
         public void ResetCommand_ShouldReloadStylesFromUseCase()
         {

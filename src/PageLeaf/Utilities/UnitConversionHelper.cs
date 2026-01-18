@@ -21,6 +21,69 @@ namespace PageLeaf.Utilities
         public static double Round(double value) => Math.Round(value, 2, MidpointRounding.AwayFromZero);
 
         /// <summary>
+        /// CSS文字列を数値部分と単位部分に分離します。
+        /// </summary>
+        /// <param name="input">"16px", "1.2em" などのCSS文字列。</param>
+        /// <returns>数値と単位のタプル。</returns>
+        public static (double Value, string Unit) Split(string? input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return (0.0, "px");
+
+            // 数値と単位を分離
+            var numPart = new string(input.TakeWhile(c => char.IsDigit(c) || c == '.' || c == '-').ToArray());
+            var unitPart = input.Substring(numPart.Length).Trim().ToLower();
+
+            if (!double.TryParse(numPart, out var value)) return (0.0, "px");
+
+            // 入力単位を特定（指定がない場合はpxとみなす）
+            if (string.IsNullOrEmpty(unitPart)) unitPart = "px";
+
+            return (value, unitPart);
+        }
+
+        /// <summary>
+        /// 数値を指定された単位間で変換します。
+        /// </summary>
+        /// <param name="value">変換元の数値。</param>
+        /// <param name="fromUnit">現在の単位。</param>
+        /// <param name="toUnit">変換先の単位。</param>
+        /// <returns>変換後の数値。</returns>
+        public static double Convert(double value, string fromUnit, string toUnit)
+        {
+            if (fromUnit == toUnit) return value;
+
+            // 一旦 px に統一
+            double px = fromUnit switch
+            {
+                "em" => EmToPx(value),
+                "rem" => EmToPx(value), // このアプリでは rem = em とみなす
+                "%" => PercentToPx(value),
+                _ => value // px または未知の単位
+            };
+
+            // ターゲット単位へ変換
+            double result = toUnit switch
+            {
+                "em" => PxToEm(px),
+                "%" => PxToPercent(px),
+                _ => px
+            };
+
+            return result;
+        }
+
+        /// <summary>
+        /// 数値と単位を結合してCSS文字列を生成します。
+        /// </summary>
+        /// <param name="value">数値。</param>
+        /// <param name="unit">単位。</param>
+        /// <returns>"14px" などのCSS文字列。</returns>
+        public static string Format(double value, string unit)
+        {
+            return $"{Round(value)}{unit}";
+        }
+
+        /// <summary>
         /// 単位付きのCSS文字列を解析し、指定されたターゲット単位の数値文字列に変換します。
         /// </summary>
         /// <param name="input">"16px", "1.2em" などのCSS文字列。</param>

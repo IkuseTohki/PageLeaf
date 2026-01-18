@@ -48,13 +48,6 @@ namespace PageLeaf.ViewModels
             "ListMarkerType", "NumberedListMarkerType", "ListMarkerSize", "ListIndent"
         };
 
-        // 自動変換（GlobalUnit連動）の対象
-        private static readonly string[] AutoConvertPropertyNames = new[] { "BodyFontSize", "TitleFontSize", "HeadingFontSize", "ListMarkerSize", "TableHeaderFontSize" };
-
-        // 常に px 固定の対象
-        private static readonly string[] PxFixedPropertyNames = new[] { "TitleMarginBottom", "QuoteBorderWidth", "TableBorderWidth", "TableCellPadding", "ListIndent" };
-
-        private string _globalUnit = "px";
         private string? _selectedHeadingLevel;
         private bool _isDirty;
         private string _originalCssContent = string.Empty;
@@ -87,12 +80,6 @@ namespace PageLeaf.ViewModels
         /// タイトルタブを表示すべきかどうか。
         /// </summary>
         public bool IsTitleTabVisible => _settingsService.CurrentSettings.ShowTitleInPreview;
-
-        public string GlobalUnit
-        {
-            get => _globalUnit;
-            set { if (_globalUnit != value) { var old = _globalUnit; _globalUnit = value; ConvertAutoFontSizes(old, value); IsDirty = true; UpdatePreview(); OnPropertyChanged(); } }
-        }
 
         /// <summary>
         /// 現在選択されているタブ。
@@ -188,13 +175,7 @@ namespace PageLeaf.ViewModels
                 var prop = type.GetProperty(name);
                 if (prop != null)
                 {
-                    var raw = prop.GetValue(styleInfo) as string;
-                    if (AutoConvertPropertyNames.Contains(name))
-                        _styles[name] = UnitConversionHelper.ParseAndConvert(raw, GlobalUnit, null);
-                    else if (PxFixedPropertyNames.Contains(name))
-                        _styles[name] = UnitConversionHelper.ParseAndConvert(raw, "px", null);
-                    else
-                        _styles[name] = raw;
+                    _styles[name] = prop.GetValue(styleInfo) as string;
                 }
             }
 
@@ -209,8 +190,7 @@ namespace PageLeaf.ViewModels
             foreach (var level in AvailableHeadingLevels)
             {
                 _styles[$"{level}.TextColor"] = styleInfo.HeadingTextColors.TryGetValue(level, out var c) ? c : null;
-                var rawSize = styleInfo.HeadingFontSizes.TryGetValue(level, out var s) ? s : null;
-                _styles[$"{level}.FontSize"] = UnitConversionHelper.ParseAndConvert(rawSize, GlobalUnit, null);
+                _styles[$"{level}.FontSize"] = styleInfo.HeadingFontSizes.TryGetValue(level, out var s) ? s : null;
                 _styles[$"{level}.FontFamily"] = styleInfo.HeadingFontFamilies.TryGetValue(level, out var f) ? f : null;
                 _styles[$"{level}.Alignment"] = styleInfo.HeadingAlignments.TryGetValue(level, out var a) ? a : null;
 
@@ -225,40 +205,6 @@ namespace PageLeaf.ViewModels
             OnPropertyChanged(string.Empty);
             UpdateHeadingProperties();
             UpdatePreview();
-        }
-
-        private void ConvertAutoFontSizes(string fromUnit, string toUnit)
-        {
-            // 単一プロパティの変換と通知
-            foreach (var name in AutoConvertPropertyNames)
-            {
-                if (_styles.TryGetValue(name, out var val))
-                {
-                    _styles[name] = ConvertValue(val, fromUnit, toUnit);
-                    OnPropertyChanged(name); // UI更新のために個別に通知
-                }
-            }
-
-            // 各見出しレベルの数値を変換
-            foreach (var lv in AvailableHeadingLevels)
-            {
-                var key = $"{lv}.FontSize";
-                if (_styles.TryGetValue(key, out var v))
-                {
-                    _styles[key] = ConvertValue(v, fromUnit, toUnit);
-                }
-            }
-
-            OnPropertyChanged("Item[]"); // インデクサを使用している要素への通知
-            UpdateHeadingProperties();   // 現在選択中の見出しプロパティの通知
-        }
-
-        private string? ConvertValue(string? value, string from, string to)
-        {
-            if (!double.TryParse(value, out var d)) return value;
-            double px = from switch { "em" => UnitConversionHelper.EmToPx(d), "%" => UnitConversionHelper.PercentToPx(d), _ => d };
-            double result = to switch { "em" => UnitConversionHelper.PxToEm(px), "%" => UnitConversionHelper.PxToPercent(px), _ => px };
-            return UnitConversionHelper.Round(result).ToString();
         }
 
         private string? GetStyleValue(string key) => _styles.TryGetValue(key, out var value) ? value : null;
@@ -375,7 +321,7 @@ namespace PageLeaf.ViewModels
             {
                 var prop = type.GetProperty(name);
                 if (prop != null && _styles.TryGetValue(name, out var val))
-                    prop.SetValue(styleInfo, AddUnit(name, val));
+                    prop.SetValue(styleInfo, val);
             }
             styleInfo.IsCodeBlockOverrideEnabled = IsCodeBlockOverrideEnabled;
 
@@ -390,7 +336,7 @@ namespace PageLeaf.ViewModels
             foreach (var lv in AvailableHeadingLevels)
             {
                 if (_styles.TryGetValue($"{lv}.TextColor", out var c) && c != null) styleInfo.HeadingTextColors[lv] = c;
-                if (_styles.TryGetValue($"{lv}.FontSize", out var s) && s != null) styleInfo.HeadingFontSizes[lv] = s + GlobalUnit;
+                if (_styles.TryGetValue($"{lv}.FontSize", out var s) && s != null) styleInfo.HeadingFontSizes[lv] = s;
                 if (_styles.TryGetValue($"{lv}.FontFamily", out var f) && f != null) styleInfo.HeadingFontFamilies[lv] = f;
                 if (_styles.TryGetValue($"{lv}.Alignment", out var a)) styleInfo.HeadingAlignments[lv] = a;
                 styleInfo.HeadingStyleFlags[lv] = new HeadingStyleFlags
@@ -402,14 +348,6 @@ namespace PageLeaf.ViewModels
                 if (_flags.TryGetValue($"{lv}.IsNumberingEnabled", out var n)) styleInfo.HeadingNumberingStates[lv] = n;
             }
             return styleInfo;
-        }
-
-        private string? AddUnit(string propertyName, string? value)
-        {
-            if (string.IsNullOrEmpty(value)) return value;
-            if (AutoConvertPropertyNames.Contains(propertyName)) return value + GlobalUnit;
-            if (PxFixedPropertyNames.Contains(propertyName)) return value + "px";
-            return value;
         }
     }
 }
