@@ -156,6 +156,13 @@ namespace PageLeaf.Tests.Services
                 "  background-color: rgba(255, 255, 255, 1);",
                 "}",
                 "",
+                "#page-title {",
+                "  font-weight: normal;",
+                "  font-style: normal;",
+                "  text-decoration-style: initial;",
+                "  text-decoration-line: none;",
+                "}",
+                "",
                 "li:has(input[type=\"checkbox\"]) {",
                 "  list-style-type: none;",
                 "}",
@@ -233,8 +240,8 @@ namespace PageLeaf.Tests.Services
             // Assert
             Assert.IsNotNull(styles.HeadingTextColors);
             Assert.AreEqual(2, styles.HeadingTextColors.Count);
-            Assert.AreEqual("rgba(255, 0, 0, 1)", styles.HeadingTextColors["h1"]);
-            Assert.AreEqual("rgba(0, 0, 255, 1)", styles.HeadingTextColors["h2"]);
+            Assert.AreEqual("#FF0000", styles.HeadingTextColors["h1"]);
+            Assert.AreEqual("#0000FF", styles.HeadingTextColors["h2"]);
         }
 
         [TestMethod]
@@ -421,13 +428,13 @@ namespace PageLeaf.Tests.Services
             ";
 
             var styleInfo = new CssStyleInfo();
-            styleInfo.HeadingTextColors["h1"] = "rgba(0, 0, 255, 1)"; // Blue
+            styleInfo.HeadingTextColors["h1"] = "#0000FF"; // Blue
             styleInfo.HeadingFontSizes["h1"] = "24px";
             styleInfo.HeadingFontFamilies["h1"] = "Arial";
             styleInfo.HeadingAlignments["h1"] = "center";
             styleInfo.HeadingStyleFlags["h1"] = new HeadingStyleFlags { IsBold = true, IsUnderline = true };
 
-            styleInfo.HeadingTextColors["h2"] = "rgba(0, 255, 0, 1)"; // Green
+            styleInfo.HeadingTextColors["h2"] = "#00FF00"; // Green
             styleInfo.HeadingFontSizes["h2"] = "1.5em";
             styleInfo.HeadingFontFamilies["h2"] = "Verdana";
             styleInfo.HeadingAlignments["h2"] = "right";
@@ -438,7 +445,7 @@ namespace PageLeaf.Tests.Services
             var parsedUpdatedStyles = service.ParseCss(updatedCss);
 
             // Assert h1
-            Assert.AreEqual("rgba(0, 0, 255, 1)", parsedUpdatedStyles.HeadingTextColors["h1"]);
+            Assert.AreEqual("#0000FF", parsedUpdatedStyles.HeadingTextColors["h1"]);
             Assert.AreEqual("24px", parsedUpdatedStyles.HeadingFontSizes["h1"]);
             Assert.AreEqual("Arial", parsedUpdatedStyles.HeadingFontFamilies["h1"]);
             Assert.AreEqual("center", parsedUpdatedStyles.HeadingAlignments["h1"]);
@@ -447,7 +454,7 @@ namespace PageLeaf.Tests.Services
             Assert.IsFalse(parsedUpdatedStyles.HeadingStyleFlags["h1"].IsItalic);
 
             // Assert h2
-            Assert.AreEqual("rgba(0, 255, 0, 1)", parsedUpdatedStyles.HeadingTextColors["h2"]);
+            Assert.AreEqual("#00FF00", parsedUpdatedStyles.HeadingTextColors["h2"]);
             Assert.AreEqual("1.5em", parsedUpdatedStyles.HeadingFontSizes["h2"]);
             Assert.AreEqual("Verdana", parsedUpdatedStyles.HeadingFontFamilies["h2"]);
             Assert.AreEqual("right", parsedUpdatedStyles.HeadingAlignments["h2"]);
@@ -860,6 +867,24 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
+        public void UpdateCssContent_ShouldRemoveBodyCounterReset_WhenAllNumberingDisabled()
+        {
+            // テスト観点: すべての見出しの採番が無効になった場合、body に設定されていた counter-reset が削除されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "body { counter-reset: h1 0; color: black; }";
+            var styleInfo = new CssStyleInfo();
+            // 全て false (デフォルト)
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            // Assert
+            Assert.IsFalse(updatedCss.Contains("counter-reset"), "body counter-reset should be removed.");
+            StringAssert.Contains(updatedCss, "color: rgba(0, 0, 0, 1);"); // 他のプロパティは維持
+        }
+
+        [TestMethod]
         public void ParseCss_WithMalformedCss_ShouldReturnDefaultStyleInfo()
         {
             // テスト観点: 壊れたCSS文字列を渡しても、例外を投げずに解析可能な範囲で結果を返すことを確認する。
@@ -873,6 +898,39 @@ namespace PageLeaf.Tests.Services
             // Assert
             Assert.IsNotNull(styles);
             Assert.AreEqual("#FF0000", styles.BodyTextColor);
+        }
+
+        [TestMethod]
+        public void ParseCss_ShouldParseTitleStyles()
+        {
+            // テスト観点: `#page-title` の各種スタイル（色、サイズ、フォント、配置、余白、装飾）が
+            //            正しく解析されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = @"
+                #page-title { 
+                    color: #FF00FF; 
+                    font-size: 32px; 
+                    font-family: 'Segoe UI';
+                    text-align: center;
+                    margin-bottom: 20px;
+                    font-weight: bold;
+                    font-style: italic;
+                    text-decoration: underline;
+                }";
+
+            // Act
+            var styles = service.ParseCss(cssContent);
+
+            // Assert
+            Assert.AreEqual("#FF00FF", styles.TitleTextColor);
+            Assert.AreEqual("32px", styles.TitleFontSize);
+            Assert.AreEqual("\"Segoe UI\"", styles.TitleFontFamily);
+            Assert.AreEqual("center", styles.TitleAlignment);
+            Assert.AreEqual("20px", styles.TitleMarginBottom);
+            Assert.IsTrue(styles.TitleStyleFlags.IsBold);
+            Assert.IsTrue(styles.TitleStyleFlags.IsItalic);
+            Assert.IsTrue(styles.TitleStyleFlags.IsUnderline);
         }
     }
 }

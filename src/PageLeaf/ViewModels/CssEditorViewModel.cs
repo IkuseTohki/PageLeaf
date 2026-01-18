@@ -16,6 +16,7 @@ namespace PageLeaf.ViewModels
     /// </summary>
     public enum CssEditorTab
     {
+        Title,
         General,
         Headings,
         Quote,
@@ -37,6 +38,7 @@ namespace PageLeaf.ViewModels
         private static readonly string[] StylePropertyNames = new[]
         {
             "BodyTextColor", "BodyBackgroundColor", "BodyFontSize",
+            "TitleTextColor", "TitleFontSize", "TitleFontFamily", "TitleAlignment", "TitleMarginBottom",
             "QuoteTextColor", "QuoteBackgroundColor", "QuoteBorderColor",
             "QuoteBorderWidth", "QuoteBorderStyle",
             "TableBorderColor", "TableHeaderBackgroundColor", "TableHeaderTextColor", "TableHeaderFontSize", "TableBorderWidth", "TableBorderStyle", "TableHeaderAlignment", "TableCellPadding",
@@ -47,10 +49,10 @@ namespace PageLeaf.ViewModels
         };
 
         // 自動変換（GlobalUnit連動）の対象
-        private static readonly string[] AutoConvertPropertyNames = new[] { "BodyFontSize", "HeadingFontSize", "ListMarkerSize", "TableHeaderFontSize" };
+        private static readonly string[] AutoConvertPropertyNames = new[] { "BodyFontSize", "TitleFontSize", "HeadingFontSize", "ListMarkerSize", "TableHeaderFontSize" };
 
         // 常に px 固定の対象
-        private static readonly string[] PxFixedPropertyNames = new[] { "QuoteBorderWidth", "TableBorderWidth", "TableCellPadding", "ListIndent" };
+        private static readonly string[] PxFixedPropertyNames = new[] { "TitleMarginBottom", "QuoteBorderWidth", "TableBorderWidth", "TableCellPadding", "ListIndent" };
 
         private string _globalUnit = "px";
         private string? _selectedHeadingLevel;
@@ -80,6 +82,11 @@ namespace PageLeaf.ViewModels
             get => _isDirty;
             set { if (_isDirty != value) { _isDirty = value; OnPropertyChanged(); } }
         }
+
+        /// <summary>
+        /// タイトルタブを表示すべきかどうか。
+        /// </summary>
+        public bool IsTitleTabVisible => _settingsService.CurrentSettings.ShowTitleInPreview;
 
         public string GlobalUnit
         {
@@ -131,10 +138,13 @@ namespace PageLeaf.ViewModels
         {
             if (parameter is string key)
             {
-                // 見出し文字色の場合は、現在選択中のレベルに応じたキーに変換
-                string actualKey = (key == nameof(HeadingTextColor))
-                    ? $"{_selectedHeadingLevel}.TextColor"
-                    : key;
+                // 文字色のキー変換
+                string actualKey = key switch
+                {
+                    nameof(HeadingTextColor) => $"{_selectedHeadingLevel}.TextColor",
+                    nameof(TitleTextColor) => nameof(TitleTextColor),
+                    _ => key
+                };
 
                 var currentColor = GetStyleValue(actualKey);
                 var newColor = _dialogService.ShowColorPickerDialog(currentColor);
@@ -186,6 +196,14 @@ namespace PageLeaf.ViewModels
                     else
                         _styles[name] = raw;
                 }
+            }
+
+            // タイトルのフラグをロード
+            if (styleInfo.TitleStyleFlags != null)
+            {
+                _flags["Title.IsBold"] = styleInfo.TitleStyleFlags.IsBold;
+                _flags["Title.IsItalic"] = styleInfo.TitleStyleFlags.IsItalic;
+                _flags["Title.IsUnderline"] = styleInfo.TitleStyleFlags.IsUnderline;
             }
 
             foreach (var level in AvailableHeadingLevels)
@@ -272,6 +290,19 @@ namespace PageLeaf.ViewModels
         public string? BodyTextColor { get => this[nameof(BodyTextColor)]; set => this[nameof(BodyTextColor)] = value; }
         public string? BodyBackgroundColor { get => this[nameof(BodyBackgroundColor)]; set => this[nameof(BodyBackgroundColor)] = value; }
         public string? BodyFontSize { get => this[nameof(BodyFontSize)]; set => this[nameof(BodyFontSize)] = value; }
+
+        public string? TitleTextColor { get => this[nameof(TitleTextColor)]; set => this[nameof(TitleTextColor)] = value; }
+        public string? TitleFontSize { get => this[nameof(TitleFontSize)]; set => this[nameof(TitleFontSize)] = value; }
+        public string? TitleFontFamily { get => this[nameof(TitleFontFamily)]; set => this[nameof(TitleFontFamily)] = value; }
+        public string? TitleAlignment { get => this[nameof(TitleAlignment)]; set => this[nameof(TitleAlignment)] = value; }
+        public string? TitleMarginBottom { get => this[nameof(TitleMarginBottom)]; set => this[nameof(TitleMarginBottom)] = value; }
+        public bool IsTitleBold { get => GetTitleFlag("IsBold"); set => SetTitleFlag("IsBold", value); }
+        public bool IsTitleItalic { get => GetTitleFlag("IsItalic"); set => SetTitleFlag("IsItalic", value); }
+        public bool IsTitleUnderline { get => GetTitleFlag("IsUnderline"); set => SetTitleFlag("IsUnderline", value); }
+
+        private bool GetTitleFlag(string attr) => _flags.TryGetValue($"Title.{attr}", out var b) && b;
+        private void SetTitleFlag(string attr, bool value) { var key = $"Title.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; UpdatePreview(); OnPropertyChanged($"IsTitle{attr}"); } }
+
         public string? QuoteTextColor { get => this[nameof(QuoteTextColor)]; set => this[nameof(QuoteTextColor)] = value; }
         public string? QuoteBackgroundColor { get => this[nameof(QuoteBackgroundColor)]; set => this[nameof(QuoteBackgroundColor)] = value; }
         public string? QuoteBorderColor { get => this[nameof(QuoteBorderColor)]; set => this[nameof(QuoteBorderColor)] = value; }
@@ -314,6 +345,14 @@ namespace PageLeaf.ViewModels
         public void NotifySettingsChanged()
         {
             OnPropertyChanged(nameof(IsCodeBlockOverrideEnabled));
+            OnPropertyChanged(nameof(IsTitleTabVisible));
+
+            // タイトル表示がオフになり、かつ現在タイトルタブが選択されている場合は「全体」へ切り替える
+            if (!IsTitleTabVisible && SelectedTab == CssEditorTab.Title)
+            {
+                SelectedTab = CssEditorTab.General;
+            }
+
             UpdatePreview();
         }
 
@@ -339,6 +378,15 @@ namespace PageLeaf.ViewModels
                     prop.SetValue(styleInfo, AddUnit(name, val));
             }
             styleInfo.IsCodeBlockOverrideEnabled = IsCodeBlockOverrideEnabled;
+
+            // タイトルのフラグを保存
+            styleInfo.TitleStyleFlags = new HeadingStyleFlags
+            {
+                IsBold = GetTitleFlag("IsBold"),
+                IsItalic = GetTitleFlag("IsItalic"),
+                IsUnderline = GetTitleFlag("IsUnderline")
+            };
+
             foreach (var lv in AvailableHeadingLevels)
             {
                 if (_styles.TryGetValue($"{lv}.TextColor", out var c) && c != null) styleInfo.HeadingTextColors[lv] = c;

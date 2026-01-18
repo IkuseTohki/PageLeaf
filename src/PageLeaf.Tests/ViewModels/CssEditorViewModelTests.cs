@@ -474,5 +474,46 @@ namespace PageLeaf.Tests.ViewModels
             // Assert
             Assert.AreEqual("solid", _viewModel.QuoteBorderStyle);
         }
+
+        [TestMethod]
+        public void IsTitleTabVisible_ShouldReflectSettings()
+        {
+            // テスト観点: IsTitleTabVisible プロパティが設定サービスの ShowTitleInPreview を正しく反映することを確認する。
+
+            // Arrange (Setting = true)
+            var settings = new PageLeaf.Models.ApplicationSettings { ShowTitleInPreview = true };
+            _mockSettingsService.Setup(s => s.CurrentSettings).Returns(settings);
+            _viewModel.NotifySettingsChanged();
+
+            // Assert
+            Assert.IsTrue(_viewModel.IsTitleTabVisible);
+
+            // Arrange (Setting = false)
+            settings.ShowTitleInPreview = false;
+            _viewModel.NotifySettingsChanged();
+
+            // Assert
+            Assert.IsFalse(_viewModel.IsTitleTabVisible);
+        }
+
+        [TestMethod]
+        public void SelectedTab_ShouldSwitch_WhenTitleTabBecomesHidden()
+        {
+            // テスト観点: タイトルタブが非表示になった際、もしタイトルタブが選択されていたら別のタブへ切り替わることを確認する。
+
+            // Arrange
+            var settings = new PageLeaf.Models.ApplicationSettings { ShowTitleInPreview = true };
+            _mockSettingsService.Setup(s => s.CurrentSettings).Returns(settings);
+            _viewModel.NotifySettingsChanged();
+            _viewModel.SelectedTab = CssEditorTab.Title;
+
+            // Act: 非表示にする
+            settings.ShowTitleInPreview = false;
+            _viewModel.NotifySettingsChanged();
+
+            // Assert
+            Assert.AreNotEqual(CssEditorTab.Title, _viewModel.SelectedTab, "SelectedTab should have switched away from Title.");
+            Assert.AreEqual(CssEditorTab.General, _viewModel.SelectedTab, "SelectedTab should default to General.");
+        }
     }
 }

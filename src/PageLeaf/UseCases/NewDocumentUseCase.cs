@@ -84,7 +84,7 @@ namespace PageLeaf.UseCases
             var resultFrontMatter = new System.Collections.Generic.Dictionary<string, object>();
 
             // 1. アプリ管理の標準プロパティを生成
-            resultFrontMatter["title"] = "Untitled";
+            resultFrontMatter["title"] = "";
             resultFrontMatter["created"] = ReplacePlaceholders("{Now}");
             resultFrontMatter["updated"] = ReplacePlaceholders("{Now}");
             resultFrontMatter["css"] = "";
@@ -105,8 +105,9 @@ namespace PageLeaf.UseCases
             doc.FrontMatter = resultFrontMatter;
 
             // title プロパティがあれば見出しとして使用、なければ Untitled
-            string title = resultFrontMatter.TryGetValue("title", out var t) ? t.ToString() ?? "Untitled" : "Untitled";
-            doc.Content = $"# {title}" + System.Environment.NewLine;
+            string titleValue = resultFrontMatter.TryGetValue("title", out var t) ? t.ToString() ?? "" : "";
+            string displayTitle = string.IsNullOrWhiteSpace(titleValue) ? "Untitled" : titleValue;
+            doc.Content = $"# {displayTitle}" + System.Environment.NewLine;
         }
 
         /// <summary>

@@ -7,6 +7,12 @@ namespace PageLeaf.Models
         public string? BodyTextColor { get; set; }
         public string? BodyBackgroundColor { get; set; }
         public string? BodyFontSize { get; set; }
+        public string? TitleTextColor { get; set; }
+        public string? TitleFontSize { get; set; }
+        public string? TitleFontFamily { get; set; }
+        public string? TitleAlignment { get; set; }
+        public string? TitleMarginBottom { get; set; }
+        public HeadingStyleFlags TitleStyleFlags { get; set; } = new HeadingStyleFlags();
         public string? HeadingTextColor { get; set; }
         public Dictionary<string, string?> HeadingTextColors { get; } = new Dictionary<string, string?>();
         public Dictionary<string, string?> HeadingFontSizes { get; } = new Dictionary<string, string?>();

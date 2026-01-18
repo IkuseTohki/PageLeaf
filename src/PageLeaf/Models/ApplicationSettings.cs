@@ -53,6 +53,11 @@ namespace PageLeaf.Models
         public double EditorFontSize { get; set; } = 14.0;
 
         /// <summary>
+        /// プレビューの最上部にフロントマターのタイトルを表示するかどうか。
+        /// </summary>
+        public bool ShowTitleInPreview { get; set; } = true;
+
+        /// <summary>
         /// 新規作成時にフロントマターを自動挿入するかどうか。
         /// </summary>
         public bool AutoInsertFrontMatter { get; set; } = true;

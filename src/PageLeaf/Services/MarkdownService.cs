@@ -38,6 +38,7 @@ namespace PageLeaf.Services
         {
             var frontMatter = ParseFrontMatter(markdown ?? string.Empty);
             var settings = GetEffectiveSettings(frontMatter);
+            var appSettings = _settingsService.CurrentSettings;
 
             var pipeline = CreatePipeline();
             var htmlBody = Markdown.ToHtml(markdown ?? string.Empty, pipeline);
@@ -49,6 +50,13 @@ namespace PageLeaf.Services
             htmlBuilder.Append(BuildHead(cssPath, baseDirectory, settings));
             htmlBuilder.AppendLine("</head>");
             htmlBuilder.AppendLine("<body>");
+
+            // タイトルの挿入
+            if (appSettings.ShowTitleInPreview && frontMatter.TryGetValue("title", out var titleObj) && titleObj is string title && !string.IsNullOrWhiteSpace(title))
+            {
+                htmlBuilder.AppendLine($"<header id=\"page-title\" class=\"title-element\">{System.Net.WebUtility.HtmlEncode(title)}</header>");
+            }
+
             htmlBuilder.Append(htmlBody);
             htmlBuilder.Append(BuildScripts(settings));
             htmlBuilder.AppendLine("</body>");

@@ -23,203 +23,15 @@ namespace PageLeaf.Services
 
             var styleInfo = new CssStyleInfo();
 
-            var bodyRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "body");
+            ParseBodyStyles(stylesheet, styleInfo);
+            ParseTitleStyles(stylesheet, styleInfo);
+            ParseHeadingStyles(stylesheet, styleInfo);
+            ParseBlockquoteStyles(stylesheet, styleInfo);
+            ParseListStyles(stylesheet, styleInfo);
+            ParseTableStyles(stylesheet, styleInfo);
+            ParseCodeStyles(stylesheet, styleInfo);
+            ParseNumberingStates(stylesheet, styleInfo);
 
-            if (bodyRule != null)
-            {
-                styleInfo.BodyTextColor = GetColorHexFromRule(bodyRule, "color");
-                styleInfo.BodyBackgroundColor = GetColorHexFromRule(bodyRule, "background-color");
-
-                // font-size プロパティを読み取る
-                styleInfo.BodyFontSize = bodyRule.Style.GetPropertyValue("font-size");
-            }
-
-            // h1からh6までの見出しのcolorプロパティを解析
-            for (int i = 1; i <= 6; i++)
-            {
-                var headingSelector = $"h{i}";
-                var headingRule = stylesheet.Rules
-                    .OfType<ICssStyleRule>()
-                    .FirstOrDefault(r => r.SelectorText == headingSelector);
-
-                if (headingRule != null)
-                {
-                    var colorProperty = headingRule.Style.GetProperty("color");
-                    if (colorProperty != null && colorProperty.RawValue is AngleSharp.Css.Values.Color angleSharpColor)
-                    {
-                        // AngleSharpは色をrgba形式で正規化するため、CssTextプロパティを使用してそのまま格納
-                        styleInfo.HeadingTextColors[headingSelector] = angleSharpColor.CssText;
-                    }
-
-                    // font-sizeプロパティを解析
-                    var fontSize = headingRule.Style.GetPropertyValue("font-size");
-                    if (!string.IsNullOrEmpty(fontSize))
-                    {
-                        styleInfo.HeadingFontSizes[headingSelector] = fontSize;
-                    }
-
-                    // font-familyプロパティを解析
-                    var fontFamily = headingRule.Style.GetPropertyValue("font-family");
-                    if (!string.IsNullOrEmpty(fontFamily))
-                    {
-                        styleInfo.HeadingFontFamilies[headingSelector] = fontFamily;
-                    }
-
-                    // text-alignプロパティを解析
-                    var textAlign = headingRule.Style.GetPropertyValue("text-align");
-                    if (!string.IsNullOrEmpty(textAlign))
-                    {
-                        styleInfo.HeadingAlignments[headingSelector] = textAlign;
-                    }
-
-                    // スタイルフラグを解析
-                    var flags = new HeadingStyleFlags();
-                    var fontWeight = headingRule.Style.GetPropertyValue("font-weight");
-                    if (fontWeight == "bold" || (int.TryParse(fontWeight, out var weight) && weight >= 700))
-                    {
-                        flags.IsBold = true;
-                    }
-
-                    var fontStyle = headingRule.Style.GetPropertyValue("font-style");
-                    if (fontStyle == "italic")
-                    {
-                        flags.IsItalic = true;
-                    }
-
-                    var textDecoration = headingRule.Style.GetPropertyValue("text-decoration");
-                    if (textDecoration.Contains("underline"))
-                    {
-                        flags.IsUnderline = true;
-                    }
-                    styleInfo.HeadingStyleFlags[headingSelector] = flags;
-                }
-            }
-
-            // blockquote のスタイルを解析
-            var blockquoteRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "blockquote");
-
-            if (blockquoteRule != null)
-            {
-                styleInfo.QuoteTextColor = GetColorHexFromRule(blockquoteRule, "color");
-                styleInfo.QuoteBackgroundColor = GetColorHexFromRule(blockquoteRule, "background-color");
-
-                // border-left
-                styleInfo.QuoteBorderWidth = blockquoteRule.Style.GetPropertyValue("border-left-width");
-                styleInfo.QuoteBorderStyle = blockquoteRule.Style.GetPropertyValue("border-left-style");
-                styleInfo.QuoteBorderColor = GetColorHexFromRule(blockquoteRule, "border-left-color");
-            }
-
-            // ul のスタイルを解析
-            var ulRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "ul");
-
-            if (ulRule != null)
-            {
-                styleInfo.ListMarkerType = ulRule.Style.GetPropertyValue("list-style-type");
-                styleInfo.ListIndent = ulRule.Style.GetPropertyValue("padding-left");
-            }
-
-            // ol のスタイルを解析
-            var olRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "ol");
-
-            if (olRule != null)
-            {
-                styleInfo.NumberedListMarkerType = olRule.Style.GetPropertyValue("list-style-type");
-            }
-
-            // li::marker のスタイルを解析
-            var markerRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "li::marker");
-
-            if (markerRule != null)
-            {
-                styleInfo.ListMarkerSize = markerRule.Style.GetPropertyValue("font-size");
-            }
-
-            // table のスタイルを解析
-            var thTdRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "th, td");
-
-            if (thTdRule != null)
-            {
-                // border
-                styleInfo.TableBorderWidth = thTdRule.Style.GetPropertyValue("border-width");
-                styleInfo.TableBorderColor = GetColorHexFromRule(thTdRule, "border-color");
-                styleInfo.TableBorderStyle = thTdRule.Style.GetPropertyValue("border-style");
-
-                // padding
-                styleInfo.TableCellPadding = thTdRule.Style.GetPropertyValue("padding");
-            }
-
-            var thRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "th");
-
-            if (thRule != null)
-            {
-                styleInfo.TableHeaderBackgroundColor = GetColorHexFromRule(thRule, "background-color");
-                styleInfo.TableHeaderTextColor = GetColorHexFromRule(thRule, "color");
-                styleInfo.TableHeaderFontSize = thRule.Style.GetPropertyValue("font-size");
-                styleInfo.TableHeaderAlignment = thRule.Style.GetPropertyValue("text-align");
-            }
-
-            // code のスタイルを解析
-            var codeRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "code");
-
-            if (codeRule != null)
-            {
-                styleInfo.CodeTextColor = GetColorHexFromRule(codeRule, "color");
-                styleInfo.CodeBackgroundColor = GetColorHexFromRule(codeRule, "background-color");
-                styleInfo.InlineCodeTextColor = styleInfo.CodeTextColor;
-                styleInfo.InlineCodeBackgroundColor = styleInfo.CodeBackgroundColor;
-                styleInfo.CodeFontFamily = codeRule.Style.GetPropertyValue("font-family");
-            }
-
-            // pre code (コードブロック) のスタイルを解析
-            var preCodeRule = stylesheet.Rules
-                .OfType<ICssStyleRule>()
-                .FirstOrDefault(r => r.SelectorText == "pre code");
-
-            if (preCodeRule != null)
-            {
-                styleInfo.BlockCodeTextColor = GetColorHexFromRule(preCodeRule, "color");
-                styleInfo.BlockCodeBackgroundColor = GetColorHexFromRule(preCodeRule, "background-color");
-            }
-
-            // 項番採番の検出 (見出しレベルごと)
-            for (int i = 1; i <= 6; i++)
-            {
-                var headingSelector = $"h{i}";
-                var headingRule = stylesheet.Rules
-                    .OfType<ICssStyleRule>()
-                    .FirstOrDefault(r => r.SelectorText == headingSelector);
-
-                var beforeRule = stylesheet.Rules
-                    .OfType<ICssStyleRule>()
-                    .FirstOrDefault(r => r.SelectorText == $"{headingSelector}::before");
-
-                // counter-incrementと::before contentが存在するかで判断
-                if (headingRule?.Style.GetPropertyValue("counter-increment")?.Contains(headingSelector) == true &&
-                    beforeRule?.Style.GetPropertyValue("content")?.Contains($"counter({headingSelector})") == true)
-                {
-                    styleInfo.HeadingNumberingStates[headingSelector] = true;
-                }
-                else
-                {
-                    styleInfo.HeadingNumberingStates[headingSelector] = false;
-                }
-            }
             return styleInfo;
         }
 
@@ -234,6 +46,39 @@ namespace PageLeaf.Services
                 if (!string.IsNullOrEmpty(info.BodyTextColor)) rule.Style.SetProperty("color", info.BodyTextColor);
                 if (!string.IsNullOrEmpty(info.BodyBackgroundColor)) rule.Style.SetProperty("background-color", info.BodyBackgroundColor);
                 if (!string.IsNullOrEmpty(info.BodyFontSize)) rule.Style.SetProperty("font-size", info.BodyFontSize);
+            }, styleInfo);
+
+            // Page Title
+            UpdateOrCreateRule(stylesheet, "#page-title", (rule, info) =>
+            {
+                if (!string.IsNullOrEmpty(info.TitleTextColor)) rule.Style.SetProperty("color", info.TitleTextColor);
+                if (!string.IsNullOrEmpty(info.TitleFontSize)) rule.Style.SetProperty("font-size", info.TitleFontSize);
+                if (!string.IsNullOrEmpty(info.TitleFontFamily)) rule.Style.SetProperty("font-family", info.TitleFontFamily);
+                if (!string.IsNullOrEmpty(info.TitleAlignment)) rule.Style.SetProperty("text-align", info.TitleAlignment);
+                if (!string.IsNullOrEmpty(info.TitleMarginBottom)) rule.Style.SetProperty("margin-bottom", info.TitleMarginBottom);
+
+                if (info.TitleStyleFlags != null)
+                {
+                    rule.Style.SetProperty("font-weight", info.TitleStyleFlags.IsBold ? "bold" : "normal");
+                    rule.Style.SetProperty("font-style", info.TitleStyleFlags.IsItalic ? "italic" : "normal");
+
+                    var textDecorations = new List<string>();
+                    if (info.TitleStyleFlags.IsUnderline) textDecorations.Add("underline");
+
+                    if (textDecorations.Any())
+                    {
+                        rule.Style.SetProperty("text-decoration", string.Join(" ", textDecorations));
+                        if (!string.IsNullOrEmpty(info.TitleTextColor))
+                        {
+                            rule.Style.SetProperty("text-decoration-color", info.TitleTextColor);
+                        }
+                    }
+                    else
+                    {
+                        rule.Style.SetProperty("text-decoration", "none");
+                        rule.Style.RemoveProperty("text-decoration-color");
+                    }
+                }
             }, styleInfo);
 
             // Headings
@@ -434,80 +279,101 @@ namespace PageLeaf.Services
         {
             if (stylesheet?.Rules == null || styleInfo == null) return;
 
-            // Step 1: Remove all ::before rules for headings to have a clean slate.
-            for (int i = stylesheet.Rules.Length - 1; i >= 0; i--)
-            {
-                var rule = stylesheet.Rules[i];
-                if (rule is ICssStyleRule styleRule && styleRule.SelectorText != null && styleRule.SelectorText.StartsWith("h") && styleRule.SelectorText.Contains("::before"))
-                {
-                    stylesheet.RemoveAt(i);
-                }
-            }
+            ClearExistingNumberingRules(stylesheet);
+            UpdateBodyCounterReset(stylesheet, styleInfo);
+            UpdateHeadingCounterRules(stylesheet, styleInfo);
+            UpdateHeadingBeforeRules(stylesheet, styleInfo);
+        }
 
-            // Check if any heading numbering is enabled at all to decide if body counter-reset is needed
-            bool anyHeadingNumberingEnabled = styleInfo.HeadingNumberingStates != null && styleInfo.HeadingNumberingStates.Any(kvp => kvp.Value);
-
-            // Step 2: Update counter properties on body and headings
-            UpdateOrCreateRule(stylesheet, "body", (rule, info) =>
-            {
-                if (anyHeadingNumberingEnabled)
-                {
-                    rule.Style.SetProperty("counter-reset", "h1 0"); // Reset h1 counter on body
-                }
-                else
-                {
-                    rule.Style.RemoveProperty("counter-reset");
-                }
-            }, styleInfo);
-
+        private void UpdateHeadingCounterRules(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
             for (int i = 1; i <= 6; i++)
             {
-                var headingSelector = $"h{i}";
-                UpdateOrCreateRule(stylesheet, headingSelector, (rule, info) =>
+                var selector = $"h{i}";
+                UpdateOrCreateRule(stylesheet, selector, (rule, info) =>
                 {
-                    if (info.HeadingNumberingStates != null && info.HeadingNumberingStates.TryGetValue(headingSelector, out bool isEnabled) && isEnabled)
+                    bool isEnabled = info.HeadingNumberingStates != null &&
+                                   info.HeadingNumberingStates.TryGetValue(selector, out bool val) && val;
+
+                    if (isEnabled)
                     {
-                        rule.Style.SetProperty("counter-increment", headingSelector);
-                        // Reset counter for sub-headings if current heading numbering is enabled
-                        if (i < 6)
-                        {
-                            rule.Style.SetProperty("counter-reset", $"h{i + 1} 0");
-                        }
+                        rule.Style.SetProperty("counter-increment", selector);
+                        if (i < 6) rule.Style.SetProperty("counter-reset", $"h{i + 1} 0");
                     }
-                    else // Numbering is disabled for this specific heading level
+                    else
                     {
                         rule.Style.RemoveProperty("counter-increment");
                         rule.Style.RemoveProperty("counter-reset");
                     }
                 }, styleInfo);
             }
+        }
 
-            // Step 3: Add ::before rules if numbering is enabled for a specific heading
+        private void UpdateHeadingBeforeRules(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
             for (int i = 1; i <= 6; i++)
             {
-                var headingSelector = $"h{i}";
-                if (styleInfo.HeadingNumberingStates != null && styleInfo.HeadingNumberingStates.TryGetValue(headingSelector, out bool isEnabled) && isEnabled)
+                var selector = $"h{i}";
+                bool isEnabled = styleInfo.HeadingNumberingStates != null &&
+                               styleInfo.HeadingNumberingStates.TryGetValue(selector, out bool val) && val;
+
+                if (isEnabled)
                 {
-                    var beforeSelector = $"{headingSelector}::before";
-                    UpdateOrCreateRule(stylesheet, beforeSelector, (rule, info) =>
+                    UpdateOrCreateRule(stylesheet, $"{selector}::before", (rule, info) =>
                     {
-                        var contentBuilder = new StringBuilder();
-                        bool isFirst = true;
-                        for (int j = 1; j <= i; j++)
-                        {
-                            var currentH = $"h{j}";
-                            if (info.HeadingNumberingStates != null && info.HeadingNumberingStates.TryGetValue(currentH, out bool isHEnabled) && isHEnabled)
-                            {
-                                if (!isFirst) contentBuilder.Append("\".\"");
-                                contentBuilder.Append($"counter({currentH})");
-                                isFirst = false;
-                            }
-                        }
-                        contentBuilder.Append("\". \"");
-                        rule.Style.SetProperty("content", contentBuilder.ToString());
+                        rule.Style.SetProperty("content", BuildCounterContent(i, info));
                     }, styleInfo);
                 }
             }
+        }
+
+        private string BuildCounterContent(int level, CssStyleInfo info)
+        {
+            var sb = new StringBuilder();
+            bool isFirst = true;
+            for (int j = 1; j <= level; j++)
+            {
+                var h = $"h{j}";
+                if (info.HeadingNumberingStates != null && info.HeadingNumberingStates.TryGetValue(h, out bool val) && val)
+                {
+                    if (!isFirst) sb.Append("\".\"");
+                    sb.Append($"counter({h})");
+                    isFirst = false;
+                }
+            }
+            sb.Append("\". \"");
+            return sb.ToString();
+        }
+
+        private void ClearExistingNumberingRules(ICssStyleSheet stylesheet)
+        {
+            for (int i = stylesheet.Rules.Length - 1; i >= 0; i--)
+            {
+                var rule = stylesheet.Rules[i];
+                if (rule is ICssStyleRule styleRule && styleRule.SelectorText != null &&
+                    styleRule.SelectorText.StartsWith("h") && styleRule.SelectorText.Contains("::before"))
+                {
+                    stylesheet.RemoveAt(i);
+                }
+            }
+        }
+
+        private void UpdateBodyCounterReset(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
+            bool anyEnabled = styleInfo.HeadingNumberingStates != null &&
+                             styleInfo.HeadingNumberingStates.Any(kvp => kvp.Value);
+
+            UpdateOrCreateRule(stylesheet, "body", (rule, info) =>
+            {
+                if (anyEnabled)
+                {
+                    rule.Style.SetProperty("counter-reset", "h1 0");
+                }
+                else
+                {
+                    rule.Style.RemoveProperty("counter-reset");
+                }
+            }, styleInfo);
         }
 
 
@@ -526,6 +392,144 @@ namespace PageLeaf.Services
             }
         }
 
+
+        private void ParseBodyStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
+            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "body");
+            if (rule != null)
+            {
+                styleInfo.BodyTextColor = GetColorHexFromRule(rule, "color");
+                styleInfo.BodyBackgroundColor = GetColorHexFromRule(rule, "background-color");
+                styleInfo.BodyFontSize = rule.Style.GetPropertyValue("font-size");
+            }
+        }
+
+        private void ParseTitleStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
+            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "#page-title");
+            if (rule != null)
+            {
+                styleInfo.TitleTextColor = GetColorHexFromRule(rule, "color");
+                styleInfo.TitleFontSize = rule.Style.GetPropertyValue("font-size");
+                styleInfo.TitleFontFamily = rule.Style.GetPropertyValue("font-family");
+                styleInfo.TitleAlignment = rule.Style.GetPropertyValue("text-align");
+                styleInfo.TitleMarginBottom = rule.Style.GetPropertyValue("margin-bottom");
+                styleInfo.TitleStyleFlags = GetStyleFlags(rule);
+            }
+        }
+
+        private void ParseHeadingStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
+            for (int i = 1; i <= 6; i++)
+            {
+                var selector = $"h{i}";
+                var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == selector);
+                if (rule != null)
+                {
+                    styleInfo.HeadingTextColors[selector] = GetColorHexFromRule(rule, "color");
+                    styleInfo.HeadingFontSizes[selector] = rule.Style.GetPropertyValue("font-size");
+                    styleInfo.HeadingFontFamilies[selector] = rule.Style.GetPropertyValue("font-family");
+                    styleInfo.HeadingAlignments[selector] = rule.Style.GetPropertyValue("text-align");
+                    styleInfo.HeadingStyleFlags[selector] = GetStyleFlags(rule);
+                }
+            }
+        }
+
+        private void ParseBlockquoteStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
+            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "blockquote");
+            if (rule != null)
+            {
+                styleInfo.QuoteTextColor = GetColorHexFromRule(rule, "color");
+                styleInfo.QuoteBackgroundColor = GetColorHexFromRule(rule, "background-color");
+                styleInfo.QuoteBorderWidth = rule.Style.GetPropertyValue("border-left-width");
+                styleInfo.QuoteBorderStyle = rule.Style.GetPropertyValue("border-left-style");
+                styleInfo.QuoteBorderColor = GetColorHexFromRule(rule, "border-left-color");
+            }
+        }
+
+        private void ParseListStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
+            var ulRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "ul");
+            if (ulRule != null)
+            {
+                styleInfo.ListMarkerType = ulRule.Style.GetPropertyValue("list-style-type");
+                styleInfo.ListIndent = ulRule.Style.GetPropertyValue("padding-left");
+            }
+
+            var olRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "ol");
+            if (olRule != null)
+            {
+                styleInfo.NumberedListMarkerType = olRule.Style.GetPropertyValue("list-style-type");
+            }
+
+            var markerRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "li::marker");
+            if (markerRule != null)
+            {
+                styleInfo.ListMarkerSize = markerRule.Style.GetPropertyValue("font-size");
+            }
+        }
+
+        private void ParseTableStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
+            var thTdRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "th, td");
+            if (thTdRule != null)
+            {
+                styleInfo.TableBorderWidth = thTdRule.Style.GetPropertyValue("border-width");
+                styleInfo.TableBorderColor = GetColorHexFromRule(thTdRule, "border-color");
+                styleInfo.TableBorderStyle = thTdRule.Style.GetPropertyValue("border-style");
+                styleInfo.TableCellPadding = thTdRule.Style.GetPropertyValue("padding");
+            }
+
+            var thRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "th");
+            if (thRule != null)
+            {
+                styleInfo.TableHeaderBackgroundColor = GetColorHexFromRule(thRule, "background-color");
+                styleInfo.TableHeaderTextColor = GetColorHexFromRule(thRule, "color");
+                styleInfo.TableHeaderFontSize = thRule.Style.GetPropertyValue("font-size");
+                styleInfo.TableHeaderAlignment = thRule.Style.GetPropertyValue("text-align");
+            }
+        }
+
+        private void ParseCodeStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
+            var codeRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "code");
+            if (codeRule != null)
+            {
+                styleInfo.CodeTextColor = GetColorHexFromRule(codeRule, "color");
+                styleInfo.CodeBackgroundColor = GetColorHexFromRule(codeRule, "background-color");
+                styleInfo.InlineCodeTextColor = styleInfo.CodeTextColor;
+                styleInfo.InlineCodeBackgroundColor = styleInfo.CodeBackgroundColor;
+                styleInfo.CodeFontFamily = codeRule.Style.GetPropertyValue("font-family");
+            }
+
+            var preCodeRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "pre code");
+            if (preCodeRule != null)
+            {
+                styleInfo.BlockCodeTextColor = GetColorHexFromRule(preCodeRule, "color");
+                styleInfo.BlockCodeBackgroundColor = GetColorHexFromRule(preCodeRule, "background-color");
+            }
+        }
+
+        private void ParseNumberingStates(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
+            for (int i = 1; i <= 6; i++)
+            {
+                var selector = $"h{i}";
+                var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == selector);
+                var beforeRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == $"{selector}::before");
+
+                if (rule?.Style.GetPropertyValue("counter-increment")?.Contains(selector) == true &&
+                    beforeRule?.Style.GetPropertyValue("content")?.Contains($"counter({selector})") == true)
+                {
+                    styleInfo.HeadingNumberingStates[selector] = true;
+                }
+                else
+                {
+                    styleInfo.HeadingNumberingStates[selector] = false;
+                }
+            }
+        }
 
         private string? GetColorHexFromRule(ICssStyleRule rule, string propertyName)
         {
@@ -554,6 +558,29 @@ namespace PageLeaf.Services
             {
                 return null;
             }
+        }
+
+        private HeadingStyleFlags GetStyleFlags(ICssStyleRule rule)
+        {
+            var flags = new HeadingStyleFlags();
+            var fontWeight = rule.Style.GetPropertyValue("font-weight");
+            if (fontWeight == "bold" || (int.TryParse(fontWeight, out var weight) && weight >= 700))
+            {
+                flags.IsBold = true;
+            }
+
+            var fontStyle = rule.Style.GetPropertyValue("font-style");
+            if (fontStyle == "italic")
+            {
+                flags.IsItalic = true;
+            }
+
+            var textDecoration = rule.Style.GetPropertyValue("text-decoration");
+            if (textDecoration != null && textDecoration.Contains("underline"))
+            {
+                flags.IsUnderline = true;
+            }
+            return flags;
         }
     }
 }

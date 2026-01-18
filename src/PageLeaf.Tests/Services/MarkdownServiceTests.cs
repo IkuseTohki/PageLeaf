@@ -323,6 +323,54 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
+        public void ConvertToHtml_ShouldInsertTitleHeader_WhenShowTitleInPreviewIsEnabled()
+        {
+            // テスト観点: ShowTitleInPreviewがONかつタイトルがフロントマターに存在する場合、
+            //             HTMLのbody直後にheader要素としてタイトルが挿入されることを確認する。
+            // Arrange
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { ShowTitleInPreview = true });
+            var markdown = "---\ntitle: My Awesome Document\n---\n# Content";
+
+            // Act
+            string html = _service.ConvertToHtml(markdown, null, null);
+
+            // Assert
+            StringAssert.Contains(html, "<header id=\"page-title\" class=\"title-element\">My Awesome Document</header>");
+        }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldNotInsertTitleHeader_WhenShowTitleInPreviewIsDisabled()
+        {
+            // テスト観点: ShowTitleInPreviewがOFFの場合、フロントマターにタイトルがあっても
+            //             header要素が挿入されないことを確認する。
+            // Arrange
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { ShowTitleInPreview = false });
+            var markdown = "---\ntitle: My Awesome Document\n---\n# Content";
+
+            // Act
+            string html = _service.ConvertToHtml(markdown, null, null);
+
+            // Assert
+            Assert.IsFalse(html.Contains("id=\"page-title\""), "Title header should not be present when disabled.");
+        }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldNotInsertTitleHeader_WhenTitleIsEmpty()
+        {
+            // テスト観点: ShowTitleInPreviewがONでもタイトルが空の場合、
+            //             header要素が挿入されないことを確認する。
+            // Arrange
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { ShowTitleInPreview = true });
+            var markdown = "---\ntitle: \"\"\n---\n# Content";
+
+            // Act
+            string html = _service.ConvertToHtml(markdown, null, null);
+
+            // Assert
+            Assert.IsFalse(html.Contains("id=\"page-title\""), "Title header should not be present when title is empty.");
+        }
+
+        [TestMethod]
         public void ParseFrontMatter_ShouldReturnDictionary_WhenFrontMatterExists()
         {
             // テスト観点: フロントマターが存在する場合、正しく辞書形式で取得できることを確認する。

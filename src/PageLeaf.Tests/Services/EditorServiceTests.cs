@@ -303,6 +303,28 @@ namespace PageLeaf.Tests.Services
             Assert.IsTrue(propertyChangedRaised, "EditorTextの変更通知が発生すべきです");
             Assert.AreEqual("Updated", _editorService.EditorText);
         }
+
+        [TestMethod]
+        public void CurrentDocument_FrontMatterChangedExternally_ShouldUpdatePreview()
+        {
+            // テスト観点: CurrentDocument の FrontMatter が直接変更された場合、EditorService が HTML を再生成することを確認する。
+            // Arrange
+            var document = new MarkdownDocument { Content = "# Body" };
+            _editorService.LoadDocument(document);
+            _editorService.SelectedMode = DisplayMode.Viewer;
+
+            var newFrontMatter = new System.Collections.Generic.Dictionary<string, object> { { "title", "New Title" } };
+            _mockMarkdownService.Setup(m => m.Join(newFrontMatter, "# Body")).Returns("---\ntitle: New Title\n---\n# Body");
+            _mockMarkdownService.Setup(m => m.ConvertToHtml(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>()))
+                .Returns("<h1>New Title</h1>");
+
+            // Act
+            document.FrontMatter = newFrontMatter;
+
+            // Assert
+            _mockMarkdownService.Verify(m => m.ConvertToHtml(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>()), Times.AtLeastOnce());
+            Assert.AreEqual("<h1>New Title</h1>", File.ReadAllText(_editorService.HtmlFilePath));
+        }
     }
 }
 

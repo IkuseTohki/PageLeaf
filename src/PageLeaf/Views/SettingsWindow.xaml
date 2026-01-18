@@ -77,6 +77,9 @@
                         <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※Tabキーを押した際に入力される空白の量を指定します。" />
 
                         <Label Content="フロントマター設定" Style="{StaticResource SectionHeaderLabelStyle}" />
+                        <CheckBox Content="フロントマターのタイトルをプレビューに表示する"
+                                  IsChecked="{Binding ShowTitleInPreview}"
+                                  Style="{StaticResource FormCheckBoxStyle}" />
                         <CheckBox Content="新規作成時にフロントマターを自動挿入する"
                                   IsChecked="{Binding AutoInsertFrontMatter}"
                                   Style="{StaticResource FormCheckBoxStyle}" />

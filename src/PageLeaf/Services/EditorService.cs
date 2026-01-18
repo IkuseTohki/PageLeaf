@@ -168,6 +168,10 @@ namespace PageLeaf.Services
                 OnPropertyChanged(nameof(EditorText)); // EditorText の変更を通知
                 UpdateHtmlContent(); // プレビューも更新
             }
+            else if (e.PropertyName == nameof(MarkdownDocument.FrontMatter))
+            {
+                UpdateHtmlContent(); // プレビューも更新
+            }
         }
 
         public void LoadDocument(MarkdownDocument document)

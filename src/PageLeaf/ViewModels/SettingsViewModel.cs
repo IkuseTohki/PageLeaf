@@ -34,6 +34,7 @@ namespace PageLeaf.ViewModels
         private bool _useSpacesForIndent = true;
         private double _editorFontSize = 14.0;
         private bool _autoInsertFrontMatter = true;
+        private bool _showTitleInPreview = true;
         private ResourceSource _libraryResourceSource = ResourceSource.Local;
         private SettingsCategory _currentCategory = SettingsCategory.Editor;
 
@@ -44,6 +45,15 @@ namespace PageLeaf.ViewModels
         {
             get => _currentCategory;
             set { if (_currentCategory != value) { _currentCategory = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
+        /// プレビューの最上部にフロントマターのタイトルを表示するかどうか。
+        /// </summary>
+        public bool ShowTitleInPreview
+        {
+            get => _showTitleInPreview;
+            set { if (_showTitleInPreview != value) { _showTitleInPreview = value; OnPropertyChanged(); } }
         }
 
         /// <summary>
@@ -193,6 +203,7 @@ namespace PageLeaf.ViewModels
             _useSpacesForIndent = settings.UseSpacesForIndent;
             _editorFontSize = settings.EditorFontSize;
             _autoInsertFrontMatter = settings.AutoInsertFrontMatter;
+            _showTitleInPreview = settings.ShowTitleInPreview;
             _libraryResourceSource = settings.LibraryResourceSource;
 
             // 追加フロントマタープロパティのロード
@@ -290,6 +301,7 @@ namespace PageLeaf.ViewModels
             settings.UseSpacesForIndent = UseSpacesForIndent;
             settings.EditorFontSize = EditorFontSize;
             settings.AutoInsertFrontMatter = AutoInsertFrontMatter;
+            settings.ShowTitleInPreview = ShowTitleInPreview;
             settings.LibraryResourceSource = LibraryResourceSource;
 
             // 追加フロントマタープロパティの保存 (順序維持)

@@ -48,14 +48,36 @@
             </Grid>
 
             <!-- 値の入力欄 -->
-            <TextBox Margin="0,2,0,0"
-                     Padding="0,2"
-                     Background="Transparent"
-                     BorderBrush="{StaticResource BorderBrush}"
-                     BorderThickness="0,0,0,1"
-                     FontSize="12"
-                     IsReadOnly="{Binding IsValueReadOnly}"
-                     Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <Grid Margin="0,2,0,0">
+                <TextBlock Margin="0,2"
+                           Padding="0,2"
+                           FontSize="12"
+                           FontStyle="Italic"
+                           Foreground="Gray"
+                           IsHitTestVisible="False"
+                           Text="{Binding Placeholder}">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Value}" Value="">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Value}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBox Padding="0,2"
+                         Background="Transparent"
+                         BorderBrush="{StaticResource BorderBrush}"
+                         BorderThickness="0,0,0,1"
+                         FontSize="12"
+                         IsReadOnly="{Binding IsValueReadOnly}"
+                         Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            </Grid>
         </StackPanel>
     </DataTemplate>
 

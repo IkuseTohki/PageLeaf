@@ -70,6 +70,10 @@
                 <!-- Horizontal Tabs -->
                 <ScrollViewer Style="{StaticResource ScrollViewerWithButtonsStyle}">
                     <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="タイトル"
+                                     IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Title}}"
+                                     Tag="T"
+                                     Visibility="{Binding IsTitleTabVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
                         <RadioButton Content="全体"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.General}}"
                                      Tag="🌐" />
@@ -98,6 +102,77 @@
                       Padding="20"
                       VerticalScrollBarVisibility="Auto">
             <Grid>
+                <!-- Title Tab -->
+                <StackPanel Visibility="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Title}}">
+                    <Label Content="フォント設定" Style="{StaticResource FirstCompactFormGroupHeaderStyle}" />
+                    <Label Content="サイズ" Style="{StaticResource CompactFormLabelStyle}" />
+                    <controls:FontSizeEditorControl HorizontalAlignment="Left"
+                                                    Unit="{Binding GlobalUnit}"
+                                                    Value="{Binding TitleFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <Label Content="フォントファミリー" Style="{StaticResource CompactFormLabelStyle}" />
+                    <TextBox Style="{StaticResource CompactFormTextBoxMediumStyle}" Text="{Binding TitleFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+                    <Label Content="スタイル" Style="{StaticResource CompactFormLabelStyle}" />
+                    <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
+                        <CheckBox IsChecked="{Binding IsTitleBold, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactFormCheckBoxStyle}">
+                            <TextBlock FontWeight="Bold" Text="太字" />
+                        </CheckBox>
+                        <CheckBox IsChecked="{Binding IsTitleItalic, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactFormCheckBoxStyle}">
+                            <TextBlock FontStyle="Italic" Text="斜体" />
+                        </CheckBox>
+                        <CheckBox IsChecked="{Binding IsTitleUnderline, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactFormCheckBoxStyle}">
+                            <TextBlock Text="下線" TextDecorations="Underline" />
+                        </CheckBox>
+                    </StackPanel>
+
+                    <Label Content="カラー設定" Style="{StaticResource CompactFormGroupHeaderStyle}" />
+                    <Label Content="文字色" Style="{StaticResource CompactFormLabelStyle}" />
+                    <controls:ColorInputControl ColorText="{Binding TitleTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                CommandParameter="TitleTextColor"
+                                                SelectColorCommand="{Binding SelectColorCommand}" />
+
+                    <Label Content="配置・余白" Style="{StaticResource CompactFormGroupHeaderStyle}" />
+                    <Label Content="位置揃え" Style="{StaticResource CompactFormLabelStyle}" />
+                    <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
+                        <ToggleButton CommandParameter="left"
+                                      IsChecked="{Binding TitleAlignment, Converter={StaticResource ComparisonConverter}, ConverterParameter=left}"
+                                      Style="{StaticResource IconToggleButtonStyle}"
+                                      ToolTip="左寄せ">
+                            <Path Width="16"
+                                  Height="16"
+                                  Data="{StaticResource AlignLeftIconGeometry}"
+                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Stretch="Uniform" />
+                        </ToggleButton>
+                        <ToggleButton CommandParameter="center"
+                                      IsChecked="{Binding TitleAlignment, Converter={StaticResource ComparisonConverter}, ConverterParameter=center}"
+                                      Style="{StaticResource IconToggleButtonStyle}"
+                                      ToolTip="中央寄せ">
+                            <Path Width="16"
+                                  Height="16"
+                                  Data="{StaticResource AlignCenterIconGeometry}"
+                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Stretch="Uniform" />
+                        </ToggleButton>
+                        <ToggleButton CommandParameter="right"
+                                      IsChecked="{Binding TitleAlignment, Converter={StaticResource ComparisonConverter}, ConverterParameter=right}"
+                                      Style="{StaticResource IconToggleButtonStyle}"
+                                      ToolTip="右寄せ">
+                            <Path Width="16"
+                                  Height="16"
+                                  Data="{StaticResource AlignRightIconGeometry}"
+                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Stretch="Uniform" />
+                        </ToggleButton>
+                    </StackPanel>
+
+                    <Label Content="下マージン" Style="{StaticResource CompactFormLabelStyle}" />
+                    <controls:NumericUpDownControl HorizontalAlignment="Left"
+                                                   Unit="px"
+                                                   Value="{Binding TitleMarginBottom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
                 <!-- General Tab -->
                 <StackPanel Visibility="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.General}}">
                     <Label Content="フォント設定" Style="{StaticResource FirstCompactFormGroupHeaderStyle}" />

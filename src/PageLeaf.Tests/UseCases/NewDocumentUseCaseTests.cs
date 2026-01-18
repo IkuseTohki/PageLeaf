@@ -131,7 +131,7 @@ namespace PageLeaf.Tests.UseCases
             _useCase.Execute();
 
             // Assert
-            Assert.AreEqual("Untitled", doc.FrontMatter["title"]);
+            Assert.AreEqual("", doc.FrontMatter["title"]);
             Assert.IsTrue(doc.FrontMatter.ContainsKey("created"));
             Assert.IsTrue(doc.FrontMatter.ContainsKey("updated"));
             Assert.IsTrue(doc.FrontMatter.ContainsKey("css"));
@@ -187,7 +187,7 @@ namespace PageLeaf.Tests.UseCases
 
             // Assert
             // 標準プロパティ
-            Assert.AreEqual("Untitled", doc.FrontMatter["title"]);
+            Assert.AreEqual("", doc.FrontMatter["title"]);
             // 追加プロパティ
             Assert.AreEqual("Test Author", doc.FrontMatter["author"]);
             Assert.AreEqual("test", doc.FrontMatter["tags"]);

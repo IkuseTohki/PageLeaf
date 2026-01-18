@@ -47,9 +47,15 @@ namespace PageLeaf.Models
                     OnPropertyChanged(nameof(IsValueReadOnly));
                     OnPropertyChanged(nameof(CanRemove));
                     OnPropertyChanged(nameof(IsTags));
+                    OnPropertyChanged(nameof(Placeholder));
                 }
             }
         }
+
+        /// <summary>
+        /// プレースホルダーテキストを取得します。
+        /// </summary>
+        public string? Placeholder => Key == "title" ? "(タイトル未設定)" : null;
 
         /// <summary>
         /// プロパティの値。
