@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.IO;
 using PageLeaf.Utilities;
-using System.Windows.Media; // ColorConverter を使用するために追加
-using AngleSharp.Css.Values; // AngleSharp.Css.Values.Color を使用するために追加
-using System.Collections.Generic; // List<string> を使用するために追加
+using System.Windows.Media; // ColorConverter
+using AngleSharp.Css.Values; // AngleSharp.Css.Values.Color
+using System.Collections.Generic; // List<string>
 using System;
 using AngleSharp.Css;
 using System.Text.RegularExpressions;
@@ -103,7 +103,7 @@ namespace PageLeaf.Services
                     UpdateProperty(info.HeadingAlignments, headingSelector, "text-align");
 
                     // Text Align specifically for headings might need override logic in future, but for now standard helper is fine.
-                    // Special case: text-align might need !important if we want to override Markdown's default behavior, 
+                    // Special case: text-align might need !important if we want to override Markdown's default behavior,
                     // but usually that applies only to table headers.
 
                     // Style Flags
@@ -221,7 +221,7 @@ namespace PageLeaf.Services
                 else
                 {
                     // If override is disabled, we remove these properties from the rule to let highlight.js theme win
-                    // but we might want to preserve them if they were already there? 
+                    // but we might want to preserve them if they were already there?
                     // For now, follow the requirement: theme takes precedence.
                     rule.Style.RemoveProperty("color");
                     rule.Style.RemoveProperty("background-color");

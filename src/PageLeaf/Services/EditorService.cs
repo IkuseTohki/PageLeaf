@@ -4,8 +4,8 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.Diagnostics;
-using System.Collections.Generic; // Added
-using System.Linq; // Added
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PageLeaf.Services
 {
@@ -22,7 +22,7 @@ namespace PageLeaf.Services
         private bool _isViewerVisible;
         private double _editorFontSize = 14.0;
         private string _htmlFilePath = string.Empty;
-        private readonly List<string> _tempHtmlFiles = new List<string>(); // Added
+        private readonly List<string> _tempHtmlFiles = new List<string>();
 
         // EditorService が公開する IsDirty プロパティ
         public bool IsDirty => CurrentDocument.IsDirty;
