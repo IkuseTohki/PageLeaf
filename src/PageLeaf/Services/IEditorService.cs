@@ -31,6 +31,11 @@ namespace PageLeaf.Services
         DisplayMode SelectedMode { get; set; }
 
         /// <summary>
+        /// エディタのフォントサイズを取得または設定します。
+        /// </summary>
+        double EditorFontSize { get; set; }
+
+        /// <summary>
         /// Markdownエディタ（TextBox）が表示されるべきかどうかを取得します。
         /// </summary>
         bool IsMarkdownEditorVisible { get; }

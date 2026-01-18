@@ -262,6 +262,9 @@ namespace PageLeaf.ViewModels
             // ObservableCollectionの初期化後なので大丈夫なはず。
             //念のため、確実に適用しておく
             Editor.ApplyCss(SelectedCssFile);
+
+            // フォントサイズの反映
+            Editor.EditorFontSize = _settingsService.CurrentSettings.EditorFontSize;
         }
 
         private void ExecuteNewDocument(object? parameter)
@@ -300,6 +303,9 @@ namespace PageLeaf.ViewModels
 
             // 設定が変更された可能性があるため、各所に通知・反映
             CssEditorViewModel.NotifySettingsChanged();
+
+            // エディタのフォントサイズを反映
+            Editor.EditorFontSize = _settingsService.CurrentSettings.EditorFontSize;
 
             // WebViewの内容を更新（テーマ変更の反映）
             Editor.UpdatePreview();

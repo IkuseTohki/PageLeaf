@@ -102,6 +102,7 @@
                          behaviors:EditorTextInsertionBehavior.EditorService="{Binding Editor}"
                          behaviors:MarkdownEditorBehavior.IsEnabled="True"
                          AcceptsReturn="True"
+                         FontSize="{Binding Editor.EditorFontSize}"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          Text="{Binding Editor.EditorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, NotifyOnTargetUpdated=True}"
                          TextWrapping="Wrap"

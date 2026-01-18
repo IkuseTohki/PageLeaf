@@ -161,6 +161,25 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
+        public void test_SaveAndLoad_EditorFontSize()
+        {
+            // テスト観点: EditorFontSize プロパティが正しく保存および読み込みされることを確認する。
+            // Arrange
+            var settings = new ApplicationSettings
+            {
+                EditorFontSize = 18
+            };
+            var service = new SettingsService(_mockLogger.Object, _testAppDataPath);
+
+            // Act
+            service.SaveSettings(settings);
+            var loadedSettings = service.LoadSettings();
+
+            // Assert
+            Assert.AreEqual(18, loadedSettings.EditorFontSize);
+        }
+
+        [TestMethod]
         public void test_DefaultSettingsFilePath_ShouldBeInBaseDirectory()
         {
             // テスト観点: appDataPath が null の場合、設定ファイルが実行ディレクトリ配下に設定されることを確認する。

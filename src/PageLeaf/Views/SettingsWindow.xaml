@@ -60,6 +60,10 @@
                     <StackPanel Visibility="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Editor}}">
                         <Label Content="エディタ設定" Style="{StaticResource FirstSectionHeaderLabelStyle}" />
 
+                        <Label Content="フォントサイズ" Style="{StaticResource FormLabelStyle}" />
+                        <TextBox Style="{StaticResource FormTextBoxSmallStyle}" Text="{Binding EditorFontSize}" />
+                        <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※エディタのテキストサイズを指定します（px）。" />
+
                         <CheckBox Content="タブの代わりにスペースを使用する"
                                   IsChecked="{Binding UseSpacesForIndent}"
                                   Style="{StaticResource FormCheckBoxStyle}" />

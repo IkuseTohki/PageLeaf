@@ -48,6 +48,11 @@ namespace PageLeaf.Models
         public bool UseSpacesForIndent { get; set; } = true;
 
         /// <summary>
+        /// エディタのフォントサイズ。
+        /// </summary>
+        public double EditorFontSize { get; set; } = 14.0;
+
+        /// <summary>
         /// 新規作成時にフロントマターを自動挿入するかどうか。
         /// </summary>
         public bool AutoInsertFrontMatter { get; set; } = true;

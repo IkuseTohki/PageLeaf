@@ -32,6 +32,7 @@ namespace PageLeaf.ViewModels
         private string _imageFileNameTemplate = "image_{Date}_{Time}";
         private int _indentSize = 4;
         private bool _useSpacesForIndent = true;
+        private double _editorFontSize = 14.0;
         private bool _autoInsertFrontMatter = true;
         private ResourceSource _libraryResourceSource = ResourceSource.Local;
         private SettingsCategory _currentCategory = SettingsCategory.Editor;
@@ -43,6 +44,15 @@ namespace PageLeaf.ViewModels
         {
             get => _currentCategory;
             set { if (_currentCategory != value) { _currentCategory = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
+        /// エディタのフォントサイズ。
+        /// </summary>
+        public double EditorFontSize
+        {
+            get => _editorFontSize;
+            set { if (_editorFontSize != value) { _editorFontSize = value; OnPropertyChanged(); } }
         }
 
         /// <summary>
@@ -181,6 +191,7 @@ namespace PageLeaf.ViewModels
             _imageFileNameTemplate = settings.ImageFileNameTemplate;
             _indentSize = settings.IndentSize;
             _useSpacesForIndent = settings.UseSpacesForIndent;
+            _editorFontSize = settings.EditorFontSize;
             _autoInsertFrontMatter = settings.AutoInsertFrontMatter;
             _libraryResourceSource = settings.LibraryResourceSource;
 
@@ -277,6 +288,7 @@ namespace PageLeaf.ViewModels
             settings.ImageFileNameTemplate = ImageFileNameTemplate;
             settings.IndentSize = IndentSize;
             settings.UseSpacesForIndent = UseSpacesForIndent;
+            settings.EditorFontSize = EditorFontSize;
             settings.AutoInsertFrontMatter = AutoInsertFrontMatter;
             settings.LibraryResourceSource = LibraryResourceSource;
 

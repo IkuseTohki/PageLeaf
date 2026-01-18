@@ -20,6 +20,7 @@ namespace PageLeaf.Services
         private MarkdownDocument _currentDocument = new MarkdownDocument();
         private bool _isMarkdownEditorVisible;
         private bool _isViewerVisible;
+        private double _editorFontSize = 14.0;
         private string _htmlFilePath = string.Empty;
         private readonly List<string> _tempHtmlFiles = new List<string>(); // Added
 
@@ -37,6 +38,19 @@ namespace PageLeaf.Services
                     OnPropertyChanged();
                     UpdateVisibility();
                     UpdateHtmlContent(); // モード変更時にもHTMLを更新
+                }
+            }
+        }
+
+        public double EditorFontSize
+        {
+            get => _editorFontSize;
+            set
+            {
+                if (_editorFontSize != value)
+                {
+                    _editorFontSize = value;
+                    OnPropertyChanged();
                 }
             }
         }
