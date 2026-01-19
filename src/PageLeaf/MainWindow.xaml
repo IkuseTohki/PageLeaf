@@ -67,6 +67,7 @@
                 <MenuItem Command="{Binding ShowSettingsCommand}" Header="{StaticResource MenuSettingsSettingsHeader}" />
             </MenuItem>
             <MenuItem Header="{StaticResource MenuHelpHeader}">
+                <MenuItem Command="{Binding ShowCheatSheetCommand}" Header="チートシート" />
                 <MenuItem Command="{Binding ShowAboutCommand}" Header="{StaticResource MenuHelpAboutHeader}" />
             </MenuItem>
         </Menu>

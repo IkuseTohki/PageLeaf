@@ -15,6 +15,7 @@ namespace PageLeaf.Tests.ViewModels
         private Mock<IEditorService> _editorServiceMock = null!;
         private Mock<IFileService> _fileServiceMock = null!;
         private Mock<IDialogService> _dialogServiceMock = null!;
+        private Mock<IWindowService> _windowServiceMock = null!;
         private Mock<ISettingsService> _settingsServiceMock = null!;
         private Mock<ICssManagementService> _cssManagementServiceMock = null!;
         private Mock<ILogger<MainViewModel>> _loggerMock = null!;
@@ -33,6 +34,7 @@ namespace PageLeaf.Tests.ViewModels
             _editorServiceMock = new Mock<IEditorService>();
             _fileServiceMock = new Mock<IFileService>();
             _dialogServiceMock = new Mock<IDialogService>();
+            _windowServiceMock = new Mock<IWindowService>();
             _settingsServiceMock = new Mock<ISettingsService>();
             _cssManagementServiceMock = new Mock<ICssManagementService>();
             _loggerMock = new Mock<ILogger<MainViewModel>>();
@@ -57,6 +59,7 @@ namespace PageLeaf.Tests.ViewModels
                 _fileServiceMock.Object,
                 _loggerMock.Object,
                 _dialogServiceMock.Object,
+                _windowServiceMock.Object,
                 _editorServiceMock.Object,
                 _settingsServiceMock.Object,
                 _cssManagementServiceMock.Object,
@@ -218,6 +221,18 @@ namespace PageLeaf.Tests.ViewModels
             // Assert
             Assert.AreEqual(newWidth, _viewModel.CssEditorColumnWidth);
             Assert.IsTrue(notifiedProperties.Contains(nameof(MainViewModel.CssEditorColumnWidth)));
+        }
+
+        [TestMethod]
+        public void ShowCheatSheet_ShouldCallWindowService()
+        {
+            // テスト観点: チートシート表示コマンドを実行すると、WindowService.ShowWindow<CheatSheetViewModel>() が呼ばれることを確認する。
+
+            // Act
+            _viewModel.ShowCheatSheetCommand.Execute(null);
+
+            // Assert
+            _windowServiceMock.Verify(w => w.ShowWindow<CheatSheetViewModel>(), Times.Once);
         }
     }
 }

@@ -15,6 +15,7 @@ namespace PageLeaf.ViewModels
         private readonly IFileService _fileService;
         private readonly ILogger<MainViewModel> _logger;
         private readonly IDialogService _dialogService;
+        private readonly IWindowService _windowService;
         private readonly ICssManagementService _cssManagementService;
         private readonly ISettingsService _settingsService;
         private readonly INewDocumentUseCase _newDocumentUseCase;
@@ -168,6 +169,7 @@ namespace PageLeaf.ViewModels
         public ICommand ToggleCssEditorCommand { get; }
         public ICommand ShowSettingsCommand { get; }
         public ICommand ShowAboutCommand { get; }
+        public ICommand ShowCheatSheetCommand { get; }
         public ICommand PasteImageCommand { get; }
         public ICommand OpenFileByPathCommand { get; }
         /// <summary>表示モード（エディタ/プレビュー）を切り替えるコマンド。</summary>
@@ -182,6 +184,7 @@ namespace PageLeaf.ViewModels
             IFileService fileService,
             ILogger<MainViewModel> logger,
             IDialogService dialogService,
+            IWindowService windowService,
             IEditorService editorService,
             ISettingsService settingsService,
             ICssManagementService cssManagementService,
@@ -196,6 +199,7 @@ namespace PageLeaf.ViewModels
             ArgumentNullException.ThrowIfNull(fileService);
             ArgumentNullException.ThrowIfNull(logger);
             ArgumentNullException.ThrowIfNull(dialogService);
+            ArgumentNullException.ThrowIfNull(windowService);
             ArgumentNullException.ThrowIfNull(editorService);
             ArgumentNullException.ThrowIfNull(settingsService);
             ArgumentNullException.ThrowIfNull(cssManagementService);
@@ -210,6 +214,7 @@ namespace PageLeaf.ViewModels
             _fileService = fileService;
             _logger = logger;
             _dialogService = dialogService;
+            _windowService = windowService;
             Editor = editorService;
             _settingsService = settingsService;
             _cssManagementService = cssManagementService;
@@ -233,6 +238,7 @@ namespace PageLeaf.ViewModels
             ToggleCssEditorCommand = new Utilities.DelegateCommand(ExecuteToggleCssEditor);
             ShowSettingsCommand = new Utilities.DelegateCommand(ExecuteShowSettings);
             ShowAboutCommand = new Utilities.DelegateCommand(ExecuteShowAbout);
+            ShowCheatSheetCommand = new Utilities.DelegateCommand(ExecuteShowCheatSheet);
             PasteImageCommand = new Utilities.DelegateCommand(ExecutePasteImage);
             OpenFileByPathCommand = new Utilities.DelegateCommand(ExecuteOpenFileByPath);
             ToggleDisplayModeCommand = new Utilities.DelegateCommand(ExecuteToggleDisplayMode);
@@ -314,6 +320,11 @@ namespace PageLeaf.ViewModels
         private void ExecuteShowAbout(object? parameter)
         {
             _dialogService.ShowAboutDialog();
+        }
+
+        private void ExecuteShowCheatSheet(object? parameter)
+        {
+            _windowService.ShowWindow<CheatSheetViewModel>();
         }
 
         private async void ExecutePasteImage(object? parameter)
