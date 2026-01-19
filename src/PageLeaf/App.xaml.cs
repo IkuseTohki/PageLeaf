@@ -89,7 +89,7 @@ namespace PageLeaf
                     // 可読性と一貫性のため、シンプルな登録方法を採用している。
                     services.AddSingleton<IFileService, FileService>();
                     services.AddSingleton<ICssService, CssService>();
-                    services.AddSingleton<ISettingsService, SettingsService>();
+                    services.AddSingleton<ISettingsService>(sp => new SettingsService(sp.GetRequiredService<ILogger<SettingsService>>(), App.BaseDirectory));
                     services.AddSingleton<IDialogService, DialogService>();
                     services.AddSingleton<IMarkdownService, MarkdownService>();
                     services.AddSingleton<IEditorService, EditorService>(); // EditorService を登録
