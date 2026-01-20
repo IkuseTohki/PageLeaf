@@ -13,9 +13,11 @@
     <SelfContained>false</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishReadyToRun>true</PublishReadyToRun>
-    <Version>1.1.16</Version>
-    <AssemblyVersion>1.1.16.0</AssemblyVersion>
-    <FileVersion>1.1.16.0</FileVersion>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+    <Version>1.1.17</Version>
+    <AssemblyVersion>1.1.17.0</AssemblyVersion>
+    <FileVersion>1.1.17.0</FileVersion>
     <Company>PageLeaf Project</Company>
     <Product>PageLeaf</Product>
     <Description>Markdown CSS エディター &amp; ビューアー</Description>
@@ -37,14 +39,17 @@
   <ItemGroup>
     <Content Include="Resources\css\*.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <Link>css\%(FileName)%(Extension)</Link>
     </Content>
     <Content Include="Resources\highlight\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <Link>highlight\%(RecursiveDir)%(FileName)%(Extension)</Link>
     </Content>
     <Content Include="Resources\mermaid\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <Link>mermaid\%(RecursiveDir)%(FileName)%(Extension)</Link>
     </Content>
     <Resource Include="Resources\css.png" />

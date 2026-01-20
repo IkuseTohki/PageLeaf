@@ -1,7 +1,9 @@
 using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Web.WebView2.Wpf;
+using Microsoft.Web.WebView2.Core;
 using System.Threading.Tasks;
+using System.IO;
 using System;
 
 namespace PageLeaf.Utilities
@@ -11,6 +13,27 @@ namespace PageLeaf.Utilities
     /// </summary>
     public static class WebBrowserHelper
     {
+        private static Task<CoreWebView2Environment>? _environmentTask;
+
+        /// <summary>
+        /// WebView2 の環境設定を取得します。
+        /// ユーザーデータフォルダを AppData\Local\PageLeaf\WebView2 に設定します。
+        /// </summary>
+        /// <returns>WebView2 環境設定。</returns>
+        private static Task<CoreWebView2Environment> GetEnvironmentAsync()
+        {
+            if (_environmentTask == null)
+            {
+                var userDataFolder = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "PageLeaf",
+                    "WebView2"
+                );
+                _environmentTask = CoreWebView2Environment.CreateAsync(null, userDataFolder);
+            }
+            return _environmentTask;
+        }
+
         /// <summary>
         /// WebBrowser の HTML コンテンツを管理する添付プロパティを定義します。
         /// </summary>
@@ -63,7 +86,8 @@ namespace PageLeaf.Utilities
 
                 if (webView2.CoreWebView2 == null)
                 {
-                    await webView2.EnsureCoreWebView2Async(null);
+                    var env = await GetEnvironmentAsync();
+                    await webView2.EnsureCoreWebView2Async(env);
                 }
 
                 // Subscribe to NavigationCompleted to re-inject CSS after reload
