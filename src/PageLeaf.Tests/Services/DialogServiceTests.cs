@@ -1,12 +1,12 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PageLeaf.Models;
-using PageLeaf.Views;
+using PageLeaf.Services;
 using System.Windows;
 
 using Moq;
 using System;
 
-namespace PageLeaf.Tests.Views
+namespace PageLeaf.Tests.Services
 {
     [TestClass]
     public class DialogServiceTests

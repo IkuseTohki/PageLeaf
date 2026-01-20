@@ -1,12 +1,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using PageLeaf.Models;
-using PageLeaf.Services;
 using PageLeaf.ViewModels;
+using PageLeaf.Views;
 using System;
 using System.Windows; // MessageBox
 
-namespace PageLeaf.Views
+namespace PageLeaf.Services
 {
     /// <summary>
     /// ファイルダイアログ操作の具体的な実装を提供します。
