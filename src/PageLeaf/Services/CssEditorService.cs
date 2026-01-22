@@ -159,7 +159,60 @@ namespace PageLeaf.Services
 
             UpdateOrCreateRule(stylesheet, "ol", (rule, info) =>
             {
-                if (!string.IsNullOrEmpty(info.NumberedListMarkerType)) rule.Style.SetProperty("list-style-type", info.NumberedListMarkerType);
+                if (!string.IsNullOrEmpty(info.ListIndent)) rule.Style.SetProperty("padding-left", info.ListIndent);
+
+                if (info.NumberedListMarkerType == "decimal-nested")
+                {
+                    rule.Style.SetProperty("list-style-type", "none");
+                    rule.Style.SetProperty("counter-reset", "item 0");
+                }
+                else
+                {
+                    if (!string.IsNullOrEmpty(info.NumberedListMarkerType))
+                    {
+                        rule.Style.SetProperty("list-style-type", info.NumberedListMarkerType);
+                    }
+                    rule.Style.RemoveProperty("counter-reset");
+                }
+            }, styleInfo);
+
+            // Cleanup legacy generic selectors if they exist
+            UpdateOrCreateRule(stylesheet, "li", (rule, info) =>
+            {
+                rule.Style.RemoveProperty("display");
+            }, styleInfo);
+
+            UpdateOrCreateRule(stylesheet, "li::before", (rule, info) =>
+            {
+                rule.Style.RemoveProperty("content");
+                rule.Style.RemoveProperty("counter-increment");
+            }, styleInfo);
+
+            // Apply nested decimal styles to specific selectors (ol > li)
+            UpdateOrCreateRule(stylesheet, "ol > li", (rule, info) =>
+            {
+                if (info.NumberedListMarkerType == "decimal-nested")
+                {
+                    rule.Style.SetProperty("display", "block");
+                }
+                else
+                {
+                    rule.Style.RemoveProperty("display");
+                }
+            }, styleInfo);
+
+            UpdateOrCreateRule(stylesheet, "ol > li::before", (rule, info) =>
+            {
+                if (info.NumberedListMarkerType == "decimal-nested")
+                {
+                    rule.Style.SetProperty("content", "counters(item, \".\") \" \"");
+                    rule.Style.SetProperty("counter-increment", "item");
+                }
+                else
+                {
+                    rule.Style.RemoveProperty("content");
+                    rule.Style.RemoveProperty("counter-increment");
+                }
             }, styleInfo);
 
             UpdateOrCreateRule(stylesheet, "li::marker", (rule, info) =>
@@ -271,6 +324,10 @@ namespace PageLeaf.Services
                     generatedCss = Regex.Replace(generatedCss, thTdBlockPattern, newBlock);
                 }
             }
+
+            // Fix for AngleSharp malformed counters syntax
+            // AngleSharp normalizes 'counters(item, ".")' to 'counters(item .)' which is invalid CSS.
+            generatedCss = generatedCss.Replace("counters(item .)", "counters(item, \".\")");
 
             return generatedCss;
         }

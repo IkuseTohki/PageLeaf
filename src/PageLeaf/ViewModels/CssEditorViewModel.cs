@@ -61,6 +61,7 @@ namespace PageLeaf.ViewModels
         public ObservableCollection<string> AvailableHeadingLevels { get; }
         public ObservableCollection<string> AvailableUnits { get; }
         public ObservableCollection<string> AvailableAlignments { get; }
+        public ObservableCollection<string> AvailableListMarkerTypes { get; }
         public ObservableCollection<string> AvailableNumberedListMarkerTypes { get; }
         public string? TargetCssFileName { get; private set; }
 
@@ -118,7 +119,8 @@ namespace PageLeaf.ViewModels
             SelectedHeadingLevel = AvailableHeadingLevels.FirstOrDefault();
             AvailableUnits = new ObservableCollection<string> { "px", "em", "%" };
             AvailableAlignments = new ObservableCollection<string> { "left", "center", "right" };
-            AvailableNumberedListMarkerTypes = new ObservableCollection<string> { "decimal", "decimal-leading-zero", "lower-alpha", "upper-alpha", "lower-roman", "upper-roman" };
+            AvailableListMarkerTypes = new ObservableCollection<string> { "disc", "circle", "square", "none" };
+            AvailableNumberedListMarkerTypes = new ObservableCollection<string> { "decimal", "decimal-leading-zero", "lower-alpha", "upper-alpha", "lower-roman", "upper-roman", "decimal-nested" };
         }
 
         private void ExecuteSelectColor(object? parameter)

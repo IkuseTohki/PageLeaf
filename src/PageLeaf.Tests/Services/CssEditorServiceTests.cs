@@ -932,5 +932,159 @@ namespace PageLeaf.Tests.Services
             Assert.IsTrue(styles.TitleStyleFlags.IsItalic);
             Assert.IsTrue(styles.TitleStyleFlags.IsUnderline);
         }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldApplyListIndentToOrderedList()
+        {
+            // テスト観点: UpdateCssContentメソッドが、ol要素に対してもListIndent（padding-left）を適用することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "ol { list-style-type: decimal; }";
+            var styleInfo = new CssStyleInfo
+            {
+                NumberedListMarkerType = "decimal",
+                ListIndent = "2rem"
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            // Assert
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*\{[^}]*padding-left:\s*2rem;[^}]*\}"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldGenerateNestedDecimalStyles()
+        {
+            // テスト観点: NumberedListMarkerTypeが "decimal-nested" の場合、
+            //            階層番号付け用のCSS（counter-reset, markers）が生成されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "";
+            var styleInfo = new CssStyleInfo
+            {
+                NumberedListMarkerType = "decimal-nested"
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            // Assert
+            // ol: list-style-type: none; counter-reset: item;
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*\{[^}]*list-style-type:\s*none;[^}]*\}"));
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*\{[^}]*counter-reset:\s*item\s*0;[^}]*\}"));
+
+            // li: display: block;
+            StringAssert.Matches(updatedCss, new Regex(@"li\s*\{[^}]*display:\s*block;[^}]*\}"));
+
+            // li::before: content: counters(item, ".") " "; counter-increment: item;
+            // Note: AngleSharp might normalize 'counters(item, ".")' to 'counters(item .)' or similar depending on version.
+            // We adjust regex to be flexible.
+            StringAssert.Matches(updatedCss, new Regex(@"li::before\s*\{[^}]*content:\s*counters\(item(,\s*""\.""|\s+\.?)\)\s*""\s"";[^}]*\}"));
+            StringAssert.Matches(updatedCss, new Regex(@"li::before\s*\{[^}]*counter-increment:\s*item(\s+1)?;[^}]*\}"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldGenerateValidCountersSyntax()
+        {
+            // テスト観点: AngleSharpによって生成される counters 関数の構文が正しい（カンマと引用符が含まれている）ことを確認する。
+            // 不具合再現用: 現状の実装では counters(item .) のようにカンマと引用符が抜ける可能性がある。
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo { NumberedListMarkerType = "decimal-nested" };
+
+            var updatedCss = service.UpdateCssContent("", styleInfo);
+
+            // 期待値: content: counters(item, ".") " ";
+            // AngleSharpのフォーマッタによってはスペースの有無が変わるため、柔軟かつ必須要素を確認する正規表現にする。
+            // 必須: counters, (, item, カンマ, ", ., ", ), " "
+            StringAssert.Matches(updatedCss, new Regex(@"content:\s*counters\(item,\s*""\.""\)\s*""\s"";"),
+                "CSS output for counters function is invalid. Expected comma and quotes.");
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldNotAffectUnorderedList_WhenDecimalNestedIsSelected()
+        {
+            // テスト観点: NumberedListMarkerType が "decimal-nested" の場合でも、
+            //            箇条書きリスト (ul) のマーカーに数字 (counters) が適用されないことを確認する。
+            //            (バグ再現用: li 全体にスタイルが当たっていると ul にも数字が出る)
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo
+            {
+                NumberedListMarkerType = "decimal-nested",
+                ListMarkerType = "disc" // ul は黒丸
+            };
+
+            var updatedCss = service.UpdateCssContent("", styleInfo);
+
+            // ol > li (または ol li) には counters が適用されるべき
+            // しかし ul > li (または単なる li で ul 内のもの) には適用されるべきではない
+            // CSSの実装として "li::before" が無条件に出力されているとアウト。
+            // 修正後は "ol > li::before" などの詳細なセレクタになるはず。
+
+            // 検証: "li::before" というセレクタが、ol に限定されずに存在していないか確認。
+            // もし "ol > li::before" ならOKだが、単なる "li::before" はNG。
+            // (注: AngleSharpの出力フォーマットに依存するため、セレクタ文字列をチェックする)
+
+            // 期待されるセレクタが含まれているか
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*>\s*li::before"), "Should target 'ol > li' specifically.");
+
+            // 汎用的な li::before が存在しないこと (もし存在すると ul にも効く)
+            // ただし、もし `ul > li::before` などを別途定義する仕様なら話は別だが、今回は `decimal-nested` に関するチェック。
+            Assert.IsFalse(Regex.IsMatch(updatedCss, @"(?<!>)\s*li::before"), "Should not have generic 'li::before' selector.");
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldSupportAllListMarkerTypes()
+        {
+            // テスト観点: 全てのリストマーカータイプが正しくCSSに出力されるか網羅的に確認する。
+            var service = new CssEditorService();
+
+            var ulTypes = new[] { "disc", "circle", "square", "none" };
+            var olTypes = new[] { "decimal", "decimal-leading-zero", "lower-alpha", "upper-alpha", "lower-roman", "upper-roman" };
+
+            foreach (var type in ulTypes)
+            {
+                var style = new CssStyleInfo { ListMarkerType = type };
+                var css = service.UpdateCssContent("", style);
+                StringAssert.Matches(css, new Regex($@"ul\s*\{{[^}}]*list-style-type:\s*{type};[^}}]*\}}"), $"ul type '{type}' failed.");
+            }
+
+            foreach (var type in olTypes)
+            {
+                var style = new CssStyleInfo { NumberedListMarkerType = type };
+                var css = service.UpdateCssContent("", style);
+                StringAssert.Matches(css, new Regex($@"ol\s*\{{[^}}]*list-style-type:\s*{type};[^}}]*\}}"), $"ol type '{type}' failed.");
+            }
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldRemoveNestedStyles_WhenSwitchingToStandard()
+        {
+            // テスト観点: "decimal-nested" から標準のリストタイプに戻したとき、
+            //            階層番号付け用のスタイルが削除されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            // 階層番号付けが有効な状態のCSSを想定
+            var existingCss = @"
+                ol { list-style-type: none; counter-reset: item; }
+                li { display: block; }
+                li::before { content: counters(item, '.'); counter-increment: item; }";
+
+            var styleInfo = new CssStyleInfo
+            {
+                NumberedListMarkerType = "decimal" // 標準に戻す
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            // Assert
+            // 標準のスタイルが適用されていること
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*\{[^}]*list-style-type:\s*decimal;[^}]*\}"));
+
+            // 特殊なスタイルが削除されていること (counter-reset等)
+            Assert.IsFalse(updatedCss.Contains("counter-reset: item"), "Should remove counter-reset for standard lists.");
+            Assert.IsFalse(updatedCss.Contains("counters(item"), "Should remove counters content for standard lists.");
+        }
     }
 }

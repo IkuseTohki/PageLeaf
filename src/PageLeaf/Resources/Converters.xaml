@@ -10,5 +10,6 @@
     <utilities:MultiValueConverter x:Key="MultiValueConverter" />
     <utilities:StringToUpperCaseConverter x:Key="StringToUpperCaseConverter" />
     <utilities:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <utilities:ListMarkerTypeToContentConverter x:Key="ListMarkerTypeToContentConverter" />
 
 </ResourceDictionary>

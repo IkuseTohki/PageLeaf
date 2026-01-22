@@ -267,17 +267,30 @@
                 <StackPanel Visibility="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.List}}">
                     <Label Content="マーカー設定" Style="{StaticResource FirstCompactFormGroupHeaderStyle}" />
                     <Label Content="箇条書き (ul)" Style="{StaticResource CompactFormLabelStyle}" />
-                    <ComboBox Style="{StaticResource CompactFormComboBoxWideStyle}" Text="{Binding ListMarkerType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                        <ComboBoxItem Content="disc" />
-                        <ComboBoxItem Content="circle" />
-                        <ComboBoxItem Content="square" />
-                        <ComboBoxItem Content="none" />
-                    </ComboBox>
+                    <ListBox Margin="0,0,0,8"
+                             ItemContainerStyle="{StaticResource ListMarkerListBoxItemStyle}"
+                             ItemTemplate="{StaticResource ListMarkerItemTemplate}"
+                             ItemsSource="{Binding AvailableListMarkerTypes}"
+                             SelectedItem="{Binding ListMarkerType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="4" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                    </ListBox>
 
                     <Label Content="番号付き (ol)" Style="{StaticResource CompactFormLabelStyle}" />
-                    <ComboBox ItemsSource="{Binding AvailableNumberedListMarkerTypes}"
-                              SelectedItem="{Binding NumberedListMarkerType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              Style="{StaticResource CompactFormComboBoxWideStyle}" />
+                    <ListBox Margin="0,0,0,8"
+                             ItemContainerStyle="{StaticResource ListMarkerListBoxItemStyle}"
+                             ItemTemplate="{StaticResource ListMarkerItemTemplate}"
+                             ItemsSource="{Binding AvailableNumberedListMarkerTypes}"
+                             SelectedItem="{Binding NumberedListMarkerType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="4" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                    </ListBox>
 
                     <Label Content="フォント設定" Style="{StaticResource CompactFormGroupHeaderStyle}" />
                     <Label Content="サイズ" Style="{StaticResource CompactFormLabelStyle}" />

@@ -185,6 +185,14 @@
         <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" />
     </DataTemplate>
 
+    <!-- リストマーカー選択アイテム -->
+    <DataTemplate x:Key="ListMarkerItemTemplate">
+        <TextBlock Margin="8,6"
+                   HorizontalAlignment="Center"
+                   Text="{Binding Converter={StaticResource ListMarkerTypeToContentConverter}}"
+                   ToolTip="{Binding}" />
+    </DataTemplate>
+
     <!-- フロントマター Expander ヘッダー -->
     <DataTemplate x:Key="FrontMatterExpanderHeaderTemplate">
         <TextBlock FontSize="11"
