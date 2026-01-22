@@ -15,9 +15,9 @@
     <PublishReadyToRun>true</PublishReadyToRun>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-    <Version>1.1.17</Version>
-    <AssemblyVersion>1.1.17.0</AssemblyVersion>
-    <FileVersion>1.1.17.0</FileVersion>
+    <Version>1.1.18</Version>
+    <AssemblyVersion>1.1.18.0</AssemblyVersion>
+    <FileVersion>1.1.18.0</FileVersion>
     <Company>PageLeaf Project</Company>
     <Product>PageLeaf</Product>
     <Description>Markdown CSS エディター &amp; ビューアー</Description>
@@ -53,6 +53,8 @@
       <Link>mermaid\%(RecursiveDir)%(FileName)%(Extension)</Link>
     </Content>
     <Resource Include="Resources\css.png" />
+    <Resource Include="Resources\Fonts\*.otf" />
+    <Resource Include="Resources\Fonts\*.ttf" />
   </ItemGroup>
 
 </Project>

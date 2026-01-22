@@ -103,6 +103,7 @@
                          behaviors:EditorTextInsertionBehavior.EditorService="{Binding Editor}"
                          behaviors:MarkdownEditorBehavior.IsEnabled="True"
                          AcceptsReturn="True"
+                         FontFamily="./Resources/Fonts/#Noto Sans Mono, ./Resources/Fonts/#Noto Sans JP"
                          FontSize="{Binding Editor.EditorFontSize}"
                          ScrollViewer.VerticalScrollBarVisibility="Auto"
                          Text="{Binding Editor.EditorText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, NotifyOnTargetUpdated=True}"
