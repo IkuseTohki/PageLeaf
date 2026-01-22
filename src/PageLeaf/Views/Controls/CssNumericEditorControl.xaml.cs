@@ -1,4 +1,5 @@
 using PageLeaf.Utilities;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,6 +8,8 @@ namespace PageLeaf.Views.Controls
 {
     public partial class CssNumericEditorControl : UserControl
     {
+        public ObservableCollection<string> AvailableValues { get; } = new ObservableCollection<string>();
+
         public static readonly DependencyProperty CssValueProperty =
             DependencyProperty.Register(nameof(CssValue), typeof(string), typeof(CssNumericEditorControl),
                 new FrameworkPropertyMetadata(null, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnCssValueChanged));
@@ -50,6 +53,7 @@ namespace PageLeaf.Views.Controls
         public CssNumericEditorControl()
         {
             InitializeComponent();
+            UpdateAvailableValues("px"); // Default unit
         }
 
         private static void OnCssValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -63,6 +67,7 @@ namespace PageLeaf.Views.Controls
                 var (val, unit) = UnitConversionHelper.Split(e.NewValue as string);
                 control.InternalValue = val.ToString();
                 control.InternalUnit = unit;
+                // Note: OnInternalChanged will trigger UpdateAvailableValues if Unit changes
             }
             finally
             {
@@ -83,6 +88,8 @@ namespace PageLeaf.Views.Controls
 
                 if (e.Property == InternalUnitProperty)
                 {
+                    control.UpdateAvailableValues(currentUnitText);
+
                     // 単位が変わった場合は数値を変換
                     if (double.TryParse(currentValText, out var val))
                     {
@@ -123,7 +130,35 @@ namespace PageLeaf.Views.Controls
             if (double.TryParse(InternalValue, out var val))
             {
                 var step = (InternalUnit == "em" || InternalUnit == "rem") ? 0.1 : 1.0;
-                InternalValue = (val + (delta * step)).ToString();
+                var newValue = val + (delta * step);
+                InternalValue = UnitConversionHelper.Round(newValue).ToString();
+            }
+        }
+
+        private void UpdateAvailableValues(string? unit)
+        {
+            AvailableValues.Clear();
+            if (string.IsNullOrEmpty(unit)) return;
+
+            string[] values;
+            switch (unit.ToLower())
+            {
+                case "em":
+                case "rem":
+                    values = new[] { "0.5", "0.75", "0.8", "0.9", "1.0", "1.1", "1.2", "1.5", "2.0", "3.0" };
+                    break;
+                case "%":
+                    values = new[] { "50", "75", "80", "90", "100", "110", "120", "150", "200", "300" };
+                    break;
+                case "px":
+                default:
+                    values = new[] { "9", "10", "11", "12", "14", "16", "18", "20", "24", "28", "32", "36", "48", "64", "72" };
+                    break;
+            }
+
+            foreach (var v in values)
+            {
+                AvailableValues.Add(v);
             }
         }
     }

@@ -191,22 +191,10 @@
 
                 <!-- スピナーなしの場合：候補リスト付きComboBox -->
                 <ComboBox IsEditable="True"
+                          ItemsSource="{Binding ElementName=Root, Path=AvailableValues}"
                           Style="{StaticResource SlimComboBoxStyle}"
                           Text="{Binding ElementName=Root, Path=InternalValue, UpdateSourceTrigger=PropertyChanged}"
-                          Visibility="{Binding ElementName=Root, Path=ShowSpinner, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}">
-                    <ComboBoxItem Content="9" />
-                    <ComboBoxItem Content="10.5" />
-                    <ComboBoxItem Content="12" />
-                    <ComboBoxItem Content="14" />
-                    <ComboBoxItem Content="16" />
-                    <ComboBoxItem Content="20" />
-                    <ComboBoxItem Content="24" />
-                    <ComboBoxItem Content="1.0" />
-                    <ComboBoxItem Content="1.2" />
-                    <ComboBoxItem Content="1.5" />
-                    <ComboBoxItem Content="100" />
-                    <ComboBoxItem Content="120" />
-                </ComboBox>
+                          Visibility="{Binding ElementName=Root, Path=ShowSpinner, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}" />
             </Grid>
 
             <!-- スピンボタン (マウスオーバー時のみ表示) -->
