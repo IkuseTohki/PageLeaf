@@ -249,17 +249,23 @@ namespace PageLeaf.ViewModels
         {
             try
             {
-                // 実行ディレクトリからの相対パスでテーマを探す
-                // 開発環境と実行環境の両方を考慮
+                // 実行ディレクトリまたは一時フォルダからテーマを探す
                 var baseDir = App.BaseDirectory;
+                var tempDir = App.AppInternalTempDirectory;
                 var themesDir = Path.Combine(baseDir, "highlight", "styles");
+
+                // exeフォルダになければ一時フォルダを確認
+                if (!Directory.Exists(themesDir))
+                {
+                    themesDir = Path.Combine(tempDir, "highlight", "styles");
+                }
 
                 if (!Directory.Exists(themesDir))
                 {
-                    // 開発環境用のフォールバック（src/PageLeaf/Resources/...）
-                    // 実際にはビルド時にコピーされるため、通常は上のパスで見つかるはず
-                    _selectedCodeBlockTheme = "github.css";
+                    // どこにもなければデフォルト
+                    AvailableThemes.Clear();
                     AvailableThemes.Add("github.css");
+                    SelectedCodeBlockTheme = "github.css";
                     return;
                 }
 
@@ -275,7 +281,7 @@ namespace PageLeaf.ViewModels
                     AvailableThemes.Add(file);
                 }
 
-                // 現在の選択がリストにない場合は追加（またはデフォルトに）
+                // 現在の選択がリストにない場合はデフォルトに
                 if (!AvailableThemes.Contains(SelectedCodeBlockTheme))
                 {
                     if (AvailableThemes.Contains("github.css")) SelectedCodeBlockTheme = "github.css";

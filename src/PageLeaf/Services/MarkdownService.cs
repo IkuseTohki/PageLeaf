@@ -65,6 +65,19 @@ namespace PageLeaf.Services
             return htmlBuilder.ToString();
         }
 
+        /// <summary>
+        /// リソース（CSS/JS）の場所を特定し、URI形式で返します。
+        /// 1. BaseDirectory（exeフォルダ）にあればそれを優先（デバッグ時用）
+        /// 2. なければ AppInternalTempDirectory（一時フォルダ）を参照
+        /// </summary>
+        private string GetResourceUri(string subPath)
+        {
+            var localPath = Path.Combine(App.BaseDirectory, subPath);
+            if (File.Exists(localPath)) return new Uri(localPath).ToString();
+
+            return new Uri(Path.Combine(App.AppInternalTempDirectory, subPath)).ToString();
+        }
+
         private MarkdownPipeline CreatePipeline()
         {
             return new MarkdownPipelineBuilder()
@@ -87,7 +100,11 @@ namespace PageLeaf.Services
             if (frontMatter.TryGetValue("syntax_highlight", out var fmThemeObj) && fmThemeObj is string fmTheme && !string.IsNullOrWhiteSpace(fmTheme))
             {
                 var candidateTheme = fmTheme.EndsWith(".css", StringComparison.OrdinalIgnoreCase) ? fmTheme : fmTheme + ".css";
-                if (File.Exists(Path.Combine(App.BaseDirectory, "highlight", "styles", candidateTheme)))
+                var themeSubPath = Path.Combine("highlight", "styles", candidateTheme);
+
+                // 存在チェック（Base または Temp）
+                if (File.Exists(Path.Combine(App.BaseDirectory, themeSubPath)) ||
+                    File.Exists(Path.Combine(App.AppInternalTempDirectory, themeSubPath)))
                 {
                     settings.ThemeName = candidateTheme;
                 }
@@ -107,7 +124,7 @@ namespace PageLeaf.Services
                 try
                 {
                     // ディレクトリパスをURIに変換し、末尾にスラッシュを保証
-                    var baseUri = new Uri(baseDirectory).AbsoluteUri;
+                    var baseUri = new Uri(baseDirectory).ToString();
                     if (!baseUri.EndsWith("/")) baseUri += "/";
                     sb.AppendLine($"<base href=\"{baseUri}\" />");
                 }
@@ -118,19 +135,22 @@ namespace PageLeaf.Services
             }
 
             // 拡張機能用のベーススタイルを追加
-            var extensionsCssUri = new Uri(Path.Combine(App.BaseDirectory, "css", "extensions.css")).AbsoluteUri;
+            // HTMLの <base> タグの影響を受けないよう、アプリ内リソースは絶対URIで指定する
+            var extensionsCssUri = GetResourceUri("css/extensions.css");
             sb.AppendLine($"<link rel=\"stylesheet\" href=\"{extensionsCssUri}\">");
 
             if (!string.IsNullOrEmpty(cssPath))
             {
-                sb.AppendLine($"<link rel=\"stylesheet\" href=\"{cssPath}?v={DateTime.Now.Ticks}\">");
+                // ユーザーCSSも絶対URIに変換（エスケープを避けるためToStringを使用）
+                var userCssUri = new Uri(cssPath).ToString();
+                sb.AppendLine($"<link rel=\"stylesheet\" href=\"{userCssUri}\">");
             }
 
             sb.AppendLine("<style id=\"dynamic-style\"></style>");
 
             string themeUri = settings.ResourceSource == ResourceSource.Cdn
                 ? $"{HighlightCdnBase}styles/{settings.ThemeName}"
-                : new Uri(Path.Combine(App.BaseDirectory, "highlight", "styles", settings.ThemeName)).AbsoluteUri;
+                : GetResourceUri(Path.Combine("highlight", "styles", settings.ThemeName));
 
             sb.AppendLine($"<link rel=\"stylesheet\" href=\"{themeUri}\">");
 
@@ -141,7 +161,7 @@ namespace PageLeaf.Services
         {
             string highlightUri;
             string mermaidUri;
-            string extensionUri = new Uri(Path.Combine(App.BaseDirectory, "highlight", "pageleaf-extensions.js")).AbsoluteUri;
+            string extensionUri = GetResourceUri("highlight/pageleaf-extensions.js");
 
             if (settings.ResourceSource == ResourceSource.Cdn)
             {
@@ -150,8 +170,8 @@ namespace PageLeaf.Services
             }
             else
             {
-                highlightUri = new Uri(Path.Combine(App.BaseDirectory, "highlight", "highlight.min.js")).AbsoluteUri;
-                mermaidUri = new Uri(Path.Combine(App.BaseDirectory, "mermaid", "mermaid.min.js")).AbsoluteUri;
+                highlightUri = GetResourceUri("highlight/highlight.min.js");
+                mermaidUri = GetResourceUri("mermaid/mermaid.min.js");
             }
 
             var sb = new StringBuilder();

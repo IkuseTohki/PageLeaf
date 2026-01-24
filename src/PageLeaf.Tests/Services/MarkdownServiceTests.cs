@@ -40,18 +40,18 @@ namespace PageLeaf.Tests.Services
         [TestMethod]
         public void ConvertToHtml_ShouldIncludeCssLink_WhenCssPathIsProvided()
         {
-            // テスト観点: CSSパスが提供された場合、生成されるHTMLの<head>内に<link>タグが正しく挿入され、
-            //             キャッシュバスティングのためのタイムスタンプが付与されることを確認する。
+            // テスト観点: CSSパスが提供された場合、生成されるHTMLの<head>内に<link>タグが正しく挿入されることを確認する。
             // Arrange
             string markdown = "# Hello";
             string cssPath = @"C:\styles\github.css";
+            var expectedUri = new Uri(cssPath).ToString();
 
             // Act
             string actualHtml = _service.ConvertToHtml(markdown, cssPath, null);
 
             // Assert
             // Regex.Escape を使用してパスを安全にエスケープしつつ検証
-            string expectedPattern = @"<link\s+rel=""stylesheet""\s+href=""" + Regex.Escape(cssPath) + @"\?v=\d+"">";
+            string expectedPattern = @"<link\s+rel=""stylesheet""\s+href=""" + Regex.Escape(expectedUri) + @""">";
             StringAssert.Matches(actualHtml, new Regex(expectedPattern));
         }
 
@@ -186,12 +186,16 @@ namespace PageLeaf.Tests.Services
             // Act
             string html = _service.ConvertToHtml(markdown, null, null);
 
-            // 絶対パスの構築
-            var scriptFilePath = Path.Combine(App.BaseDirectory, "highlight", "highlight.min.js");
-            var scriptFileUri = new Uri(scriptFilePath).AbsoluteUri;
+            // 絶対パスの構築 (物理ファイルがあれば Base を、なければ Temp を参照するロジックに合わせる)
+            static string GetExpectedUri(string subPath)
+            {
+                var localPath = Path.Combine(App.BaseDirectory, subPath);
+                if (File.Exists(localPath)) return new Uri(localPath).ToString();
+                return new Uri(Path.Combine(App.AppInternalTempDirectory, subPath)).ToString();
+            }
 
-            var cssFilePath = Path.Combine(App.BaseDirectory, "highlight", "styles", customTheme);
-            var cssFileUri = new Uri(cssFilePath).AbsoluteUri;
+            var scriptFileUri = GetExpectedUri("highlight/highlight.min.js");
+            var cssFileUri = GetExpectedUri(Path.Combine("highlight", "styles", customTheme));
 
             // Assert
             // 1. スタイルシートへのリンクが含まれているか (Regex.Escape を使用して安全に)

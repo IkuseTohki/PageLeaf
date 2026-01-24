@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!-- 基本設定 -->
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <LangVersion>8.0</LangVersion>
@@ -9,15 +10,22 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Resources\PageLeaf.ico</ApplicationIcon>
+    <DebugType>embedded</DebugType>
+
+    <!-- 単一ファイル配布 (SingleFile) 関連の設定 -->
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>false</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishReadyToRun>true</PublishReadyToRun>
+    <!-- 自己解凍時にネイティブライブラリやコンテンツを含める設定 -->
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-    <Version>1.1.23</Version>
-    <AssemblyVersion>1.1.23.0</AssemblyVersion>
-    <FileVersion>1.1.23.0</FileVersion>
+    
+    <!-- アプリケーションのメタデータ -->
+    <SatelliteResourceLanguages>_</SatelliteResourceLanguages>
+    <Version>1.1.24</Version>
+    <AssemblyVersion>1.1.24.0</AssemblyVersion>
+    <FileVersion>1.1.24.0</FileVersion>
     <Company>PageLeaf Project</Company>
     <Product>PageLeaf</Product>
     <Description>Markdown CSS エディター &amp; ビューアー</Description>
@@ -25,6 +33,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <!-- 依存パッケージ -->
     <PackageReference Include="AngleSharp" Version="0.17.1" />
     <PackageReference Include="AngleSharp.Css" Version="0.17.0" />
     <PackageReference Include="AvalonEdit" Version="6.3.1.120" />
@@ -38,21 +47,27 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- 配布用リソース (実行ファイルと同じ階層にコピー) -->
     <Content Include="Resources\css\*.css">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <Link>css\%(FileName)%(Extension)</Link>
     </Content>
     <Content Include="Resources\highlight\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <Link>highlight\%(RecursiveDir)%(FileName)%(Extension)</Link>
     </Content>
     <Content Include="Resources\mermaid\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <Link>mermaid\%(RecursiveDir)%(FileName)%(Extension)</Link>
     </Content>
+
+    <!-- 自己展開用リソース (DLL内に埋め込み、実行時に ResourceExtractionService で展開) -->
+    <!-- LogicalName を指定することで、埋め込み時のパスをディレクトリ構造として維持する -->
+    <EmbeddedResource Include="Resources\css\**\*" LogicalName="css/%(RecursiveDir)%(FileName)%(Extension)" />
+    <EmbeddedResource Include="Resources\highlight\**\*" LogicalName="highlight/%(RecursiveDir)%(FileName)%(Extension)" />
+    <EmbeddedResource Include="Resources\mermaid\**\*" LogicalName="mermaid/%(RecursiveDir)%(FileName)%(Extension)" />
+
+    <!-- WPF 標準リソース (xaml からパックURIで参照) -->
     <Resource Include="Resources\css.png" />
     <Resource Include="Resources\Fonts\*.otf" />
     <Resource Include="Resources\Fonts\*.ttf" />

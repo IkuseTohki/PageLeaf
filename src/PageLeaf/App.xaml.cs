@@ -31,16 +31,17 @@ namespace PageLeaf
                 string? processPath = null;
                 try
                 {
-                    using var process = Process.GetCurrentProcess();
-                    processPath = process.MainModule?.FileName;
+                    using (var process = Process.GetCurrentProcess())
+                    {
+                        processPath = process.MainModule?.FileName;
+                    }
                 }
                 catch
                 {
-                    // 取得できない場合は無視してフォールバック
+                    // アクセス拒否などの例外時はフォールバック
                 }
 
-                if (!string.IsNullOrEmpty(processPath) &&
-                    Path.GetFileNameWithoutExtension(processPath).Equals("PageLeaf", StringComparison.OrdinalIgnoreCase))
+                if (!string.IsNullOrEmpty(processPath))
                 {
                     return Path.GetDirectoryName(processPath)!;
                 }
@@ -49,9 +50,23 @@ namespace PageLeaf
         }
 
         /// <summary>
+        /// アプリケーション専用の一時ディレクトリパスを取得します。
+        /// </summary>
+        public static string AppInternalTempDirectory => Path.Combine(Path.GetTempPath(), "PageLeaf", "v1.1.23");
+
+        /// <summary>
         /// DIコンテナやロギングなどのアプリケーションサービスをホストします。
         /// </summary>
         public static IHost? AppHost { get; private set; }
+
+        /// <summary>
+        /// 埋め込みリソースを物理ファイルとして展開します。
+        /// </summary>
+        private void InitializeResources()
+        {
+            var extractionService = new ResourceExtractionService(typeof(App).Assembly);
+            extractionService.ExtractAll(BaseDirectory, AppInternalTempDirectory);
+        }
 
         /// <summary>
         /// アプリケーションの起動時に呼び出されます。
@@ -60,6 +75,9 @@ namespace PageLeaf
         protected override async void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
+
+            // リソースの初期化（SingleFile対応）
+            InitializeResources();
 
             // AngleSharpが色をHEX形式で出力するように設定
             Color.UseHex = true;
@@ -87,6 +105,7 @@ namespace PageLeaf
                     // いくつかの Service は複数の依存関係を持つが、コンストラクタが一つであり、
                     // 全ての依存関係がDIコンテナに登録されているため、自動解決が可能。
                     // 可読性と一貫性のため、シンプルな登録方法を採用している。
+                    services.AddSingleton<IResourceExtractionService>(sp => new ResourceExtractionService(typeof(App).Assembly));
                     services.AddSingleton<IFileService, FileService>();
                     services.AddSingleton<ICssService, CssService>();
                     services.AddSingleton<ISettingsService>(sp => new SettingsService(sp.GetRequiredService<ILogger<SettingsService>>(), App.BaseDirectory));

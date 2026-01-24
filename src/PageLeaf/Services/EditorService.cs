@@ -272,7 +272,9 @@ namespace PageLeaf.Services
         /// <returns>保存された一時ファイルのフルパス。</returns>
         private string SaveHtmlToTempFile(string htmlContent)
         {
-            string tempDirectory = Path.GetTempPath();
+            string tempDirectory = App.AppInternalTempDirectory;
+            if (!Directory.Exists(tempDirectory)) Directory.CreateDirectory(tempDirectory);
+
             string fileName = $"PageLeaf-{Guid.NewGuid()}.html";
             string filePath = Path.Combine(tempDirectory, fileName);
 
