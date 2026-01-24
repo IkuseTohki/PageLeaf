@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Microsoft.Web.WebView2.Wpf;
 using System;
+using ICSharpCode.AvalonEdit;
 
 namespace PageLeaf.Behaviors
 {
@@ -67,7 +68,21 @@ namespace PageLeaf.Behaviors
 
             private async void OnScrollToHeaderRequested(object? sender, TocItem item)
             {
-                if (_element is TextBox textBox)
+                if (_element is TextEditor editor)
+                {
+                    if (_service.SelectedMode == DisplayMode.Markdown)
+                    {
+                        int lineNum = item.LineNumber + 1;
+                        if (lineNum >= 1 && lineNum <= editor.LineCount)
+                        {
+                            editor.ScrollToLine(lineNum);
+                            var offset = editor.Document.GetLineByNumber(lineNum).Offset;
+                            editor.CaretOffset = offset;
+                            editor.Focus();
+                        }
+                    }
+                }
+                else if (_element is TextBox textBox)
                 {
                     if (_service.SelectedMode == DisplayMode.Markdown)
                     {

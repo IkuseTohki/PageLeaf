@@ -16,7 +16,10 @@ namespace PageLeaf.Services
         // 順序付きリスト: 任意の空白 + 数字 + . + 1つ以上の空白
         private static readonly Regex OrderedListRegex = new Regex(@"^(\s*)(\d+)\.(\s+)");
         // タスクリスト: 任意の空白 + (* or - or +) + 1つ以上の空白 + [ ] または [x] + 1つ以上の空白
-        private static readonly Regex TaskListRegex = new Regex(@"^(\s*)([*+-])\s+\[[ xX]\]\s+");
+        // グループ3にチェック状態 ([x] の中身) をキャプチャするように修正
+        private static readonly Regex TaskListRegex = new Regex(@"^(\s*)([*+-])\s+\[([ xX])\]\s+");
+        // 引用: 任意の空白 + > + (任意の >) + 任意の空白
+        private static readonly Regex BlockquoteRegex = new Regex(@"^(\s*)(>+)(\s*)");
         // コードブロック開始: 任意の空白 + バックティックまたはチルダ3つ以上
         private static readonly Regex CodeBlockStartRegex = new Regex(@"^(\s*)(?:`{3,}|~{3,})");
 
@@ -53,19 +56,28 @@ namespace PageLeaf.Services
         {
             if (string.IsNullOrEmpty(currentLine)) return null;
 
-            // タスクリスト（通常の順序なしリストより先に判定）
+            // 引用 (Blockquote)
+            var blockquoteMatch = BlockquoteRegex.Match(currentLine);
+            if (blockquoteMatch.Success)
+            {
+                var indent = blockquoteMatch.Groups[1].Value;
+                var markers = blockquoteMatch.Groups[2].Value;
+
+                // 内容が空（マーカーのみ）であれば終了
+                if (currentLine.Trim() == markers) return string.Empty;
+
+                return indent + markers + " ";
+            }
+
+            // タスクリスト
             var taskMatch = TaskListRegex.Match(currentLine);
             if (taskMatch.Success)
             {
+                // 内容が空（インデント + マーカー + [ ] のみ）であれば終了
+                if (currentLine.Length == taskMatch.Length) return string.Empty;
+
                 var indent = taskMatch.Groups[1].Value;
                 var marker = taskMatch.Groups[2].Value;
-
-                // 記号のみ（タスクリスト終了）
-                if (currentLine.Trim() == marker + " [ ]" || currentLine.Trim() == marker + " [x]" || currentLine.Trim() == marker + " [X]")
-                {
-                    return string.Empty;
-                }
-
                 return indent + marker + " [ ] ";
             }
 
@@ -73,16 +85,12 @@ namespace PageLeaf.Services
             var unorderedMatch = UnorderedListRegex.Match(currentLine);
             if (unorderedMatch.Success)
             {
+                // 内容が空であれば終了
+                if (currentLine.Length == unorderedMatch.Length) return string.Empty;
+
                 var indent = unorderedMatch.Groups[1].Value;
                 var marker = unorderedMatch.Groups[2].Value;
                 var spaces = unorderedMatch.Groups[3].Value;
-
-                // 内容が空（インデント+記号+空白のみ）であればリスト終了
-                if (currentLine.Trim() == marker)
-                {
-                    return string.Empty;
-                }
-
                 return indent + marker + spaces;
             }
 
@@ -90,15 +98,12 @@ namespace PageLeaf.Services
             var orderedMatch = OrderedListRegex.Match(currentLine);
             if (orderedMatch.Success)
             {
+                // 内容が空であれば終了
+                if (currentLine.Length == orderedMatch.Length) return string.Empty;
+
                 var indent = orderedMatch.Groups[1].Value;
                 var numberStr = orderedMatch.Groups[2].Value;
                 var spaces = orderedMatch.Groups[3].Value;
-
-                // 内容が空（インデント+数字+.+空白のみ）であればリスト終了
-                if (currentLine.Trim() == numberStr + ".")
-                {
-                    return string.Empty;
-                }
 
                 if (int.TryParse(numberStr, out int number))
                 {
@@ -108,6 +113,21 @@ namespace PageLeaf.Services
 
             return null;
         }
+
+        // ... (GetPairCharacter, IsCodeBlockStart, GetIndentString, DecreaseIndent, IncreaseIndent, ToggleHeading, ConvertToMarkdownTable, GetPageBreakString implementation kept same) ...
+        // Note: I will only replace the top part and append new methods,
+        // using "old_string" to cover the top part of the file.
+        // Wait, "replace" tool requires exact match.
+        // It's safer to read the file fully and replace the specific blocks or use larger context.
+        // I'll replace the regex definitions and GetAutoListMarker method.
+        // And append the new methods at the end.
+
+        // Actually, replacing the whole file content via `write_file` might be easier if I had the full content.
+        // But `replace` is safer to preserve other methods I didn't read fully?
+        // I read fully in previous turn.
+
+        // Let's use `replace` for Regex definitions and GetAutoListMarker first.
+
 
         /// <summary>
         /// 指定された文字に対して、自動補完すべき対となる文字を取得します。
@@ -284,6 +304,182 @@ namespace PageLeaf.Services
         public string GetPageBreakString()
         {
             return "<div style=\"page-break-after: always;\"></div>";
+        }
+
+        public bool ShouldAutoContinueList(string line, int cursorOffset)
+        {
+            // まず、リストとして有効か（マーカーが生成されるか、またはリスト終了動作になるか）確認
+            if (GetAutoListMarker(line) == null) return false;
+
+            // カーソル位置が本文開始位置（マーカーの後ろ）にあるか判定
+
+            // 1. Task List
+            var taskMatch = TaskListRegex.Match(line);
+            if (taskMatch.Success)
+            {
+                return cursorOffset >= taskMatch.Length;
+            }
+
+            // 2. Unordered List
+            var unorderedMatch = UnorderedListRegex.Match(line);
+            if (unorderedMatch.Success)
+            {
+                return cursorOffset >= unorderedMatch.Length;
+            }
+
+            // 3. Ordered List
+            var orderedMatch = OrderedListRegex.Match(line);
+            if (orderedMatch.Success)
+            {
+                return cursorOffset >= orderedMatch.Length;
+            }
+
+            // 4. Blockquote
+            var blockquoteMatch = BlockquoteRegex.Match(line);
+            if (blockquoteMatch.Success)
+            {
+                return cursorOffset >= blockquoteMatch.Length;
+            }
+
+            // マッチしない場合（通常あり得ないが、念のため）
+            return false;
+        }
+
+        public bool ShouldAutoIndent(string line, int cursorOffset)
+        {
+            // 行の絶対的な先頭 (offset 0) で Enter を押した場合は、
+            // オートインデント（空白の引き継ぎ）を行わず、純粋な空行を挿入したいので false を返す。
+            return cursorOffset != 0;
+        }
+
+        public string ToggleTaskList(string line)
+        {
+            if (line == null) return string.Empty;
+
+            // 1. Check if it is a task list
+            var taskMatch = TaskListRegex.Match(line);
+            if (taskMatch.Success)
+            {
+                var indent = taskMatch.Groups[1].Value;
+                var marker = taskMatch.Groups[2].Value;
+                var checkState = taskMatch.Groups[3].Value; // space or x or X
+                var content = line.Substring(taskMatch.Length);
+
+                // If content is empty (just marker), remove the list marker (VSCode style)
+                if (string.IsNullOrEmpty(content))
+                {
+                    return indent + marker + " ";
+                }
+
+                // Toggle state
+                bool isChecked = checkState.Trim().Length > 0; // if not space, it is checked
+                char newCheckState = isChecked ? ' ' : 'x';
+
+                return $"{indent}{marker} [{newCheckState}] {content}";
+            }
+
+            // 2. Check if it is an unordered list
+            var unorderedMatch = UnorderedListRegex.Match(line);
+            if (unorderedMatch.Success)
+            {
+                var indent = unorderedMatch.Groups[1].Value;
+                var marker = unorderedMatch.Groups[2].Value;
+                var content = line.Substring(unorderedMatch.Length);
+
+                return $"{indent}{marker} [ ] {content}";
+            }
+
+            // 3. Normal text -> Task List
+            var currentIndent = GetAutoIndent(line);
+            var text = line.TrimStart();
+            return $"{currentIndent}- [ ] {text}";
+        }
+
+        public string GetCodeBlockCompletion(string indent)
+        {
+            // 構成: \r\n (インデント) \r\n (インデント) ```
+            // これにより、カーソルを中間の行に配置する余地を作る
+            return "\r\n" + indent + "\r\n" + indent + "```";
+        }
+
+        public string GetShiftEnterInsertion()
+        {
+            // 改ページ用タグ + 改行
+            // 視認性を考慮し、タグの後に改行を入れて挿入する
+            return GetPageBreakString() + "\r\n";
+        }
+
+        public string FormatTableLine(string line)
+        {
+            if (string.IsNullOrEmpty(line)) return line;
+            if (!line.Contains('|')) return line;
+
+            var parts = Regex.Split(line, @"(?<!\\)\|");
+            if (parts.Length < 2) return line;
+
+            var sb = new StringBuilder();
+            for (int i = 0; i < parts.Length; i++)
+            {
+                var part = parts[i];
+                if (i > 0)
+                {
+                    sb.Append('|');
+                }
+
+                // First part: Keep as is (indent)
+                if (i == 0)
+                {
+                    sb.Append(part);
+                    continue;
+                }
+
+                // Last part: Keep as is, unless it's just whitespace and not meaningful
+                if (i == parts.Length - 1)
+                {
+                    sb.Append(part);
+                    continue;
+                }
+
+                // Middle parts: Cell content. Pad with spaces.
+                sb.Append(" " + part.Trim() + " ");
+            }
+            return sb.ToString();
+        }
+
+        public int GetNextCellOffset(string line, int currentOffset)
+        {
+            if (string.IsNullOrEmpty(line)) return 0;
+            var matches = Regex.Matches(line, @"(?<!\\)\|");
+            foreach (Match match in matches)
+            {
+                if (match.Index >= currentOffset)
+                {
+                    int pos = match.Index + 1;
+                    if (pos < line.Length && line[pos] == ' ') pos++;
+                    // もし現在の位置と同じなら（例：| の直後にいる場合）、さらに次のパイプを探す
+                    if (pos <= currentOffset) continue;
+                    return pos;
+                }
+            }
+            return line.Length;
+        }
+
+        public int GetPreviousCellOffset(string line, int currentOffset)
+        {
+            if (string.IsNullOrEmpty(line)) return 0;
+            var matches = Regex.Matches(line, @"(?<!\\)\|").Cast<Match>().ToList();
+            var before = matches.Where(m => m.Index < currentOffset).ToList();
+
+            if (before.Count >= 2)
+            {
+                // 現在のセルの開始パイプの、さらに一つ前のパイプを見つける
+                var target = before[before.Count - 2];
+                int pos = target.Index + 1;
+                if (pos < line.Length && line[pos] == ' ') pos++;
+                return pos;
+            }
+
+            return 0;
         }
     }
 }

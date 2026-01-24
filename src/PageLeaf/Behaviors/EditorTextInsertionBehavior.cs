@@ -1,6 +1,7 @@
 using PageLeaf.Services;
 using System.Windows;
 using System.Windows.Controls;
+using ICSharpCode.AvalonEdit;
 
 namespace PageLeaf.Behaviors
 {
@@ -21,20 +22,20 @@ namespace PageLeaf.Behaviors
 
         private static void OnEditorServiceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (d is TextBox textBox)
+            if (d is Control control)
             {
                 // 古いリスナーがあれば解除
-                var oldListener = GetListener(textBox);
+                var oldListener = GetListener(control);
                 if (oldListener != null)
                 {
                     oldListener.Detach();
-                    SetListener(textBox, null);
+                    SetListener(control, null);
                 }
 
                 if (e.NewValue is IEditorService newService)
                 {
-                    var newListener = new EditorInsertionListener(textBox, newService);
-                    SetListener(textBox, newListener);
+                    var newListener = new EditorInsertionListener(control, newService);
+                    SetListener(control, newListener);
                 }
             }
         }
@@ -48,12 +49,12 @@ namespace PageLeaf.Behaviors
 
         private class EditorInsertionListener
         {
-            private readonly TextBox _textBox;
+            private readonly Control _control;
             private readonly IEditorService _service;
 
-            public EditorInsertionListener(TextBox textBox, IEditorService service)
+            public EditorInsertionListener(Control control, IEditorService service)
             {
-                _textBox = textBox;
+                _control = control;
                 _service = service;
                 _service.TextInsertionRequested += OnTextInsertionRequested;
             }
@@ -65,12 +66,19 @@ namespace PageLeaf.Behaviors
 
             private void OnTextInsertionRequested(object? sender, string text)
             {
-                if (!string.IsNullOrEmpty(text))
+                if (string.IsNullOrEmpty(text)) return;
+
+                if (_control is TextEditor editor)
                 {
-                    _textBox.SelectedText = text;
-                    _textBox.Focus();
-                    _textBox.SelectionLength = 0;
-                    _textBox.SelectionStart += text.Length;
+                    editor.TextArea.Selection.ReplaceSelectionWithText(text);
+                    editor.Focus();
+                }
+                else if (_control is TextBox textBox)
+                {
+                    textBox.SelectedText = text;
+                    textBox.Focus();
+                    textBox.SelectionLength = 0;
+                    textBox.SelectionStart += text.Length;
                 }
             }
         }

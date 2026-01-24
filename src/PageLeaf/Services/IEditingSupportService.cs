@@ -74,5 +74,65 @@ namespace PageLeaf.Services
         /// </summary>
         /// <returns>改ページ用のHTMLタグ。</returns>
         string GetPageBreakString();
+
+        /// <summary>
+        /// 行のタスクリスト状態をトグルします。
+        /// [ ] -> [x] -> (なし) -> [ ] のように切り替えます。
+        /// </summary>
+        /// <param name="line">対象の行。</param>
+        /// <returns>変換後の行。</returns>
+        string ToggleTaskList(string line);
+
+        /// <summary>
+        /// 現在の行の状態とカーソル位置から、リストマーカーの自動継続を行うべきか判定します。
+        /// </summary>
+        /// <param name="line">現在の行文字列。</param>
+        /// <param name="cursorOffset">行内のカーソル位置（オフセット）。</param>
+        /// <returns>継続すべきであれば true。</returns>
+        bool ShouldAutoContinueList(string line, int cursorOffset);
+
+        /// <summary>
+        /// 現在の行の状態とカーソル位置から、オートインデント（先頭の空白の引き継ぎ）を行うべきか判定します。
+        /// </summary>
+        /// <param name="line">現在の行文字列。</param>
+        /// <param name="cursorOffset">行内のカーソル位置（オフセット）。</param>
+        /// <returns>継続すべきであれば true。</returns>
+        bool ShouldAutoIndent(string line, int cursorOffset);
+
+        /// <summary>
+        /// テーブル行のパイプ `|` の周囲をスペースで整形します。
+        /// </summary>
+        /// <param name="line">対象の行。</param>
+        /// <returns>整形後の行。</returns>
+        string FormatTableLine(string line);
+
+        /// <summary>
+        /// コードブロック開始行に対する補完文字列（閉じるための文字列）を取得します。
+        /// </summary>
+        /// <param name="indent">現在の行のインデント。</param>
+        /// <returns>挿入すべき補完文字列。</returns>
+        string GetCodeBlockCompletion(string indent);
+
+        /// <summary>
+        /// Shift+Enter（強制改ページ）時に挿入すべき文字列を取得します。
+        /// </summary>
+        /// <returns>挿入すべき文字列。</returns>
+        string GetShiftEnterInsertion();
+
+        /// <summary>
+        /// テーブル行において、現在のカーソル位置から次のセルの開始位置（オフセット）を取得します。
+        /// </summary>
+        /// <param name="line">対象の行。</param>
+        /// <param name="currentOffset">現在の行内オフセット。</param>
+        /// <returns>次のセルの開始オフセット。次がない場合は行の末尾。</returns>
+        int GetNextCellOffset(string line, int currentOffset);
+
+        /// <summary>
+        /// テーブル行において、現在のカーソル位置から前のセルの開始位置（オフセット）を取得します。
+        /// </summary>
+        /// <param name="line">対象の行。</param>
+        /// <param name="currentOffset">現在の行内オフセット。</param>
+        /// <returns>前のセルの開始オフセット。前がない場合は 0。</returns>
+        int GetPreviousCellOffset(string line, int currentOffset);
     }
 }
