@@ -7,6 +7,9 @@ namespace PageLeaf.Models
         public string? BodyTextColor { get; set; }
         public string? BodyBackgroundColor { get; set; }
         public string? BodyFontSize { get; set; }
+        public string? ParagraphLineHeight { get; set; }
+        public string? ParagraphMarginBottom { get; set; }
+        public string? ParagraphTextIndent { get; set; }
         public string? TitleTextColor { get; set; }
         public string? TitleFontSize { get; set; }
         public string? TitleFontFamily { get; set; }

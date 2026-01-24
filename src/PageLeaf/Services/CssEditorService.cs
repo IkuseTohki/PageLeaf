@@ -24,6 +24,7 @@ namespace PageLeaf.Services
             var styleInfo = new CssStyleInfo();
 
             ParseBodyStyles(stylesheet, styleInfo);
+            ParseParagraphStyles(stylesheet, styleInfo);
             ParseTitleStyles(stylesheet, styleInfo);
             ParseHeadingStyles(stylesheet, styleInfo);
             ParseBlockquoteStyles(stylesheet, styleInfo);
@@ -46,6 +47,14 @@ namespace PageLeaf.Services
                 if (!string.IsNullOrEmpty(info.BodyTextColor)) rule.Style.SetProperty("color", info.BodyTextColor);
                 if (!string.IsNullOrEmpty(info.BodyBackgroundColor)) rule.Style.SetProperty("background-color", info.BodyBackgroundColor);
                 if (!string.IsNullOrEmpty(info.BodyFontSize)) rule.Style.SetProperty("font-size", info.BodyFontSize);
+            }, styleInfo);
+
+            // Paragraph
+            UpdateOrCreateRule(stylesheet, "p", (rule, info) =>
+            {
+                if (!string.IsNullOrEmpty(info.ParagraphLineHeight)) rule.Style.SetProperty("line-height", info.ParagraphLineHeight);
+                if (!string.IsNullOrEmpty(info.ParagraphMarginBottom)) rule.Style.SetProperty("margin-bottom", info.ParagraphMarginBottom);
+                if (!string.IsNullOrEmpty(info.ParagraphTextIndent)) rule.Style.SetProperty("text-indent", info.ParagraphTextIndent);
             }, styleInfo);
 
             // Page Title
@@ -458,6 +467,17 @@ namespace PageLeaf.Services
                 styleInfo.BodyTextColor = GetColorHexFromRule(rule, "color");
                 styleInfo.BodyBackgroundColor = GetColorHexFromRule(rule, "background-color");
                 styleInfo.BodyFontSize = rule.Style.GetPropertyValue("font-size");
+            }
+        }
+
+        private void ParseParagraphStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
+            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "p");
+            if (rule != null)
+            {
+                styleInfo.ParagraphLineHeight = rule.Style.GetPropertyValue("line-height");
+                styleInfo.ParagraphMarginBottom = rule.Style.GetPropertyValue("margin-bottom");
+                styleInfo.ParagraphTextIndent = rule.Style.GetPropertyValue("text-indent");
             }
         }
 

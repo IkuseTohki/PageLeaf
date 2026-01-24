@@ -1086,5 +1086,83 @@ namespace PageLeaf.Tests.Services
             Assert.IsFalse(updatedCss.Contains("counter-reset: item"), "Should remove counter-reset for standard lists.");
             Assert.IsFalse(updatedCss.Contains("counters(item"), "Should remove counters content for standard lists.");
         }
+
+        [TestMethod]
+        public void ParseCss_ShouldParseParagraphStyles()
+        {
+            // テスト観点: pタグのスタイル（line-height, margin-bottom, text-indent）が正しく解析されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = @"
+                p { 
+                    line-height: 1.6; 
+                    margin-bottom: 1em; 
+                    text-indent: 20px; 
+                }";
+
+            // Act
+            var styles = service.ParseCss(cssContent);
+
+            // Assert
+            Assert.AreEqual("1.6", styles.ParagraphLineHeight);
+            Assert.AreEqual("1em", styles.ParagraphMarginBottom);
+            Assert.AreEqual("20px", styles.ParagraphTextIndent);
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldUpdateParagraphStyles()
+        {
+            // テスト観点: UpdateCssContentが、段落スタイル情報を正しく既存のCSSに反映、または新規作成することを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "p { color: black; }";
+            var styleInfo = new CssStyleInfo
+            {
+                ParagraphLineHeight = "1.8",
+                ParagraphMarginBottom = "12px",
+                ParagraphTextIndent = "1em"
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+            var parsed = service.ParseCss(updatedCss);
+
+            // Assert
+            Assert.AreEqual("1.8", parsed.ParagraphLineHeight);
+            Assert.AreEqual("12px", parsed.ParagraphMarginBottom);
+            Assert.AreEqual("1em", parsed.ParagraphTextIndent);
+            // 既存の color が維持されていることを確認
+            var parser = new AngleSharp.Css.Parser.CssParser();
+            var stylesheet = parser.ParseStyleSheet(updatedCss);
+            var pRule = stylesheet.Rules.OfType<AngleSharp.Css.Dom.ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "p");
+            Assert.IsNotNull(pRule);
+            Assert.AreEqual("rgba(0, 0, 0, 1)", pRule.Style.GetPropertyValue("color"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ParagraphStyles_EdgeCases()
+        {
+            // テスト観点: 段落スタイルのエッジケース（null値、空文字、ルール未存在）での動作を確認する。
+            var service = new CssEditorService();
+
+            // Case 1: ルールがない場合に新規作成されるか
+            var styleInfo = new CssStyleInfo { ParagraphLineHeight = "2" };
+            var updatedCss = service.UpdateCssContent(string.Empty, styleInfo);
+            StringAssert.Matches(updatedCss, new Regex(@"p\s*\{[^}]*line-height:\s*2;[^}]*\}"));
+
+            // Case 2: 値が null の場合、プロパティが更新（または削除）されないか
+            var existingCss = "p { line-height: 1.5; margin-bottom: 10px; }";
+            styleInfo = new CssStyleInfo { ParagraphLineHeight = null, ParagraphMarginBottom = "20px" };
+            updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+            var parsed = service.ParseCss(updatedCss);
+            Assert.AreEqual("1.5", parsed.ParagraphLineHeight, "Null property should not overwrite existing value.");
+            Assert.AreEqual("20px", parsed.ParagraphMarginBottom);
+
+            // Case 3: 空文字の場合の挙動 (現状の実装では SetProperty がスキップされるため、既存値が維持される)
+            styleInfo = new CssStyleInfo { ParagraphLineHeight = "" };
+            updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+            parsed = service.ParseCss(updatedCss);
+            Assert.AreEqual("1.5", parsed.ParagraphLineHeight, "Empty string should not overwrite existing value.");
+        }
     }
 }

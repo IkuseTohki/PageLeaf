@@ -39,6 +39,7 @@ namespace PageLeaf.ViewModels
         private static readonly string[] StylePropertyNames = new[]
         {
             "BodyTextColor", "BodyBackgroundColor", "BodyFontSize",
+            "ParagraphLineHeight", "ParagraphMarginBottom", "ParagraphTextIndent",
             "TitleTextColor", "TitleFontSize", "TitleFontFamily", "TitleAlignment", "TitleMarginBottom",
             "QuoteTextColor", "QuoteBackgroundColor", "QuoteBorderColor",
             "QuoteBorderWidth", "QuoteBorderStyle",
@@ -124,7 +125,7 @@ namespace PageLeaf.ViewModels
 
         private CssEditorTab GetTabFromPropertyName(string propertyName)
         {
-            if (propertyName.StartsWith("Body")) return CssEditorTab.General;
+            if (propertyName.StartsWith("Body") || propertyName.StartsWith("Paragraph")) return CssEditorTab.General;
             if (propertyName.StartsWith("Title") || propertyName.StartsWith("IsTitle")) return CssEditorTab.Title;
             if (propertyName.StartsWith("h") && propertyName.Length >= 2 && char.IsDigit(propertyName[1])) return CssEditorTab.Headings;
             if (propertyName.Contains("Heading") || propertyName.Contains("IsHeading")) return CssEditorTab.Headings;
@@ -298,6 +299,10 @@ namespace PageLeaf.ViewModels
         public string? BodyTextColor { get => this[nameof(BodyTextColor)]; set => this[nameof(BodyTextColor)] = value; }
         public string? BodyBackgroundColor { get => this[nameof(BodyBackgroundColor)]; set => this[nameof(BodyBackgroundColor)] = value; }
         public string? BodyFontSize { get => this[nameof(BodyFontSize)]; set => this[nameof(BodyFontSize)] = value; }
+
+        public string? ParagraphLineHeight { get => this[nameof(ParagraphLineHeight)]; set => this[nameof(ParagraphLineHeight)] = value; }
+        public string? ParagraphMarginBottom { get => this[nameof(ParagraphMarginBottom)]; set => this[nameof(ParagraphMarginBottom)] = value; }
+        public string? ParagraphTextIndent { get => this[nameof(ParagraphTextIndent)]; set => this[nameof(ParagraphTextIndent)] = value; }
 
         public string? TitleTextColor { get => this[nameof(TitleTextColor)]; set => this[nameof(TitleTextColor)] = value; }
         public string? TitleFontSize { get => this[nameof(TitleFontSize)]; set => this[nameof(TitleFontSize)] = value; }

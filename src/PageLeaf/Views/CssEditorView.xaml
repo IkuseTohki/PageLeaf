@@ -184,6 +184,23 @@
                     <Label Content="フォントサイズ" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:CssNumericEditorControl HorizontalAlignment="Left" CssValue="{Binding BodyFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
+                    <Label Content="段落設定" Style="{StaticResource CompactFormGroupHeaderStyle}" />
+                    <Label Content="行間" Style="{StaticResource CompactFormLabelStyle}" />
+                    <!-- line-height は単位なし数値を推奨するためシンプルなテキストボックス、またはスピナー付きにする -->
+                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      CssValue="{Binding ParagraphLineHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      ShowSpinner="True" />
+
+                    <Label Content="段落下の余白" Style="{StaticResource CompactFormLabelStyle}" />
+                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      CssValue="{Binding ParagraphMarginBottom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      ShowSpinner="True" />
+
+                    <Label Content="行頭インデント (字下げ)" Style="{StaticResource CompactFormLabelStyle}" />
+                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      CssValue="{Binding ParagraphTextIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      ShowSpinner="True" />
+
                     <Label Content="カラー設定" Style="{StaticResource CompactFormGroupHeaderStyle}" />
 
                     <Label Content="文字色" Style="{StaticResource CompactFormLabelStyle}" />
