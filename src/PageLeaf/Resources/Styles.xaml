@@ -599,15 +599,27 @@
                             BorderBrush="Transparent"
                             BorderThickness="0,0,0,3">
                         <StackPanel Orientation="Horizontal">
-                            <!-- Icon -->
-                            <TextBlock Margin="0,0,4,0"
-                                       FontSize="12"
-                                       Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" />
+                            <!-- Icon + Dot Overlay -->
+                            <Grid Margin="0,0,4,0">
+                                <TextBlock FontSize="12" Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" />
+                                <Path x:Name="DirtyIndicator"
+                                      Width="4"
+                                      Height="4"
+                                      Margin="-2,-2,0,0"
+                                      HorizontalAlignment="Left"
+                                      VerticalAlignment="Top"
+                                      Data="{StaticResource DotIndicatorGeometry}"
+                                      Fill="{Binding Foreground, RelativeSource={RelativeSource TemplatedParent}}"
+                                      Visibility="Collapsed" />
+                            </Grid>
                             <!-- Text -->
                             <ContentPresenter VerticalAlignment="Center" />
                         </StackPanel>
                     </Border>
                     <ControlTemplate.Triggers>
+                        <Trigger Property="behaviors:StyleBehavior.IsDirty" Value="True">
+                            <Setter TargetName="DirtyIndicator" Property="Visibility" Value="Visible" />
+                        </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter Property="Foreground" Value="{StaticResource PrimaryActionBrush}" />
                         </Trigger>

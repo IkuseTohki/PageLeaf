@@ -70,26 +70,33 @@
                 <!-- Horizontal Tabs -->
                 <ScrollViewer Style="{StaticResource ScrollViewerWithButtonsStyle}">
                     <StackPanel Orientation="Horizontal">
-                        <RadioButton Content="タイトル"
+                        <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsTitleTabDirty}"
+                                     Content="タイトル"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Title}}"
                                      Tag="T"
                                      Visibility="{Binding IsTitleTabVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                        <RadioButton Content="全体"
+                        <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsGeneralTabDirty}"
+                                     Content="全体"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.General}}"
                                      Tag="🌐" />
-                        <RadioButton Content="見出し"
+                        <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsHeadingsTabDirty}"
+                                     Content="見出し"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Headings}}"
                                      Tag="#" />
-                        <RadioButton Content="引用"
+                        <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsQuoteTabDirty}"
+                                     Content="引用"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Quote}}"
                                      Tag="¶" />
-                        <RadioButton Content="リスト"
+                        <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsListTabDirty}"
+                                     Content="リスト"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.List}}"
                                      Tag="≡" />
-                        <RadioButton Content="表"
+                        <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsTableTabDirty}"
+                                     Content="表"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Table}}"
                                      Tag="▦" />
-                        <RadioButton Content="コード"
+                        <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsCodeTabDirty}"
+                                     Content="コード"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Code}}"
                                      Tag="&lt;&gt;" />
                     </StackPanel>

@@ -34,6 +34,7 @@ namespace PageLeaf.ViewModels
         private readonly ISettingsService _settingsService;
         private readonly Dictionary<string, string?> _styles = new Dictionary<string, string?>();
         private readonly Dictionary<string, bool> _flags = new Dictionary<string, bool>();
+        private readonly HashSet<CssEditorTab> _dirtyTabs = new HashSet<CssEditorTab>();
 
         private static readonly string[] StylePropertyNames = new[]
         {
@@ -75,6 +76,63 @@ namespace PageLeaf.ViewModels
         {
             get => _isDirty;
             set { if (_isDirty != value) { _isDirty = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
+        /// 指定されたタブに変更があるかどうかを取得します。
+        /// </summary>
+        public bool IsTabDirty(CssEditorTab tab) => _dirtyTabs.Contains(tab);
+
+        public bool IsTitleTabDirty => IsTabDirty(CssEditorTab.Title);
+        public bool IsGeneralTabDirty => IsTabDirty(CssEditorTab.General);
+        public bool IsHeadingsTabDirty => IsTabDirty(CssEditorTab.Headings);
+        public bool IsQuoteTabDirty => IsTabDirty(CssEditorTab.Quote);
+        public bool IsListTabDirty => IsTabDirty(CssEditorTab.List);
+        public bool IsTableTabDirty => IsTabDirty(CssEditorTab.Table);
+        public bool IsCodeTabDirty => IsTabDirty(CssEditorTab.Code);
+
+        private void MarkTabDirty(CssEditorTab tab)
+        {
+            if (_dirtyTabs.Add(tab))
+            {
+                OnPropertyChanged(nameof(IsTabDirty));
+                switch (tab)
+                {
+                    case CssEditorTab.Title: OnPropertyChanged(nameof(IsTitleTabDirty)); break;
+                    case CssEditorTab.General: OnPropertyChanged(nameof(IsGeneralTabDirty)); break;
+                    case CssEditorTab.Headings: OnPropertyChanged(nameof(IsHeadingsTabDirty)); break;
+                    case CssEditorTab.Quote: OnPropertyChanged(nameof(IsQuoteTabDirty)); break;
+                    case CssEditorTab.List: OnPropertyChanged(nameof(IsListTabDirty)); break;
+                    case CssEditorTab.Table: OnPropertyChanged(nameof(IsTableTabDirty)); break;
+                    case CssEditorTab.Code: OnPropertyChanged(nameof(IsCodeTabDirty)); break;
+                }
+            }
+        }
+
+        private void ClearDirtyTabs()
+        {
+            _dirtyTabs.Clear();
+            OnPropertyChanged(nameof(IsTabDirty));
+            OnPropertyChanged(nameof(IsTitleTabDirty));
+            OnPropertyChanged(nameof(IsGeneralTabDirty));
+            OnPropertyChanged(nameof(IsHeadingsTabDirty));
+            OnPropertyChanged(nameof(IsQuoteTabDirty));
+            OnPropertyChanged(nameof(IsListTabDirty));
+            OnPropertyChanged(nameof(IsTableTabDirty));
+            OnPropertyChanged(nameof(IsCodeTabDirty));
+        }
+
+        private CssEditorTab GetTabFromPropertyName(string propertyName)
+        {
+            if (propertyName.StartsWith("Body")) return CssEditorTab.General;
+            if (propertyName.StartsWith("Title") || propertyName.StartsWith("IsTitle")) return CssEditorTab.Title;
+            if (propertyName.StartsWith("h") && propertyName.Length >= 2 && char.IsDigit(propertyName[1])) return CssEditorTab.Headings;
+            if (propertyName.Contains("Heading") || propertyName.Contains("IsHeading")) return CssEditorTab.Headings;
+            if (propertyName.StartsWith("Quote")) return CssEditorTab.Quote;
+            if (propertyName.StartsWith("List") || propertyName.StartsWith("NumberedList")) return CssEditorTab.List;
+            if (propertyName.StartsWith("Table")) return CssEditorTab.Table;
+            if (propertyName.Contains("Code")) return CssEditorTab.Code;
+            return CssEditorTab.General;
         }
 
         /// <summary>
@@ -204,6 +262,7 @@ namespace PageLeaf.ViewModels
                 _flags[$"{level}.IsNumberingEnabled"] = styleInfo.HeadingNumberingStates.TryGetValue(level, out var n) && n;
             }
             IsDirty = false;
+            ClearDirtyTabs();
             OnPropertyChanged(string.Empty);
             UpdateHeadingProperties();
             UpdatePreview();
@@ -223,6 +282,7 @@ namespace PageLeaf.ViewModels
             {
                 _styles[key] = value;
                 IsDirty = true;
+                MarkTabDirty(GetTabFromPropertyName(key));
                 UpdatePreview();
                 OnPropertyChanged("Item[]");
                 if (_selectedHeadingLevel != null && key.StartsWith(_selectedHeadingLevel))
@@ -249,7 +309,7 @@ namespace PageLeaf.ViewModels
         public bool IsTitleUnderline { get => GetTitleFlag("IsUnderline"); set => SetTitleFlag("IsUnderline", value); }
 
         private bool GetTitleFlag(string attr) => _flags.TryGetValue($"Title.{attr}", out var b) && b;
-        private void SetTitleFlag(string attr, bool value) { var key = $"Title.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; UpdatePreview(); OnPropertyChanged($"IsTitle{attr}"); } }
+        private void SetTitleFlag(string attr, bool value) { var key = $"Title.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; MarkTabDirty(CssEditorTab.Title); UpdatePreview(); OnPropertyChanged($"IsTitle{attr}"); } }
 
         public string? QuoteTextColor { get => this[nameof(QuoteTextColor)]; set => this[nameof(QuoteTextColor)] = value; }
         public string? QuoteBackgroundColor { get => this[nameof(QuoteBackgroundColor)]; set => this[nameof(QuoteBackgroundColor)] = value; }
@@ -286,7 +346,7 @@ namespace PageLeaf.ViewModels
         public bool IsHeadingNumberingEnabled { get => GetFlag("IsNumberingEnabled"); set => SetFlag("IsNumberingEnabled", value); }
 
         private bool GetFlag(string attr) => _selectedHeadingLevel != null && _flags.TryGetValue($"{_selectedHeadingLevel}.{attr}", out var b) && b;
-        private void SetFlag(string attr, bool value) { if (_selectedHeadingLevel == null) return; var key = $"{_selectedHeadingLevel}.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; UpdatePreview(); OnPropertyChanged($"IsHeading{attr}"); } }
+        private void SetFlag(string attr, bool value) { if (_selectedHeadingLevel == null) return; var key = $"{_selectedHeadingLevel}.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; MarkTabDirty(CssEditorTab.Headings); UpdatePreview(); OnPropertyChanged($"IsHeading{attr}"); } }
         public string? SelectedHeadingLevel { get => _selectedHeadingLevel; set { if (_selectedHeadingLevel != value) { _selectedHeadingLevel = value; OnPropertyChanged(); UpdateHeadingProperties(); } } }
         private void UpdateHeadingProperties() { OnPropertyChanged(nameof(HeadingTextColor)); OnPropertyChanged(nameof(HeadingFontSize)); OnPropertyChanged(nameof(HeadingFontFamily)); OnPropertyChanged(nameof(HeadingAlignment)); OnPropertyChanged(nameof(IsHeadingBold)); OnPropertyChanged(nameof(IsHeadingItalic)); OnPropertyChanged(nameof(IsHeadingUnderline)); OnPropertyChanged(nameof(IsHeadingNumberingEnabled)); }
 
@@ -312,6 +372,7 @@ namespace PageLeaf.ViewModels
             var styleInfo = CreateStyleInfo();
             _saveCssUseCase.Execute(TargetCssFileName!, styleInfo);
             IsDirty = false;
+            ClearDirtyTabs();
             CssSaved?.Invoke(this, EventArgs.Empty);
         }
 

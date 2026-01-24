@@ -8,6 +8,12 @@ namespace PageLeaf.Behaviors
     /// </summary>
     public static class StyleBehavior
     {
+        public static readonly DependencyProperty IsDirtyProperty =
+            DependencyProperty.RegisterAttached("IsDirty", typeof(bool), typeof(StyleBehavior), new PropertyMetadata(false));
+
+        public static bool GetIsDirty(DependencyObject obj) => (bool)obj.GetValue(IsDirtyProperty);
+        public static void SetIsDirty(DependencyObject obj, bool value) => obj.SetValue(IsDirtyProperty, value);
+
         public static readonly DependencyProperty MergeStyleProperty =
             DependencyProperty.RegisterAttached("MergeStyle", typeof(Style), typeof(StyleBehavior), new PropertyMetadata(null, OnMergeStyleChanged));
 

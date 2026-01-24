@@ -156,6 +156,21 @@
                                             <DataTrigger Binding="{Binding Editor.SelectedMode}" Value="Markdown">
                                                 <Setter Property="Data" Value="{StaticResource EyeIconGeometry}" />
                                             </DataTrigger>
+                                            <!-- Dirty indicators -->
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Editor.SelectedMode}" Value="Viewer" />
+                                                    <Condition Binding="{Binding Editor.IsDirty}" Value="True" />
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Data" Value="{StaticResource PenDirtyIconGeometry}" />
+                                            </MultiDataTrigger>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding Editor.SelectedMode}" Value="Markdown" />
+                                                    <Condition Binding="{Binding Editor.IsDirty}" Value="True" />
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Data" Value="{StaticResource EyeDirtyIconGeometry}" />
+                                            </MultiDataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </Path.Style>
