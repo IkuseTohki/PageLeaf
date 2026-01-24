@@ -113,7 +113,9 @@
                 <StackPanel Visibility="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Title}}">
                     <Label Content="フォント設定" Style="{StaticResource FirstCompactFormGroupHeaderStyle}" />
                     <Label Content="サイズ" Style="{StaticResource CompactFormLabelStyle}" />
-                    <controls:CssNumericEditorControl HorizontalAlignment="Left" CssValue="{Binding TitleFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      CssValue="{Binding TitleFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="2.0" />
 
                     <Label Content="フォントファミリー" Style="{StaticResource CompactFormLabelStyle}" />
                     <TextBox Style="{StaticResource CompactFormTextBoxMediumStyle}" Text="{Binding TitleFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -175,6 +177,7 @@
                     <Label Content="下マージン" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
                                                       CssValue="{Binding TitleMarginBottom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="1.2"
                                                       ShowSpinner="True" />
                 </StackPanel>
 
@@ -182,23 +185,28 @@
                 <StackPanel Visibility="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.General}}">
                     <Label Content="フォント設定" Style="{StaticResource FirstCompactFormGroupHeaderStyle}" />
                     <Label Content="フォントサイズ" Style="{StaticResource CompactFormLabelStyle}" />
-                    <controls:CssNumericEditorControl HorizontalAlignment="Left" CssValue="{Binding BodyFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      CssValue="{Binding BodyFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="1.0" />
 
                     <Label Content="段落設定" Style="{StaticResource CompactFormGroupHeaderStyle}" />
                     <Label Content="行間" Style="{StaticResource CompactFormLabelStyle}" />
                     <!-- line-height は単位なし数値を推奨するためシンプルなテキストボックス、またはスピナー付きにする -->
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
                                                       CssValue="{Binding ParagraphLineHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="1.6"
                                                       ShowSpinner="True" />
 
                     <Label Content="段落下の余白" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
                                                       CssValue="{Binding ParagraphMarginBottom, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="1.0"
                                                       ShowSpinner="True" />
 
                     <Label Content="行頭インデント (字下げ)" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
                                                       CssValue="{Binding ParagraphTextIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="1.0"
                                                       ShowSpinner="True" />
 
                     <Label Content="カラー設定" Style="{StaticResource CompactFormGroupHeaderStyle}" />
@@ -223,7 +231,9 @@
 
                     <Label Content="フォント設定" Style="{StaticResource CompactFormGroupHeaderStyle}" />
                     <Label Content="サイズ" Style="{StaticResource CompactFormLabelStyle}" />
-                    <controls:CssNumericEditorControl HorizontalAlignment="Left" CssValue="{Binding HeadingFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      CssValue="{Binding HeadingFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="1.5" />
 
                     <Label Content="フォントファミリー" Style="{StaticResource CompactFormLabelStyle}" />
                     <TextBox Style="{StaticResource CompactFormTextBoxMediumStyle}" Text="{Binding HeadingFontFamily, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -318,12 +328,15 @@
 
                     <Label Content="フォント設定" Style="{StaticResource CompactFormGroupHeaderStyle}" />
                     <Label Content="サイズ" Style="{StaticResource CompactFormLabelStyle}" />
-                    <controls:CssNumericEditorControl HorizontalAlignment="Left" CssValue="{Binding ListMarkerSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      CssValue="{Binding ListMarkerSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="1.0" />
 
                     <Label Content="レイアウト設定" Style="{StaticResource CompactFormGroupHeaderStyle}" />
                     <Label Content="インデント" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
                                                       CssValue="{Binding ListIndent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="2.0"
                                                       ShowSpinner="True" />
                 </StackPanel>
 
@@ -333,6 +346,8 @@
                     <Label Content="罫線" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
                                                       CssValue="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="1"
+                                                      InternalUnit="px"
                                                       ShowSpinner="True" />
 
                     <Label Content="罫線 色" Style="{StaticResource CompactFormLabelStyle}" />
@@ -387,9 +402,11 @@
                                                 SelectColorCommand="{Binding SelectColorCommand}" />
 
                     <Label Content="フォントサイズ" Style="{StaticResource CompactFormLabelStyle}" />
-                    <controls:CssNumericEditorControl HorizontalAlignment="Left" CssValue="{Binding TableHeaderFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      CssValue="{Binding TableHeaderFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="1.1" />
 
-                    <Label Content="位置揃え:" Style="{StaticResource FormLabelStyle}" />
+                    <Label Content="位置揃え" Style="{StaticResource CompactFormLabelStyle}" />
                     <StackPanel Orientation="Horizontal">
                         <ToggleButton CommandParameter="left"
                                       IsChecked="{Binding TableHeaderAlignment, Converter={StaticResource ComparisonConverter}, ConverterParameter=left}"
@@ -423,9 +440,11 @@
                         </ToggleButton>
                     </StackPanel>
 
-                    <Label Content="セル パディング:" Style="{StaticResource FormLabelStyle}" />
+                    <Label Content="セル パディング" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
                                                       CssValue="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="8"
+                                                      InternalUnit="px"
                                                       ShowSpinner="True" />
                 </StackPanel>
 
@@ -490,6 +509,8 @@
                     <Label Content="左枠線" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
                                                       CssValue="{Binding QuoteBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="4"
+                                                      InternalUnit="px"
                                                       ShowSpinner="True" />
 
                     <Label Content="左枠線 色" Style="{StaticResource CompactFormLabelStyle}" />

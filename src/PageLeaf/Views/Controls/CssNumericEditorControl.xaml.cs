@@ -1,4 +1,5 @@
 using PageLeaf.Utilities;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -29,6 +30,18 @@ namespace PageLeaf.Views.Controls
             set => SetValue(ShowSpinnerProperty, value);
         }
 
+        public static readonly DependencyProperty DefaultValueProperty =
+            DependencyProperty.Register(nameof(DefaultValue), typeof(double), typeof(CssNumericEditorControl), new PropertyMetadata(0.0));
+
+        /// <summary>
+        /// 未入力状態でスピナーを操作した際の初期値を取得または設定します。
+        /// </summary>
+        public double DefaultValue
+        {
+            get => (double)GetValue(DefaultValueProperty);
+            set => SetValue(DefaultValueProperty, value);
+        }
+
         // 内部バインディング用
         public static readonly DependencyProperty InternalValueProperty =
             DependencyProperty.Register(nameof(InternalValue), typeof(string), typeof(CssNumericEditorControl), new PropertyMetadata(null, OnInternalChanged));
@@ -53,7 +66,8 @@ namespace PageLeaf.Views.Controls
         public CssNumericEditorControl()
         {
             InitializeComponent();
-            UpdateAvailableValues("px"); // Default unit
+            InternalUnit = "em"; // Default unit
+            UpdateAvailableValues("em");
         }
 
         private static void OnCssValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -66,8 +80,8 @@ namespace PageLeaf.Views.Controls
             {
                 var (val, unit) = UnitConversionHelper.Split(e.NewValue as string);
                 control.InternalValue = val.ToString();
-                control.InternalUnit = unit;
-                // Note: OnInternalChanged will trigger UpdateAvailableValues if Unit changes
+                // 値が設定された場合はその単位を尊重し、空の場合は em にする
+                control.InternalUnit = string.IsNullOrEmpty(unit) ? "em" : unit;
             }
             finally
             {
@@ -85,6 +99,13 @@ namespace PageLeaf.Views.Controls
             {
                 var currentValText = control.InternalValue;
                 var currentUnitText = control.InternalUnit;
+
+                // 単位が未設定なら em をデフォルトにする
+                if (string.IsNullOrEmpty(currentUnitText))
+                {
+                    currentUnitText = "em";
+                    control.InternalUnit = "em";
+                }
 
                 if (e.Property == InternalUnitProperty)
                 {
@@ -109,7 +130,17 @@ namespace PageLeaf.Views.Controls
                 // 結合して外部プロパティを更新
                 if (double.TryParse(currentValText, out var num))
                 {
-                    control.CssValue = UnitConversionHelper.Format(num, currentUnitText ?? "px");
+                    // マイナス値は 0 に制限
+                    if (num < 0) num = 0;
+
+                    // px, % は整数のみに制限
+                    if (currentUnitText == "px" || currentUnitText == "%")
+                    {
+                        num = Math.Round(num);
+                        control.InternalValue = num.ToString();
+                    }
+
+                    control.CssValue = UnitConversionHelper.Format(num, currentUnitText);
                 }
                 else
                 {
@@ -127,12 +158,30 @@ namespace PageLeaf.Views.Controls
 
         private void AdjustValue(double delta)
         {
-            if (double.TryParse(InternalValue, out var val))
+            double val;
+            if (string.IsNullOrWhiteSpace(InternalValue))
             {
-                var step = (InternalUnit == "em" || InternalUnit == "rem") ? 0.1 : 1.0;
-                var newValue = val + (delta * step);
-                InternalValue = UnitConversionHelper.Round(newValue).ToString();
+                // 未入力時はデフォルト値から開始
+                val = DefaultValue;
             }
+            else if (!double.TryParse(InternalValue, out val))
+            {
+                return;
+            }
+
+            var step = (InternalUnit == "em" || InternalUnit == "rem") ? 0.1 : 1.0;
+            var newValue = val + (delta * step);
+
+            // マイナス値は 0 に制限
+            if (newValue < 0) newValue = 0;
+
+            // px, % は整数に丸める
+            if (InternalUnit == "px" || InternalUnit == "%")
+            {
+                newValue = Math.Round(newValue);
+            }
+
+            InternalValue = UnitConversionHelper.Round(newValue).ToString();
         }
 
         private void UpdateAvailableValues(string? unit)
