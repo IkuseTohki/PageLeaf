@@ -36,6 +36,7 @@
                     <ComboBox Grid.Column="0"
                               Margin="0,0,10,0"
                               HorizontalAlignment="Stretch"
+                              VerticalAlignment="Center"
                               ItemsSource="{Binding DataContext.AvailableCssFiles, RelativeSource={RelativeSource AncestorType=Window}}"
                               SelectedItem="{Binding DataContext.SelectedCssFile, RelativeSource={RelativeSource AncestorType=Window}}"
                               Style="{StaticResource CompactFormComboBoxStyle}"
@@ -43,7 +44,7 @@
 
                     <!-- Action Buttons -->
                     <StackPanel Grid.Column="1"
-                                VerticalAlignment="Top"
+                                VerticalAlignment="Center"
                                 Orientation="Horizontal">
                         <Button Margin="0,0,5,0"
                                 Command="{Binding SaveCssCommand}"
@@ -351,7 +352,8 @@
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
                                                       CssValue="{Binding TableBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                       DefaultValue="1"
-                                                      InternalUnit="px"
+                                                      FixedUnit="px"
+                                                      IsUnitFixed="True"
                                                       ShowSpinner="True" />
 
                     <Label Content="罫線 色" Style="{StaticResource CompactFormLabelStyle}" />
@@ -448,7 +450,8 @@
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
                                                       CssValue="{Binding TableCellPadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                       DefaultValue="8"
-                                                      InternalUnit="px"
+                                                      FixedUnit="px"
+                                                      IsUnitFixed="True"
                                                       ShowSpinner="True" />
                 </StackPanel>
 
@@ -514,7 +517,8 @@
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
                                                       CssValue="{Binding QuoteBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                       DefaultValue="4"
-                                                      InternalUnit="px"
+                                                      FixedUnit="px"
+                                                      IsUnitFixed="True"
                                                       ShowSpinner="True" />
 
                     <Label Content="左枠線 色" Style="{StaticResource CompactFormLabelStyle}" />

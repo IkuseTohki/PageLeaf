@@ -251,17 +251,26 @@
                        Margin="0,4"
                        Fill="{DynamicResource BorderBrush}" />
 
-            <!-- 単位選択 -->
-            <ComboBox Grid.Column="3"
-                      Width="45"
-                      HorizontalContentAlignment="Center"
-                      IsEditable="True"
-                      Style="{StaticResource UnitComboBoxStyle}"
-                      Text="{Binding ElementName=Root, Path=InternalUnit, UpdateSourceTrigger=PropertyChanged}">
-                <ComboBoxItem Content="px" />
-                <ComboBoxItem Content="em" />
-                <ComboBoxItem Content="%" />
-            </ComboBox>
+            <!-- 単位表示エリア -->
+            <Grid Grid.Column="3" Width="45">
+                <!-- 通常時：選択可能なComboBox -->
+                <ComboBox HorizontalContentAlignment="Center"
+                          IsEditable="True"
+                          Style="{StaticResource UnitComboBoxStyle}"
+                          Text="{Binding ElementName=Root, Path=InternalUnit, UpdateSourceTrigger=PropertyChanged}"
+                          Visibility="{Binding ElementName=Root, Path=IsUnitFixed, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}">
+                    <ComboBoxItem Content="px" />
+                    <ComboBoxItem Content="em" />
+                    <ComboBoxItem Content="%" />
+                </ComboBox>
+
+                <!-- 固定時：編集不可のTextBlock -->
+                <TextBlock HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Foreground="{DynamicResource SecondaryTextBrush}"
+                           Text="{Binding ElementName=Root, Path=FixedUnit}"
+                           Visibility="{Binding ElementName=Root, Path=IsUnitFixed, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </Grid>
         </Grid>
     </Border>
 </UserControl>

@@ -7,6 +7,10 @@ using System.Windows.Controls;
 
 namespace PageLeaf.Views.Controls
 {
+    /// <summary>
+    /// 数値と単位（px, em, %）を編集するためのエディタコントロールです。
+    /// 単位の固定表示モードもサポートします。
+    /// </summary>
     public partial class CssNumericEditorControl : UserControl
     {
         public ObservableCollection<string> AvailableValues { get; } = new ObservableCollection<string>();
@@ -28,6 +32,30 @@ namespace PageLeaf.Views.Controls
         {
             get => (bool)GetValue(ShowSpinnerProperty);
             set => SetValue(ShowSpinnerProperty, value);
+        }
+
+        public static readonly DependencyProperty IsUnitFixedProperty =
+            DependencyProperty.Register(nameof(IsUnitFixed), typeof(bool), typeof(CssNumericEditorControl), new PropertyMetadata(false));
+
+        /// <summary>
+        /// 単位を固定し、ユーザーによる変更を禁止するかどうかを取得または設定します。
+        /// </summary>
+        public bool IsUnitFixed
+        {
+            get => (bool)GetValue(IsUnitFixedProperty);
+            set => SetValue(IsUnitFixedProperty, value);
+        }
+
+        public static readonly DependencyProperty FixedUnitProperty =
+            DependencyProperty.Register(nameof(FixedUnit), typeof(string), typeof(CssNumericEditorControl), new PropertyMetadata("px", OnFixedUnitChanged));
+
+        /// <summary>
+        /// 固定表示する単位（IsUnitFixedがTrueの時に使用）を取得または設定します。
+        /// </summary>
+        public string FixedUnit
+        {
+            get => (string)GetValue(FixedUnitProperty);
+            set => SetValue(FixedUnitProperty, value);
         }
 
         public static readonly DependencyProperty DefaultValueProperty =
@@ -66,8 +94,17 @@ namespace PageLeaf.Views.Controls
         public CssNumericEditorControl()
         {
             InitializeComponent();
-            InternalUnit = "em"; // Default unit
+            InternalUnit = "em"; // Default
             UpdateAvailableValues("em");
+        }
+
+        private static void OnFixedUnitChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var control = (CssNumericEditorControl)d;
+            if (control.IsUnitFixed)
+            {
+                control.InternalUnit = e.NewValue as string;
+            }
         }
 
         private static void OnCssValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -80,8 +117,16 @@ namespace PageLeaf.Views.Controls
             {
                 var (val, unit) = UnitConversionHelper.Split(e.NewValue as string);
                 control.InternalValue = val.ToString();
-                // 値が設定された場合はその単位を尊重し、空の場合は em にする
-                control.InternalUnit = string.IsNullOrEmpty(unit) ? "em" : unit;
+
+                if (control.IsUnitFixed)
+                {
+                    control.InternalUnit = control.FixedUnit;
+                }
+                else
+                {
+                    // 値が設定された場合はその単位を尊重し、空の場合は em にする
+                    control.InternalUnit = string.IsNullOrEmpty(unit) ? "em" : unit;
+                }
             }
             finally
             {
@@ -98,7 +143,7 @@ namespace PageLeaf.Views.Controls
             try
             {
                 var currentValText = control.InternalValue;
-                var currentUnitText = control.InternalUnit;
+                var currentUnitText = control.IsUnitFixed ? control.FixedUnit : control.InternalUnit;
 
                 // 単位が未設定なら em をデフォルトにする
                 if (string.IsNullOrEmpty(currentUnitText))
@@ -107,7 +152,7 @@ namespace PageLeaf.Views.Controls
                     control.InternalUnit = "em";
                 }
 
-                if (e.Property == InternalUnitProperty)
+                if (e.Property == InternalUnitProperty && !control.IsUnitFixed)
                 {
                     control.UpdateAvailableValues(currentUnitText);
 
@@ -169,7 +214,8 @@ namespace PageLeaf.Views.Controls
                 return;
             }
 
-            var step = (InternalUnit == "em" || InternalUnit == "rem") ? 0.1 : 1.0;
+            var unit = IsUnitFixed ? FixedUnit : InternalUnit;
+            var step = (unit == "em" || unit == "rem") ? 0.1 : 1.0;
             var newValue = val + (delta * step);
 
             // マイナス値は 0 に制限

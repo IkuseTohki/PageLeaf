@@ -93,7 +93,7 @@ namespace PageLeaf.Tests.ViewModels
 
             // Arrange
             _settings.Theme = AppTheme.Light;
-            
+
             // Act
             var viewModel = new SettingsViewModel(_settingsServiceMock.Object);
 
@@ -149,7 +149,7 @@ namespace PageLeaf.Tests.ViewModels
 
             // Arrange
             var viewModel = new SettingsViewModel(_settingsServiceMock.Object);
-            
+
             // Act
             viewModel.CurrentCategory = SettingsCategory.Editor;
 
