@@ -184,16 +184,24 @@ YAML フロントマターの内容を GUI で確認・編集するための UI 
 
 リソース定義の循環参照を防ぎ、保守性を高めるため、以下の役割ごとにリソースファイルを分割・管理する。
 
-- **Colors.xaml**: アプリケーション全体で使用する色・ブラシ定義（原色、テーマカラーなど）。
+- **LightColors.xaml / DarkColors.xaml**: アプリケーション全体で使用する色・ブラシ定義。テーマ（ライト/ダーク）ごとに作成し、実行時に動的に差し替える。
 - **Icons.xaml**: ベクターアイコン（Geometry）の定義。
 - **Converters.xaml**: IValueConverter などのコンバーター定義。
 - **ControlStyles.xaml**: ボタン、トグルスイッチなどの基本的なコントロールスタイル。
 - **DataTemplates.xaml**: リストアイテムやコンテンツ表示用のデータテンプレート。
 - **Styles.xaml**: その他の複合的なスタイル定義や、上記リソースを組み合わせたスタイル。
 
+#### テーマとハイライトのアーキテクチャ
+
+本アプリケーションでは、テーマ（ライト/ダーク）の切り替えを以下の原則に基づいて実装する。
+
+1. **色のマスター (Master of Colors)**: 常に XAML リソース (`LightColors.xaml`, `DarkColors.xaml`) を正解とする。
+2. **構造のマスター (Master of Rules)**: AvalonEdit のハイライトルール（正規表現等）は `Markdown.xshd` を正解とする。XSHD 内の色定義はフォールバック用として扱い、実行時は無視される。
+3. **動的同期**: テーマ切り替え時、プログラム (Behavior) が XAML から色を取得し、AvalonEdit のメモリ上のハイライト定義 (`IHighlightingDefinition`) を動的に更新する。これにより、XSHD ファイルを増やすことなく、一貫したテーマ管理を実現する。
+
 **ルール**
 
-- 原則として、View 内のインラインスタイル (`<Button.Style>...`) は避け、上記リソースファイルに定義して `StaticResource` で参照する。
+- 原則として、View 内のインラインスタイル (`<Button.Style>...`) は避け、上記リソースファイルに定義して `DynamicResource` で参照する。
 - リソースファイルの読み込み順序（依存関係）に注意する（例: `Colors.xaml` -> `ControlStyles.xaml`）。
 
 ### 5.4. 品質担保

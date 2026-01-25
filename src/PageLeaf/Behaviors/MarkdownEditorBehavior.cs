@@ -5,6 +5,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
 using ICSharpCode.AvalonEdit;
+using ICSharpCode.AvalonEdit.Highlighting;
+using System.Windows.Media;
 
 namespace PageLeaf.Behaviors
 {
@@ -13,6 +15,8 @@ namespace PageLeaf.Behaviors
     /// </summary>
     public static class MarkdownEditorBehavior
     {
+        private static ISettingsService? _settingsService;
+
         public static readonly DependencyProperty IsEnabledProperty =
             DependencyProperty.RegisterAttached(
                 "IsEnabled",
@@ -35,6 +39,11 @@ namespace PageLeaf.Behaviors
 
         private static void OnIsEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
+            if (_settingsService == null)
+            {
+                _settingsService = App.AppHost?.Services.GetService<ISettingsService>();
+            }
+
             if (d is TextBox textBox)
             {
                 if ((bool)e.NewValue)
@@ -54,6 +63,14 @@ namespace PageLeaf.Behaviors
                 {
                     editor.PreviewKeyDown += OnPreviewKeyDown;
                     editor.PreviewTextInput += OnPreviewTextInput;
+
+                    // テーマ変更イベントの購読
+                    if (_settingsService != null)
+                    {
+                        _settingsService.SettingsChanged += (s, settings) => UpdateHighlightingColors(editor);
+                        // 初回適用
+                        UpdateHighlightingColors(editor);
+                    }
                 }
                 else
                 {
@@ -61,6 +78,46 @@ namespace PageLeaf.Behaviors
                     editor.PreviewTextInput -= OnPreviewTextInput;
                 }
             }
+        }
+
+        /// <summary>
+        /// 現在のテーマに基づいて、AvalonEdit のハイライト色を更新します。
+        /// </summary>
+        private static void UpdateHighlightingColors(TextEditor editor)
+        {
+            if (editor.SyntaxHighlighting == null) return;
+
+            // XSHD の色名と WPF リソースキーのマッピング
+            var colorMap = new System.Collections.Generic.Dictionary<string, string>
+            {
+                { "Heading", "MDHeadingBrush" },
+                { "Code", "MDCodeBrush" },
+                { "BlockQuote", "MDQuoteBrush" },
+                { "Link", "MDLinkBrush" },
+                { "Image", "MDLinkBrush" },
+                { "ListMarker", "MDListMarkerBrush" }
+            };
+
+            foreach (var color in editor.SyntaxHighlighting.NamedHighlightingColors)
+            {
+                if (colorMap.TryGetValue(color.Name, out var resourceKey))
+                {
+                    if (Application.Current.TryFindResource(resourceKey) is SolidColorBrush brush)
+                    {
+                        // メモリ上のハイライト定義を直接書き換える
+                        color.Foreground = new SimpleHighlightingBrush(brush.Color);
+                    }
+                }
+            }
+
+            // カーソルの色もテキスト色に合わせる
+            if (Application.Current.TryFindResource("PrimaryTextBrush") is SolidColorBrush textBrush)
+            {
+                editor.TextArea.Caret.CaretBrush = textBrush;
+            }
+
+            // 再描画を促す
+            editor.TextArea.TextView.Redraw();
         }
 
         private static void OnPreviewTextInput(object sender, TextCompositionEventArgs e)

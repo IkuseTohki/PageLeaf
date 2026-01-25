@@ -15,6 +15,7 @@ namespace PageLeaf.ViewModels
     /// </summary>
     public enum SettingsCategory
     {
+        Appearance,
         Editor,
         Image,
         Code
@@ -36,7 +37,8 @@ namespace PageLeaf.ViewModels
         private bool _autoInsertFrontMatter = true;
         private bool _showTitleInPreview = true;
         private ResourceSource _libraryResourceSource = ResourceSource.Local;
-        private SettingsCategory _currentCategory = SettingsCategory.Editor;
+        private AppTheme _theme = AppTheme.System;
+        private SettingsCategory _currentCategory = SettingsCategory.Appearance;
 
         /// <summary>
         /// 現在選択されているカテゴリ。
@@ -45,6 +47,15 @@ namespace PageLeaf.ViewModels
         {
             get => _currentCategory;
             set { if (_currentCategory != value) { _currentCategory = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
+        /// アプリケーションの表示テーマ。
+        /// </summary>
+        public AppTheme Theme
+        {
+            get => _theme;
+            set { if (_theme != value) { _theme = value; OnPropertyChanged(); } }
         }
 
         /// <summary>
@@ -205,6 +216,7 @@ namespace PageLeaf.ViewModels
             _autoInsertFrontMatter = settings.AutoInsertFrontMatter;
             _showTitleInPreview = settings.ShowTitleInPreview;
             _libraryResourceSource = settings.LibraryResourceSource;
+            _theme = settings.Theme;
 
             // 追加フロントマタープロパティのロード
             DefaultFrontMatterProperties.Clear();
@@ -309,6 +321,7 @@ namespace PageLeaf.ViewModels
             settings.AutoInsertFrontMatter = AutoInsertFrontMatter;
             settings.ShowTitleInPreview = ShowTitleInPreview;
             settings.LibraryResourceSource = LibraryResourceSource;
+            settings.Theme = Theme;
 
             // 追加フロントマタープロパティの保存 (順序維持)
             settings.AdditionalFrontMatter = DefaultFrontMatterProperties

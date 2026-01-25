@@ -19,6 +19,11 @@ namespace PageLeaf.Services
         private readonly IDeserializer _deserializer;
 
         /// <summary>
+        /// 設定が変更されたときに発生するイベント。
+        /// </summary>
+        public event EventHandler<ApplicationSettings>? SettingsChanged;
+
+        /// <summary>
         /// SettingsService クラスの新しいインスタンスを初期化します。
         /// </summary>
         /// <param name="logger">ロガー。</param>
@@ -104,6 +109,7 @@ namespace PageLeaf.Services
                 File.WriteAllText(_settingsFilePath, yamlString);
                 _logger.LogInformation("Settings saved successfully to {SettingsFilePath}.", _settingsFilePath);
                 _currentSettings = settings; // Update current settings after saving
+                SettingsChanged?.Invoke(this, settings);
             }
             catch (Exception ex)
             {

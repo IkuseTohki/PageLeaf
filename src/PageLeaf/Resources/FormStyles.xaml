@@ -1,0 +1,319 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- フォーム用ラベルスタイル -->
+    <Style x:Key="FormLabelStyle" TargetType="Label">
+        <Setter Property="Margin" Value="0,0,0,6" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Medium" />
+        <Setter Property="Foreground" Value="{DynamicResource FormLabelForegroundBrush}" />
+    </Style>
+
+    <!-- フォーム用セクションラベルスタイル (上部に余白あり) -->
+    <Style x:Key="FormSectionLabelStyle"
+           BasedOn="{StaticResource FormLabelStyle}"
+           TargetType="Label">
+        <Setter Property="Margin" Value="0,15,0,0" />
+    </Style>
+
+    <!-- フォーム用テキストボックススタイル -->
+    <Style x:Key="FormTextBoxStyle" TargetType="TextBox">
+        <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="Padding" Value="8" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4"
+                            SnapsToDevicePixels="True">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Focusable="false"
+                                      HorizontalScrollBarVisibility="Hidden"
+                                      VerticalScrollBarVisibility="Hidden" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter TargetName="border" Property="Opacity" Value="0.56" />
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource FormDisabledBackgroundBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryActionBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="true">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryActionBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- フォーム用テキストボックススタイル (Small: 80px) -->
+    <Style x:Key="FormTextBoxSmallStyle"
+           BasedOn="{StaticResource FormTextBoxStyle}"
+           TargetType="TextBox">
+        <Setter Property="Width" Value="80" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- フォーム用テキストボックススタイル (Medium: 300px) -->
+    <Style x:Key="FormTextBoxMediumStyle"
+           BasedOn="{StaticResource FormTextBoxStyle}"
+           TargetType="TextBox">
+        <Setter Property="Width" Value="300" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- フォーム用コンボボックススタイル -->
+    <Style x:Key="FormComboBoxStyle"
+           BasedOn="{StaticResource BaseComboBoxStyle}"
+           TargetType="ComboBox">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="Padding" Value="8,6" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- フォーム用コンボボックススタイル (Medium: 300px) -->
+    <Style x:Key="FormComboBoxMediumStyle"
+           BasedOn="{StaticResource FormComboBoxStyle}"
+           TargetType="ComboBox">
+        <Setter Property="Width" Value="300" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- フォーム用チェックボックススタイル -->
+    <Style x:Key="FormCheckBoxStyle" TargetType="CheckBox">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <BulletDecorator Background="Transparent" SnapsToDevicePixels="true">
+                        <BulletDecorator.Bullet>
+                            <Border x:Name="columnHeaderBorder"
+                                    Width="16"
+                                    Height="16"
+                                    Background="{DynamicResource WindowBackgroundBrush}"
+                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="3">
+                                <Grid>
+                                    <Path x:Name="optionMark"
+                                          Margin="2"
+                                          Data="M1,4.5 L4,7.5 L9,1"
+                                          Stroke="{DynamicResource PrimaryActionBrush}"
+                                          StrokeThickness="2"
+                                          Visibility="Collapsed" />
+                                </Grid>
+                            </Border>
+                        </BulletDecorator.Bullet>
+                        <ContentPresenter Margin="8,0,0,0"
+                                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          RecognizesAccessKey="True"
+                                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" />
+                    </BulletDecorator>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="true">
+                            <Setter TargetName="optionMark" Property="Visibility" Value="Visible" />
+                            <Setter TargetName="columnHeaderBorder" Property="BorderBrush" Value="{DynamicResource PrimaryActionBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter TargetName="columnHeaderBorder" Property="BorderBrush" Value="{DynamicResource PrimaryActionBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter Property="Foreground" Value="{DynamicResource FormDisabledBorderBrush}" />
+                            <Setter TargetName="columnHeaderBorder" Property="Background" Value="{DynamicResource FormDisabledBackgroundBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- フォーム用コンテナスタイル -->
+    <Style x:Key="FormContainerStyle" TargetType="StackPanel">
+        <Setter Property="Margin" Value="10" />
+    </Style>
+
+    <!-- 設定画面タイトル用テキストスタイル -->
+    <Style x:Key="SettingsTitleTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="Margin" Value="10,0,0,20" />
+    </Style>
+
+    <!-- 入力コントロール幅スタイル (Small: 80px) -->
+    <Style x:Key="InputControlSmallStyle" TargetType="Control">
+        <Setter Property="Width" Value="80" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- 入力コントロール幅スタイル (Medium: 300px) -->
+    <Style x:Key="InputControlMediumStyle" TargetType="Control">
+        <Setter Property="Width" Value="300" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- コンパクト入力コントロール幅スタイル (Compact: 80px) -->
+    <Style x:Key="InputControlCompactStyle" TargetType="Control">
+        <Setter Property="Width" Value="80" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- コンパクト入力コントロール幅スタイル (Wide: 120px) -->
+    <Style x:Key="InputControlCompactWideStyle" TargetType="Control">
+        <Setter Property="Width" Value="120" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- セクション見出し用ラベルスタイル -->
+    <Style x:Key="SectionHeaderLabelStyle" TargetType="Label">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource SectionHeaderBorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="Padding" Value="0,0,0,10" />
+    </Style>
+
+    <!-- 最初のセクション用（マージン調整 - HTML案では共通） -->
+    <Style x:Key="FirstSectionHeaderLabelStyle"
+           BasedOn="{StaticResource SectionHeaderLabelStyle}"
+           TargetType="Label">
+        <Setter Property="Margin" Value="0,0,0,20" />
+    </Style>
+
+    <!-- 注釈テキスト用スタイル -->
+    <Style x:Key="AnnotationTextStyle" TargetType="TextBlock">
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        <Setter Property="Margin" Value="0,-12,0,15" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+
+    <!-- コンパクト形式: ラベルスタイル -->
+    <Style x:Key="CompactFormLabelStyle" TargetType="Label">
+        <Setter Property="Margin" Value="0,0,0,4" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+    </Style>
+
+    <!-- コンパクト形式: グループヘッダースタイル -->
+    <Style x:Key="CompactFormGroupHeaderStyle" TargetType="Label">
+        <Setter Property="Margin" Value="0,12,0,8" />
+        <Setter Property="Padding" Value="0,0,0,4" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+    </Style>
+
+    <!-- コンパクト形式: 最初のグループヘッダースタイル -->
+    <Style x:Key="FirstCompactFormGroupHeaderStyle"
+           BasedOn="{StaticResource CompactFormGroupHeaderStyle}"
+           TargetType="Label">
+        <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+
+    <!-- コンパクト形式: TextBoxスタイル -->
+    <Style x:Key="CompactFormTextBoxStyle" TargetType="TextBox">
+        <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="Padding" Value="6,4" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="TextBox">
+                    <Border x:Name="border"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="4"
+                            SnapsToDevicePixels="True">
+                        <ScrollViewer x:Name="PART_ContentHost"
+                                      Focusable="false"
+                                      HorizontalScrollBarVisibility="Hidden"
+                                      VerticalScrollBarVisibility="Hidden" />
+                    </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsEnabled" Value="false">
+                            <Setter TargetName="border" Property="Opacity" Value="0.56" />
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource FormDisabledBackgroundBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="true">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryActionBrush}" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="true">
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryActionBrush}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- コンパクト形式: TextBoxスタイル (Medium: 300px) -->
+    <Style x:Key="CompactFormTextBoxMediumStyle"
+           BasedOn="{StaticResource CompactFormTextBoxStyle}"
+           TargetType="TextBox">
+        <Setter Property="Width" Value="300" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- コンパクト形式: ComboBoxスタイル -->
+    <Style x:Key="CompactFormComboBoxStyle"
+           BasedOn="{StaticResource BaseComboBoxStyle}"
+           TargetType="ComboBox">
+        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="Margin" Value="0,0,0,12" />
+        <Setter Property="Padding" Value="6,4" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+    </Style>
+
+    <!-- コンパクト形式: ComboBoxスタイル (Wide: 120px) -->
+    <Style x:Key="CompactFormComboBoxWideStyle"
+           BasedOn="{StaticResource CompactFormComboBoxStyle}"
+           TargetType="ComboBox">
+        <Setter Property="Width" Value="120" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- コンパクト形式: ComboBoxスタイル (Small: 80px) -->
+    <Style x:Key="CompactFormComboBoxSmallStyle"
+           BasedOn="{StaticResource CompactFormComboBoxStyle}"
+           TargetType="ComboBox">
+        <Setter Property="Width" Value="80" />
+        <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+
+    <!-- コンパクト形式: CheckBoxスタイル -->
+    <Style x:Key="CompactFormCheckBoxStyle"
+           BasedOn="{StaticResource FormCheckBoxStyle}"
+           TargetType="CheckBox">
+        <Setter Property="Margin" Value="0,0,10,12" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+</ResourceDictionary>

@@ -12,8 +12,8 @@
     <Border Width="120"
             Height="28"
             HorizontalAlignment="Left"
-            Background="White"
-            BorderBrush="{StaticResource BorderBrush}"
+            Background="{DynamicResource WindowBackgroundBrush}"
+            BorderBrush="{DynamicResource BorderBrush}"
             BorderThickness="1"
             CornerRadius="4"
             SnapsToDevicePixels="True">
@@ -31,7 +31,7 @@
                     Margin="6,0,0,0"
                     HorizontalAlignment="Left"
                     Background="{Binding ElementName=Root, Path=ColorText, Converter={StaticResource StringToBrushConverter}}"
-                    BorderBrush="{StaticResource BorderBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="1"
                     CornerRadius="2" />
 
@@ -42,7 +42,9 @@
                      VerticalAlignment="Center"
                      Background="Transparent"
                      BorderThickness="0"
+                     CaretBrush="{DynamicResource PrimaryTextBrush}"
                      FontSize="12"
+                     Foreground="{DynamicResource PrimaryTextBrush}"
                      Text="{Binding ElementName=Root, Path=ColorText, UpdateSourceTrigger=PropertyChanged}" />
 
             <!-- ピッカーボタン (マウスオーバー時のみ表示) -->
@@ -67,7 +69,7 @@
                 <Path Width="12"
                       Height="12"
                       Data="{StaticResource PaletteIconGeometry}"
-                      Fill="{StaticResource SecondaryTextBrush}"
+                      Fill="{DynamicResource SecondaryTextBrush}"
                       Stretch="Uniform" />
             </Button>
         </Grid>

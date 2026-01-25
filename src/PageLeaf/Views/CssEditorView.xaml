@@ -13,7 +13,7 @@
         <Style BasedOn="{StaticResource HorizontalTabRadioButtonStyle}" TargetType="RadioButton" />
     </UserControl.Resources>
 
-    <Grid Background="{StaticResource PanelBackgroundBrush}">
+    <Grid Background="{DynamicResource PanelBackgroundBrush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -22,7 +22,7 @@
         <!-- Header Area (File Selector & Toolbar) -->
         <Border Grid.Row="0"
                 Padding="2,12,2,0"
-                BorderBrush="{StaticResource BorderBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="0,0,0,1">
             <StackPanel>
                 <!-- Controls Row -->
@@ -52,7 +52,7 @@
                             <Path Width="14"
                                   Height="14"
                                   Data="{StaticResource SaveIconGeometry}"
-                                  Fill="{StaticResource SecondaryTextBrush}"
+                                  Fill="{DynamicResource SecondaryTextBrush}"
                                   Stretch="Uniform" />
                         </Button>
                         <Button Command="{Binding ResetCommand}"
@@ -61,7 +61,7 @@
                             <Path Width="14"
                                   Height="14"
                                   Data="{StaticResource RefreshIconGeometry}"
-                                  Fill="{StaticResource SecondaryTextBrush}"
+                                  Fill="{DynamicResource SecondaryTextBrush}"
                                   Stretch="Uniform" />
                         </Button>
                     </StackPanel>
@@ -149,7 +149,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignLeftIconGeometry}"
-                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="center"
@@ -159,7 +159,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignCenterIconGeometry}"
-                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="right"
@@ -169,7 +169,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignRightIconGeometry}"
-                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                     </StackPanel>
@@ -267,7 +267,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignLeftIconGeometry}"
-                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="center"
@@ -277,7 +277,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignCenterIconGeometry}"
-                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="right"
@@ -287,7 +287,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignRightIconGeometry}"
-                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                     </StackPanel>
@@ -302,6 +302,8 @@
                     <Label Content="マーカー設定" Style="{StaticResource FirstCompactFormGroupHeaderStyle}" />
                     <Label Content="箇条書き (ul)" Style="{StaticResource CompactFormLabelStyle}" />
                     <ListBox Margin="0,0,0,8"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"
                              ItemContainerStyle="{StaticResource ListMarkerListBoxItemStyle}"
                              ItemTemplate="{StaticResource ListMarkerItemTemplate}"
                              ItemsSource="{Binding AvailableListMarkerTypes}"
@@ -315,6 +317,8 @@
 
                     <Label Content="番号付き (ol)" Style="{StaticResource CompactFormLabelStyle}" />
                     <ListBox Margin="0,0,0,8"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"
                              ItemContainerStyle="{StaticResource ListMarkerListBoxItemStyle}"
                              ItemTemplate="{StaticResource ListMarkerItemTemplate}"
                              ItemsSource="{Binding AvailableNumberedListMarkerTypes}"
@@ -364,7 +368,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource BorderSolidIconGeometry}"
-                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="dotted"
@@ -374,7 +378,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource BorderDottedIconGeometry}"
-                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="dashed"
@@ -384,7 +388,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource BorderDashedIconGeometry}"
-                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                     </StackPanel>
@@ -415,7 +419,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignLeftIconGeometry}"
-                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="center"
@@ -425,7 +429,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignCenterIconGeometry}"
-                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="right"
@@ -435,7 +439,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignRightIconGeometry}"
-                                  Fill="{StaticResource PrimaryTextBrush}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                     </StackPanel>

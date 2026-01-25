@@ -14,6 +14,7 @@
         Width="1000"
         Height="600"
         behaviors:FileDropBehavior.Command="{Binding OpenFileByPathCommand}"
+        Background="{DynamicResource WindowBackgroundBrush}"
         Icon="{StaticResource AppIconImage}"
         mc:Ignorable="d">
     <Window.InputBindings>
@@ -147,7 +148,7 @@
                                 ToolTip="表示モード切替 (Alt+Shift+←/→)">
                             <Path Width="16"
                                   Height="16"
-                                  Fill="{StaticResource AccentBlueBrush}"
+                                  Fill="{DynamicResource AccentBlueBrush}"
                                   Stretch="Uniform">
                                 <Path.Style>
                                     <Style TargetType="Path">
@@ -186,7 +187,7 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource ListIconGeometry}"
-                                  Fill="{StaticResource AccentBlueBrush}"
+                                  Fill="{DynamicResource AccentBlueBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                     </StackPanel>
@@ -203,8 +204,8 @@
                     <Border MinWidth="200"
                             MaxHeight="400"
                             Padding="5"
-                            Background="{StaticResource PanelBackgroundBrush}"
-                            BorderBrush="{StaticResource BorderBrush}"
+                            Background="{DynamicResource PanelBackgroundBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
                             BorderThickness="1"
                             CornerRadius="4">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -256,7 +257,7 @@
                         Style="{StaticResource ToggleHandleButtonStyle}">
                     <Path Width="8"
                           Height="8"
-                          Fill="{StaticResource PrimaryTextBrush}"
+                          Fill="{DynamicResource PrimaryTextBrush}"
                           Stretch="Uniform">
                         <Path.Style>
                             <Style TargetType="Path">

@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <SyntaxDefinition name="Markdown" extensions=".md" xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
-	<Color name="Heading" foreground="#007ACC" fontWeight="bold" />
+	<Color name="Heading" foreground="#000000" fontWeight="bold" />
 	<Color name="Emphasis" fontStyle="italic" />
 	<Color name="StrongEmphasis" fontWeight="bold" />
-	<Color name="Code" foreground="#CE9178" />
-	<Color name="BlockQuote" foreground="#608B4E" />
-	<Color name="Link" foreground="#569CD6" />
-	<Color name="Image" foreground="#569CD6" />
-    <Color name="ListMarker" foreground="#DCDCAA" />
+	<Color name="Code" foreground="#000000" />
+	<Color name="BlockQuote" foreground="#000000" />
+	<Color name="Link" foreground="#000000" />
+	<Color name="Image" foreground="#000000" />
+    <Color name="ListMarker" foreground="#000000" />
 
 	<RuleSet>
 		<Span color="Code" multiline="true">

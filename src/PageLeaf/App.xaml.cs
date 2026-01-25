@@ -11,6 +11,9 @@ using System.Diagnostics;
 using System.IO;
 using System.Windows;
 using AngleSharp.Css.Values;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
+using Microsoft.Win32;
 
 namespace PageLeaf
 {
@@ -19,6 +22,13 @@ namespace PageLeaf
     /// </summary>
     public partial class App : Application
     {
+        private ISettingsService? _settingsService;
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+
         /// <summary>
         /// アプリケーションのベースディレクトリを取得します。
         /// SingleFile発行時は実行ファイルの場所、それ以外は AppDomain.CurrentDomain.BaseDirectory を返します。
@@ -109,6 +119,8 @@ namespace PageLeaf
                     services.AddSingleton<IFileService, FileService>();
                     services.AddSingleton<ICssService, CssService>();
                     services.AddSingleton<ISettingsService>(sp => new SettingsService(sp.GetRequiredService<ILogger<SettingsService>>(), App.BaseDirectory));
+                    services.AddSingleton<ISystemThemeProvider, SystemThemeProvider>();
+                    services.AddSingleton<IThemeService, ThemeService>();
                     services.AddSingleton<IDialogService, DialogService>();
                     services.AddSingleton<IMarkdownService, MarkdownService>();
                     services.AddSingleton<IEditorService, EditorService>(); // EditorService を登録
@@ -143,7 +155,23 @@ namespace PageLeaf
             {
                 await AppHost.StartAsync();
 
+                var settingsService = AppHost.Services.GetRequiredService<ISettingsService>();
+                var themeService = AppHost.Services.GetRequiredService<IThemeService>();
+
+                _settingsService = settingsService;
+
+                // OSのテーマ変更（ライト/ダーク）を監視
+                SystemEvents.UserPreferenceChanged += OnUserPreferenceChanged;
+
+                // 先に MainWindow を生成（DI経由）
                 var mainWindow = AppHost.Services.GetRequiredService<MainWindow>();
+
+                // テーマの初期適用（MainWindow 生成後なのでタイトルバーにも適用される）
+                ApplyTheme(settingsService.CurrentSettings.Theme);
+
+                // 設定変更時のテーマ適用
+                settingsService.SettingsChanged += (s, settings) => ApplyTheme(settings.Theme);
+
                 mainWindow.Show();
             }
             catch (Exception ex)
@@ -159,6 +187,8 @@ namespace PageLeaf
         /// <param name="e">終了イベントのデータ。</param>
         protected override async void OnExit(ExitEventArgs e)
         {
+            SystemEvents.UserPreferenceChanged -= OnUserPreferenceChanged;
+
             if (AppHost != null)
             {
                 await AppHost.StopAsync();
@@ -168,6 +198,86 @@ namespace PageLeaf
             base.OnExit(e);
         }
 
+        /// <summary>
+        /// Windowsの設定（テーマなど）が変更された際に呼び出されます。
+        /// </summary>
+        private void OnUserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+        {
+            if (e.Category == UserPreferenceCategory.General || e.Category == UserPreferenceCategory.VisualStyle)
+            {
+                if (_settingsService?.CurrentSettings.Theme == Models.AppTheme.System)
+                {
+                    // UIスレッドで実行
+                    Dispatcher.Invoke(() => ApplyTheme(Models.AppTheme.System));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 指定されたテーマをアプリケーションに適用します。
+        /// </summary>
+        /// <param name="theme">適用するテーマ。</param>
+        private void ApplyTheme(Models.AppTheme theme)
+        {
+            var themeService = AppHost!.Services.GetRequiredService<IThemeService>();
+            var actualTheme = themeService.GetActualTheme();
+
+            var themeUri = actualTheme == Models.AppTheme.Dark
+                ? new Uri("Resources/DarkColors.xaml", UriKind.Relative)
+                : new Uri("Resources/LightColors.xaml", UriKind.Relative);
+
+            try
+            {
+                // MergedDictionariesの最初のリソース（ThemeColors）を差し替える
+                var dictionaries = Application.Current.Resources.MergedDictionaries;
+                if (dictionaries.Count > 0)
+                {
+                    dictionaries[0] = new ResourceDictionary { Source = themeUri };
+                }
+
+                // タイトルバーのダークモード対応 (Windows 11)
+                UpdateTitleBarTheme(actualTheme == Models.AppTheme.Dark);
+            }
+            catch (Exception ex)
+            {
+                var logger = AppHost?.Services.GetService<ILogger<App>>();
+                logger?.LogError(ex, "Failed to apply theme: {ThemeUri}", themeUri);
+            }
+        }
+
+        // GetSystemTheme メソッドは ThemeService に移行したため削除可能ですが、
+        // 既存の OnUserPreferenceChanged 等で使われている場合は適宜修正します。
+
+        /// <summary>
+        /// ウィンドウのタイトルバーのテーマを更新します。
+        /// </summary>
+        private void UpdateTitleBarTheme(bool isDark)
+        {
+            if (MainWindow == null) return;
+
+            var helper = new WindowInteropHelper(MainWindow);
+            var hwnd = helper.Handle;
+
+            if (hwnd != IntPtr.Zero)
+            {
+                int useImmersiveDarkMode = isDark ? 1 : 0;
+                DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, ref useImmersiveDarkMode, sizeof(int));
+            }
+            else
+            {
+                // ウィンドウハンドルが未作成の場合は、作成完了後に一度だけ適用するイベントを登録
+                // += を重ねないよう、一度削除してから追加するか、フラグで制御する
+                EventHandler handler = null!;
+                handler = (s, e) =>
+                {
+                    MainWindow.SourceInitialized -= handler;
+                    var h = new WindowInteropHelper(MainWindow).Handle;
+                    int val = isDark ? 1 : 0;
+                    DwmSetWindowAttribute(h, DWMWA_USE_IMMERSIVE_DARK_MODE, ref val, sizeof(int));
+                };
+                MainWindow.SourceInitialized += handler;
+            }
+        }
         /// <summary>
         /// アプリケーション全体でハンドルされなかった例外を補足し、ログに記録します。
         /// </summary>

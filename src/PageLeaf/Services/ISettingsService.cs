@@ -9,6 +9,11 @@ namespace PageLeaf.Services
     public interface ISettingsService
     {
         /// <summary>
+        /// 設定が変更されたときに発生するイベント。
+        /// </summary>
+        event System.EventHandler<ApplicationSettings>? SettingsChanged;
+
+        /// <summary>
         /// 現在メモリ上にある設定オブジェクトを取得します。
         /// </summary>
         ApplicationSettings CurrentSettings { get; }

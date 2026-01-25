@@ -16,7 +16,7 @@
     <Expander Header="FRONT MATTER"
               IsExpanded="{Binding IsExpanded}"
               Style="{StaticResource FrontMatterExpanderStyle}">
-        <Grid Background="{StaticResource PanelBackgroundBrush}">
+        <Grid Background="{DynamicResource PanelBackgroundBrush}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />

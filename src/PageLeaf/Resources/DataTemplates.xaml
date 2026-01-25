@@ -18,11 +18,12 @@
                          BorderThickness="0"
                          FontSize="10"
                          FontWeight="Bold"
-                         Foreground="{StaticResource SecondaryTextBrush}"
+                         Foreground="{DynamicResource SecondaryTextBrush}"
                          IsReadOnly="{Binding IsKeyReadOnly}"
                          Text="{Binding Key, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                     <TextBox.Style>
                         <Style TargetType="TextBox">
+                            <Setter Property="CaretBrush" Value="{DynamicResource PrimaryTextBrush}" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsKeyReadOnly}" Value="True">
                                     <Setter Property="Opacity" Value="0.7" />
@@ -42,7 +43,7 @@
                     <Path Width="8"
                           Height="8"
                           Data="{StaticResource CloseIconGeometry}"
-                          Fill="{StaticResource SecondaryActionBrush}"
+                          Fill="{DynamicResource SecondaryActionBrush}"
                           Stretch="Uniform" />
                 </Button>
             </Grid>
@@ -53,8 +54,9 @@
                            Padding="0,2"
                            FontSize="12"
                            FontStyle="Italic"
-                           Foreground="Gray"
+                           Foreground="{DynamicResource SecondaryTextBrush}"
                            IsHitTestVisible="False"
+                           Opacity="0.6"
                            Text="{Binding Placeholder}">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
@@ -72,9 +74,11 @@
                 </TextBlock>
                 <TextBox Padding="0,2"
                          Background="Transparent"
-                         BorderBrush="{StaticResource BorderBrush}"
+                         BorderBrush="{DynamicResource BorderBrush}"
                          BorderThickness="0,0,0,1"
+                         CaretBrush="{DynamicResource PrimaryTextBrush}"
                          FontSize="12"
+                         Foreground="{DynamicResource PrimaryTextBrush}"
                          IsReadOnly="{Binding IsValueReadOnly}"
                          Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </Grid>
@@ -96,7 +100,7 @@
                          BorderThickness="0"
                          FontSize="10"
                          FontWeight="Bold"
-                         Foreground="{StaticResource SecondaryTextBrush}"
+                         Foreground="{DynamicResource SecondaryTextBrush}"
                          IsReadOnly="True"
                          Text="{Binding Key, Mode=OneWay}" />
             </Grid>
@@ -113,14 +117,14 @@
                         <DataTemplate>
                             <Border Margin="0,2,4,2"
                                     Padding="6,1,4,1"
-                                    Background="#1A0078D4"
-                                    BorderBrush="{StaticResource AccentBlueBrush}"
+                                    Background="{DynamicResource TagBackgroundBrush}"
+                                    BorderBrush="{DynamicResource AccentBlueBrush}"
                                     BorderThickness="1"
                                     CornerRadius="10">
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock VerticalAlignment="Center"
                                                FontSize="10"
-                                               Foreground="{StaticResource AccentBlueBrush}"
+                                               Foreground="{DynamicResource AccentBlueBrush}"
                                                Text="{Binding}" />
                                     <Button Margin="4,0,0,0"
                                             VerticalAlignment="Center"
@@ -135,7 +139,7 @@
                                         <Path Width="6"
                                               Height="6"
                                               Data="{StaticResource CloseIconGeometry}"
-                                              Fill="{StaticResource AccentBlueBrush}"
+                                              Fill="{DynamicResource AccentBlueBrush}"
                                               Stretch="Uniform" />
                                     </Button>
                                 </StackPanel>
@@ -146,8 +150,12 @@
                 <!-- タグ追加用入力欄 -->
                 <TextBox Margin="0,4,0,0"
                          Padding="2"
+                         Background="Transparent"
+                         BorderBrush="{DynamicResource BorderBrush}"
+                         BorderThickness="0,0,0,1"
+                         CaretBrush="{DynamicResource PrimaryTextBrush}"
                          FontSize="11"
-                         Foreground="{StaticResource SecondaryTextBrush}"
+                         Foreground="{DynamicResource PrimaryTextBrush}"
                          Text="{Binding NewTagText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                          ToolTip="タグを入力してEnterで追加">
                     <TextBox.InputBindings>
@@ -170,6 +178,7 @@
                 Command="{Binding DataContext.NavigateToHeaderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                 CommandParameter="{Binding}">
             <TextBlock Margin="{Binding Level, Converter={StaticResource LevelToMarginConverter}}"
+                       Foreground="{DynamicResource PrimaryTextBrush}"
                        Text="{Binding Text}"
                        TextTrimming="CharacterEllipsis" />
         </Button>
@@ -177,18 +186,21 @@
 
     <!-- 表示モード 選択アイテム -->
     <DataTemplate x:Key="DisplayModeItemTemplate">
-        <TextBlock Text="{Binding Converter={StaticResource DisplayModeToStringConverter}}" />
+        <TextBlock Foreground="{DynamicResource PrimaryTextBrush}" Text="{Binding Converter={StaticResource DisplayModeToStringConverter}}" />
     </DataTemplate>
 
     <!-- CSSファイル 選択アイテム -->
     <DataTemplate x:Key="CssFileItemTemplate">
-        <TextBlock Text="{Binding}" TextTrimming="CharacterEllipsis" />
+        <TextBlock Foreground="{DynamicResource PrimaryTextBrush}"
+                   Text="{Binding}"
+                   TextTrimming="CharacterEllipsis" />
     </DataTemplate>
 
     <!-- リストマーカー選択アイテム -->
     <DataTemplate x:Key="ListMarkerItemTemplate">
         <TextBlock Margin="8,6"
                    HorizontalAlignment="Center"
+                   Foreground="{DynamicResource PrimaryTextBrush}"
                    Text="{Binding Converter={StaticResource ListMarkerTypeToContentConverter}}"
                    ToolTip="{Binding}" />
     </DataTemplate>
@@ -197,7 +209,7 @@
     <DataTemplate x:Key="FrontMatterExpanderHeaderTemplate">
         <TextBlock FontSize="11"
                    FontWeight="Bold"
-                   Foreground="{StaticResource PrimaryTextBrush}"
+                   Foreground="{DynamicResource PrimaryTextBrush}"
                    Text="{Binding}"
                    TextOptions.TextFormattingMode="Display" />
     </DataTemplate>
@@ -212,25 +224,29 @@
             </Grid.ColumnDefinitions>
             <Border Grid.Column="0"
                     Margin="0,0,5,0"
-                    Background="White"
-                    BorderBrush="{StaticResource BorderBrush}"
+                    Background="{DynamicResource WindowBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="1"
                     CornerRadius="3">
                 <TextBox Padding="4,2"
                          Background="Transparent"
                          BorderThickness="0"
+                         CaretBrush="{DynamicResource PrimaryTextBrush}"
                          FontSize="12"
+                         Foreground="{DynamicResource PrimaryTextBrush}"
                          Text="{Binding Key, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </Border>
             <Border Grid.Column="1"
-                    Background="White"
-                    BorderBrush="{StaticResource BorderBrush}"
+                    Background="{DynamicResource WindowBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="1"
                     CornerRadius="3">
                 <TextBox Padding="4,2"
                          Background="Transparent"
                          BorderThickness="0"
+                         CaretBrush="{DynamicResource PrimaryTextBrush}"
                          FontSize="12"
+                         Foreground="{DynamicResource PrimaryTextBrush}"
                          Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
             </Border>
             <Button Grid.Column="2"
@@ -242,7 +258,7 @@
                 <Path Width="10"
                       Height="10"
                       Data="{StaticResource CloseIconGeometry}"
-                      Fill="{StaticResource SecondaryActionBrush}"
+                      Fill="{DynamicResource SecondaryActionBrush}"
                       Stretch="Uniform" />
             </Button>
         </Grid>

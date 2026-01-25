@@ -73,6 +73,11 @@ namespace PageLeaf.Models
         /// </summary>
         public ResourceSource LibraryResourceSource { get; set; } = ResourceSource.Local;
 
+        /// <summary>
+        /// アプリケーションの表示テーマ。
+        /// </summary>
+        public AppTheme Theme { get; set; } = AppTheme.System;
+
         // Default constructor for deserialization
         public ApplicationSettings() { }
     }

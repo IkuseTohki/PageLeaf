@@ -1,0 +1,92 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- カラー値の定義 (アニメーション等で直接使用) -->
+    <Color x:Key="PrimaryActionColor">#0078D4</Color>
+    <Color x:Key="PrimaryActionHoverColor">#0063B1</Color>
+    <Color x:Key="SwitchOffColor">#FFDDDDDD</Color>
+    <Color x:Key="SecondaryTextColor">#666666</Color>
+
+    <!-- 基本・レイアウト -->
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="WindowBorderBrush" Color="#DDDDDD" />
+    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#F7F9FA" />
+    <SolidColorBrush x:Key="BorderBrush" Color="#E1E1E1" />
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#333333" />
+    <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}" />
+    <SolidColorBrush x:Key="AnnotationTextBrush" Color="{StaticResource SecondaryTextColor}" />
+
+    <!-- アクション -->
+    <SolidColorBrush x:Key="PrimaryActionBrush" Color="{StaticResource PrimaryActionColor}" />
+    <SolidColorBrush x:Key="PrimaryActionHoverBrush" Color="{StaticResource PrimaryActionHoverColor}" />
+    <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource PrimaryActionColor}" />
+    <SolidColorBrush x:Key="SecondaryActionBrush" Color="{StaticResource SecondaryTextColor}" />
+
+    <!-- サイドバー -->
+    <SolidColorBrush x:Key="SidebarHoverBrush" Color="#EAEAEA" />
+    <SolidColorBrush x:Key="SidebarSelectedBrush" Color="#E5F1FB" />
+    <SolidColorBrush x:Key="SidebarSelectedTextBrush" Color="#005FB8" />
+
+    <!-- ComboBox -->
+    <SolidColorBrush x:Key="ComboBoxBackgroundBrush" Color="#FFF2F2F2" />
+    <SolidColorBrush x:Key="ComboBoxHoverBackgroundBrush" Color="#FFE5E5E5" />
+    <SolidColorBrush x:Key="ComboBoxPressedBackgroundBrush" Color="#FFD5D5D5" />
+    <SolidColorBrush x:Key="ComboBoxDropDownBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="ComboBoxItemHoverBackgroundBrush" Color="#FFF0F0F0" />
+    <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#FFCCCCCC" />
+
+    <!-- Button -->
+    <SolidColorBrush x:Key="ButtonSecondaryBackgroundBrush" Color="#FFE0E0E0" />
+    <SolidColorBrush x:Key="ButtonSecondaryHoverBackgroundBrush" Color="#FFD0D0D0" />
+    <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="#FFE0E0E0" />
+    <SolidColorBrush x:Key="ButtonHoverBorderBrush" Color="#FFACACAC" />
+    <SolidColorBrush x:Key="ButtonCheckedBackgroundBrush" Color="#FFD0D0D0" />
+    <SolidColorBrush x:Key="ButtonCheckedBorderBrush" Color="#FF888888" />
+    <SolidColorBrush x:Key="ButtonMouseOverBackgroundBrush" Color="#FFF8F8F8" />
+
+    <!-- Floating Button / ScrollBar -->
+    <SolidColorBrush x:Key="FloatingButtonHoverBackgroundBrush" Color="#1A000000" />
+    <SolidColorBrush x:Key="FloatingButtonCheckedBackgroundBrush" Color="#33000000" />
+    <SolidColorBrush x:Key="ScrollBarThumbBrush" Color="#4D000000" />
+    <SolidColorBrush x:Key="ScrollBarThumbHoverBrush" Color="#80000000" />
+    <SolidColorBrush x:Key="ScrollBarThumbDraggingBrush" Color="#A6000000" />
+
+    <!-- ToolBar / Form / Expander -->
+    <SolidColorBrush x:Key="ToolBarBackgroundBrush" Color="#FFE0E0E0" />
+    <SolidColorBrush x:Key="ToolBarButtonHoverBackgroundBrush" Color="#FFC5C5C5" />
+    <SolidColorBrush x:Key="ToolBarButtonHoverBorderBrush" Color="#FF707070" />
+    <SolidColorBrush x:Key="FormLabelForegroundBrush" Color="#444444" />
+    <SolidColorBrush x:Key="FormDisabledBorderBrush" Color="#FFADADAD" />
+    <SolidColorBrush x:Key="FormDisabledBackgroundBrush" Color="#FFF4F4F4" />
+    <SolidColorBrush x:Key="SectionHeaderBorderBrush" Color="#EEEEEE" />
+    <SolidColorBrush x:Key="ExpanderBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="ExpanderHeaderBackgroundBrush" Color="#F7F9FA" />
+
+    <!-- Switch / Segmented Button -->
+    <SolidColorBrush x:Key="SwitchOffBrush" Color="{StaticResource SwitchOffColor}" />
+    <SolidColorBrush x:Key="SegmentedButtonForegroundBrush" Color="#FF666666" />
+    <SolidColorBrush x:Key="SegmentedButtonHoverBackgroundBrush" Color="#FFE0E0E0" />
+
+    <!-- Markdown Syntax Colors -->
+    <SolidColorBrush x:Key="MDHeadingBrush" Color="#007ACC" />
+    <SolidColorBrush x:Key="MDCodeBrush" Color="#CE9178" />
+    <SolidColorBrush x:Key="MDQuoteBrush" Color="#608B4E" />
+    <SolidColorBrush x:Key="MDLinkBrush" Color="#569CD6" />
+    <SolidColorBrush x:Key="MDListMarkerBrush" Color="#333333" />
+
+    <!-- Menu Bar -->
+    <SolidColorBrush x:Key="MenuBarBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="MenuBarForegroundBrush" Color="#333333" />
+    <SolidColorBrush x:Key="MenuHoverBackgroundBrush" Color="#EAEAEA" />
+    <SolidColorBrush x:Key="MenuSeparatorBrush" Color="#E1E1E1" />
+    <SolidColorBrush x:Key="MenuDropdownBackgroundBrush" Color="White" />
+    <SolidColorBrush x:Key="MenuDropdownBorderBrush" Color="#DDDDDD" />
+
+    <!-- Other -->
+    <SolidColorBrush x:Key="SelectionBackgroundBrush" Color="#0078D4" />
+    <SolidColorBrush x:Key="SelectionForegroundBrush" Color="White" />
+    <SolidColorBrush x:Key="ScrollButtonIconBrush" Color="{StaticResource SecondaryTextColor}" />
+    <SolidColorBrush x:Key="ScrollRepeatButtonHoverBackgroundBrush" Color="#15000000" />
+    <SolidColorBrush x:Key="ScrollRepeatButtonPressedBackgroundBrush" Color="#25000000" />
+    <SolidColorBrush x:Key="TagBackgroundBrush" Color="#1A0078D4" />
+
+</ResourceDictionary>

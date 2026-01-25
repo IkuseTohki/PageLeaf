@@ -68,5 +68,93 @@ namespace PageLeaf.Tests.ViewModels
             Assert.AreEqual("first", _settings.AdditionalFrontMatter[0].Key);
             Assert.AreEqual("second", _settings.AdditionalFrontMatter[1].Key);
         }
+
+        [TestMethod]
+        public void Save_ShouldSaveTheme()
+        {
+            // テスト観点: テーマ設定が正しく保存されることを確認する。
+
+            // Arrange
+            var viewModel = new SettingsViewModel(_settingsServiceMock.Object);
+            viewModel.Theme = AppTheme.Dark;
+
+            // Act
+            viewModel.SaveCommand.Execute(null);
+
+            // Assert
+            Assert.AreEqual(AppTheme.Dark, _settings.Theme);
+            _settingsServiceMock.Verify(x => x.SaveSettings(It.IsAny<ApplicationSettings>()), Times.Once);
+        }
+
+        [TestMethod]
+        public void Theme_ShouldInitializeFromSettings()
+        {
+            // テスト観点: ビューモデル初期化時に設定からテーマが正しく読み込まれることを確認する。
+
+            // Arrange
+            _settings.Theme = AppTheme.Light;
+            
+            // Act
+            var viewModel = new SettingsViewModel(_settingsServiceMock.Object);
+
+            // Assert
+            Assert.AreEqual(AppTheme.Light, viewModel.Theme);
+        }
+
+        [TestMethod]
+        public void IsCdnEnabled_ShouldSyncWithLibraryResourceSource()
+        {
+            // テスト観点: IsCdnEnabled と LibraryResourceSource が互いに連動することを確認する。
+
+            // Arrange
+            var viewModel = new SettingsViewModel(_settingsServiceMock.Object);
+
+            // Act & Assert (Local -> Cdn via IsCdnEnabled)
+            viewModel.IsCdnEnabled = true;
+            Assert.AreEqual(ResourceSource.Cdn, viewModel.LibraryResourceSource);
+
+            // Act & Assert (Cdn -> Local via LibraryResourceSource)
+            viewModel.LibraryResourceSource = ResourceSource.Local;
+            Assert.IsFalse(viewModel.IsCdnEnabled);
+        }
+
+        [TestMethod]
+        public void Save_ShouldSaveBasicProperties()
+        {
+            // テスト観点: 基本的な数値や真偽値の設定が正しく保存されることを確認する。
+
+            // Arrange
+            var viewModel = new SettingsViewModel(_settingsServiceMock.Object);
+            viewModel.EditorFontSize = 20.5;
+            viewModel.ShowTitleInPreview = false;
+            viewModel.IndentSize = 2;
+            viewModel.UseSpacesForIndent = false;
+            viewModel.AutoInsertFrontMatter = false;
+
+            // Act
+            viewModel.SaveCommand.Execute(null);
+
+            // Assert
+            Assert.AreEqual(20.5, _settings.EditorFontSize);
+            Assert.IsFalse(_settings.ShowTitleInPreview);
+            Assert.AreEqual(2, _settings.IndentSize);
+            Assert.IsFalse(_settings.UseSpacesForIndent);
+            Assert.IsFalse(_settings.AutoInsertFrontMatter);
+        }
+
+        [TestMethod]
+        public void CurrentCategory_ShouldChange()
+        {
+            // テスト観点: カテゴリの切り替えができることを確認する。
+
+            // Arrange
+            var viewModel = new SettingsViewModel(_settingsServiceMock.Object);
+            
+            // Act
+            viewModel.CurrentCategory = SettingsCategory.Editor;
+
+            // Assert
+            Assert.AreEqual(SettingsCategory.Editor, viewModel.CurrentCategory);
+        }
     }
 }

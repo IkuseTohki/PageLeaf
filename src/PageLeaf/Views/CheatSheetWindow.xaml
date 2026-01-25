@@ -50,11 +50,11 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="{StaticResource PrimaryActionBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource PrimaryActionBrush}" />
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource AccentBlueBrush}" />
-                                <Setter Property="Foreground" Value="{StaticResource AccentBlueBrush}" />
+                                <Setter TargetName="Border" Property="BorderBrush" Value="{DynamicResource AccentBlueBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource AccentBlueBrush}" />
                                 <Setter Property="FontWeight" Value="SemiBold" />
                             </Trigger>
                         </ControlTemplate.Triggers>
@@ -79,12 +79,12 @@
         <DataTemplate x:Key="GroupHeaderTemplate">
             <Border Margin="0,20,0,8"
                     Padding="0,0,0,8"
-                    Background="White"
-                    BorderBrush="{StaticResource BorderBrush}"
+                    Background="Transparent"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="0,0,0,1">
                 <TextBlock FontSize="14"
                            FontWeight="Bold"
-                           Foreground="{StaticResource PrimaryTextBrush}"
+                           Foreground="{DynamicResource PrimaryTextBrush}"
                            Text="{Binding Name}" />
             </Border>
         </DataTemplate>
@@ -93,8 +93,8 @@
         <DataTemplate x:Key="CheatSheetItemTemplate">
             <Border Margin="0,2"
                     Padding="10,8"
-                    Background="White"
-                    BorderBrush="#F0F0F0"
+                    Background="{DynamicResource WindowBackgroundBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"
                     BorderThickness="1"
                     CornerRadius="4">
                 <Grid>
@@ -113,25 +113,25 @@
                             Padding="8,4"
                             HorizontalAlignment="Left"
                             VerticalAlignment="Center"
-                            Background="#F5F5F5"
+                            Background="{DynamicResource PanelBackgroundBrush}"
                             CornerRadius="3">
                         <TextBlock FontFamily="Consolas, monospace"
                                    FontSize="12"
                                    FontWeight="SemiBold"
-                                   Foreground="#333"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
                                    Text="{Binding Syntax}" />
                     </Border>
 
                     <!-- Description & Note -->
                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
                         <TextBlock FontSize="13"
-                                   Foreground="{StaticResource PrimaryTextBrush}"
+                                   Foreground="{DynamicResource PrimaryTextBrush}"
                                    Text="{Binding Description}"
                                    TextWrapping="Wrap" />
                         <TextBlock x:Name="NoteText"
                                    Margin="0,2,0,0"
                                    FontSize="11"
-                                   Foreground="#999"
+                                   Foreground="{DynamicResource SecondaryTextBrush}"
                                    Text="{Binding Note}"
                                    TextWrapping="Wrap" />
                     </StackPanel>
@@ -143,7 +143,7 @@
                                VerticalAlignment="Center"
                                FontFamily="Consolas, monospace"
                                FontSize="11"
-                               Foreground="#BBB"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                Text="{Binding RelatedShortcut}" />
                 </Grid>
             </Border>
@@ -173,8 +173,8 @@
     </Window.InputBindings>
 
 
-    <Border Background="{StaticResource WindowBackgroundBrush}"
-            BorderBrush="{StaticResource WindowBorderBrush}"
+    <Border Background="{DynamicResource WindowBackgroundBrush}"
+            BorderBrush="{DynamicResource WindowBorderBrush}"
             BorderThickness="1"
             CornerRadius="8">
         <Border.Effect>
@@ -246,7 +246,7 @@
                     <TextBlock VerticalAlignment="Center"
                                FontSize="11"
                                FontWeight="Light"
-                               Foreground="#AAA"
+                               Foreground="{DynamicResource SecondaryTextBrush}"
                                Text="Cheat Sheet" />
                 </StackPanel>
 
@@ -264,14 +264,14 @@
                           HorizontalAlignment="Center"
                           VerticalAlignment="Center"
                           Data="{StaticResource CloseIconGeometry}"
-                          Fill="#999"
+                          Fill="{DynamicResource SecondaryTextBrush}"
                           Stretch="Uniform" />
                 </Button>
             </Grid>
 
             <Separator Grid.Row="0"
                        VerticalAlignment="Bottom"
-                       Background="{StaticResource BorderBrush}" />
+                       Background="{DynamicResource BorderBrush}" />
 
             <!-- Content Area -->
             <Grid Grid.Row="1" Margin="20,10,20,20">

@@ -35,6 +35,10 @@
                 <StackPanel Margin="10,20">
                     <TextBlock Style="{StaticResource SettingsTitleTextStyle}" Text="設定" />
 
+                    <RadioButton Content="外観"
+                                 IsChecked="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Appearance}}"
+                                 Style="{StaticResource SidebarMenuItemStyle}"
+                                 Tag="🎨" />
                     <RadioButton Content="エディタ"
                                  IsChecked="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Editor}}"
                                  Style="{StaticResource SidebarMenuItemStyle}"
@@ -46,7 +50,7 @@
                     <RadioButton Content="表示 (コード)"
                                  IsChecked="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Code}}"
                                  Style="{StaticResource SidebarMenuItemStyle}"
-                                 Tag="🎨" />
+                                 Tag="🧩" />
                 </StackPanel>
             </Border>
 
@@ -56,6 +60,33 @@
                           Margin="25,25,25,10"
                           VerticalScrollBarVisibility="Auto">
                 <Grid>
+                    <!-- Appearance Settings -->
+                    <StackPanel Visibility="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Appearance}}">
+                        <Label Content="外観設定" Style="{StaticResource FirstSectionHeaderLabelStyle}" />
+
+                        <Label Content="アプリケーションのテーマ" Style="{StaticResource FormLabelStyle}" />
+                        <StackPanel Margin="0,0,0,20" Orientation="Horizontal">
+                            <RadioButton Width="80"
+                                         Height="28"
+                                         Content="システム"
+                                         IsChecked="{Binding Theme, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static models:AppTheme.System}}"
+                                         Style="{StaticResource SegmentedButtonStyle}" />
+                            <RadioButton Width="80"
+                                         Height="28"
+                                         Margin="10,0,0,0"
+                                         Content="ライト"
+                                         IsChecked="{Binding Theme, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static models:AppTheme.Light}}"
+                                         Style="{StaticResource SegmentedButtonStyle}" />
+                            <RadioButton Width="80"
+                                         Height="28"
+                                         Margin="10,0,0,0"
+                                         Content="ダーク"
+                                         IsChecked="{Binding Theme, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static models:AppTheme.Dark}}"
+                                         Style="{StaticResource SegmentedButtonStyle}" />
+                        </StackPanel>
+                        <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※アプリケーション全体の配色モードを選択します。" />
+                    </StackPanel>
+
                     <!-- Editor Settings -->
                     <StackPanel Visibility="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Editor}}">
                         <Label Content="エディタ設定" Style="{StaticResource FirstSectionHeaderLabelStyle}" />

@@ -20,12 +20,12 @@
     <!-- 自己解凍時にネイティブライブラリやコンテンツを含める設定 -->
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-    
+
     <!-- アプリケーションのメタデータ -->
     <SatelliteResourceLanguages>_</SatelliteResourceLanguages>
-    <Version>1.1.24</Version>
-    <AssemblyVersion>1.1.24.0</AssemblyVersion>
-    <FileVersion>1.1.24.0</FileVersion>
+    <Version>1.1.25</Version>
+    <AssemblyVersion>1.1.25.0</AssemblyVersion>
+    <FileVersion>1.1.25.0</FileVersion>
     <Company>PageLeaf Project</Company>
     <Product>PageLeaf</Product>
     <Description>Markdown CSS エディター &amp; ビューアー</Description>
