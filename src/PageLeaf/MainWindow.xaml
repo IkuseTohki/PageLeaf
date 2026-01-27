@@ -14,6 +14,7 @@
         Width="1000"
         Height="600"
         behaviors:FileDropBehavior.Command="{Binding OpenFileByPathCommand}"
+        behaviors:WindowLifecycleBehavior.ClosedCommand="{Binding WindowClosedCommand}"
         Background="{DynamicResource WindowBackgroundBrush}"
         Icon="{StaticResource AppIconImage}"
         mc:Ignorable="d">

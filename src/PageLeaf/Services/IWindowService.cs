@@ -19,5 +19,10 @@ namespace PageLeaf.Services
         /// </summary>
         /// <typeparam name="TViewModel">閉じるウィンドウの ViewModel 型。</typeparam>
         void CloseWindow<TViewModel>();
+
+        /// <summary>
+        /// 管理しているすべてのウィンドウを閉じます。
+        /// </summary>
+        void CloseAllWindows();
     }
 }

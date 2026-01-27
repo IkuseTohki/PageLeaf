@@ -234,5 +234,17 @@ namespace PageLeaf.Tests.ViewModels
             // Assert
             _windowServiceMock.Verify(w => w.ShowWindow<CheatSheetViewModel>(), Times.Once);
         }
+
+        [TestMethod]
+        public void WindowClosed_ShouldCallCloseAllWindows()
+        {
+            // テスト観点: ウィンドウが閉じたときに、WindowServiceを通じて全ての子ウィンドウを閉じることを確認する。
+
+            // Act
+            _viewModel.WindowClosedCommand.Execute(null);
+
+            // Assert
+            _windowServiceMock.Verify(w => w.CloseAllWindows(), Times.Once);
+        }
     }
 }

@@ -78,6 +78,19 @@ namespace PageLeaf.Services
         }
 
         /// <summary>
+        /// 管理しているすべてのウィンドウを閉じます。
+        /// </summary>
+        public void CloseAllWindows()
+        {
+            // Close() を呼ぶと Closed イベントが発生し、_openedWindows から削除されるため、
+            // コレクション変更例外を避けるためにリストのコピーを作成してループする。
+            foreach (var window in new List<Window>(_openedWindows.Values))
+            {
+                window.Close();
+            }
+        }
+
+        /// <summary>
         /// ViewModel に対応する Window を生成するヘルパーメソッド。
         /// マッピングロジックはここに集約する。
         /// </summary>

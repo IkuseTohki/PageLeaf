@@ -178,6 +178,8 @@ namespace PageLeaf.ViewModels
         public ICommand ToggleTocCommand { get; }
         /// <summary>目次から特定の見出しへナビゲートするコマンド。</summary>
         public ICommand NavigateToHeaderCommand { get; }
+        /// <summary>ウィンドウが閉じられたときに実行されるコマンド。</summary>
+        public ICommand WindowClosedCommand { get; }
 
 
         public MainViewModel(
@@ -244,6 +246,7 @@ namespace PageLeaf.ViewModels
             ToggleDisplayModeCommand = new Utilities.DelegateCommand(ExecuteToggleDisplayMode);
             ToggleTocCommand = new Utilities.DelegateCommand(ExecuteToggleToc);
             NavigateToHeaderCommand = new Utilities.DelegateCommand(ExecuteNavigateToHeader);
+            WindowClosedCommand = new Utilities.DelegateCommand(ExecuteWindowClosed);
 
             AvailableModes = new ObservableCollection<DisplayMode>(
                 Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>()
@@ -398,6 +401,11 @@ namespace PageLeaf.ViewModels
                 Editor.RequestScrollToHeader(item);
                 IsTocOpen = false; // ナビゲート後は目次を閉じる
             }
+        }
+
+        private void ExecuteWindowClosed(object? parameter)
+        {
+            _windowService.CloseAllWindows();
         }
 
         /// <summary>現在のドキュメントから目次をロードします。</summary>
