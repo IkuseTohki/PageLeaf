@@ -14,10 +14,12 @@ namespace PageLeaf.Services
     public class DialogService : IDialogService
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly IWindowService _windowService;
 
-        public DialogService(IServiceProvider serviceProvider)
+        public DialogService(IServiceProvider serviceProvider, IWindowService windowService)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
         }
 
         /// <summary>
@@ -133,10 +135,7 @@ namespace PageLeaf.Services
         /// </summary>
         public void ShowSettingsDialog()
         {
-            var viewModel = _serviceProvider.GetRequiredService<SettingsViewModel>();
-            var settingsWindow = new SettingsWindow(viewModel);
-            settingsWindow.Owner = Application.Current.MainWindow;
-            settingsWindow.ShowDialog();
+            _windowService.ShowWindow<SettingsViewModel>();
         }
 
         /// <summary>
@@ -144,10 +143,7 @@ namespace PageLeaf.Services
         /// </summary>
         public void ShowAboutDialog()
         {
-            var viewModel = new ViewModels.AboutViewModel();
-            var aboutWindow = new AboutWindow(viewModel);
-            aboutWindow.Owner = Application.Current.MainWindow;
-            aboutWindow.ShowDialog();
+            _windowService.ShowWindow<AboutViewModel>();
         }
 
         public void ShowMessage(string message, string title)

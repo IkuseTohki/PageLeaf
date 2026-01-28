@@ -142,6 +142,7 @@ namespace PageLeaf
                     // ViewModels と Views をDIコンテナに登録
                     services.AddTransient<SettingsViewModel>();
                     services.AddTransient<CheatSheetViewModel>(); // チートシートViewModel
+                    services.AddTransient<AboutViewModel>(); // バージョン情報ViewModel
                     services.AddSingleton<CssEditorViewModel>();
                     services.AddSingleton<MainViewModel>();
                     services.AddSingleton<MainWindow>();

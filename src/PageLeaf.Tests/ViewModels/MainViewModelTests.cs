@@ -246,5 +246,24 @@ namespace PageLeaf.Tests.ViewModels
             // Assert
             _windowServiceMock.Verify(w => w.CloseAllWindows(), Times.Once);
         }
+
+        [TestMethod]
+        public void Overlay_ShouldToggleVisibility()
+        {
+            // テスト観点: オーバーレイの表示・非表示がプロパティとコマンドで正しく切り替わることを確認する。
+
+            // 初期状態
+            Assert.IsFalse(_viewModel.IsOverlayVisible);
+
+            // Act: 表示 (プロパティ直接変更、またはサービス経由での変更を想定)
+            _viewModel.IsOverlayVisible = true;
+            Assert.IsTrue(_viewModel.IsOverlayVisible);
+
+            // Act: コマンドで閉じる (オーバーレイクリック時など)
+            _viewModel.CloseOverlayCommand.Execute(null);
+
+            // Assert
+            Assert.IsFalse(_viewModel.IsOverlayVisible);
+        }
     }
 }

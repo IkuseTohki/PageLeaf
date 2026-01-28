@@ -10,6 +10,7 @@
         Width="500"
         Height="650"
         MinWidth="460"
+        behaviors:WindowAnimationBehavior.AnimationType="Modeless"
         d:DataContext="{d:DesignInstance viewModels:CheatSheetViewModel}"
         AllowsTransparency="True"
         Background="Transparent"

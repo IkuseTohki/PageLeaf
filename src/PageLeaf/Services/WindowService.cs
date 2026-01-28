@@ -15,6 +15,8 @@ namespace PageLeaf.Services
         private readonly IServiceProvider _serviceProvider;
         private readonly Dictionary<Type, Window> _openedWindows = new Dictionary<Type, Window>();
 
+        public event EventHandler<Type>? WindowClosed;
+
         public WindowService(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
@@ -51,12 +53,14 @@ namespace PageLeaf.Services
 
             // Window の設定
             window.DataContext = viewModel;
-            // メインウィンドウがある場合はオーナー設定（任意：タスクバーを分けるなら設定しない方が良い場合もあるが、アプリ内ツールとしては設定した方が自然な場合も）
-            // モードレスツールウィンドウとして独立させるため、Ownerは設定しないでおく（仕様書の「独立して移動」はOwnerがあっても可能だが、最小化連動などをどうするかによる）
-            // 一旦Owner設定なしで実装し、必要に応じて変更する。
+            window.Owner = Application.Current.MainWindow;
 
             // 閉じたときのハンドリング
-            window.Closed += (s, e) => _openedWindows.Remove(viewModelType);
+            window.Closed += (s, e) =>
+            {
+                _openedWindows.Remove(viewModelType);
+                WindowClosed?.Invoke(this, viewModelType);
+            };
 
             // 表示
             window.Show();
@@ -99,6 +103,8 @@ namespace PageLeaf.Services
             return viewModel switch
             {
                 CheatSheetViewModel _ => new CheatSheetWindow(),
+                SettingsViewModel _ => new SettingsWindow((SettingsViewModel)viewModel),
+                AboutViewModel _ => new AboutWindow((AboutViewModel)viewModel),
                 // 今後追加されるウィンドウはここに追加
                 _ => throw new NotImplementedException($"ViewModel {viewModel.GetType().Name} is not mapped to any Window.")
             };

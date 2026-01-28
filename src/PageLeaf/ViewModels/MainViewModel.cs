@@ -26,6 +26,7 @@ namespace PageLeaf.ViewModels
         private readonly IMarkdownService _markdownService;
 
         private bool _isCssEditorVisible;
+        private bool _isOverlayVisible;
         private ObservableCollection<string> _availableCssFiles = null!;
         private string _selectedCssFile = null!;
         private bool _isWebView2Initialized;
@@ -37,6 +38,22 @@ namespace PageLeaf.ViewModels
         public CssEditorViewModel CssEditorViewModel { get; }
         public FrontMatterViewModel FrontMatterViewModel { get; }
         public ObservableCollection<DisplayMode> AvailableModes { get; }
+
+        /// <summary>
+        /// モーダル表示時のオーバーレイ（シャドウ）を表示するかどうか。
+        /// </summary>
+        public bool IsOverlayVisible
+        {
+            get => _isOverlayVisible;
+            set
+            {
+                if (_isOverlayVisible != value)
+                {
+                    _isOverlayVisible = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         /// <summary>
         /// 目次ポップアップが開いているかどうかを取得または設定します。
@@ -180,6 +197,8 @@ namespace PageLeaf.ViewModels
         public ICommand NavigateToHeaderCommand { get; }
         /// <summary>ウィンドウが閉じられたときに実行されるコマンド。</summary>
         public ICommand WindowClosedCommand { get; }
+        /// <summary>オーバーレイがクリックされたときに実行されるコマンド。</summary>
+        public ICommand CloseOverlayCommand { get; }
 
 
         public MainViewModel(
@@ -232,6 +251,7 @@ namespace PageLeaf.ViewModels
 
             // イベント購読
             CssEditorViewModel.CssSaved += OnCssSaved;
+            _windowService.WindowClosed += (s, type) => OnSubWindowClosed(type);
 
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
             SaveFileCommand = new Utilities.DelegateCommand(ExecuteSaveFile);
@@ -247,6 +267,7 @@ namespace PageLeaf.ViewModels
             ToggleTocCommand = new Utilities.DelegateCommand(ExecuteToggleToc);
             NavigateToHeaderCommand = new Utilities.DelegateCommand(ExecuteNavigateToHeader);
             WindowClosedCommand = new Utilities.DelegateCommand(ExecuteWindowClosed);
+            CloseOverlayCommand = new Utilities.DelegateCommand(ExecuteCloseOverlay);
 
             AvailableModes = new ObservableCollection<DisplayMode>(
                 Enum.GetValues(typeof(DisplayMode)).Cast<DisplayMode>()
@@ -308,20 +329,16 @@ namespace PageLeaf.ViewModels
 
         private void ExecuteShowSettings(object? parameter)
         {
+            IsOverlayVisible = true;
             _dialogService.ShowSettingsDialog();
 
-            // 設定が変更された可能性があるため、各所に通知・反映
-            CssEditorViewModel.NotifySettingsChanged();
-
-            // エディタのフォントサイズを反映
-            Editor.EditorFontSize = _settingsService.CurrentSettings.EditorFontSize;
-
-            // WebViewの内容を更新（テーマ変更の反映）
-            Editor.UpdatePreview();
+            // Show() に変更したため、ここでは false にせず
+            // ウィンドウ側の Behavior や オーバーレイクリックで制御する
         }
 
         private void ExecuteShowAbout(object? parameter)
         {
+            IsOverlayVisible = true;
             _dialogService.ShowAboutDialog();
         }
 
@@ -330,6 +347,14 @@ namespace PageLeaf.ViewModels
             _windowService.ShowWindow<CheatSheetViewModel>();
         }
 
+        private void ExecuteCloseOverlay(object? parameter)
+        {
+            // オーバーレイクリック時：モーダル対象のウィンドウのみを閉じる
+            _windowService.CloseWindow<SettingsViewModel>();
+            _windowService.CloseWindow<AboutViewModel>();
+
+            IsOverlayVisible = false;
+        }
         private async void ExecutePasteImage(object? parameter)
         {
             _logger.LogInformation("PasteImageCommand executed.");
@@ -422,6 +447,20 @@ namespace PageLeaf.ViewModels
         private void OnCssSaved(object? sender, EventArgs e)
         {
             Editor.ApplyCss(SelectedCssFile);
+        }
+
+        private void OnSubWindowClosed(Type viewModelType)
+        {
+            // モーダルとして扱っているウィンドウが閉じられた場合のみ、オーバーレイを非表示にする
+            if (viewModelType == typeof(SettingsViewModel) || viewModelType == typeof(AboutViewModel))
+            {
+                IsOverlayVisible = false;
+
+                // 設定の反映（設定画面が閉じられたことを想定）
+                CssEditorViewModel.NotifySettingsChanged();
+                Editor.EditorFontSize = _settingsService.CurrentSettings.EditorFontSize;
+                Editor.UpdatePreview();
+            }
         }
 
         private void CreateNewStyle()

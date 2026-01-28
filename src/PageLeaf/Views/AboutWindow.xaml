@@ -7,6 +7,8 @@
         xmlns:viewmodels="clr-namespace:PageLeaf.ViewModels"
         Title="PageLeaf について"
         Width="350"
+        behaviors:FocusTrapBehavior.IsEnabled="True"
+        behaviors:WindowAnimationBehavior.AnimationType="Modal"
         behaviors:WindowDragBehavior.IsEnabled="True"
         d:DataContext="{d:DesignInstance Type=viewmodels:AboutViewModel}"
         AllowsTransparency="True"
@@ -16,7 +18,7 @@
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         mc:Ignorable="d">
-    <Border Style="{StaticResource SettingsWindowBorderStyle}">
+    <Border KeyboardNavigation.TabNavigation="Cycle" Style="{StaticResource SettingsWindowBorderStyle}">
         <Grid Margin="25">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />

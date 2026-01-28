@@ -8,6 +8,11 @@ namespace PageLeaf.Services
     public interface IWindowService
     {
         /// <summary>
+        /// いずれかのサブウィンドウが閉じられたときに発生します。
+        /// </summary>
+        event System.EventHandler<System.Type> WindowClosed;
+
+        /// <summary>
         /// 指定した ViewModel に対応するウィンドウを表示します。
         /// 既に開いている場合は、そのウィンドウを最前面に表示します。
         /// </summary>

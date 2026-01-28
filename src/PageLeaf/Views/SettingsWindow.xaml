@@ -9,6 +9,8 @@
         Title="設定"
         Width="680"
         Height="500"
+        behaviors:FocusTrapBehavior.IsEnabled="True"
+        behaviors:WindowAnimationBehavior.AnimationType="Modal"
         behaviors:WindowDragBehavior.IsEnabled="True"
         AllowsTransparency="True"
         Background="Transparent"
@@ -16,7 +18,7 @@
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         mc:Ignorable="d">
-    <Border Style="{StaticResource SettingsWindowBorderStyle}">
+    <Border KeyboardNavigation.TabNavigation="Cycle" Style="{StaticResource SettingsWindowBorderStyle}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />

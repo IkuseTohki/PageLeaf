@@ -308,5 +308,38 @@
                 </Grid>
             </Border>
         </Grid>
+
+        <!-- Overlay (Shadow) -->
+        <Border Grid.Row="0"
+                Grid.RowSpan="2"
+                Background="Black"
+                Visibility="{Binding IsOverlayVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <Border.InputBindings>
+                <MouseBinding Command="{Binding CloseOverlayCommand}" MouseAction="LeftClick" />
+            </Border.InputBindings>
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Setter Property="Opacity" Value="0.4" />
+                    <Style.Triggers>
+                        <Trigger Property="Visibility" Value="Visible">
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                         From="0.0"
+                                                         To="0.4"
+                                                         Duration="0:0:0.2">
+                                            <DoubleAnimation.EasingFunction>
+                                                <QuadraticEase EasingMode="EaseOut" />
+                                            </DoubleAnimation.EasingFunction>
+                                        </DoubleAnimation>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+        </Border>
     </Grid>
 </Window>
