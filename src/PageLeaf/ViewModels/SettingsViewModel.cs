@@ -36,6 +36,7 @@ namespace PageLeaf.ViewModels
         private double _editorFontSize = 14.0;
         private bool _autoInsertFrontMatter = true;
         private bool _showTitleInPreview = true;
+        private bool _renumberFootnotesOnSave = true;
         private ResourceSource _libraryResourceSource = ResourceSource.Local;
         private AppTheme _theme = AppTheme.System;
         private SettingsCategory _currentCategory = SettingsCategory.Appearance;
@@ -65,6 +66,15 @@ namespace PageLeaf.ViewModels
         {
             get => _showTitleInPreview;
             set { if (_showTitleInPreview != value) { _showTitleInPreview = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
+        /// 保存時に脚注番号を振り直すかどうか。
+        /// </summary>
+        public bool RenumberFootnotesOnSave
+        {
+            get => _renumberFootnotesOnSave;
+            set { if (_renumberFootnotesOnSave != value) { _renumberFootnotesOnSave = value; OnPropertyChanged(); } }
         }
 
         /// <summary>
@@ -215,6 +225,7 @@ namespace PageLeaf.ViewModels
             _editorFontSize = settings.EditorFontSize;
             _autoInsertFrontMatter = settings.AutoInsertFrontMatter;
             _showTitleInPreview = settings.ShowTitleInPreview;
+            _renumberFootnotesOnSave = settings.RenumberFootnotesOnSave;
             _libraryResourceSource = settings.LibraryResourceSource;
             _theme = settings.Theme;
 
@@ -320,6 +331,7 @@ namespace PageLeaf.ViewModels
             settings.EditorFontSize = EditorFontSize;
             settings.AutoInsertFrontMatter = AutoInsertFrontMatter;
             settings.ShowTitleInPreview = ShowTitleInPreview;
+            settings.RenumberFootnotesOnSave = RenumberFootnotesOnSave;
             settings.LibraryResourceSource = LibraryResourceSource;
             settings.Theme = Theme;
 

@@ -95,6 +95,63 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("24px", h1Rule.Style.GetPropertyValue("font-size"));
         }
 
+        [TestMethod]
+        public void ParseFootnoteStyles_ShouldExtractCorrectProperties()
+        {
+            // テスト観点: 脚注関連の各セレクタからプロパティが正しく抽出されることを確認する。
+            var service = new CssEditorService();
+            var cssContent = @"
+.footnote-ref { color: #FF0000; font-weight: bold; }
+.footnote-ref::before { content: '['; }
+.footnotes { font-size: 12px; color: #666666; margin-top: 2em; }
+.footnotes hr { border: 0; border-top: 2px dashed #CCCCCC; }
+.footnotes li { line-height: 1.8; }
+.footnote-back-ref { display: none; }
+";
+
+            var styles = service.ParseCss(cssContent);
+
+            Assert.AreEqual("#FF0000", styles.Footnote.MarkerTextColor);
+            Assert.IsTrue(styles.Footnote.IsMarkerBold);
+            Assert.IsTrue(styles.Footnote.HasMarkerBrackets);
+            Assert.AreEqual("12px", styles.Footnote.AreaFontSize);
+            Assert.AreEqual("#666666", styles.Footnote.AreaTextColor);
+            Assert.AreEqual("2em", styles.Footnote.AreaMarginTop);
+            Assert.AreEqual("2px", styles.Footnote.AreaBorderTopWidth);
+            Assert.AreEqual("dashed", styles.Footnote.AreaBorderTopStyle);
+            Assert.AreEqual("#CCCCCC", styles.Footnote.AreaBorderTopColor);
+            Assert.AreEqual("1.8", styles.Footnote.ListItemLineHeight);
+            Assert.IsFalse(styles.Footnote.IsBackLinkVisible);
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldHandleFootnoteStyles()
+        {
+            // テスト観点: 指定したスタイル情報に基づいて脚注のCSSが正しく更新・生成されることを確認する。
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo();
+            styleInfo.Footnote.MarkerTextColor = "#0000FF";
+            styleInfo.Footnote.IsMarkerBold = true;
+            styleInfo.Footnote.HasMarkerBrackets = true;
+            styleInfo.Footnote.AreaFontSize = "14px";
+            styleInfo.Footnote.AreaBorderTopWidth = "3px";
+            styleInfo.Footnote.AreaBorderTopStyle = "dotted";
+            styleInfo.Footnote.AreaBorderTopColor = "#00FF00";
+            styleInfo.Footnote.IsBackLinkVisible = false;
+
+            var updatedCss = service.UpdateCssContent("", styleInfo);
+            var parsed = service.ParseCss(updatedCss);
+
+            Assert.AreEqual("#0000FF", parsed.Footnote.MarkerTextColor);
+            Assert.IsTrue(parsed.Footnote.IsMarkerBold);
+            Assert.IsTrue(parsed.Footnote.HasMarkerBrackets);
+            Assert.AreEqual("14px", parsed.Footnote.AreaFontSize);
+            Assert.AreEqual("3px", parsed.Footnote.AreaBorderTopWidth);
+            Assert.AreEqual("dotted", parsed.Footnote.AreaBorderTopStyle);
+            Assert.AreEqual("#00FF00", parsed.Footnote.AreaBorderTopColor);
+            Assert.IsFalse(parsed.Footnote.IsBackLinkVisible);
+        }
+
         /// <summary>
         /// テスト観点: UpdateCssContentメソッドが、bodyセレクタ内にプロパティが存在しない場合に新しく追加することを確認する。
         /// </summary>
@@ -169,6 +226,19 @@ namespace PageLeaf.Tests.Services
                 "",
                 "table {",
                 "  border-collapse: collapse;",
+                "}",
+                "",
+                ".footnote-ref {",
+                "  vertical-align: super;",
+                "  font-size: smaller;",
+                "  text-decoration-color: initial;",
+                "  text-decoration-style: initial;",
+                "  text-decoration-line: none;",
+                "}",
+                "",
+                ".footnote-ref sup {",
+                "  vertical-align: baseline;",
+                "  font-size: 100%;",
                 "}"
             );
 
@@ -653,7 +723,8 @@ namespace PageLeaf.Tests.Services
             var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
 
             // Assert
-            Assert.IsFalse(updatedCss.Contains("color:"), "Properties should be removed from pre code when override is disabled.");
+            // 脚注など他の箇所で color: が使われる可能性があるため、pre code セレクタの中身が空であることを確認する
+            Assert.IsFalse(updatedCss.Contains("pre code {"), "Properties should be removed from pre code when override is disabled.");
         }
 
         [TestMethod]
@@ -1163,6 +1234,58 @@ namespace PageLeaf.Tests.Services
             updatedCss = service.UpdateCssContent(existingCss, styleInfo);
             parsed = service.ParseCss(updatedCss);
             Assert.AreEqual("1.5", parsed.ParagraphLineHeight, "Empty string should not overwrite existing value.");
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldNotGenerateEmptyFootnoteRules_WhenPropertiesAreDefault()
+        {
+            // テスト観点: 脚注プロパティが未設定の場合、CSSに不要な脚注関連セレクタが出現しないことを確認する。
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo(); // すべてデフォルト
+
+            var updatedCss = service.UpdateCssContent(string.Empty, styleInfo);
+
+            // .footnote-ref は上付き強制のため出現するが、他は出ないはず
+            Assert.IsFalse(updatedCss.Contains(".footnotes {"), "Empty .footnotes rule should not be generated.");
+            Assert.IsFalse(updatedCss.Contains(".footnote-back-ref {"), "Empty .footnote-back-ref rule should not be generated.");
+            Assert.IsFalse(updatedCss.Contains(".footnote-ref::before {"), "Empty ::before rule should not be generated.");
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldPreserveHandwrittenPropertiesInFootnotes()
+        {
+            // テスト観点: 脚注スタイルにおいて、自動生成対象外のプロパティ（手書きカスタム）が維持されることを確認する。
+            var service = new CssEditorService();
+            var existingCss = ".footnote-ref { color: #000; z-index: 100; }";
+            var styleInfo = new CssStyleInfo();
+            styleInfo.Footnote.MarkerTextColor = "#FF0000";
+
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            // 更新されたプロパティと、維持されたプロパティの両方を確認
+            Assert.IsTrue(updatedCss.Contains("color: rgba(255, 0, 0, 1);"), "Marker color should be updated.");
+            Assert.IsTrue(updatedCss.Contains("z-index: 100;"), "Handwritten property should be preserved.");
+        }
+
+        [TestMethod]
+        public void ParseCss_ShouldHandleVariousColorFormats()
+        {
+            // テスト観点: 脚注の文字色において、#RGB, #RRGGBB, rgb() などの形式が正しく解析されることを確認する。
+            var service = new CssEditorService();
+
+            var testCases = new[]
+            {
+                (".footnote-ref { color: #F00; }", "#FF0000"),
+                (".footnote-ref { color: #00FF00; }", "#00FF00"),
+                (".footnote-ref { color: rgb(0, 0, 255); }", "#0000FF"),
+                (".footnote-ref { color: rgba(255, 255, 0, 1); }", "#FFFF00")
+            };
+
+            foreach (var (css, expectedHex) in testCases)
+            {
+                var styles = service.ParseCss(css);
+                Assert.AreEqual(expectedHex, styles.Footnote.MarkerTextColor, $"Failed to parse color: {css}");
+            }
         }
     }
 }

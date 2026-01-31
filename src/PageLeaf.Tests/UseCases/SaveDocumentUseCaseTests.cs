@@ -14,6 +14,7 @@ namespace PageLeaf.Tests.UseCases
         private Mock<IFileService> _fileServiceMock = null!;
         private Mock<ISaveAsDocumentUseCase> _saveAsDocumentUseCaseMock = null!;
         private Mock<IMarkdownService> _markdownServiceMock = null!;
+        private Mock<ISettingsService> _settingsServiceMock = null!;
         private SaveDocumentUseCase _useCase = null!;
 
         [TestInitialize]
@@ -23,12 +24,78 @@ namespace PageLeaf.Tests.UseCases
             _fileServiceMock = new Mock<IFileService>();
             _saveAsDocumentUseCaseMock = new Mock<ISaveAsDocumentUseCase>();
             _markdownServiceMock = new Mock<IMarkdownService>();
+            _settingsServiceMock = new Mock<ISettingsService>();
 
             // デフォルトの振る舞い
             _markdownServiceMock.Setup(m => m.ParseFrontMatter(It.IsAny<string>()))
                 .Returns(new System.Collections.Generic.Dictionary<string, object>());
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings());
 
-            _useCase = new SaveDocumentUseCase(_editorServiceMock.Object, _fileServiceMock.Object, _saveAsDocumentUseCaseMock.Object, _markdownServiceMock.Object);
+            _useCase = new SaveDocumentUseCase(
+                _editorServiceMock.Object,
+                _fileServiceMock.Object,
+                _saveAsDocumentUseCaseMock.Object,
+                _markdownServiceMock.Object,
+                _settingsServiceMock.Object);
+        }
+
+        [TestMethod]
+        public void Execute_ShouldRenumberFootnotesIfEnabled()
+        {
+            // テスト観点: 設定が有効な場合、保存時に脚注番号が振り直されることを確認する。
+            // Arrange
+            var settings = new ApplicationSettings { RenumberFootnotesOnSave = true };
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(settings);
+
+            var doc = new MarkdownDocument
+            {
+                FilePath = "test.md",
+                Content = "Text[^5]\n\n[^5]: Note",
+                IsDirty = true
+            };
+            _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
+            _fileServiceMock.Setup(x => x.FileExists("test.md")).Returns(true);
+            _markdownServiceMock.Setup(m => m.Join(It.IsAny<System.Collections.Generic.Dictionary<string, object>>(), It.IsAny<string>()))
+                .Returns((System.Collections.Generic.Dictionary<string, object> fm, string content) => content);
+
+            // Act
+            var result = _useCase.Execute();
+
+            // Assert
+            Assert.IsTrue(result);
+            // 本文がリナンバリングされていること ( [^5] -> [^1] )
+            // MarkdownFootnoteHelper.Renumber は末尾に定義を追加し、改行を付与する
+            var expectedContent = "Text[^1]" + Environment.NewLine + Environment.NewLine + "[^1]: Note" + Environment.NewLine;
+            Assert.AreEqual(expectedContent, doc.Content);
+            _fileServiceMock.Verify(x => x.Save(It.Is<MarkdownDocument>(d => d.Content == expectedContent)), Times.Once);
+        }
+
+        [TestMethod]
+        public void Execute_ShouldNotRenumberFootnotesIfDisabled()
+        {
+            // テスト観点: 設定が無効な場合、保存時に脚注番号が振り直されないことを確認する。
+            // Arrange
+            var settings = new ApplicationSettings { RenumberFootnotesOnSave = false };
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(settings);
+
+            var doc = new MarkdownDocument
+            {
+                FilePath = "test.md",
+                Content = "Text[^5]\n\n[^5]: Note",
+                IsDirty = true
+            };
+            _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
+            _fileServiceMock.Setup(x => x.FileExists("test.md")).Returns(true);
+            _markdownServiceMock.Setup(m => m.Join(It.IsAny<System.Collections.Generic.Dictionary<string, object>>(), It.IsAny<string>()))
+                .Returns((System.Collections.Generic.Dictionary<string, object> fm, string content) => content);
+
+            // Act
+            var result = _useCase.Execute();
+
+            // Assert
+            Assert.IsTrue(result);
+            // リナンバリングされていないこと
+            Assert.AreEqual("Text[^5]\n\n[^5]: Note", doc.Content);
         }
 
         [TestMethod]

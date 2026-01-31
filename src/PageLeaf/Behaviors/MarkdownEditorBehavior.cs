@@ -1,8 +1,12 @@
 using PageLeaf.Services;
+using PageLeaf.Views.Controls;
+using PageLeaf.Utilities;
 using System;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using ICSharpCode.AvalonEdit;
 using ICSharpCode.AvalonEdit.Highlighting;
@@ -16,6 +20,20 @@ namespace PageLeaf.Behaviors
     public static class MarkdownEditorBehavior
     {
         private static ISettingsService? _settingsService;
+        private static ILogger? _logger;
+
+        private static ILogger? Logger
+        {
+            get
+            {
+                if (_logger == null)
+                {
+                    var factory = App.AppHost?.Services.GetService<ILoggerFactory>();
+                    _logger = factory?.CreateLogger("PageLeaf.Behaviors.MarkdownEditorBehavior");
+                }
+                return _logger;
+            }
+        }
 
         public static readonly DependencyProperty IsEnabledProperty =
             DependencyProperty.RegisterAttached(
@@ -225,6 +243,12 @@ namespace PageLeaf.Behaviors
             else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.C) { e.Handled = true; SurroundSelection(textBox, "`"); }
             // Ctrl + K (リンク)
             else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.K) HandleLink(textBox, e);
+            // Ctrl + Alt + F (脚注)
+            else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt) && e.Key == Key.F)
+            {
+                e.Handled = true;
+                HandleFootnote(textBox);
+            }
             // Ctrl + L (タスクリスト切替)
             else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.L) HandleToggleTaskList(textBox, e);
             // Ctrl + 1~6 (見出し)
@@ -577,6 +601,12 @@ namespace PageLeaf.Behaviors
             else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.X) { e.Handled = true; SurroundSelection(editor, "~~"); }
             else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.C) { e.Handled = true; SurroundSelection(editor, "`"); }
             else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.K) HandleLink(editor, e);
+            // Ctrl + Alt + F (脚注)
+            else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt) && e.Key == Key.F)
+            {
+                e.Handled = true;
+                HandleFootnote(editor);
+            }
             else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.L) HandleToggleTaskList(editor, e);
             else if (Keyboard.Modifiers == ModifierKeys.Control &&
                      ((e.Key >= Key.D1 && e.Key <= Key.D6) || (e.Key >= Key.NumPad1 && e.Key <= Key.NumPad6)))
@@ -826,6 +856,203 @@ namespace PageLeaf.Behaviors
 
             editor.Document.Replace(line.Offset, line.Length, newLine);
             editor.CaretOffset = line.Offset + newLine.Length;
+        }
+
+        private static void HandleFootnote(TextBox textBox)
+        {
+            var window = Window.GetWindow(textBox);
+            if (window == null) return;
+
+            // カーソル位置の矩形を取得 (TextBoxコンテンツ座標)
+            var rect = textBox.GetRectFromCharacterIndex(textBox.CaretIndex);
+
+            // ウィンドウ基準の Rect を作成
+            var pTopLeft = textBox.TranslatePoint(new Point(rect.Left, rect.Top), window);
+            var caretRectInWindow = new Rect(pTopLeft.X, pTopLeft.Y, rect.Width, rect.Height);
+
+            var inputControl = new FootnoteInputPopup();
+
+            // 表示前にサイズを計測して、ガード処理（境界チェック）に利用する
+            inputControl.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            var popupSize = inputControl.DesiredSize;
+
+            Logger?.LogDebug("Footnote Popup (TextBox): WindowSize={WindowSize}, CaretInWindow={CaretInWindow}, PopupSize={PopupSize}",
+                new Size(window.ActualWidth, window.ActualHeight), caretRectInWindow, popupSize);
+
+            // ヘルパーを使用して調整後の座標を取得
+            var adjustedPos = PopupPlacementHelper.CalculatePopupPosition(
+                caretRectInWindow,
+                popupSize,
+                new Size(window.ActualWidth, window.ActualHeight));
+
+            double x = adjustedPos.X;
+            double y = adjustedPos.Y;
+
+            var popup = new System.Windows.Controls.Primitives.Popup
+            {
+                PlacementTarget = window,
+                Placement = System.Windows.Controls.Primitives.PlacementMode.Relative,
+                HorizontalOffset = x,
+                VerticalOffset = y,
+                StaysOpen = false,
+                AllowsTransparency = true
+            };
+            popup.Child = inputControl;
+
+            inputControl.Submitted += (s, text) =>
+            {
+                popup.IsOpen = false;
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    int nextNum = MarkdownFootnoteHelper.GetNextFootnoteNumber(textBox.Text);
+                    string marker = $"[^{nextNum}]";
+                    int targetCaretIndex = textBox.CaretIndex + marker.Length;
+
+                    // 本文にマーカーを挿入
+                    textBox.SelectedText = marker;
+
+                    // 文末に定義を追記
+                    string currentText = textBox.Text;
+                    string suffix = "";
+
+                    if (currentText.Length > 0)
+                    {
+                        // 既存の脚注定義があるかチェック (簡易判定)
+                        bool lastLineIsDefinition = Regex.IsMatch(currentText.TrimEnd(), @"^\[\^[^\]]+\]:.*$", RegexOptions.Multiline);
+
+                        if (lastLineIsDefinition)
+                        {
+                            // 脚注定義の後なら改行1つ
+                            if (!currentText.EndsWith(Environment.NewLine)) suffix += Environment.NewLine;
+                        }
+                        else
+                        {
+                            // 本文の後なら空行を挟む（改行2つ）
+                            if (currentText.EndsWith(Environment.NewLine + Environment.NewLine)) { /* すでに空行あり */ }
+                            else if (currentText.EndsWith(Environment.NewLine)) suffix += Environment.NewLine;
+                            else suffix += Environment.NewLine + Environment.NewLine;
+                        }
+                    }
+
+                    textBox.AppendText($"{suffix}{marker}: {text}");
+
+                    // カーソルを本文中のマーカー直後に戻す
+                    textBox.CaretIndex = targetCaretIndex;
+                }
+                textBox.Focus();
+            };
+
+            inputControl.Cancelled += (s, e) =>
+            {
+                popup.IsOpen = false;
+                textBox.Focus();
+            };
+            popup.IsOpen = true;
+        }
+
+        private static void HandleFootnote(TextEditor editor)
+        {
+            var window = Window.GetWindow(editor);
+            if (window == null) return;
+
+            // カーソル位置の矩形を取得 (ドキュメント全体座標)
+            var caretRect = editor.TextArea.Caret.CalculateCaretRectangle();
+
+            // スクロールオフセットを取得
+            var scrollX = editor.HorizontalOffset;
+            var scrollY = editor.VerticalOffset;
+
+            // エディタ表示領域（ビューポート）内の相対座標に変換
+            var visualX = caretRect.Left - scrollX;
+            var visualTop = caretRect.Top - scrollY;
+
+            // エディタコントロールを基準に Window 座標上の Rect を作成
+            var pTopLeft = editor.TranslatePoint(new Point(visualX, visualTop), window);
+            var caretRectInWindow = new Rect(pTopLeft.X, pTopLeft.Y, caretRect.Width, caretRect.Height);
+
+            var inputControl = new FootnoteInputPopup();
+            inputControl.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+            var popupSize = inputControl.DesiredSize;
+
+            Logger?.LogDebug("Footnote Popup (AvalonEdit): WindowSize={WindowSize}, CaretInWindow={CaretInWindow}, PopupSize={PopupSize}",
+                new Size(window.ActualWidth, window.ActualHeight), caretRectInWindow, popupSize);
+
+            // ヘルパーを使用して調整後の座標を取得
+            var adjustedPos = PopupPlacementHelper.CalculatePopupPosition(
+                caretRectInWindow,
+                popupSize,
+                new Size(window.ActualWidth, window.ActualHeight));
+
+            double x = adjustedPos.X;
+            double y = adjustedPos.Y;
+
+            var popup = new System.Windows.Controls.Primitives.Popup
+            {
+                PlacementTarget = window, // ウィンドウを基準にする
+                Placement = System.Windows.Controls.Primitives.PlacementMode.Relative,
+                HorizontalOffset = x,
+                VerticalOffset = y,
+                StaysOpen = false,
+                AllowsTransparency = true
+            };
+            popup.Child = inputControl;
+
+            inputControl.Submitted += (s, text) =>
+            {
+                popup.IsOpen = false;
+                if (!string.IsNullOrWhiteSpace(text))
+                {
+                    InsertFootnote(editor, text);
+                }
+                editor.Focus();
+            };
+
+            inputControl.Cancelled += (s, e) =>
+            {
+                popup.IsOpen = false;
+                editor.Focus();
+            };
+            popup.IsOpen = true;
+        }
+
+        private static void InsertFootnote(TextEditor editor, string content)
+        {
+            var doc = editor.Document;
+            int nextNum = MarkdownFootnoteHelper.GetNextFootnoteNumber(doc.Text);
+            string marker = $"[^{nextNum}]";
+            int insertionOffset = editor.CaretOffset;
+
+            // 本文への挿入
+            doc.Insert(insertionOffset, marker);
+
+            // 挿入後のカーソル位置を計算（マーカーの後ろ）
+            int newCaretOffset = insertionOffset + marker.Length;
+
+            // 文末に定義を追記
+            string currentText = doc.Text;
+            string suffix = "";
+
+            if (currentText.Length > 0)
+            {
+                // 既存の脚注定義があるかチェック
+                bool lastLineIsDefinition = Regex.IsMatch(currentText.TrimEnd(), @"^\[\^[^\]]+\]:.*$", RegexOptions.Multiline);
+
+                if (lastLineIsDefinition)
+                {
+                    if (!currentText.EndsWith(Environment.NewLine)) suffix += Environment.NewLine;
+                }
+                else
+                {
+                    if (currentText.EndsWith(Environment.NewLine + Environment.NewLine)) { /* すでに空行あり */ }
+                    else if (currentText.EndsWith(Environment.NewLine)) suffix += Environment.NewLine;
+                    else suffix += Environment.NewLine + Environment.NewLine;
+                }
+            }
+
+            doc.Insert(doc.TextLength, $"{suffix}{marker}: {content}");
+
+            // カーソル位置をマーカーの後ろに設定
+            editor.CaretOffset = newCaretOffset;
         }
         #endregion
     }

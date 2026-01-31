@@ -48,5 +48,6 @@ namespace PageLeaf.Models
         public string? ListMarkerSize { get; set; }
         public string? ListIndent { get; set; }
         public Dictionary<string, bool> HeadingNumberingStates { get; } = new Dictionary<string, bool>();
+        public CssFootnoteInfo Footnote { get; set; } = new CssFootnoteInfo();
     }
 }

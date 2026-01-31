@@ -100,6 +100,10 @@
                                      Content="コード"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Code}}"
                                      Tag="&lt;&gt;" />
+                        <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsFootnoteTabDirty}"
+                                     Content="注釈"
+                                     IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Footnote}}"
+                                     Tag="†" />
                     </StackPanel>
                 </ScrollViewer>
             </StackPanel>
@@ -525,6 +529,92 @@
                     <controls:ColorInputControl ColorText="{Binding QuoteBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 CommandParameter="QuoteBorderColor"
                                                 SelectColorCommand="{Binding SelectColorCommand}" />
+                </StackPanel>
+
+                <!-- Footnote Tab -->
+                <StackPanel Visibility="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Footnote}}">
+                    <Label Content="本文中マーカー" Style="{StaticResource FirstCompactFormGroupHeaderStyle}" />
+                    <Label Content="文字色" Style="{StaticResource CompactFormLabelStyle}" />
+                    <controls:ColorInputControl ColorText="{Binding FootnoteMarkerTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                CommandParameter="FootnoteMarkerTextColor"
+                                                SelectColorCommand="{Binding SelectColorCommand}" />
+
+                    <Label Content="スタイル" Style="{StaticResource CompactFormLabelStyle}" />
+                    <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
+                        <CheckBox IsChecked="{Binding IsFootnoteMarkerBold, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CompactFormCheckBoxStyle}">
+                            <TextBlock FontWeight="Bold" Text="太字" />
+                        </CheckBox>
+                        <CheckBox Content="括弧で囲む [1]"
+                                  IsChecked="{Binding HasFootnoteMarkerBrackets, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource CompactFormCheckBoxStyle}" />
+                    </StackPanel>
+
+                    <Label Content="注釈エリア全体" Style="{StaticResource CompactFormGroupHeaderStyle}" />
+                    <Label Content="フォントサイズ" Style="{StaticResource CompactFormLabelStyle}" />
+                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      CssValue="{Binding FootnoteAreaFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="0.85" />
+
+                    <Label Content="文字色" Style="{StaticResource CompactFormLabelStyle}" />
+                    <controls:ColorInputControl ColorText="{Binding FootnoteAreaTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                CommandParameter="FootnoteAreaTextColor"
+                                                SelectColorCommand="{Binding SelectColorCommand}" />
+
+                    <Label Content="上マージン" Style="{StaticResource CompactFormLabelStyle}" />
+                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      CssValue="{Binding FootnoteAreaMarginTop, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="2.0"
+                                                      ShowSpinner="True" />
+
+                    <Label Content="区切り線 (hr)" Style="{StaticResource CompactFormGroupHeaderStyle}" />
+                    <Label Content="太さ" Style="{StaticResource CompactFormLabelStyle}" />
+                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      CssValue="{Binding FootnoteAreaBorderTopWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="1"
+                                                      FixedUnit="px"
+                                                      IsUnitFixed="True"
+                                                      ShowSpinner="True" />
+
+                    <Label Content="色" Style="{StaticResource CompactFormLabelStyle}" />
+                    <controls:ColorInputControl ColorText="{Binding FootnoteAreaBorderTopColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                CommandParameter="FootnoteAreaBorderTopColor"
+                                                SelectColorCommand="{Binding SelectColorCommand}" />
+
+                    <Label Content="種類" Style="{StaticResource CompactFormLabelStyle}" />
+                    <StackPanel Margin="0,0,0,12" Orientation="Horizontal">
+                        <ToggleButton CommandParameter="solid"
+                                      IsChecked="{Binding FootnoteAreaBorderTopStyle, Converter={StaticResource ComparisonConverter}, ConverterParameter=solid}"
+                                      Style="{StaticResource IconToggleButtonStyle}"
+                                      ToolTip="実線 (solid)">
+                            <Path Width="16"
+                                  Height="16"
+                                  Data="{StaticResource BorderSolidIconGeometry}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
+                                  Stretch="Uniform" />
+                        </ToggleButton>
+                        <ToggleButton CommandParameter="dotted"
+                                      IsChecked="{Binding FootnoteAreaBorderTopStyle, Converter={StaticResource ComparisonConverter}, ConverterParameter=dotted}"
+                                      Style="{StaticResource IconToggleButtonStyle}"
+                                      ToolTip="点線 (dotted)">
+                            <Path Width="16"
+                                  Height="16"
+                                  Data="{StaticResource BorderDottedIconGeometry}"
+                                  Fill="{DynamicResource PrimaryTextBrush}"
+                                  Stretch="Uniform" />
+                        </ToggleButton>
+                    </StackPanel>
+
+                    <Label Content="注釈リスト設定" Style="{StaticResource CompactFormGroupHeaderStyle}" />
+                    <Label Content="行間" Style="{StaticResource CompactFormLabelStyle}" />
+                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      CssValue="{Binding FootnoteListItemLineHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                      DefaultValue="1.5"
+                                                      ShowSpinner="True" />
+
+                    <CheckBox Margin="0,12,0,0"
+                              Content="戻るリンク (↩) を表示"
+                              IsChecked="{Binding IsFootnoteBackLinkVisible, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Style="{StaticResource CompactFormCheckBoxStyle}" />
                 </StackPanel>
             </Grid>
         </ScrollViewer>
