@@ -32,12 +32,15 @@ namespace PageLeaf.Services
             ParseTableStyles(stylesheet, styleInfo);
             ParseCodeStyles(stylesheet, styleInfo);
             ParseNumberingStates(stylesheet, styleInfo);
+            ParseFootnoteStyles(stylesheet, styleInfo);
 
             return styleInfo;
         }
 
         public string UpdateCssContent(string existingCss, CssStyleInfo styleInfo)
         {
+            if (styleInfo == null) throw new ArgumentNullException(nameof(styleInfo));
+
             var parser = new CssParser();
             var stylesheet = parser.ParseStyleSheet(existingCss);
 
@@ -290,10 +293,91 @@ namespace PageLeaf.Services
                 }
             }, styleInfo);
 
-            if (styleInfo != null)
+            UpdateHeadingNumbering(stylesheet, styleInfo);
+
+            // Footnotes
+            // Marker
+            UpdateOrCreateRule(stylesheet, ".footnote-ref", (rule, info) =>
             {
-                UpdateHeadingNumbering(stylesheet, styleInfo);
-            }
+                if (!string.IsNullOrEmpty(info.Footnote.MarkerTextColor)) rule.Style.SetProperty("color", info.Footnote.MarkerTextColor);
+                else rule.Style.RemoveProperty("color");
+
+                if (info.Footnote.IsMarkerBold) rule.Style.SetProperty("font-weight", "bold");
+                else rule.Style.RemoveProperty("font-weight");
+
+                // Ensure superscript appearance for both number and brackets
+                rule.Style.SetProperty("vertical-align", "super");
+                rule.Style.SetProperty("font-size", "smaller");
+                rule.Style.SetProperty("text-decoration", "none");
+            }, styleInfo);
+
+            // Prevent double superscripting when child sup exists
+            UpdateOrCreateRule(stylesheet, ".footnote-ref sup", (rule, info) =>
+            {
+                rule.Style.SetProperty("vertical-align", "baseline");
+                rule.Style.SetProperty("font-size", "100%");
+            }, styleInfo);
+
+            UpdateOrCreateRule(stylesheet, ".footnote-ref::before", (rule, info) =>
+            {
+                if (info.Footnote.HasMarkerBrackets) rule.Style.SetProperty("content", "'['");
+                else rule.Style.RemoveProperty("content");
+            }, styleInfo);
+
+            UpdateOrCreateRule(stylesheet, ".footnote-ref::after", (rule, info) =>
+            {
+                if (info.Footnote.HasMarkerBrackets) rule.Style.SetProperty("content", "']'");
+                else rule.Style.RemoveProperty("content");
+            }, styleInfo);
+
+            // Area
+            UpdateOrCreateRule(stylesheet, ".footnotes", (rule, info) =>
+            {
+                if (!string.IsNullOrEmpty(info.Footnote.AreaFontSize)) rule.Style.SetProperty("font-size", info.Footnote.AreaFontSize);
+                else rule.Style.RemoveProperty("font-size");
+
+                if (!string.IsNullOrEmpty(info.Footnote.AreaTextColor)) rule.Style.SetProperty("color", info.Footnote.AreaTextColor);
+                else rule.Style.RemoveProperty("color");
+
+                if (!string.IsNullOrEmpty(info.Footnote.AreaMarginTop)) rule.Style.SetProperty("margin-top", info.Footnote.AreaMarginTop);
+                else rule.Style.RemoveProperty("margin-top");
+            }, styleInfo);
+
+            // Area Divider (HR)
+            UpdateOrCreateRule(stylesheet, ".footnotes hr", (rule, info) =>
+            {
+                bool hasBorder = !string.IsNullOrEmpty(info.Footnote.AreaBorderTopWidth) ||
+                                 !string.IsNullOrEmpty(info.Footnote.AreaBorderTopColor) ||
+                                 !string.IsNullOrEmpty(info.Footnote.AreaBorderTopStyle);
+
+                if (hasBorder)
+                {
+                    rule.Style.SetProperty("border", "0"); // Reset default HR style
+                    var width = !string.IsNullOrEmpty(info.Footnote.AreaBorderTopWidth) ? info.Footnote.AreaBorderTopWidth : "1px";
+                    var style = !string.IsNullOrEmpty(info.Footnote.AreaBorderTopStyle) ? info.Footnote.AreaBorderTopStyle : "solid";
+                    var color = !string.IsNullOrEmpty(info.Footnote.AreaBorderTopColor) ? info.Footnote.AreaBorderTopColor : "currentColor";
+                    rule.Style.SetProperty("border-top", $"{width} {style} {color}");
+                }
+                else
+                {
+                    rule.Style.RemoveProperty("border");
+                    rule.Style.RemoveProperty("border-top");
+                }
+            }, styleInfo);
+
+            // List Item
+            UpdateOrCreateRule(stylesheet, ".footnotes li", (rule, info) =>
+            {
+                if (!string.IsNullOrEmpty(info.Footnote.ListItemLineHeight)) rule.Style.SetProperty("line-height", info.Footnote.ListItemLineHeight);
+                else rule.Style.RemoveProperty("line-height");
+            }, styleInfo);
+
+            // Back Link
+            UpdateOrCreateRule(stylesheet, ".footnote-back-ref", (rule, info) =>
+            {
+                if (!info.Footnote.IsBackLinkVisible) rule.Style.SetProperty("display", "none");
+                else rule.Style.RemoveProperty("display");
+            }, styleInfo);
 
             // 更新されたスタイルシートを文字列として出力
             string generatedCss;
@@ -605,6 +689,55 @@ namespace PageLeaf.Services
                 {
                     styleInfo.HeadingNumberingStates[selector] = false;
                 }
+            }
+        }
+
+        private void ParseFootnoteStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        {
+            var markerRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == ".footnote-ref");
+            if (markerRule != null)
+            {
+                styleInfo.Footnote.MarkerTextColor = GetColorHexFromRule(markerRule, "color");
+                var fontWeight = markerRule.Style.GetPropertyValue("font-weight");
+                styleInfo.Footnote.IsMarkerBold = fontWeight == "bold" || (int.TryParse(fontWeight, out var w) && w >= 700);
+            }
+
+            var markerBeforeRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == ".footnote-ref::before");
+            styleInfo.Footnote.HasMarkerBrackets = markerBeforeRule?.Style.GetPropertyValue("content")?.Contains("[") == true;
+
+            var areaRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == ".footnotes");
+            if (areaRule != null)
+            {
+                styleInfo.Footnote.AreaFontSize = areaRule.Style.GetPropertyValue("font-size");
+                styleInfo.Footnote.AreaTextColor = GetColorHexFromRule(areaRule, "color");
+                styleInfo.Footnote.AreaMarginTop = areaRule.Style.GetPropertyValue("margin-top");
+            }
+
+            var hrRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == ".footnotes hr");
+            if (hrRule != null)
+            {
+                styleInfo.Footnote.AreaBorderTopWidth = hrRule.Style.GetPropertyValue("border-top-width");
+                if (string.IsNullOrEmpty(styleInfo.Footnote.AreaBorderTopWidth) && !string.IsNullOrEmpty(hrRule.Style.GetPropertyValue("border-top")))
+                {
+                    // Parse shorthand if specific prop is missing (simplified)
+                    styleInfo.Footnote.AreaBorderTopWidth = "1px";
+                }
+                styleInfo.Footnote.AreaBorderTopStyle = hrRule.Style.GetPropertyValue("border-top-style");
+                styleInfo.Footnote.AreaBorderTopColor = GetColorHexFromRule(hrRule, "border-top-color");
+            }
+
+            var liRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == ".footnotes li");
+            styleInfo.Footnote.ListItemLineHeight = liRule?.Style.GetPropertyValue("line-height");
+
+            var backLinkRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == ".footnote-back-ref");
+            if (backLinkRule != null)
+            {
+                styleInfo.Footnote.IsBackLinkVisible = backLinkRule.Style.GetPropertyValue("display") != "none";
+            }
+            else
+            {
+                // デフォルトは表示
+                styleInfo.Footnote.IsBackLinkVisible = true;
             }
         }
 

@@ -40,12 +40,13 @@ namespace PageLeaf.ViewModels
                 new CheatSheetItem { Category = "リスト", Syntax = "- [ ] タスク", Description = "タスクリスト (未完了)", RelatedShortcut = "Ctrl + L" },
                 new CheatSheetItem { Category = "リスト", Syntax = "- [x] タスク", Description = "タスクリスト (完了)", RelatedShortcut = "Ctrl + L" },
                 new CheatSheetItem { Category = "リンク・画像", Syntax = "[リンク](URL)", Description = "リンク", RelatedShortcut = "Ctrl + K" },
-                new CheatSheetItem { Category = "リンク・画像", Syntax = "![Alt](ImageURL)", Description = "画像埋め込み", RelatedShortcut = "Ctrl + Shift + V" },
+                new CheatSheetItem { Category = "リンク・画像", Syntax = "![Alt](ImageURL)", Description = "画像埋め込み", Note = "ローカルパスや相対パスも指定可能", RelatedShortcut = "Ctrl + Shift + V" },
                 new CheatSheetItem { Category = "引用・コード", Syntax = "> 引用", Description = "引用ブロック" },
                 new CheatSheetItem { Category = "引用・コード", Syntax = "`code`", Description = "インラインコード", RelatedShortcut = "Ctrl + Shift + C" },
-                new CheatSheetItem { Category = "引用・コード", Syntax = "```\ncode\n```", Description = "コードブロック" },
+                new CheatSheetItem { Category = "引用・コード", Syntax = "```\ncode\n```", Description = "コードブロック", Note = "```の後に言語名指定でシンタックスハイライト" },
                 new CheatSheetItem { Category = "テーブル", Syntax = "| A | B |\n|---|---|", Description = "テーブル作成" },
                 new CheatSheetItem { Category = "その他", Syntax = "---", Description = "水平線" },
+                new CheatSheetItem { Category = "その他", Syntax = "[^1] / [^1]: ...", Description = "脚注 (Footnote)", Note = "文中に [^1]、末尾に詳細を記述", RelatedShortcut = "Ctrl + Alt + F" },
                 new CheatSheetItem { Category = "独自機能", Syntax = "Shift + Enter", Description = "強制改ページ挿入", Note = "<div style=\"page-break-after: always;\"></div>", RelatedShortcut = "Shift + Enter" }
             };
         }
@@ -65,6 +66,7 @@ namespace PageLeaf.ViewModels
                 new CheatSheetItem { Category = "編集操作", Syntax = "Ctrl + Shift + X", Description = "取り消し線" },
                 new CheatSheetItem { Category = "編集操作", Syntax = "Ctrl + Shift + C", Description = "インラインコード" },
                 new CheatSheetItem { Category = "編集操作", Syntax = "Ctrl + K", Description = "リンク挿入" },
+                new CheatSheetItem { Category = "編集操作", Syntax = "Ctrl + Alt + F", Description = "脚注挿入", Note = "ポップアップから脚注を入力" },
                 new CheatSheetItem { Category = "編集操作", Syntax = "Ctrl + Shift + V", Description = "画像を貼り付け" },
                 new CheatSheetItem { Category = "編集操作", Syntax = "Shift + Enter", Description = "強制改ページ挿入" },
                 new CheatSheetItem { Category = "見出し操作", Syntax = "Ctrl + 1~6", Description = "見出し 1〜6 に設定" },

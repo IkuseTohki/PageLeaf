@@ -78,6 +78,11 @@ namespace PageLeaf.Models
         /// </summary>
         public AppTheme Theme { get; set; } = AppTheme.System;
 
+        /// <summary>
+        /// 保存時に脚注番号を振り直すかどうか。
+        /// </summary>
+        public bool RenumberFootnotesOnSave { get; set; } = true;
+
         // Default constructor for deserialization
         public ApplicationSettings() { }
     }

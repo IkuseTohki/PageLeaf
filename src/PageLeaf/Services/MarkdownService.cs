@@ -183,6 +183,20 @@ namespace PageLeaf.Services
             sb.AppendLine("  mermaid.initialize({ startOnLoad: true, theme: 'default' });");
             sb.AppendLine("  mermaid.contentLoaded();");
             sb.AppendLine("</script>");
+            sb.AppendLine("<script>");
+            sb.AppendLine("  // Handle internal fragment links manually to avoid issues with <base> tag");
+            sb.AppendLine("  document.addEventListener('click', function(e) {");
+            sb.AppendLine("    const link = e.target.closest('a');");
+            sb.AppendLine("    if (link && link.hash) {");
+            sb.AppendLine("      const id = decodeURIComponent(link.hash.substring(1));");
+            sb.AppendLine("      const element = document.getElementById(id);");
+            sb.AppendLine("      if (element) {");
+            sb.AppendLine("        element.scrollIntoView();");
+            sb.AppendLine("        e.preventDefault();");
+            sb.AppendLine("      }");
+            sb.AppendLine("    }");
+            sb.AppendLine("  });");
+            sb.AppendLine("</script>");
 
             return sb.ToString();
         }

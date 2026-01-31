@@ -13,6 +13,7 @@ namespace PageLeaf.UseCases
         private readonly IFileService _fileService;
         private readonly ISaveAsDocumentUseCase _saveAsDocumentUseCase;
         private readonly IMarkdownService _markdownService;
+        private readonly ISettingsService _settingsService;
 
         /// <summary>
         /// <see cref="SaveDocumentUseCase"/> クラスの新しいインスタンスを初期化します。
@@ -21,12 +22,14 @@ namespace PageLeaf.UseCases
         /// <param name="fileService">ファイルサービス。</param>
         /// <param name="saveAsDocumentUseCase">名前を付けて保存ユースケース。</param>
         /// <param name="markdownService">Markdownサービス。</param>
-        public SaveDocumentUseCase(IEditorService editorService, IFileService fileService, ISaveAsDocumentUseCase saveAsDocumentUseCase, IMarkdownService markdownService)
+        /// <param name="settingsService">設定サービス。</param>
+        public SaveDocumentUseCase(IEditorService editorService, IFileService fileService, ISaveAsDocumentUseCase saveAsDocumentUseCase, IMarkdownService markdownService, ISettingsService settingsService)
         {
             _editorService = editorService;
             _fileService = fileService;
             _saveAsDocumentUseCase = saveAsDocumentUseCase;
             _markdownService = markdownService;
+            _settingsService = settingsService;
         }
 
         /// <inheritdoc />
@@ -56,8 +59,17 @@ namespace PageLeaf.UseCases
                     document.FrontMatter = newFrontMatter;
                 }
 
+                // 脚注のリナンバリング
+                var contentToSave = document.Content ?? string.Empty;
+                if (_settingsService.CurrentSettings.RenumberFootnotesOnSave)
+                {
+                    contentToSave = PageLeaf.Utilities.MarkdownFootnoteHelper.Renumber(contentToSave);
+                    // エディタ側の内容も更新して同期させる（番号が変わったことがわかるように）
+                    document.Content = contentToSave;
+                }
+
                 // 保存用に結合
-                var fullContent = _markdownService.Join(document.FrontMatter, document.Content);
+                var fullContent = _markdownService.Join(document.FrontMatter, contentToSave);
 
                 // FileService.Save は document オブジェクトを受け取るため、
                 // 一時的に全文を持たせる必要があるが、エディタ側の同期を避けるため

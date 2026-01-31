@@ -22,7 +22,8 @@ namespace PageLeaf.ViewModels
         Quote,
         List,
         Table,
-        Code
+        Code,
+        Footnote
     }
 
     public class CssEditorViewModel : ViewModelBase
@@ -91,6 +92,7 @@ namespace PageLeaf.ViewModels
         public bool IsListTabDirty => IsTabDirty(CssEditorTab.List);
         public bool IsTableTabDirty => IsTabDirty(CssEditorTab.Table);
         public bool IsCodeTabDirty => IsTabDirty(CssEditorTab.Code);
+        public bool IsFootnoteTabDirty => IsTabDirty(CssEditorTab.Footnote);
 
         private void MarkTabDirty(CssEditorTab tab)
         {
@@ -106,6 +108,7 @@ namespace PageLeaf.ViewModels
                     case CssEditorTab.List: OnPropertyChanged(nameof(IsListTabDirty)); break;
                     case CssEditorTab.Table: OnPropertyChanged(nameof(IsTableTabDirty)); break;
                     case CssEditorTab.Code: OnPropertyChanged(nameof(IsCodeTabDirty)); break;
+                    case CssEditorTab.Footnote: OnPropertyChanged(nameof(IsFootnoteTabDirty)); break;
                 }
             }
         }
@@ -121,6 +124,7 @@ namespace PageLeaf.ViewModels
             OnPropertyChanged(nameof(IsListTabDirty));
             OnPropertyChanged(nameof(IsTableTabDirty));
             OnPropertyChanged(nameof(IsCodeTabDirty));
+            OnPropertyChanged(nameof(IsFootnoteTabDirty));
         }
 
         private CssEditorTab GetTabFromPropertyName(string propertyName)
@@ -133,6 +137,7 @@ namespace PageLeaf.ViewModels
             if (propertyName.StartsWith("List") || propertyName.StartsWith("NumberedList")) return CssEditorTab.List;
             if (propertyName.StartsWith("Table")) return CssEditorTab.Table;
             if (propertyName.Contains("Code")) return CssEditorTab.Code;
+            if (propertyName.Contains("Footnote")) return CssEditorTab.Footnote;
             return CssEditorTab.General;
         }
 
@@ -262,6 +267,20 @@ namespace PageLeaf.ViewModels
                 }
                 _flags[$"{level}.IsNumberingEnabled"] = styleInfo.HeadingNumberingStates.TryGetValue(level, out var n) && n;
             }
+
+            // 脚注のスタイルをロード
+            _styles[nameof(FootnoteMarkerTextColor)] = styleInfo.Footnote.MarkerTextColor;
+            _flags["Footnote.IsMarkerBold"] = styleInfo.Footnote.IsMarkerBold;
+            _flags["Footnote.HasMarkerBrackets"] = styleInfo.Footnote.HasMarkerBrackets;
+            _styles[nameof(FootnoteAreaFontSize)] = styleInfo.Footnote.AreaFontSize;
+            _styles[nameof(FootnoteAreaTextColor)] = styleInfo.Footnote.AreaTextColor;
+            _styles[nameof(FootnoteAreaMarginTop)] = styleInfo.Footnote.AreaMarginTop;
+            _styles[nameof(FootnoteAreaBorderTopColor)] = styleInfo.Footnote.AreaBorderTopColor;
+            _styles[nameof(FootnoteAreaBorderTopWidth)] = styleInfo.Footnote.AreaBorderTopWidth;
+            _styles[nameof(FootnoteAreaBorderTopStyle)] = styleInfo.Footnote.AreaBorderTopStyle;
+            _styles[nameof(FootnoteListItemLineHeight)] = styleInfo.Footnote.ListItemLineHeight;
+            _flags["Footnote.IsBackLinkVisible"] = styleInfo.Footnote.IsBackLinkVisible;
+
             IsDirty = false;
             ClearDirtyTabs();
             OnPropertyChanged(string.Empty);
@@ -341,6 +360,22 @@ namespace PageLeaf.ViewModels
         public string? NumberedListMarkerType { get => this[nameof(NumberedListMarkerType)]; set => this[nameof(NumberedListMarkerType)] = value; }
         public string? ListMarkerSize { get => this[nameof(ListMarkerSize)]; set => this[nameof(ListMarkerSize)] = value; }
         public string? ListIndent { get => this[nameof(ListIndent)]; set => this[nameof(ListIndent)] = value; }
+
+        public string? FootnoteMarkerTextColor { get => this[nameof(FootnoteMarkerTextColor)]; set => this[nameof(FootnoteMarkerTextColor)] = value; }
+        public bool IsFootnoteMarkerBold { get => GetFootnoteFlag(nameof(CssFootnoteInfo.IsMarkerBold)); set => SetFootnoteFlag(nameof(CssFootnoteInfo.IsMarkerBold), value); }
+        public bool HasFootnoteMarkerBrackets { get => GetFootnoteFlag(nameof(CssFootnoteInfo.HasMarkerBrackets)); set => SetFootnoteFlag(nameof(CssFootnoteInfo.HasMarkerBrackets), value); }
+        public string? FootnoteAreaFontSize { get => this[nameof(FootnoteAreaFontSize)]; set => this[nameof(FootnoteAreaFontSize)] = value; }
+        public string? FootnoteAreaTextColor { get => this[nameof(FootnoteAreaTextColor)]; set => this[nameof(FootnoteAreaTextColor)] = value; }
+        public string? FootnoteAreaMarginTop { get => this[nameof(FootnoteAreaMarginTop)]; set => this[nameof(FootnoteAreaMarginTop)] = value; }
+        public string? FootnoteAreaBorderTopColor { get => this[nameof(FootnoteAreaBorderTopColor)]; set => this[nameof(FootnoteAreaBorderTopColor)] = value; }
+        public string? FootnoteAreaBorderTopWidth { get => this[nameof(FootnoteAreaBorderTopWidth)]; set => this[nameof(FootnoteAreaBorderTopWidth)] = value; }
+        public string? FootnoteAreaBorderTopStyle { get => this[nameof(FootnoteAreaBorderTopStyle)]; set => this[nameof(FootnoteAreaBorderTopStyle)] = value; }
+        public string? FootnoteListItemLineHeight { get => this[nameof(FootnoteListItemLineHeight)]; set => this[nameof(FootnoteListItemLineHeight)] = value; }
+        public bool IsFootnoteBackLinkVisible { get => GetFootnoteFlag(nameof(CssFootnoteInfo.IsBackLinkVisible)); set => SetFootnoteFlag(nameof(CssFootnoteInfo.IsBackLinkVisible), value); }
+
+        private bool GetFootnoteFlag(string attr) => _flags.TryGetValue($"Footnote.{attr}", out var b) && b;
+        private void SetFootnoteFlag(string attr, bool value) { var key = $"Footnote.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; MarkTabDirty(CssEditorTab.Footnote); UpdatePreview(); OnPropertyChanged(key.Replace(".", "")); OnPropertyChanged(nameof(IsFootnoteMarkerBold)); OnPropertyChanged(nameof(HasFootnoteMarkerBrackets)); OnPropertyChanged(nameof(IsFootnoteBackLinkVisible)); } }
+
         public string? HeadingTextColor { get => this[$"{_selectedHeadingLevel}.TextColor"]; set => this[$"{_selectedHeadingLevel}.TextColor"] = value; }
         public string? HeadingFontSize { get => this[$"{_selectedHeadingLevel}.FontSize"]; set => this[$"{_selectedHeadingLevel}.FontSize"] = value; }
         public string? HeadingFontFamily { get => this[$"{_selectedHeadingLevel}.FontFamily"]; set => this[$"{_selectedHeadingLevel}.FontFamily"] = value; }
@@ -415,6 +450,22 @@ namespace PageLeaf.ViewModels
                 };
                 if (_flags.TryGetValue($"{lv}.IsNumberingEnabled", out var n)) styleInfo.HeadingNumberingStates[lv] = n;
             }
+
+            styleInfo.Footnote = new CssFootnoteInfo
+            {
+                MarkerTextColor = this[nameof(FootnoteMarkerTextColor)],
+                IsMarkerBold = GetFootnoteFlag("IsMarkerBold"),
+                HasMarkerBrackets = GetFootnoteFlag("HasMarkerBrackets"),
+                AreaFontSize = this[nameof(FootnoteAreaFontSize)],
+                AreaTextColor = this[nameof(FootnoteAreaTextColor)],
+                AreaMarginTop = this[nameof(FootnoteAreaMarginTop)],
+                AreaBorderTopColor = this[nameof(FootnoteAreaBorderTopColor)],
+                AreaBorderTopWidth = this[nameof(FootnoteAreaBorderTopWidth)],
+                AreaBorderTopStyle = this[nameof(FootnoteAreaBorderTopStyle)],
+                ListItemLineHeight = this[nameof(FootnoteListItemLineHeight)],
+                IsBackLinkVisible = GetFootnoteFlag("IsBackLinkVisible")
+            };
+
             return styleInfo;
         }
     }

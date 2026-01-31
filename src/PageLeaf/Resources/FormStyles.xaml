@@ -187,11 +187,11 @@
         <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SectionHeaderBorderBrush}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
-        <Setter Property="Margin" Value="0,0,0,20" />
+        <Setter Property="Margin" Value="0,20,0,20" />
         <Setter Property="Padding" Value="0,0,0,10" />
     </Style>
 
-    <!-- 最初のセクション用（マージン調整 - HTML案では共通） -->
+    <!-- 最初のセクション用（最上部のため上マージンなし） -->
     <Style x:Key="FirstSectionHeaderLabelStyle"
            BasedOn="{StaticResource SectionHeaderLabelStyle}"
            TargetType="Label">
