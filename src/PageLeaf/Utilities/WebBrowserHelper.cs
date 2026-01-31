@@ -90,9 +90,15 @@ namespace PageLeaf.Utilities
                     await webView2.EnsureCoreWebView2Async(env);
                 }
 
-                // Subscribe to NavigationCompleted to re-inject CSS after reload
+                // Subscribe to events
                 webView2.NavigationCompleted -= WebView2_NavigationCompleted;
                 webView2.NavigationCompleted += WebView2_NavigationCompleted;
+
+                if (webView2.CoreWebView2 != null)
+                {
+                    webView2.CoreWebView2.NavigationStarting -= CoreWebView2_NavigationStarting;
+                    webView2.CoreWebView2.NavigationStarting += CoreWebView2_NavigationStarting;
+                }
 
                 if (webView2.CoreWebView2 != null && !string.IsNullOrEmpty(filePath))
                 {
@@ -111,6 +117,37 @@ namespace PageLeaf.Utilities
             {
                 var cssContent = GetInjectedCss(webView2);
                 InjectCss(webView2, cssContent);
+            }
+        }
+
+        private static async void CoreWebView2_NavigationStarting(object? sender, CoreWebView2NavigationStartingEventArgs e)
+        {
+            if (sender is CoreWebView2 coreWebView2)
+            {
+                var uri = e.Uri;
+
+                // If it's a fragment link (contains #), handle it manually to avoid external navigation issues
+                if (uri.Contains("#"))
+                {
+                    var fragmentIndex = uri.IndexOf('#');
+                    var fragment = uri.Substring(fragmentIndex + 1);
+
+                    if (!string.IsNullOrEmpty(fragment))
+                    {
+                        e.Cancel = true;
+
+                        // Execute script to scroll into view
+                        var script = $@"
+                            (function() {{
+                                var id = decodeURIComponent('{fragment}');
+                                var element = document.getElementById(id);
+                                if (element) {{
+                                    element.scrollIntoView();
+                                }}}}
+                            )();";
+                        await coreWebView2.ExecuteScriptAsync(script);
+                    }
+                }
             }
         }
 

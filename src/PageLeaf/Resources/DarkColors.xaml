@@ -42,7 +42,7 @@
     <SolidColorBrush x:Key="ButtonCheckedBackgroundBrush" Color="#004D80" />
     <SolidColorBrush x:Key="ButtonCheckedBorderBrush" Color="{StaticResource PrimaryActionColor}" />
     <SolidColorBrush x:Key="ButtonMouseOverBackgroundBrush" Color="#2A2D2E" />
-    <SolidColorBrush x:Key="IconButtonSelectedBackgroundBrush" Color="#590091FF" /> 
+    <SolidColorBrush x:Key="IconButtonSelectedBackgroundBrush" Color="#590091FF" />
     <!-- 35% opacity of PrimaryActionColor -->
     <SolidColorBrush x:Key="IconButtonSelectedIconBrush" Color="{StaticResource PrimaryActionColor}" />
 
