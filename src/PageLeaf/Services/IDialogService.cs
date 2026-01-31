@@ -60,6 +60,14 @@ namespace PageLeaf.Services
         void ShowMessage(string message, string title);
 
         /// <summary>
+        /// ユーザーに確認（Yes/No）を求めるダイアログを表示します。
+        /// </summary>
+        /// <param name="message">表示するメッセージ。</param>
+        /// <param name="title">ダイアログのタイトル。</param>
+        /// <returns>はい(true)、いいえ(false)。</returns>
+        bool ShowConfirmationDialog(string message, string title);
+
+        /// <summary>
         /// 入力ダイアログを表示し、ユーザーが入力した文字列を返します。
         /// </summary>
         /// <param name="title">ダイアログのタイトル。</param>

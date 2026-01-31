@@ -73,6 +73,7 @@ namespace PageLeaf.Services
         public SaveConfirmationResult ShowSaveConfirmationDialog()
         {
             MessageBoxResult result = MessageBox.Show(
+                Application.Current.MainWindow,
                 "未保存の変更があります。保存しますか？",
                 "PageLeaf",
                 MessageBoxButton.YesNoCancel,
@@ -97,6 +98,7 @@ namespace PageLeaf.Services
         {
             var viewModel = new ViewModels.ErrorViewModel(message, exception);
             var errorWindow = new ErrorWindow(viewModel);
+            errorWindow.Owner = Application.Current.MainWindow;
             errorWindow.ShowDialog();
         }
 
@@ -146,9 +148,14 @@ namespace PageLeaf.Services
             _windowService.ShowWindow<AboutViewModel>();
         }
 
+        public bool ShowConfirmationDialog(string message, string title)
+        {
+            return MessageBox.Show(Application.Current.MainWindow, message, title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
+        }
+
         public void ShowMessage(string message, string title)
         {
-            MessageBox.Show(message, title, MessageBoxButton.OK, MessageBoxImage.Information);
+            MessageBox.Show(Application.Current.MainWindow, message, title, MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public string? ShowInputDialog(string title, string message, string defaultInput = "")

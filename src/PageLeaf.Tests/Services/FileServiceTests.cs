@@ -284,5 +284,64 @@ namespace PageLeaf.Tests.Services
             Assert.IsFalse(result.Any(f => Path.GetFileName(f) == "image.png"), "image.png が誤って含まれています。");
             Assert.IsFalse(result.Any(f => Path.GetFileName(f) == "document.docx"), "document.docx が誤って含まれています。");
         }
+
+        [TestMethod]
+        public void Monitoring_ShouldRaiseFileChangedEvent_WhenFileIsUpdatedExternally()
+        {
+            // テスト観点: 監視中のファイルが外部で更新されたとき、FileChanged イベントが発生することを検証する。
+            // Arrange
+            var fileService = new FileService(new NullLogger<FileService>());
+            var filePath = Path.Combine(_testFolderPath, "monitor_test.md");
+            File.WriteAllText(filePath, "initial content");
+
+            bool eventRaised = false;
+            string? changedPath = null;
+            fileService.FileChanged += (s, path) =>
+            {
+                eventRaised = true;
+                changedPath = path;
+            };
+
+            // Act
+            fileService.StartMonitoring(filePath);
+
+            // 外部からの更新をシミュレート
+            File.WriteAllText(filePath, "externally updated content");
+
+            // FileSystemWatcher のイベント発生を待つ（非同期のため少し待機が必要）
+            System.Threading.Thread.Sleep(200);
+
+            // Assert
+            Assert.IsTrue(eventRaised, "FileChanged イベントが発生していません。");
+            Assert.AreEqual(filePath, changedPath, "イベント引数のパスが正しくありません。");
+
+            fileService.StopMonitoring();
+        }
+
+        [TestMethod]
+        public void Monitoring_ShouldNotRaiseFileChangedEvent_WhenFileIsSavedByApp()
+        {
+            // テスト観点: アプリ自身の Save メソッドによる更新では、FileChanged イベントが発生しないことを検証する。
+            // Arrange
+            var fileService = new FileService(new NullLogger<FileService>());
+            var filePath = Path.Combine(_testFolderPath, "self_save_test.md");
+            var document = new MarkdownDocument { FilePath = filePath, Content = "initial" };
+            fileService.Save(document);
+
+            bool eventRaised = false;
+            fileService.FileChanged += (s, path) => eventRaised = true;
+
+            // Act
+            fileService.StartMonitoring(filePath);
+            document.Content = "updated by app";
+            fileService.Save(document);
+
+            System.Threading.Thread.Sleep(200);
+
+            // Assert
+            Assert.IsFalse(eventRaised, "アプリ自身の保存操作でイベントが発生してしまいました。");
+
+            fileService.StopMonitoring();
+        }
     }
 }

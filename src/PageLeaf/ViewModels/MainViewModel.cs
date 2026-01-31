@@ -33,6 +33,7 @@ namespace PageLeaf.ViewModels
         private double _cssEditorColumnWidth = 230.0;
         private bool _isTocOpen; // 目次が開いているかどうか
         private ObservableCollection<TocItem> _tocItems = new ObservableCollection<TocItem>(); // 目次アイテム
+        private bool _isHandlingExternalFileChange; // 外部変更ダイアログの二重表示防止フラグ
 
         public IEditorService Editor { get; }
         public CssEditorViewModel CssEditorViewModel { get; }
@@ -252,6 +253,7 @@ namespace PageLeaf.ViewModels
             // イベント購読
             CssEditorViewModel.CssSaved += OnCssSaved;
             _windowService.WindowClosed += (s, type) => OnSubWindowClosed(type);
+            _fileService.FileChanged += OnExternalFileChanged;
 
             OpenFileCommand = new Utilities.DelegateCommand(ExecuteOpenFile);
             SaveFileCommand = new Utilities.DelegateCommand(ExecuteSaveFile);
@@ -300,6 +302,7 @@ namespace PageLeaf.ViewModels
         private void ExecuteNewDocument(object? parameter)
         {
             _logger.LogInformation("NewDocumentCommand executed.");
+            _fileService.StopMonitoring();
             _newDocumentUseCase.Execute();
         }
 
@@ -308,18 +311,33 @@ namespace PageLeaf.ViewModels
             _logger.LogInformation("OpenFileCommand executed.");
             _openDocumentUseCase.Execute();
             ApplyDocumentMetadata();
+
+            if (!string.IsNullOrEmpty(Editor.CurrentDocument.FilePath))
+            {
+                _fileService.StartMonitoring(Editor.CurrentDocument.FilePath);
+            }
         }
 
         private void ExecuteSaveFile(object? parameter)
         {
             _logger.LogInformation("ExecuteSaveFile command triggered.");
             _saveDocumentUseCase.Execute();
+
+            if (!string.IsNullOrEmpty(Editor.CurrentDocument.FilePath))
+            {
+                _fileService.StartMonitoring(Editor.CurrentDocument.FilePath);
+            }
         }
 
         private void ExecuteSaveAsFile(object? parameter)
         {
             _logger.LogInformation("ExecuteSaveAsFile command triggered.");
             _saveAsDocumentUseCase.Execute();
+
+            if (!string.IsNullOrEmpty(Editor.CurrentDocument.FilePath))
+            {
+                _fileService.StartMonitoring(Editor.CurrentDocument.FilePath);
+            }
         }
 
         private void ExecuteToggleCssEditor(object? obj)
@@ -369,6 +387,11 @@ namespace PageLeaf.ViewModels
                 _logger.LogInformation("OpenFileByPathCommand executed for: {FilePath}", filePath);
                 _openDocumentUseCase.OpenPath(filePath);
                 ApplyDocumentMetadata();
+
+                if (!string.IsNullOrEmpty(Editor.CurrentDocument.FilePath))
+                {
+                    _fileService.StartMonitoring(Editor.CurrentDocument.FilePath);
+                }
             }
         }
 
@@ -442,6 +465,55 @@ namespace PageLeaf.ViewModels
             {
                 TocItems.Add(header);
             }
+        }
+
+        private void OnExternalFileChanged(object? sender, string filePath)
+        {
+            // UIスレッドで実行
+            System.Windows.Application.Current.Dispatcher.Invoke(async () =>
+            {
+                if (_isHandlingExternalFileChange)
+                {
+                    return;
+                }
+
+                _isHandlingExternalFileChange = true;
+
+                try
+                {
+                    string message = Editor.IsDirty
+                        ? "外部でファイルが変更されました。\n再読み込みして最新の状態を反映しますか？\n（現在の変更内容は失われます）"
+                        : "外部でファイルが変更されました。\n最新の状態を反映するために再読み込みしますか？";
+
+                    bool shouldReload = _dialogService.ShowConfirmationDialog(message, "外部変更の検知");
+
+                    if (shouldReload)
+                    {
+                        _logger.LogInformation("Reloading file due to external change: {FilePath}", filePath);
+
+                        // ファイルを読み込み、フロントマターと本文を分離する
+                        var rawDoc = _fileService.Open(filePath);
+                        var (fm, body) = _markdownService.Split(rawDoc.Content ?? string.Empty);
+
+                        rawDoc.FrontMatter = fm;
+                        rawDoc.Content = body;
+
+                        Editor.LoadDocument(rawDoc);
+                        ApplyDocumentMetadata();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to reload file after external change: {FilePath}", filePath);
+                    _dialogService.ShowMessage($"再読み込みに失敗しました：{ex.Message}", "エラー");
+                }
+                finally
+                {
+                    // OSからの連続したイベント（残響）を確実に無視するため、少し待機してからフラグを下ろす
+                    await System.Threading.Tasks.Task.Delay(500);
+                    _isHandlingExternalFileChange = false;
+                }
+            });
         }
 
         private void OnCssSaved(object? sender, EventArgs e)

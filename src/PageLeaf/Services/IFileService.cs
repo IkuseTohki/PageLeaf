@@ -54,5 +54,21 @@ namespace PageLeaf.Services
         /// <param name="filePath">書き込み先のファイルパス。</param>
         /// <param name="content">書き込む内容。</param>
         void WriteAllText(string filePath, string content);
+
+        /// <summary>
+        /// 指定されたファイルの監視を開始します。
+        /// </summary>
+        /// <param name="filePath">監視対象のファイルパス。</param>
+        void StartMonitoring(string filePath);
+
+        /// <summary>
+        /// 現在のファイル監視を停止します。
+        /// </summary>
+        void StopMonitoring();
+
+        /// <summary>
+        /// 監視中のファイルが外部で変更されたときに発生するイベントです。
+        /// </summary>
+        event System.EventHandler<string>? FileChanged;
     }
 }

@@ -9,13 +9,77 @@ using Ude;
 
 namespace PageLeaf.Services
 {
-    public class FileService : IFileService
+    public class FileService : IFileService, IDisposable
     {
         private readonly ILogger<FileService> _logger;
+        private FileSystemWatcher? _watcher;
+        private string? _monitoredFilePath;
+        private bool _isSaving;
+        private DateTime _lastEventTime = DateTime.MinValue;
+        private const double DebounceMilliseconds = 200;
+
+        public event EventHandler<string>? FileChanged;
 
         public FileService(ILogger<FileService> logger)
         {
             _logger = logger;
+        }
+
+        public void StartMonitoring(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath)) return;
+
+            StopMonitoring();
+
+            var directory = Path.GetDirectoryName(filePath);
+            var fileName = Path.GetFileName(filePath);
+
+            if (directory == null || !Directory.Exists(directory)) return;
+
+            _monitoredFilePath = filePath;
+            _watcher = new FileSystemWatcher(directory, fileName)
+            {
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.Size,
+                EnableRaisingEvents = true
+            };
+
+            _watcher.Changed += OnFileWatcherChanged;
+            _watcher.Renamed += OnFileWatcherChanged;
+
+            _logger.LogInformation("Started monitoring file: {FilePath}", filePath);
+        }
+
+        public void StopMonitoring()
+        {
+            if (_watcher != null)
+            {
+                _watcher.EnableRaisingEvents = false;
+                _watcher.Changed -= OnFileWatcherChanged;
+                _watcher.Renamed -= OnFileWatcherChanged;
+                _watcher.Dispose();
+                _watcher = null;
+            }
+            _monitoredFilePath = null;
+        }
+
+        private void OnFileWatcherChanged(object sender, FileSystemEventArgs e)
+        {
+            if (_isSaving) return;
+
+            // デバウンス処理：前回のイベントから一定時間以内なら無視
+            var now = DateTime.Now;
+            if ((now - _lastEventTime).TotalMilliseconds < DebounceMilliseconds)
+            {
+                return;
+            }
+            _lastEventTime = now;
+
+            // 監視対象のファイル名と一致するか確認（大文字小文字無視）
+            if (e.FullPath.Equals(_monitoredFilePath, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogInformation("External file change detected: {FilePath}", e.FullPath);
+                FileChanged?.Invoke(this, e.FullPath);
+            }
         }
 
         public MarkdownDocument Open(string filePath)
@@ -71,6 +135,7 @@ namespace PageLeaf.Services
 
             _logger.LogInformation("Attempting to save file to {FilePath}.", document.FilePath);
 
+            _isSaving = true;
             try
             {
                 // ドキュメントに保存されているエンコーディングを使用。なければUTF8をデフォルトとする。
@@ -82,6 +147,12 @@ namespace PageLeaf.Services
             {
                 _logger.LogError(ex, "Error saving file to {FilePath}.", document.FilePath);
                 throw new IOException($"Error saving file: {document.FilePath}", ex);
+            }
+            finally
+            {
+                // FileSystemWatcher のイベントが非同期で飛んでくるのを待つための微小な待機
+                // 環境によっては書き込み完了直後にイベントが発生するため、フラグを下ろすのを少し遅らせる
+                System.Threading.Tasks.Task.Delay(100).ContinueWith(_ => _isSaving = false);
             }
         }
 
@@ -201,6 +272,11 @@ namespace PageLeaf.Services
                 _logger.LogError(ex, "Error writing text to file {FilePath}.", filePath);
                 throw;
             }
+        }
+
+        public void Dispose()
+        {
+            StopMonitoring();
         }
     }
 }
