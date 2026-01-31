@@ -13,6 +13,7 @@
             <Setter Property="Padding" Value="2,0" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -38,7 +39,7 @@
                                      BorderThickness="0"
                                      CaretBrush="{DynamicResource PrimaryTextBrush}"
                                      Focusable="True"
-                                     Foreground="{DynamicResource PrimaryTextBrush}"
+                                     Foreground="{TemplateBinding Foreground}"
                                      IsReadOnly="{TemplateBinding IsReadOnly}"
                                      Style="{x:Null}" />
                             <!-- 矢印ボタン (マウスオーバー時のみ表示) -->
@@ -120,7 +121,7 @@
                                      BorderThickness="0"
                                      CaretBrush="{DynamicResource PrimaryTextBrush}"
                                      Focusable="True"
-                                     Foreground="{DynamicResource PrimaryTextBrush}"
+                                     Foreground="{TemplateBinding Foreground}"
                                      IsReadOnly="{TemplateBinding IsReadOnly}"
                                      Style="{x:Null}" />
                             <Path Name="Arrow"

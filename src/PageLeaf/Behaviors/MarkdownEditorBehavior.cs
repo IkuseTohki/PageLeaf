@@ -128,10 +128,10 @@ namespace PageLeaf.Behaviors
                 }
             }
 
-            // カーソルの色もテキスト色に合わせる
-            if (Application.Current.TryFindResource("PrimaryTextBrush") is SolidColorBrush textBrush)
+            // カーソルの色もアクセントカラーに合わせる
+            if (Application.Current.TryFindResource("PrimaryActionBrush") is SolidColorBrush accentBrush)
             {
-                editor.TextArea.Caret.CaretBrush = textBrush;
+                editor.TextArea.Caret.CaretBrush = accentBrush;
             }
 
             // 再描画を促す

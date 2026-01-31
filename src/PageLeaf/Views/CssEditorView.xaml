@@ -154,7 +154,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignLeftIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="center"
@@ -164,7 +163,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignCenterIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="right"
@@ -174,7 +172,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignRightIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                     </StackPanel>
@@ -272,7 +269,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignLeftIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="center"
@@ -282,7 +278,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignCenterIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="right"
@@ -292,7 +287,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignRightIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                     </StackPanel>
@@ -374,7 +368,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource BorderSolidIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="dotted"
@@ -384,7 +377,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource BorderDottedIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="dashed"
@@ -394,7 +386,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource BorderDashedIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                     </StackPanel>
@@ -425,7 +416,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignLeftIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="center"
@@ -435,7 +425,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignCenterIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="right"
@@ -445,7 +434,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource AlignRightIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                     </StackPanel>
@@ -589,7 +577,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource BorderSolidIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                         <ToggleButton CommandParameter="dotted"
@@ -599,7 +586,6 @@
                             <Path Width="16"
                                   Height="16"
                                   Data="{StaticResource BorderDottedIconGeometry}"
-                                  Fill="{DynamicResource PrimaryTextBrush}"
                                   Stretch="Uniform" />
                         </ToggleButton>
                     </StackPanel>

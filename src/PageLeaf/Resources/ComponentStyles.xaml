@@ -5,10 +5,10 @@
     <!-- リストマーカー選択用ListBoxItemスタイル -->
     <Style x:Key="ListMarkerListBoxItemStyle" TargetType="ListBoxItem">
         <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Margin" Value="2" />
-        <Setter Property="Padding" Value="0" />
+        <Setter Property="Padding" Value="4" />
         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
         <Setter Property="VerticalContentAlignment" Value="Stretch" />
         <Setter Property="Template">
@@ -19,7 +19,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="3"
+                            CornerRadius="4"
                             SnapsToDevicePixels="true">
                         <ContentPresenter HorizontalAlignment="Center"
                                           VerticalAlignment="Center"
@@ -27,12 +27,10 @@
                     </Border>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="border" Property="Background" Value="{DynamicResource SelectionBackgroundBrush}" />
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource SelectionBackgroundBrush}" />
-                            <Setter Property="Foreground" Value="White" />
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource IconButtonSelectedBackgroundBrush}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource SelectionBackgroundBrush}" />
+                            <Setter TargetName="border" Property="Background" Value="{DynamicResource ButtonHoverBackgroundBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -43,7 +41,7 @@
                 <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding IsSelected, RelativeSource={RelativeSource AncestorType=ListBoxItem}}" Value="True">
-                        <Setter Property="Foreground" Value="White" />
+                        <Setter Property="Foreground" Value="{DynamicResource IconButtonSelectedIconBrush}" />
                     </DataTrigger>
                 </Style.Triggers>
             </Style>
