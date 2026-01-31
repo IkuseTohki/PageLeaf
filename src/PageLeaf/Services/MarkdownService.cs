@@ -162,6 +162,7 @@ namespace PageLeaf.Services
             string highlightUri;
             string mermaidUri;
             string extensionUri = GetResourceUri("highlight/pageleaf-extensions.js");
+            string previewExtensionUri = GetResourceUri("js/preview-extensions.js");
 
             if (settings.ResourceSource == ResourceSource.Cdn)
             {
@@ -178,28 +179,8 @@ namespace PageLeaf.Services
             sb.AppendLine($"<script src=\"{highlightUri}\"></script>");
             sb.AppendLine($"<script src=\"{extensionUri}\"></script>");
             sb.AppendLine($"<script src=\"{mermaidUri}\"></script>");
+            sb.AppendLine($"<script src=\"{previewExtensionUri}\"></script>");
             sb.AppendLine("<script>hljs.highlightAll();</script>");
-            sb.AppendLine("<script>");
-            sb.AppendLine("  mermaid.initialize({ startOnLoad: true, theme: 'default' });");
-            sb.AppendLine("  mermaid.contentLoaded();");
-            sb.AppendLine("</script>");
-            sb.AppendLine("<script>");
-            sb.AppendLine("  // Handle internal fragment links manually to avoid issues with <base> tag");
-            sb.AppendLine("  document.addEventListener('click', function(e) {");
-            sb.AppendLine("    const link = e.target.closest('a');");
-            sb.AppendLine("    if (link) {");
-            sb.AppendLine("      const href = link.getAttribute('href');");
-            sb.AppendLine("      if (href && href.startsWith('#')) {");
-            sb.AppendLine("        const id = decodeURIComponent(href.substring(1));");
-            sb.AppendLine("        const element = document.getElementById(id);");
-            sb.AppendLine("        if (element) {");
-            sb.AppendLine("          element.scrollIntoView();");
-            sb.AppendLine("          e.preventDefault();");
-            sb.AppendLine("        }");
-            sb.AppendLine("      }");
-            sb.AppendLine("    }");
-            sb.AppendLine("  });");
-            sb.AppendLine("</script>");
 
             return sb.ToString();
         }

@@ -76,6 +76,7 @@ namespace PageLeaf.Services
             if (normalized.Equals("css/extensions.css", StringComparison.OrdinalIgnoreCase)) return true;
             if (normalized.StartsWith("highlight/", StringComparison.OrdinalIgnoreCase)) return true;
             if (normalized.StartsWith("mermaid/", StringComparison.OrdinalIgnoreCase)) return true;
+            if (normalized.StartsWith("js/", StringComparison.OrdinalIgnoreCase)) return true;
 
             return false;
         }
@@ -88,7 +89,8 @@ namespace PageLeaf.Services
             var normalized = relativePath.Replace('\\', '/');
             return normalized.StartsWith("css/") ||
                    normalized.StartsWith("highlight/") ||
-                   normalized.StartsWith("mermaid/");
+                   normalized.StartsWith("mermaid/") ||
+                   normalized.StartsWith("js/");
         }
     }
 }

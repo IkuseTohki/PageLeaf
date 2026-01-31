@@ -23,9 +23,9 @@
 
     <!-- アプリケーションのメタデータ -->
     <SatelliteResourceLanguages>_</SatelliteResourceLanguages>
-    <Version>1.1.31</Version>
-    <AssemblyVersion>1.1.31.0</AssemblyVersion>
-    <FileVersion>1.1.31.0</FileVersion>
+    <Version>1.1.32</Version>
+    <AssemblyVersion>1.1.32.0</AssemblyVersion>
+    <FileVersion>1.1.32.0</FileVersion>
     <Company>PageLeaf Project</Company>
     <Product>PageLeaf</Product>
     <Description>Markdown CSS エディター &amp; ビューアー</Description>
@@ -60,12 +60,17 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <Link>mermaid\%(RecursiveDir)%(FileName)%(Extension)</Link>
     </Content>
+    <Content Include="Resources\js\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>js\%(RecursiveDir)%(FileName)%(Extension)</Link>
+    </Content>
 
     <!-- 自己展開用リソース (DLL内に埋め込み、実行時に ResourceExtractionService で展開) -->
     <!-- LogicalName を指定することで、埋め込み時のパスをディレクトリ構造として維持する -->
     <EmbeddedResource Include="Resources\css\**\*" LogicalName="css/%(RecursiveDir)%(FileName)%(Extension)" />
     <EmbeddedResource Include="Resources\highlight\**\*" LogicalName="highlight/%(RecursiveDir)%(FileName)%(Extension)" />
     <EmbeddedResource Include="Resources\mermaid\**\*" LogicalName="mermaid/%(RecursiveDir)%(FileName)%(Extension)" />
+    <EmbeddedResource Include="Resources\js\**\*" LogicalName="js/%(RecursiveDir)%(FileName)%(Extension)" />
 
     <!-- WPF 標準リソース (xaml からパックURIで参照) -->
     <Resource Include="Resources\css.png" />

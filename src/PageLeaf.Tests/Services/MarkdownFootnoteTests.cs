@@ -41,9 +41,9 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
-        public void ConvertToHtml_ShouldIncludeImprovedFragmentLinkScript()
+        public void ConvertToHtml_ShouldIncludePreviewExtensionScriptLink()
         {
-            // テスト観点: 生成されるHTMLに、改良されたフラグメントリンク処理用スクリプトが含まれていることを確認する。
+            // テスト観点: 生成されるHTMLに、外部JSファイル(js/preview-extensions.js)へのリンクが含まれていることを確認する。
             // Arrange
             string markdown = "test";
 
@@ -51,8 +51,8 @@ namespace PageLeaf.Tests.Services
             string html = _service.ConvertToHtml(markdown, null, null);
 
             // Assert
-            StringAssert.Contains(html, "link.getAttribute('href')", "Improved script not found in HTML.");
-            StringAssert.Contains(html, "href.startsWith('#')", "Improved script conditions not found in HTML.");
+            StringAssert.Contains(html, "js/preview-extensions.js", "Preview extension script link not found in HTML.");
+            Assert.IsFalse(html.Contains("link.getAttribute('href')"), "Inline script should have been removed.");
         }
     }
 }

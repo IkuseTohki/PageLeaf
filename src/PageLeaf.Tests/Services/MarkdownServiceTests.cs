@@ -265,10 +265,9 @@ namespace PageLeaf.Tests.Services
             StringAssert.Contains(html, "highlight/highlight.min.js");
             StringAssert.Contains(html, "highlight/pageleaf-extensions.js");
             StringAssert.Contains(html, "mermaid/mermaid.min.js");
+            StringAssert.Contains(html, "js/preview-extensions.js");
 
             // Initialization
-            StringAssert.Contains(html, "mermaid.initialize");
-            StringAssert.Contains(html, "mermaid.contentLoaded()");
             StringAssert.Contains(html, "hljs.highlightAll()");
         }
 

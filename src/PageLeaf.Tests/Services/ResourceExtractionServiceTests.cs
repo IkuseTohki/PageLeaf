@@ -23,6 +23,7 @@ namespace PageLeaf.Tests.Services
         [DataRow("highlight/highlight.min.js", true)]
         [DataRow("highlight/styles/github.css", true)]
         [DataRow("mermaid/mermaid.min.js", true)]
+        [DataRow("js/preview-extensions.js", true)]
         [DataRow("Resources/css.png", false)]
         public void IsInternalResource_ShouldCorrectlyIdentifyInternalResources(string path, bool expected)
         {
