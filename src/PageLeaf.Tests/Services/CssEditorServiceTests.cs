@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PageLeaf.Services;
 using PageLeaf.Models;
 using PageLeaf.Models.Markdown;
