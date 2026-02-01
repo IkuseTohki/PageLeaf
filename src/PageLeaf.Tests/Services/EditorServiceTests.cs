@@ -21,10 +21,6 @@ namespace PageLeaf.Tests.Services
             _mockCssService = new Mock<ICssService>();
             _mockDialogService = new Mock<IDialogService>(); // モックを初期化
 
-            // デフォルトでは Join は本文をそのまま返すように設定
-            _mockMarkdownService.Setup(m => m.Join(It.IsAny<System.Collections.Generic.Dictionary<string, object>>(), It.IsAny<string>()))
-                .Returns((System.Collections.Generic.Dictionary<string, object> fm, string b) => b);
-
             _editorService = new EditorService(_mockMarkdownService.Object, _mockCssService.Object, _mockDialogService.Object);
         }
 
@@ -154,21 +150,17 @@ namespace PageLeaf.Tests.Services
             // テスト観点: HTML変換時に、本文(Content)だけでなくフロントマターも結合された状態で
             //             MarkdownService.ConvertToHtml が呼び出されていることを確認する。
             // Arrange
-            var frontMatter = new System.Collections.Generic.Dictionary<string, object> { { "syntax_highlight", "monokai" } };
+            var frontMatter = new System.Collections.Generic.Dictionary<string, object> { { "title", "monokai" } };
             var document = new MarkdownDocument { Content = "# Body", FrontMatter = frontMatter };
             _editorService.LoadDocument(document);
             _editorService.SelectedMode = DisplayMode.Viewer;
-
-            // 期待される結合済みMarkdown
-            var expectedFullMarkdown = "---\nsyntax_highlight: monokai\n---\n# Body";
-            _mockMarkdownService.Setup(m => m.Join(frontMatter, "# Body")).Returns(expectedFullMarkdown);
 
             // Act
             _editorService.UpdatePreview();
 
             // Assert
-            // ConvertToHtml の第1引数が結合されたMarkdownであることを検証
-            _mockMarkdownService.Verify(m => m.ConvertToHtml(expectedFullMarkdown, It.IsAny<string?>(), It.IsAny<string?>()), Times.Once);
+            // ToFullStringの結果（---で囲まれた形式）が ConvertToHtml の第1引数として渡されていることを検証
+            _mockMarkdownService.Verify(m => m.ConvertToHtml(It.Is<string>(s => s.Contains("title: monokai")), It.IsAny<string?>(), It.IsAny<string?>()), Times.AtLeastOnce());
         }
 
         [TestMethod]
@@ -314,7 +306,6 @@ namespace PageLeaf.Tests.Services
             _editorService.SelectedMode = DisplayMode.Viewer;
 
             var newFrontMatter = new System.Collections.Generic.Dictionary<string, object> { { "title", "New Title" } };
-            _mockMarkdownService.Setup(m => m.Join(newFrontMatter, "# Body")).Returns("---\ntitle: New Title\n---\n# Body");
             _mockMarkdownService.Setup(m => m.ConvertToHtml(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>()))
                 .Returns("<h1>New Title</h1>");
 
@@ -322,7 +313,7 @@ namespace PageLeaf.Tests.Services
             document.FrontMatter = newFrontMatter;
 
             // Assert
-            _mockMarkdownService.Verify(m => m.ConvertToHtml(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>()), Times.AtLeastOnce());
+            _mockMarkdownService.Verify(m => m.ConvertToHtml(It.Is<string>(s => s.Contains("title: New Title")), It.IsAny<string?>(), It.IsAny<string?>()), Times.AtLeastOnce());
             Assert.AreEqual("<h1>New Title</h1>", File.ReadAllText(_editorService.HtmlFilePath));
         }
     }

@@ -1,0 +1,68 @@
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad-outer" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#f8f9fa;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#e9ecef;stop-opacity:1" />
+    </linearGradient>
+    <dropShadow id="shadow" dx="0" dy="4" stdDeviation="4" flood-opacity="0.1" />
+
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#636a71" />
+    </marker>
+  </defs>
+
+  <!-- Title -->
+  <text x="400" y="50" font-family="Segoe UI, sans-serif" font-size="28" font-weight="bold" fill="#333" text-anchor="middle">PageLeaf Architecture</text>
+  <text x="400" y="80" font-family="Segoe UI, sans-serif" font-size="14" fill="#666" text-anchor="middle">The Clean Architecture Layers &amp; Dependency Rule</text>
+
+  <!-- Concentric Circles -->
+  <!-- Layer 1: Presentation -->
+  <circle cx="400" cy="340" r="220" fill="url(#grad-outer)" stroke="#dee2e6" stroke-width="2" filter="url(#shadow)" />
+  <text x="400" y="145" font-family="Segoe UI, sans-serif" font-size="16" font-weight="bold" fill="#495057" text-anchor="middle">Presentation Layer</text>
+  <text x="400" y="160" font-family="Segoe UI, sans-serif" font-size="12" fill="#6c757d" text-anchor="middle">(WPF Views / ViewModels)</text>
+
+  <!-- Layer 2: Use Cases -->
+  <circle cx="400" cy="340" r="160" fill="#ffffff" stroke="#0078D4" stroke-width="2" stroke-dasharray="4 2" filter="url(#shadow)" />
+  <text x="400" y="215" font-family="Segoe UI, sans-serif" font-size="16" font-weight="bold" fill="#0078D4" text-anchor="middle">Use Case Layer</text>
+  <text x="400" y="230" font-family="Segoe UI, sans-serif" font-size="12" fill="#005a9e" text-anchor="middle">(Application Scenarios)</text>
+
+  <!-- Layer 3: Domain Services -->
+  <circle cx="400" cy="340" r="100" fill="#e7f3ff" stroke="#0078D4" stroke-width="2" filter="url(#shadow)" />
+  <text x="400" y="275" font-family="Segoe UI, sans-serif" font-size="16" font-weight="bold" fill="#0078D4" text-anchor="middle">Domain Services</text>
+  <text x="400" y="290" font-family="Segoe UI, sans-serif" font-size="12" fill="#005a9e" text-anchor="middle">(Core Business Logic)</text>
+
+  <!-- Layer 4: Entities/Models -->
+  <circle cx="400" cy="340" r="40" fill="#0078D4" filter="url(#shadow)" />
+  <text x="400" y="345" font-family="Segoe UI, sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">Models</text>
+
+  <!-- Dependency Arrows (Inward) - Points to the edge of each circle -->
+  <!-- To Use Case (r=160, top=180) -->
+  <line x1="400" y1="170" x2="400" y2="180" stroke="#636a71" stroke-width="2" marker-end="url(#arrowhead)" />
+  <!-- To Domain (r=100, top=240) -->
+  <line x1="400" y1="230" x2="400" y2="240" stroke="#636a71" stroke-width="2" marker-end="url(#arrowhead)" />
+  <!-- To Models (r=45, top=295) -->
+  <line x1="400" y1="292" x2="400" y2="302" stroke="#636a71" stroke-width="2" marker-end="url(#arrowhead)" />
+
+  <!-- Descriptions Labels -->
+  <g font-family="Segoe UI, sans-serif" font-size="11" fill="#495057">
+    <rect x="580" y="140" width="180" height="60" rx="4" fill="#fff" stroke="#dee2e6" filter="url(#shadow)" />
+    <text x="590" y="160" font-weight="bold">Presentation</text>
+    <text x="590" y="175">Data Binding &amp; User</text>
+    <text x="590" y="190">Interactions</text>
+
+    <rect x="580" y="230" width="180" height="60" rx="4" fill="#fff" stroke="#0078D4" filter="url(#shadow)" />
+    <text x="590" y="250" font-weight="bold" fill="#0078D4">Use Cases</text>
+    <text x="590" y="265">Orchestrating services</text>
+    <text x="590" y="280">to perform actions</text>
+
+    <rect x="580" y="320" width="180" height="60" rx="4" fill="#e7f3ff" stroke="#0078D4" filter="url(#shadow)" />
+    <text x="590" y="340" font-weight="bold" fill="#0078D4">Domain Services</text>
+    <text x="590" y="355">Pure logic (File IO, MD</text>
+    <text x="590" y="370">Parsing, CSS analysis)</text>
+  </g>
+
+  <!-- Dependency Rule Note -->
+  <path d="M50,150 Q20,150 20,180 L20,500 Q20,530 50,530 L200,530" fill="none" stroke="#6c757d" stroke-width="1" />
+  <text x="30" y="145" font-family="Segoe UI, sans-serif" font-size="12" font-style="italic" fill="#6c757d">Dependencies point inwards</text>
+  <text x="30" y="545" font-family="Segoe UI, sans-serif" font-size="12" font-weight="bold" fill="#0078D4">The Dependency Rule</text>
+</svg>

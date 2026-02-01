@@ -491,14 +491,9 @@ namespace PageLeaf.ViewModels
                     {
                         _logger.LogInformation("Reloading file due to external change: {FilePath}", filePath);
 
-                        // ファイルを読み込み、フロントマターと本文を分離する
-                        var rawDoc = _fileService.Open(filePath);
-                        var (fm, body) = _markdownService.Split(rawDoc.Content ?? string.Empty);
-
-                        rawDoc.FrontMatter = fm;
-                        rawDoc.Content = body;
-
-                        Editor.LoadDocument(rawDoc);
+                        // UseCase を通じてリロードを実行する
+                        // (OpenPath は内部でドキュメントの Load を適切に行う)
+                        _openDocumentUseCase.OpenPath(filePath);
                         ApplyDocumentMetadata();
                     }
                 }

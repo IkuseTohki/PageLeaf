@@ -14,7 +14,6 @@ namespace PageLeaf.Tests.UseCases
         private Mock<IFileService> _fileServiceMock = null!;
         private Mock<IDialogService> _dialogServiceMock = null!;
         private Mock<ISaveDocumentUseCase> _saveDocumentUseCaseMock = null!;
-        private Mock<IMarkdownService> _markdownServiceMock = null!;
         private OpenDocumentUseCase _useCase = null!;
 
         [TestInitialize]
@@ -24,18 +23,12 @@ namespace PageLeaf.Tests.UseCases
             _fileServiceMock = new Mock<IFileService>();
             _dialogServiceMock = new Mock<IDialogService>();
             _saveDocumentUseCaseMock = new Mock<ISaveDocumentUseCase>();
-            _markdownServiceMock = new Mock<IMarkdownService>();
-
-            // Splitのデフォルト動作を設定
-            _markdownServiceMock.Setup(x => x.Split(It.IsAny<string>()))
-                .Returns((new System.Collections.Generic.Dictionary<string, object>(), "body"));
 
             _useCase = new OpenDocumentUseCase(
                 _editorServiceMock.Object,
                 _fileServiceMock.Object,
                 _dialogServiceMock.Object,
-                _saveDocumentUseCaseMock.Object,
-                _markdownServiceMock.Object);
+                _saveDocumentUseCaseMock.Object);
         }
 
         [TestMethod]
@@ -45,7 +38,7 @@ namespace PageLeaf.Tests.UseCases
             // Arrange
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.NoAction);
             _dialogServiceMock.Setup(x => x.ShowOpenFileDialog(It.IsAny<string>(), It.IsAny<string>())).Returns("test.md");
-            var doc = new MarkdownDocument();
+            var doc = new MarkdownDocument { Content = "# Content" };
             _fileServiceMock.Setup(x => x.Open("test.md")).Returns(doc);
 
             // Act
@@ -78,7 +71,7 @@ namespace PageLeaf.Tests.UseCases
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.Save);
             _saveDocumentUseCaseMock.Setup(x => x.Execute()).Returns(true);
             _dialogServiceMock.Setup(x => x.ShowOpenFileDialog(It.IsAny<string>(), It.IsAny<string>())).Returns("test.md");
-            var doc = new MarkdownDocument();
+            var doc = new MarkdownDocument { Content = "# Content" };
             _fileServiceMock.Setup(x => x.Open("test.md")).Returns(doc);
 
             // Act
@@ -113,7 +106,7 @@ namespace PageLeaf.Tests.UseCases
             // Arrange
             _editorServiceMock.Setup(x => x.PromptForSaveIfDirty()).Returns(SaveConfirmationResult.Discard);
             _dialogServiceMock.Setup(x => x.ShowOpenFileDialog(It.IsAny<string>(), It.IsAny<string>())).Returns("test.md");
-            var doc = new MarkdownDocument();
+            var doc = new MarkdownDocument { Content = "# Content" };
             _fileServiceMock.Setup(x => x.Open("test.md")).Returns(doc);
 
             // Act
@@ -151,9 +144,6 @@ namespace PageLeaf.Tests.UseCases
             var doc = new MarkdownDocument { Content = docContent };
             _fileServiceMock.Setup(x => x.Open("test.md")).Returns(doc);
 
-            var frontMatter = new System.Collections.Generic.Dictionary<string, object> { { "css", "report.css" } };
-            _markdownServiceMock.Setup(x => x.Split(docContent)).Returns((frontMatter, "# Body"));
-
             // Act
             _useCase.Execute();
 
@@ -171,9 +161,6 @@ namespace PageLeaf.Tests.UseCases
             var docContent = "---\ncss: report.css\n---\n# Body";
             var doc = new MarkdownDocument { Content = docContent };
             _fileServiceMock.Setup(x => x.Open("test.md")).Returns(doc);
-
-            var frontMatter = new System.Collections.Generic.Dictionary<string, object> { { "css", "report.css" } };
-            _markdownServiceMock.Setup(x => x.Split(docContent)).Returns((frontMatter, "# Body"));
 
             // Act
             _useCase.OpenPath("test.md");

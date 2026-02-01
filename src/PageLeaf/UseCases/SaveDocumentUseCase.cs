@@ -12,7 +12,6 @@ namespace PageLeaf.UseCases
         private readonly IEditorService _editorService;
         private readonly IFileService _fileService;
         private readonly ISaveAsDocumentUseCase _saveAsDocumentUseCase;
-        private readonly IMarkdownService _markdownService;
         private readonly ISettingsService _settingsService;
 
         /// <summary>
@@ -21,14 +20,12 @@ namespace PageLeaf.UseCases
         /// <param name="editorService">エディタサービス。</param>
         /// <param name="fileService">ファイルサービス。</param>
         /// <param name="saveAsDocumentUseCase">名前を付けて保存ユースケース。</param>
-        /// <param name="markdownService">Markdownサービス。</param>
         /// <param name="settingsService">設定サービス。</param>
-        public SaveDocumentUseCase(IEditorService editorService, IFileService fileService, ISaveAsDocumentUseCase saveAsDocumentUseCase, IMarkdownService markdownService, ISettingsService settingsService)
+        public SaveDocumentUseCase(IEditorService editorService, IFileService fileService, ISaveAsDocumentUseCase saveAsDocumentUseCase, ISettingsService settingsService)
         {
             _editorService = editorService;
             _fileService = fileService;
             _saveAsDocumentUseCase = saveAsDocumentUseCase;
-            _markdownService = markdownService;
             _settingsService = settingsService;
         }
 
@@ -49,32 +46,19 @@ namespace PageLeaf.UseCases
 
             try
             {
-                // フロントマターの更新 (updated)
-                // 既にフロントマターがある場合のみ更新する。
-                if (document.FrontMatter.Count > 0)
-                {
-                    // 参照を新しくすることで変更通知を飛ばす
-                    var newFrontMatter = new System.Collections.Generic.Dictionary<string, object>(document.FrontMatter);
-                    newFrontMatter["updated"] = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                    document.FrontMatter = newFrontMatter;
-                }
+                // ドメインモデルの振る舞いを使用して保存準備を行う
+                document.UpdateTimestamp();
 
-                // 脚注のリナンバリング
-                var contentToSave = document.Content ?? string.Empty;
                 if (_settingsService.CurrentSettings.RenumberFootnotesOnSave)
                 {
-                    contentToSave = PageLeaf.Utilities.MarkdownFootnoteHelper.Renumber(contentToSave);
-                    // エディタ側の内容も更新して同期させる（番号が変わったことがわかるように）
-                    document.Content = contentToSave;
+                    document.RenumberFootnotes();
                 }
 
-                // 保存用に結合
-                var fullContent = _markdownService.Join(document.FrontMatter, contentToSave);
+                // 保存用に結合されたテキストを取得
+                var fullContent = document.ToFullString();
 
-                // FileService.Save は document オブジェクトを受け取るため、
-                // 一時的に全文を持たせる必要があるが、エディタ側の同期を避けるため
-                // 別のインスタンスを作成するか、FileService側の引数を検討する。
-                // ここではクローンに近いドキュメントオブジェクトを作成して保存に回す。
+                // FileService.Save は document オブジェクトを受け取る設計のため、
+                // 一時的に保存用のクローンを作成して渡す
                 var saveTarget = new MarkdownDocument
                 {
                     FilePath = document.FilePath,

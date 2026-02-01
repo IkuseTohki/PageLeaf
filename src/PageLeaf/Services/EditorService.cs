@@ -252,8 +252,8 @@ namespace PageLeaf.Services
                     ? Path.GetDirectoryName(CurrentDocument.FilePath)
                     : null;
 
-                // 本文とフロントマターを結合して渡す
-                string fullMarkdown = _markdownService.Join(CurrentDocument.FrontMatter, CurrentDocument.Content);
+                // 本文とフロントマターを結合した全文を取得
+                string fullMarkdown = CurrentDocument.ToFullString();
                 string html = _markdownService.ConvertToHtml(fullMarkdown, _currentCssPath ?? string.Empty, baseDir);
 
                 HtmlFilePath = SaveHtmlToTempFile(html);

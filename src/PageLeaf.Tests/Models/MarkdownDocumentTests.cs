@@ -1,6 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PageLeaf.Models;
-using System.Collections.Generic;
+using System;
 
 namespace PageLeaf.Tests.Models
 {
@@ -8,49 +8,91 @@ namespace PageLeaf.Tests.Models
     public class MarkdownDocumentTests
     {
         [TestMethod]
-        public void SuggestedCss_ShouldReturnCssPropertyFromFrontMatter()
+        public void Load_ShouldSplitFrontMatterAndContent()
         {
-            /*
-            テスト観点:
-            フロントマターに "css" キーがある場合、SuggestedCss プロパティがその値を返すことを確認する。
-            */
+            // テスト観点: 生のテキストから、フロントマターと本文が正しく分離されることを確認する。
             // Arrange
-            var doc = new MarkdownDocument();
-            doc.FrontMatter = new Dictionary<string, object> { { "css", "report.css" } };
+            var document = new MarkdownDocument();
+            var rawText = "---\ntitle: test\n---\n# Body Content";
 
-            // Act & Assert
-            Assert.AreEqual("report.css", doc.SuggestedCss);
+            // Act
+            document.Load(rawText);
+
+            // Assert
+            Assert.AreEqual("# Body Content", document.Content);
+            Assert.AreEqual("test", document.FrontMatter["title"]);
+            Assert.IsFalse(document.IsDirty, "Load直後はIsDirtyはFalseであるべき");
         }
 
         [TestMethod]
-        public void PreferredSyntaxHighlight_ShouldReturnSyntaxHighlightPropertyFromFrontMatter()
+        public void Load_ShouldHandleNoFrontMatter()
         {
-            /*
-            テスト観点:
-            フロントマターに "syntax_highlight" キーがある場合、PreferredSyntaxHighlight プロパティがその値を返すことを確認する。
-            */
+            // テスト観点: フロントマターがないテキストでも、本文が正しく読み込まれることを確認する。
             // Arrange
-            var doc = new MarkdownDocument();
-            doc.FrontMatter = new Dictionary<string, object> { { "syntax_highlight", "monokai" } };
+            var document = new MarkdownDocument();
+            var rawText = "# Only Content";
 
-            // Act & Assert
-            Assert.AreEqual("monokai", doc.PreferredSyntaxHighlight);
+            // Act
+            document.Load(rawText);
+
+            // Assert
+            Assert.AreEqual(rawText, document.Content);
+            Assert.AreEqual(0, document.FrontMatter.Count);
         }
 
         [TestMethod]
-        public void HelperProperties_ShouldReturnNull_WhenKeyDoesNotExist()
+        public void ToFullString_ShouldCombineFrontMatterAndContent()
         {
-            /*
-            テスト観点:
-            該当するキーがフロントマターに存在しない場合、null を返すことを確認する。
-            */
+            // テスト観点: フロントマターと本文が、正しい形式（---で囲まれる）で結合されることを確認する。
             // Arrange
-            var doc = new MarkdownDocument();
-            doc.FrontMatter = new Dictionary<string, object>();
+            var document = new MarkdownDocument();
+            document.FrontMatter["title"] = "test";
+            document.Content = "# Content";
 
-            // Act & Assert
-            Assert.IsNull(doc.SuggestedCss);
-            Assert.IsNull(doc.PreferredSyntaxHighlight);
+            // Act
+            var result = document.ToFullString();
+
+            // Assert
+            var nl = Environment.NewLine;
+            StringAssert.Contains(result, "---" + nl);
+            StringAssert.Contains(result, "title: test" + nl);
+            StringAssert.Contains(result, "---" + nl + "# Content");
+        }
+
+        [TestMethod]
+        public void RenumberFootnotes_ShouldReorderFootnotes()
+        {
+            // テスト観点: 脚注番号がバラバラなドキュメントに対し、出現順に番号が振り直されることを確認する。
+            // Arrange
+            var document = new MarkdownDocument();
+            document.Content = "本文[^10] と [^2]\n\n[^10]: 10番の注釈\n[^2]: 2番の注釈";
+
+            // Act
+            document.RenumberFootnotes();
+
+            // Assert
+            // 番号が 1, 2 に振り直されていることを期待
+            StringAssert.Contains(document.Content, "[^1]");
+            StringAssert.Contains(document.Content, "[^2]");
+            StringAssert.Contains(document.Content, "[^1]: 10番の注釈");
+            StringAssert.Contains(document.Content, "[^2]: 2番の注釈");
+        }
+
+        [TestMethod]
+        public void UpdateTimestamp_ShouldUpdateUpdatedProperty_WhenFrontMatterIsNotEmpty()
+        {
+            // テスト観点: フロントマターが存在する場合、UpdateTimestampを実行すると 'updated' プロパティが現在日時で更新されることを確認する。
+            // Arrange
+            var document = new MarkdownDocument();
+            document.FrontMatter["updated"] = "2020-01-01 00:00:00";
+
+            // Act
+            document.UpdateTimestamp();
+
+            // Assert
+            Assert.AreNotEqual("2020-01-01 00:00:00", document.FrontMatter["updated"]);
+            // yyyy-MM-dd 形式が含まれていることを確認
+            StringAssert.Matches(document.FrontMatter["updated"].ToString(), new System.Text.RegularExpressions.Regex(@"\d{4}-\d{2}-\d{2}"));
         }
     }
 }

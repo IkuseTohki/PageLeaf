@@ -2,11 +2,8 @@ using Markdig;
 using System.Text;
 using System;
 using System.IO;
-using System.Reflection;
 using PageLeaf.Utilities.MarkdownExtensions;
 using System.Collections.Generic;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 using Markdig.Syntax;
 using Markdig.Renderers.Html;
 using PageLeaf.Models;
@@ -36,7 +33,7 @@ namespace PageLeaf.Services
 
         public string ConvertToHtml(string markdown, string? cssPath, string? baseDirectory = null)
         {
-            var frontMatter = ParseFrontMatter(markdown ?? string.Empty);
+            var frontMatter = ParseFrontMatterInternal(markdown ?? string.Empty);
             var settings = GetEffectiveSettings(frontMatter);
             var appSettings = _settingsService.CurrentSettings;
 
@@ -185,8 +182,13 @@ namespace PageLeaf.Services
             return sb.ToString();
         }
 
-        public Dictionary<string, object> ParseFrontMatter(string markdown)
+        /// <summary>
+        /// 内部的なフロントマター解析（HTML変換時のタイトル表示用）。
+        /// 実際のドキュメント構築用は MarkdownDocument.Load を使用すること。
+        /// </summary>
+        private Dictionary<string, object> ParseFrontMatterInternal(string markdown)
         {
+            // 簡易的な解析（Markdigの拡張を使わず、Html変換前のタイトル表示のためにのみ使用）
             if (string.IsNullOrEmpty(markdown) || !markdown.TrimStart().StartsWith("---"))
             {
                 return new Dictionary<string, object>();
@@ -194,80 +196,28 @@ namespace PageLeaf.Services
 
             using (var reader = new StringReader(markdown.TrimStart()))
             {
-                var line = reader.ReadLine(); // First ---
+                var line = reader.ReadLine();
                 if (line?.TrimEnd() != "---") return new Dictionary<string, object>();
 
                 var yamlContent = new StringBuilder();
                 while ((line = reader.ReadLine()) != null)
                 {
-                    if (line.TrimEnd() == "---")
-                    {
-                        break;
-                    }
+                    if (line.TrimEnd() == "---") break;
                     yamlContent.AppendLine(line);
                 }
 
-                if (yamlContent.Length == 0) return new Dictionary<string, object>();
-
                 try
                 {
-                    var deserializer = new DeserializerBuilder()
-                        .WithNamingConvention(NullNamingConvention.Instance)
+                    var deserializer = new YamlDotNet.Serialization.DeserializerBuilder()
+                        .WithNamingConvention(YamlDotNet.Serialization.NamingConventions.NullNamingConvention.Instance)
                         .Build();
-                    var result = deserializer.Deserialize<Dictionary<string, object>>(yamlContent.ToString());
-                    return result ?? new Dictionary<string, object>();
+                    return deserializer.Deserialize<Dictionary<string, object>>(yamlContent.ToString()) ?? new Dictionary<string, object>();
                 }
                 catch
                 {
                     return new Dictionary<string, object>();
                 }
             }
-        }
-
-        public (Dictionary<string, object> FrontMatter, string Body) Split(string markdown)
-        {
-            if (string.IsNullOrEmpty(markdown))
-            {
-                return (new Dictionary<string, object>(), string.Empty);
-            }
-
-            var frontMatter = ParseFrontMatter(markdown);
-            var body = markdown;
-
-            if (markdown.TrimStart().StartsWith("---"))
-            {
-                var firstDash = markdown.IndexOf("---");
-                var secondDash = markdown.IndexOf("---", firstDash + 3);
-                if (secondDash != -1)
-                {
-                    var endOfDash = secondDash + 3;
-                    // 終了 "---" 直後の改行コードを1つだけスキップする
-                    if (markdown.Length > endOfDash)
-                    {
-                        if (markdown.Substring(endOfDash).StartsWith("\r\n")) endOfDash += 2;
-                        else if (markdown.Substring(endOfDash).StartsWith("\n")) endOfDash += 1;
-                    }
-                    body = markdown.Substring(endOfDash);
-                }
-            }
-
-            return (frontMatter, body);
-        }
-
-        public string Join(Dictionary<string, object> frontMatter, string body)
-        {
-            if (frontMatter == null || frontMatter.Count == 0)
-            {
-                return body;
-            }
-
-            var serializer = new SerializerBuilder()
-                .WithNamingConvention(NullNamingConvention.Instance)
-                .Build();
-            var yaml = serializer.Serialize(frontMatter);
-            var nl = Environment.NewLine;
-
-            return "---" + nl + yaml + "---" + nl + body;
         }
 
         public List<PageLeaf.Models.TocItem> ExtractHeaders(string markdown)

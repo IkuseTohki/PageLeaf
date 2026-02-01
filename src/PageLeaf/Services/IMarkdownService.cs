@@ -16,32 +16,10 @@ namespace PageLeaf.Services
         string ConvertToHtml(string markdown, string? cssPath, string? baseDirectory = null);
 
         /// <summary>
-        /// 指定されたMarkdownテキストからフロントマターを読み取ります。
-        /// </summary>
-        /// <param name="markdown">解析対象のMarkdown文字列。</param>
-        /// <returns>キーと値のペアを含む辞書。フロントマターが存在しない場合は空の辞書。</returns>
-        System.Collections.Generic.Dictionary<string, object> ParseFrontMatter(string markdown);
-
-        /// <summary>
         /// 指定されたMarkdownテキストから見出し（H1-H3）を抽出します。
         /// </summary>
         /// <param name="markdown">Markdown文字列。</param>
         /// <returns>抽出された見出しリスト。</returns>
         System.Collections.Generic.List<PageLeaf.Models.TocItem> ExtractHeaders(string markdown);
-
-        /// <summary>
-        /// Markdown全体からフロントマターと本文を分離します。
-        /// </summary>
-        /// <param name="markdown">Markdown全体の内容。</param>
-        /// <returns>フロントマター（辞書）と本文（文字列）のタプル。</returns>
-        (System.Collections.Generic.Dictionary<string, object> FrontMatter, string Body) Split(string markdown);
-
-        /// <summary>
-        /// フロントマターと本文を結合して1つのMarkdownテキストを生成します。
-        /// </summary>
-        /// <param name="frontMatter">フロントマター。</param>
-        /// <param name="body">本文。</param>
-        /// <returns>結合されたMarkdownテキスト。</returns>
-        string Join(System.Collections.Generic.Dictionary<string, object> frontMatter, string body);
     }
 }
