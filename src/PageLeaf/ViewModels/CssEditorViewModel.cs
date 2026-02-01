@@ -52,7 +52,9 @@ namespace PageLeaf.ViewModels
             "CodeTextColor", "CodeBackgroundColor", "CodeFontFamily",
             "InlineCodeTextColor", "InlineCodeBackgroundColor",
             "BlockCodeTextColor", "BlockCodeBackgroundColor",
-            "ListMarkerType", "NumberedListMarkerType", "ListMarkerSize", "ListIndent"
+            "ListMarkerType", "NumberedListMarkerType", "ListMarkerSize", "ListIndent",
+            "FootnoteMarkerTextColor", "FootnoteAreaFontSize", "FootnoteAreaTextColor", "FootnoteAreaMarginTop",
+            "FootnoteAreaBorderTopColor", "FootnoteAreaBorderTopWidth", "FootnoteAreaBorderTopStyle", "FootnoteListItemLineHeight"
         };
 
         private string? _selectedHeadingLevel;
@@ -273,14 +275,14 @@ namespace PageLeaf.ViewModels
             }
 
             // 脚注のスタイルをロード
-            _styles[nameof(FootnoteMarkerTextColor)] = styleInfo.Footnote.MarkerTextColor;
+            _styles[nameof(FootnoteMarkerTextColor)] = styleInfo.Footnote.MarkerTextColor?.ToString();
             _flags["Footnote.IsMarkerBold"] = styleInfo.Footnote.IsMarkerBold;
             _flags["Footnote.HasMarkerBrackets"] = styleInfo.Footnote.HasMarkerBrackets;
-            _styles[nameof(FootnoteAreaFontSize)] = styleInfo.Footnote.AreaFontSize;
-            _styles[nameof(FootnoteAreaTextColor)] = styleInfo.Footnote.AreaTextColor;
-            _styles[nameof(FootnoteAreaMarginTop)] = styleInfo.Footnote.AreaMarginTop;
-            _styles[nameof(FootnoteAreaBorderTopColor)] = styleInfo.Footnote.AreaBorderTopColor;
-            _styles[nameof(FootnoteAreaBorderTopWidth)] = styleInfo.Footnote.AreaBorderTopWidth;
+            _styles[nameof(FootnoteAreaFontSize)] = styleInfo.Footnote.AreaFontSize?.ToString();
+            _styles[nameof(FootnoteAreaTextColor)] = styleInfo.Footnote.AreaTextColor?.ToString();
+            _styles[nameof(FootnoteAreaMarginTop)] = styleInfo.Footnote.AreaMarginTop?.ToString();
+            _styles[nameof(FootnoteAreaBorderTopColor)] = styleInfo.Footnote.AreaBorderTopColor?.ToString();
+            _styles[nameof(FootnoteAreaBorderTopWidth)] = styleInfo.Footnote.AreaBorderTopWidth?.ToString();
             _styles[nameof(FootnoteAreaBorderTopStyle)] = styleInfo.Footnote.AreaBorderTopStyle;
             _styles[nameof(FootnoteListItemLineHeight)] = styleInfo.Footnote.ListItemLineHeight;
             _flags["Footnote.IsBackLinkVisible"] = styleInfo.Footnote.IsBackLinkVisible;
@@ -366,8 +368,8 @@ namespace PageLeaf.ViewModels
         public string? ListIndent { get => this[nameof(ListIndent)]; set => this[nameof(ListIndent)] = value; }
 
         public string? FootnoteMarkerTextColor { get => this[nameof(FootnoteMarkerTextColor)]; set => this[nameof(FootnoteMarkerTextColor)] = value; }
-        public bool IsFootnoteMarkerBold { get => GetFootnoteFlag(nameof(CssFootnoteInfo.IsMarkerBold)); set => SetFootnoteFlag(nameof(CssFootnoteInfo.IsMarkerBold), value); }
-        public bool HasFootnoteMarkerBrackets { get => GetFootnoteFlag(nameof(CssFootnoteInfo.HasMarkerBrackets)); set => SetFootnoteFlag(nameof(CssFootnoteInfo.HasMarkerBrackets), value); }
+        public bool IsFootnoteMarkerBold { get => GetFootnoteFlag(nameof(FootnoteStyle.IsMarkerBold)); set => SetFootnoteFlag(nameof(FootnoteStyle.IsMarkerBold), value); }
+        public bool HasFootnoteMarkerBrackets { get => GetFootnoteFlag(nameof(FootnoteStyle.HasMarkerBrackets)); set => SetFootnoteFlag(nameof(FootnoteStyle.HasMarkerBrackets), value); }
         public string? FootnoteAreaFontSize { get => this[nameof(FootnoteAreaFontSize)]; set => this[nameof(FootnoteAreaFontSize)] = value; }
         public string? FootnoteAreaTextColor { get => this[nameof(FootnoteAreaTextColor)]; set => this[nameof(FootnoteAreaTextColor)] = value; }
         public string? FootnoteAreaMarginTop { get => this[nameof(FootnoteAreaMarginTop)]; set => this[nameof(FootnoteAreaMarginTop)] = value; }
@@ -375,7 +377,7 @@ namespace PageLeaf.ViewModels
         public string? FootnoteAreaBorderTopWidth { get => this[nameof(FootnoteAreaBorderTopWidth)]; set => this[nameof(FootnoteAreaBorderTopWidth)] = value; }
         public string? FootnoteAreaBorderTopStyle { get => this[nameof(FootnoteAreaBorderTopStyle)]; set => this[nameof(FootnoteAreaBorderTopStyle)] = value; }
         public string? FootnoteListItemLineHeight { get => this[nameof(FootnoteListItemLineHeight)]; set => this[nameof(FootnoteListItemLineHeight)] = value; }
-        public bool IsFootnoteBackLinkVisible { get => GetFootnoteFlag(nameof(CssFootnoteInfo.IsBackLinkVisible)); set => SetFootnoteFlag(nameof(CssFootnoteInfo.IsBackLinkVisible), value); }
+        public bool IsFootnoteBackLinkVisible { get => GetFootnoteFlag(nameof(FootnoteStyle.IsBackLinkVisible)); set => SetFootnoteFlag(nameof(FootnoteStyle.IsBackLinkVisible), value); }
 
         private bool GetFootnoteFlag(string attr) => _flags.TryGetValue($"Footnote.{attr}", out var b) && b;
         private void SetFootnoteFlag(string attr, bool value) { var key = $"Footnote.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; MarkTabDirty(CssEditorTab.Footnote); UpdatePreview(); OnPropertyChanged(key.Replace(".", "")); OnPropertyChanged(nameof(IsFootnoteMarkerBold)); OnPropertyChanged(nameof(HasFootnoteMarkerBrackets)); OnPropertyChanged(nameof(IsFootnoteBackLinkVisible)); } }
@@ -455,20 +457,10 @@ namespace PageLeaf.ViewModels
                 if (_flags.TryGetValue($"{lv}.IsNumberingEnabled", out var n)) styleInfo.HeadingNumberingStates[lv] = n;
             }
 
-            styleInfo.Footnote = new CssFootnoteInfo
-            {
-                MarkerTextColor = this[nameof(FootnoteMarkerTextColor)],
-                IsMarkerBold = GetFootnoteFlag("IsMarkerBold"),
-                HasMarkerBrackets = GetFootnoteFlag("HasMarkerBrackets"),
-                AreaFontSize = this[nameof(FootnoteAreaFontSize)],
-                AreaTextColor = this[nameof(FootnoteAreaTextColor)],
-                AreaMarginTop = this[nameof(FootnoteAreaMarginTop)],
-                AreaBorderTopColor = this[nameof(FootnoteAreaBorderTopColor)],
-                AreaBorderTopWidth = this[nameof(FootnoteAreaBorderTopWidth)],
-                AreaBorderTopStyle = this[nameof(FootnoteAreaBorderTopStyle)],
-                ListItemLineHeight = this[nameof(FootnoteListItemLineHeight)],
-                IsBackLinkVisible = GetFootnoteFlag("IsBackLinkVisible")
-            };
+            // 脚注のフラグを同期
+            styleInfo.Footnote.IsMarkerBold = GetFootnoteFlag("IsMarkerBold");
+            styleInfo.Footnote.HasMarkerBrackets = GetFootnoteFlag("HasMarkerBrackets");
+            styleInfo.Footnote.IsBackLinkVisible = GetFootnoteFlag("IsBackLinkVisible");
 
             return styleInfo;
         }

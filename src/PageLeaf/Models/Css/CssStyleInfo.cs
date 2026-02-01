@@ -6,6 +6,22 @@ namespace PageLeaf.Models.Css
     public class CssStyleInfo
     {
         public BodyStyle Body { get; } = new BodyStyle();
+        public TitleStyle Title { get; } = new TitleStyle();
+        public ParagraphStyle Paragraph { get; } = new ParagraphStyle();
+        public Dictionary<string, HeadingStyle> Headings { get; } = new Dictionary<string, HeadingStyle>
+        {
+            { "h1", new HeadingStyle() },
+            { "h2", new HeadingStyle() },
+            { "h3", new HeadingStyle() },
+            { "h4", new HeadingStyle() },
+            { "h5", new HeadingStyle() },
+            { "h6", new HeadingStyle() }
+        };
+        public ListStyle List { get; } = new ListStyle();
+        public BlockquoteStyle Blockquote { get; } = new BlockquoteStyle();
+        public TableStyle Table { get; } = new TableStyle();
+        public CodeStyle Code { get; } = new CodeStyle();
+        public FootnoteStyle Footnote { get; } = new FootnoteStyle();
 
         public string? BodyTextColor { get; set; }
         public string? BodyBackgroundColor { get; set; }
@@ -51,6 +67,15 @@ namespace PageLeaf.Models.Css
         public string? ListMarkerSize { get; set; }
         public string? ListIndent { get; set; }
         public Dictionary<string, bool> HeadingNumberingStates { get; } = new Dictionary<string, bool>();
-        public CssFootnoteInfo Footnote { get; set; } = new CssFootnoteInfo();
+
+        // Footnote Legacy Properties
+        public string? FootnoteMarkerTextColor { get; set; }
+        public string? FootnoteAreaFontSize { get; set; }
+        public string? FootnoteAreaTextColor { get; set; }
+        public string? FootnoteAreaMarginTop { get; set; }
+        public string? FootnoteAreaBorderTopColor { get; set; }
+        public string? FootnoteAreaBorderTopWidth { get; set; }
+        public string? FootnoteAreaBorderTopStyle { get; set; }
+        public string? FootnoteListItemLineHeight { get; set; }
     }
 }

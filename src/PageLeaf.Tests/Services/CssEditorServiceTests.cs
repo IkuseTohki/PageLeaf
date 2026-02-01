@@ -115,16 +115,16 @@ namespace PageLeaf.Tests.Services
 
             var styles = service.ParseCss(cssContent);
 
-            Assert.AreEqual("#FF0000", styles.Footnote.MarkerTextColor);
+            Assert.AreEqual("#FF0000", styles.FootnoteMarkerTextColor);
             Assert.IsTrue(styles.Footnote.IsMarkerBold);
             Assert.IsTrue(styles.Footnote.HasMarkerBrackets);
-            Assert.AreEqual("12px", styles.Footnote.AreaFontSize);
-            Assert.AreEqual("#666666", styles.Footnote.AreaTextColor);
-            Assert.AreEqual("2em", styles.Footnote.AreaMarginTop);
-            Assert.AreEqual("2px", styles.Footnote.AreaBorderTopWidth);
+            Assert.AreEqual("12px", styles.FootnoteAreaFontSize);
+            Assert.AreEqual("#666666", styles.FootnoteAreaTextColor);
+            Assert.AreEqual("2em", styles.FootnoteAreaMarginTop);
+            Assert.AreEqual("2px", styles.FootnoteAreaBorderTopWidth);
             Assert.AreEqual("dashed", styles.Footnote.AreaBorderTopStyle);
-            Assert.AreEqual("#CCCCCC", styles.Footnote.AreaBorderTopColor);
-            Assert.AreEqual("1.8", styles.Footnote.ListItemLineHeight);
+            Assert.AreEqual("#CCCCCC", styles.FootnoteAreaBorderTopColor);
+            Assert.AreEqual("1.8", styles.FootnoteListItemLineHeight);
             Assert.IsFalse(styles.Footnote.IsBackLinkVisible);
         }
 
@@ -134,25 +134,25 @@ namespace PageLeaf.Tests.Services
             // テスト観点: 指定したスタイル情報に基づいて脚注のCSSが正しく更新・生成されることを確認する。
             var service = new CssEditorService();
             var styleInfo = new CssStyleInfo();
-            styleInfo.Footnote.MarkerTextColor = "#0000FF";
+            styleInfo.FootnoteMarkerTextColor = "#0000FF";
             styleInfo.Footnote.IsMarkerBold = true;
             styleInfo.Footnote.HasMarkerBrackets = true;
-            styleInfo.Footnote.AreaFontSize = "14px";
-            styleInfo.Footnote.AreaBorderTopWidth = "3px";
-            styleInfo.Footnote.AreaBorderTopStyle = "dotted";
-            styleInfo.Footnote.AreaBorderTopColor = "#00FF00";
+            styleInfo.FootnoteAreaFontSize = "14px";
+            styleInfo.FootnoteAreaBorderTopWidth = "3px";
+            styleInfo.FootnoteAreaBorderTopStyle = "dotted";
+            styleInfo.FootnoteAreaBorderTopColor = "#00FF00";
             styleInfo.Footnote.IsBackLinkVisible = false;
 
             var updatedCss = service.UpdateCssContent("", styleInfo);
             var parsed = service.ParseCss(updatedCss);
 
-            Assert.AreEqual("#0000FF", parsed.Footnote.MarkerTextColor);
+            Assert.AreEqual("#0000FF", parsed.FootnoteMarkerTextColor);
             Assert.IsTrue(parsed.Footnote.IsMarkerBold);
             Assert.IsTrue(parsed.Footnote.HasMarkerBrackets);
-            Assert.AreEqual("14px", parsed.Footnote.AreaFontSize);
-            Assert.AreEqual("3px", parsed.Footnote.AreaBorderTopWidth);
+            Assert.AreEqual("14px", parsed.FootnoteAreaFontSize);
+            Assert.AreEqual("3px", parsed.FootnoteAreaBorderTopWidth);
             Assert.AreEqual("dotted", parsed.Footnote.AreaBorderTopStyle);
-            Assert.AreEqual("#00FF00", parsed.Footnote.AreaBorderTopColor);
+            Assert.AreEqual("#00FF00", parsed.FootnoteAreaBorderTopColor);
             Assert.IsFalse(parsed.Footnote.IsBackLinkVisible);
         }
 
@@ -233,6 +233,7 @@ namespace PageLeaf.Tests.Services
                 "}",
                 "",
                 ".footnote-ref {",
+                "  font-weight: normal;",
                 "  vertical-align: super;",
                 "  font-size: smaller;",
                 "  text-decoration-color: initial;",
@@ -1136,10 +1137,11 @@ namespace PageLeaf.Tests.Services
         public void UpdateCssContent_ShouldRemoveNestedStyles_WhenSwitchingToStandard()
         {
             // テスト観点: "decimal-nested" から標準のリストタイプに戻したとき、
-            //            階層番号付け用のスタイルが削除されることを確認する。
+            //            過去のバージョンで生成された可能性のある広範なセレクタ (li::before)
+            //            も含め、階層番号付け用のスタイルが削除されることを確認する。
             // Arrange
             var service = new CssEditorService();
-            // 階層番号付けが有効な状態のCSSを想定
+            // 階層番号付けが有効な状態の旧形式CSSを想定
             var existingCss = @"
                 ol { list-style-type: none; counter-reset: item; }
                 li { display: block; }
@@ -1160,6 +1162,10 @@ namespace PageLeaf.Tests.Services
             // 特殊なスタイルが削除されていること (counter-reset等)
             Assert.IsFalse(updatedCss.Contains("counter-reset: item"), "Should remove counter-reset for standard lists.");
             Assert.IsFalse(updatedCss.Contains("counters(item"), "Should remove counters content for standard lists.");
+
+            // 旧形式のセレクタに対するスタイルが残っていないこと
+            // (注: セレクタ自体の削除までは必須ではないが、プロパティが消えていることを確認)
+            Assert.IsFalse(Regex.IsMatch(updatedCss, @"li::before\s*\{[^}]*content:"), "Should remove content from legacy li::before.");
         }
 
         [TestMethod]
@@ -1262,7 +1268,7 @@ namespace PageLeaf.Tests.Services
             var service = new CssEditorService();
             var existingCss = ".footnote-ref { color: #000; z-index: 100; }";
             var styleInfo = new CssStyleInfo();
-            styleInfo.Footnote.MarkerTextColor = "#FF0000";
+            styleInfo.FootnoteMarkerTextColor = "#FF0000";
 
             var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
 
@@ -1288,7 +1294,7 @@ namespace PageLeaf.Tests.Services
             foreach (var (css, expectedHex) in testCases)
             {
                 var styles = service.ParseCss(css);
-                Assert.AreEqual(expectedHex, styles.Footnote.MarkerTextColor, $"Failed to parse color: {css}");
+                Assert.AreEqual(expectedHex, styles.FootnoteMarkerTextColor, $"Failed to parse color: {css}");
             }
         }
     }
