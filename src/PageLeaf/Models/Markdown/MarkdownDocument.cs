@@ -7,7 +7,7 @@ using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 using PageLeaf.Utilities;
 
-namespace PageLeaf.Models
+namespace PageLeaf.Models.Markdown
 {
     public class MarkdownDocument : INotifyPropertyChanged
     {

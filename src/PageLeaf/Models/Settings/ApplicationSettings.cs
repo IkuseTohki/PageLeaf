@@ -1,4 +1,4 @@
-namespace PageLeaf.Models
+namespace PageLeaf.Models.Settings
 {
     /// <summary>
     /// 設定に保存するための追加フロントマタープロパティ。

@@ -1,10 +1,14 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PageLeaf.Services;
 using System.Text.RegularExpressions;
 using System;
 using System.IO;
 using Moq;
 using PageLeaf.Models;
+using PageLeaf.Models.Markdown;
+using PageLeaf.Models.Css;
+using PageLeaf.Models.Css.Elements;
+using PageLeaf.Models.Settings;
 using System.Collections.Generic;
 
 namespace PageLeaf.Tests.Services

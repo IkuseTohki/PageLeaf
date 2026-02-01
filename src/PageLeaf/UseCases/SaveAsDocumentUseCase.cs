@@ -1,4 +1,8 @@
 using PageLeaf.Models;
+using PageLeaf.Models.Markdown;
+using PageLeaf.Models.Css;
+using PageLeaf.Models.Css.Elements;
+using PageLeaf.Models.Settings;
 using PageLeaf.Services;
 using System;
 
@@ -35,28 +39,36 @@ namespace PageLeaf.UseCases
                 return false;
             }
 
-            string? newFilePath = _dialogService.ShowSaveFileDialog(
-                "名前を付けて保存",
-                "Markdown files (*.md;*.markdown)|*.md;*.markdown|All files (*.*)|*.*",
-                document.FilePath
-            );
+            string filter = "Markdown files (*.md;*.markdown)|*.md;*.markdown|All files (*.*)|*.*";
+            string? filePath = _dialogService.ShowSaveFileDialog("名前を付けて保存", filter, document.FilePath);
 
-            if (!string.IsNullOrEmpty(newFilePath))
+            if (string.IsNullOrEmpty(filePath)) return false;
+
+            try
             {
-                try
-                {
-                    document.FilePath = newFilePath;
-                    _fileService.Save(document);
-                    document.IsDirty = false;
-                    return true;
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-            }
+                // 新しいパスを設定
+                document.FilePath = filePath;
 
-            return false;
+                // タイムスタンプ更新とシリアライズ
+                document.UpdateTimestamp();
+                var fullContent = document.ToFullString();
+
+                var saveTarget = new MarkdownDocument
+                {
+                    FilePath = filePath,
+                    Content = fullContent,
+                    Encoding = document.Encoding
+                };
+
+                _fileService.Save(saveTarget);
+                document.IsDirty = false;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _dialogService.ShowMessage($"ファイルの保存に失敗しました：{ex.Message}", "エラー");
+                return false;
+            }
         }
     }
 }

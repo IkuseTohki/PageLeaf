@@ -1,3 +1,4 @@
+using PageLeaf.Models.Markdown;
 
 namespace PageLeaf.Services
 {
@@ -20,6 +21,6 @@ namespace PageLeaf.Services
         /// </summary>
         /// <param name="markdown">Markdown文字列。</param>
         /// <returns>抽出された見出しリスト。</returns>
-        System.Collections.Generic.List<PageLeaf.Models.TocItem> ExtractHeaders(string markdown);
+        System.Collections.Generic.List<TocItem> ExtractHeaders(string markdown);
     }
 }

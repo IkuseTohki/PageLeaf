@@ -1,4 +1,8 @@
 using PageLeaf.Models;
+using PageLeaf.Models.Markdown;
+using PageLeaf.Models.Css;
+using PageLeaf.Models.Css.Elements;
+using PageLeaf.Models.Settings;
 using System;
 using System.Globalization;
 using System.Windows.Data;
@@ -17,15 +21,12 @@ namespace PageLeaf.Utilities
         {
             if (value is DisplayMode mode)
             {
-                switch (mode)
+                return mode switch
                 {
-                    case DisplayMode.Viewer:
-                        return "ビューアーモード";
-                    case DisplayMode.Markdown:
-                        return "Markdown 編集モード";
-                    default:
-                        return string.Empty;
-                }
+                    DisplayMode.Markdown => "Markdown 編集モード",
+                    DisplayMode.Viewer => "ビューアーモード",
+                    _ => mode.ToString(),
+                };
             }
             return string.Empty;
         }

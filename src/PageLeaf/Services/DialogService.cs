@@ -1,6 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Win32;
 using PageLeaf.Models;
+using PageLeaf.Models.Markdown;
+using PageLeaf.Models.Css;
+using PageLeaf.Models.Css.Elements;
+using PageLeaf.Models.Settings;
 using PageLeaf.ViewModels;
 using PageLeaf.Views;
 using System;

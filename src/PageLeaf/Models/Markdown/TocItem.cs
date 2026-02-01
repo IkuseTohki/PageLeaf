@@ -1,4 +1,4 @@
-namespace PageLeaf.Models
+namespace PageLeaf.Models.Markdown
 {
     /// <summary>
     /// 目次（TOC）の各アイテムを表すモデルクラスです。

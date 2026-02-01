@@ -1,3 +1,6 @@
+using PageLeaf.Models;
+using PageLeaf.Models.Markdown;
+using PageLeaf.Models.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -163,7 +166,7 @@ namespace PageLeaf.Services
         /// </summary>
         /// <param name="settings">アプリケーション設定。</param>
         /// <returns>インデント文字列。</returns>
-        public string GetIndentString(PageLeaf.Models.ApplicationSettings settings)
+        public string GetIndentString(ApplicationSettings settings)
         {
             if (settings.UseSpacesForIndent)
             {
@@ -178,7 +181,7 @@ namespace PageLeaf.Services
         /// <param name="line">対象の行。</param>
         /// <param name="settings">アプリケーション設定。</param>
         /// <returns>インデント削除後の行。</returns>
-        public string DecreaseIndent(string line, PageLeaf.Models.ApplicationSettings settings)
+        public string DecreaseIndent(string line, ApplicationSettings settings)
         {
             if (string.IsNullOrEmpty(line)) return line;
 
@@ -209,7 +212,7 @@ namespace PageLeaf.Services
         /// <param name="line">対象の行。</param>
         /// <param name="settings">アプリケーション設定。</param>
         /// <returns>インデント追加後の行。</returns>
-        public string IncreaseIndent(string line, PageLeaf.Models.ApplicationSettings settings)
+        public string IncreaseIndent(string line, ApplicationSettings settings)
         {
             var indent = GetIndentString(settings);
             return indent + line;

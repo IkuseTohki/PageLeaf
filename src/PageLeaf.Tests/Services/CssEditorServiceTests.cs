@@ -1,6 +1,10 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PageLeaf.Services;
 using PageLeaf.Models;
+using PageLeaf.Models.Markdown;
+using PageLeaf.Models.Css;
+using PageLeaf.Models.Css.Elements;
+using PageLeaf.Models.Settings;
 using System.Linq;
 using System;
 using System.Text.RegularExpressions;
@@ -347,13 +351,13 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var service = new CssEditorService();
             var cssContent = @"
-                h1 { 
-                    font-weight: bold; 
-                    font-style: italic; 
-                    text-decoration: underline; 
+                h1 {
+                    font-weight: bold;
+                    font-style: italic;
+                    text-decoration: underline;
                     text-align: center;
-                } 
-                h2 { 
+                }
+                h2 {
                     text-align: right;
                 }
                 h3 {
@@ -393,10 +397,10 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var service = new CssEditorService();
             var cssContent = @"
-                blockquote { 
-                    color: #123456; 
-                    background-color: #abcdef; 
-                    border-left: 3px solid #987654; 
+                blockquote {
+                    color: #123456;
+                    background-color: #abcdef;
+                    border-left: 3px solid #987654;
                 }";
 
             // Act
@@ -418,9 +422,9 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var service = new CssEditorService();
             var cssContent = @"
-                ul { 
-                    list-style-type: square; 
-                    padding-left: 40px; 
+                ul {
+                    list-style-type: square;
+                    padding-left: 40px;
                 }";
 
             // Act
@@ -439,9 +443,9 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var service = new CssEditorService();
             var cssContent = @"
-                th, td { 
-                    border: 1px solid #dddddd; 
-                    padding: 8px; 
+                th, td {
+                    border: 1px solid #dddddd;
+                    padding: 8px;
                 }
                 th {
                     background-color: #f2f2f2;
@@ -469,10 +473,10 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var service = new CssEditorService();
             var cssContent = @"
-                code { 
-                    color: #ff0000; 
-                    background-color: #000000; 
-                    font-family: ""Consolas""; 
+                code {
+                    color: #ff0000;
+                    background-color: #000000;
+                    font-family: ""Consolas"";
                 }";
 
             // Act
@@ -979,9 +983,9 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var service = new CssEditorService();
             var cssContent = @"
-                #page-title { 
-                    color: #FF00FF; 
-                    font-size: 32px; 
+                #page-title {
+                    color: #FF00FF;
+                    font-size: 32px;
                     font-family: 'Segoe UI';
                     text-align: center;
                     margin-bottom: 20px;
@@ -1165,10 +1169,10 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var service = new CssEditorService();
             var cssContent = @"
-                p { 
-                    line-height: 1.6; 
-                    margin-bottom: 1em; 
-                    text-indent: 20px; 
+                p {
+                    line-height: 1.6;
+                    margin-bottom: 1em;
+                    text-indent: 20px;
                 }";
 
             // Act

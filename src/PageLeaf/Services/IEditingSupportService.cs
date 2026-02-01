@@ -1,3 +1,6 @@
+using PageLeaf.Models.Markdown;
+using PageLeaf.Models.Settings;
+
 namespace PageLeaf.Services
 {
     /// <summary>
@@ -38,7 +41,7 @@ namespace PageLeaf.Services
         /// </summary>
         /// <param name="settings">アプリケーション設定。</param>
         /// <returns>インデント文字列。</returns>
-        string GetIndentString(PageLeaf.Models.ApplicationSettings settings);
+        string GetIndentString(ApplicationSettings settings);
 
         /// <summary>
         /// 行頭のインデントを1レベル分削除します。
@@ -46,13 +49,13 @@ namespace PageLeaf.Services
         /// <param name="line">対象の行。</param>
         /// <param name="settings">アプリケーション設定。</param>
         /// <returns>インデント削除後の行。</returns>
-        string DecreaseIndent(string line, PageLeaf.Models.ApplicationSettings settings);
+        string DecreaseIndent(string line, ApplicationSettings settings);
 
         /// <summary>
         /// 行頭に1レベル分のインデントを追加します。
         /// </summary>
         /// <returns>インデント追加後の行。</returns>
-        string IncreaseIndent(string line, PageLeaf.Models.ApplicationSettings settings);
+        string IncreaseIndent(string line, ApplicationSettings settings);
 
         /// <summary>
         /// 指定された行の見出しレベルを切り替えます。

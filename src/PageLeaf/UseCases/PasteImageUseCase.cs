@@ -1,4 +1,8 @@
 using PageLeaf.Models;
+using PageLeaf.Models.Markdown;
+using PageLeaf.Models.Css;
+using PageLeaf.Models.Css.Elements;
+using PageLeaf.Models.Settings;
 using PageLeaf.Services;
 using PageLeaf.Utilities;
 using System;
@@ -33,7 +37,7 @@ namespace PageLeaf.UseCases
         {
             if (string.IsNullOrEmpty(currentMarkdownFilePath))
             {
-                _dialogService.ShowMessage("画像を貼り付けるには、まずMarkdownファイルを保存してください。", "画像貼り付け");
+                _dialogService.ShowMessage("画像を貼り付けるには、先にMarkdownファイルを保存してください。", "画像貼り付け");
                 return;
             }
 

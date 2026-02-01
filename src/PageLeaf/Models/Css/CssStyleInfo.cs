@@ -1,6 +1,7 @@
 using System.Collections.Generic;
+using PageLeaf.Models.Css.Elements;
 
-namespace PageLeaf.Models
+namespace PageLeaf.Models.Css
 {
     public class CssStyleInfo
     {

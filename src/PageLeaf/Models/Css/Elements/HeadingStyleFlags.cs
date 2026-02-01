@@ -1,4 +1,4 @@
-namespace PageLeaf.Models
+namespace PageLeaf.Models.Css.Elements
 {
     public class HeadingStyleFlags
     {

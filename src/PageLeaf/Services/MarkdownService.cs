@@ -7,6 +7,10 @@ using System.Collections.Generic;
 using Markdig.Syntax;
 using Markdig.Renderers.Html;
 using PageLeaf.Models;
+using PageLeaf.Models.Markdown;
+using PageLeaf.Models.Css;
+using PageLeaf.Models.Css.Elements;
+using PageLeaf.Models.Settings;
 
 namespace PageLeaf.Services
 {
@@ -220,9 +224,9 @@ namespace PageLeaf.Services
             }
         }
 
-        public List<PageLeaf.Models.TocItem> ExtractHeaders(string markdown)
+        public List<TocItem> ExtractHeaders(string markdown)
         {
-            var list = new List<PageLeaf.Models.TocItem>();
+            var list = new List<TocItem>();
             if (string.IsNullOrEmpty(markdown)) return list;
 
             var pipeline = new MarkdownPipelineBuilder()
@@ -245,7 +249,7 @@ namespace PageLeaf.Services
                         // AdvancedExtensions には AutoIdentifiers が含まれているため、
                         // 基本的には ID が自動生成されるはずです。
 
-                        list.Add(new PageLeaf.Models.TocItem
+                        list.Add(new TocItem
                         {
                             Level = headingBlock.Level,
                             Text = text,

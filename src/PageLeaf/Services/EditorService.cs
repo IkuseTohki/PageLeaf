@@ -1,4 +1,8 @@
 using PageLeaf.Models;
+using PageLeaf.Models.Markdown;
+using PageLeaf.Models.Css;
+using PageLeaf.Models.Css.Elements;
+using PageLeaf.Models.Settings;
 using PageLeaf.ViewModels;
 using System;
 using System.ComponentModel;
@@ -247,17 +251,15 @@ namespace PageLeaf.Services
                     HtmlFilePath = string.Empty; // No content, no file path
                     return;
                 }
-#pragma warning disable CS8625 // null リテラルまたは考えられる null 値を null 非許容参照型に変換しています。
                 var baseDir = !string.IsNullOrEmpty(CurrentDocument.FilePath)
                     ? Path.GetDirectoryName(CurrentDocument.FilePath)
                     : null;
 
                 // 本文とフロントマターを結合した全文を取得
-                string fullMarkdown = CurrentDocument.ToFullString();
-                string html = _markdownService.ConvertToHtml(fullMarkdown, _currentCssPath ?? string.Empty, baseDir);
+                string fullMarkdown = CurrentDocument.ToFullString() ?? string.Empty;
+                string html = _markdownService.ConvertToHtml(fullMarkdown, _currentCssPath, baseDir);
 
                 HtmlFilePath = SaveHtmlToTempFile(html);
-#pragma warning restore CS8625 // null リテラルまたは考えられる null 値を null 非許容参照型に変換しています。
             }
             else
             {

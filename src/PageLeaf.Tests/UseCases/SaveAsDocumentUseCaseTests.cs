@@ -1,6 +1,10 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using PageLeaf.Models;
+using PageLeaf.Models.Markdown;
+using PageLeaf.Models.Css;
+using PageLeaf.Models.Css.Elements;
+using PageLeaf.Models.Settings;
 using PageLeaf.Services;
 using PageLeaf.UseCases;
 using System;
@@ -72,7 +76,7 @@ namespace PageLeaf.Tests.UseCases
             Assert.IsTrue(result);
             Assert.AreEqual("new.md", doc.FilePath);
             Assert.IsFalse(doc.IsDirty, "IsDirty should be false after successful Save As.");
-            _fileServiceMock.Verify(x => x.Save(doc), Times.Once);
+            _fileServiceMock.Verify(x => x.Save(It.Is<MarkdownDocument>(d => d.FilePath == "new.md")), Times.Once);
         }
 
         [TestMethod]
@@ -83,7 +87,7 @@ namespace PageLeaf.Tests.UseCases
             var doc = new MarkdownDocument { FilePath = "old.md" };
             _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
             _dialogServiceMock.Setup(x => x.ShowSaveFileDialog(It.IsAny<string>(), It.IsAny<string>(), "old.md")).Returns("new.md");
-            _fileServiceMock.Setup(x => x.Save(doc)).Throws(new Exception("Save failed"));
+            _fileServiceMock.Setup(x => x.Save(It.IsAny<MarkdownDocument>())).Throws(new Exception("Save failed"));
 
             // Act
             var result = _useCase.Execute();

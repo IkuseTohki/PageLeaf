@@ -1,8 +1,8 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PageLeaf.Models;
+using PageLeaf.Models.Markdown;
 using System;
 
-namespace PageLeaf.Tests.Models
+namespace PageLeaf.Tests.Models.Markdown
 {
     [TestClass]
     public class MarkdownDocumentTests
@@ -21,7 +21,7 @@ namespace PageLeaf.Tests.Models
             // Assert
             Assert.AreEqual("# Body Content", document.Content);
             Assert.AreEqual("test", document.FrontMatter["title"]);
-            Assert.IsFalse(document.IsDirty, "Load直後はIsDirtyはFalseであるべき");
+            Assert.IsFalse(document.IsDirty, "Load直後のIsDirtyはFalseであるべき");
         }
 
         [TestMethod]
@@ -62,7 +62,7 @@ namespace PageLeaf.Tests.Models
         [TestMethod]
         public void RenumberFootnotes_ShouldReorderFootnotes()
         {
-            // テスト観点: 脚注番号がバラバラなドキュメントに対し、出現順に番号が振り直されることを確認する。
+            // テスト観点: 脚注番号がバラバラなドキュメントに対して、出現順に番号が振り直されることを確認する。
             // Arrange
             var document = new MarkdownDocument();
             document.Content = "本文[^10] と [^2]\n\n[^10]: 10番の注釈\n[^2]: 2番の注釈";
@@ -92,7 +92,8 @@ namespace PageLeaf.Tests.Models
             // Assert
             Assert.AreNotEqual("2020-01-01 00:00:00", document.FrontMatter["updated"]);
             // yyyy-MM-dd 形式が含まれていることを確認
-            StringAssert.Matches(document.FrontMatter["updated"].ToString(), new System.Text.RegularExpressions.Regex(@"\d{4}-\d{2}-\d{2}"));
+            var updatedStr = document.FrontMatter["updated"].ToString() ?? string.Empty;
+            Assert.IsTrue(System.Text.RegularExpressions.Regex.IsMatch(updatedStr, @"\d{4}-\d{2}-\d{2}"));
         }
     }
 }
