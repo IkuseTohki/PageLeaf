@@ -4,6 +4,7 @@ using PageLeaf.Models;
 using PageLeaf.Models.Markdown;
 using PageLeaf.Models.Css;
 using PageLeaf.Models.Css.Elements;
+using PageLeaf.Models.Css.Values;
 using PageLeaf.Models.Settings;
 using System.Linq;
 using System.Text;
@@ -51,9 +52,12 @@ namespace PageLeaf.Services
             // Body
             UpdateOrCreateRule(stylesheet, "body", (rule, info) =>
             {
-                if (!string.IsNullOrEmpty(info.BodyTextColor)) rule.Style.SetProperty("color", info.BodyTextColor);
-                if (!string.IsNullOrEmpty(info.BodyBackgroundColor)) rule.Style.SetProperty("background-color", info.BodyBackgroundColor);
-                if (!string.IsNullOrEmpty(info.BodyFontSize)) rule.Style.SetProperty("font-size", info.BodyFontSize);
+                // 旧プロパティからモデルへの反映（ViewModelからの入力を受け取るため）
+                info.Body.TextColor = !string.IsNullOrEmpty(info.BodyTextColor) ? CssColor.Parse(info.BodyTextColor) : null;
+                info.Body.BackgroundColor = !string.IsNullOrEmpty(info.BodyBackgroundColor) ? CssColor.Parse(info.BodyBackgroundColor) : null;
+                info.Body.FontSize = !string.IsNullOrEmpty(info.BodyFontSize) ? CssSize.Parse(info.BodyFontSize) : null;
+
+                info.Body.ApplyTo(rule);
             }, styleInfo);
 
             // Paragraph
@@ -552,9 +556,12 @@ namespace PageLeaf.Services
             var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "body");
             if (rule != null)
             {
-                styleInfo.BodyTextColor = GetColorHexFromRule(rule, "color");
-                styleInfo.BodyBackgroundColor = GetColorHexFromRule(rule, "background-color");
-                styleInfo.BodyFontSize = rule.Style.GetPropertyValue("font-size");
+                styleInfo.Body.UpdateFrom(rule);
+
+                // 旧プロパティとの同期（既存のViewModel/Viewを壊さないため）
+                styleInfo.BodyTextColor = styleInfo.Body.TextColor?.ToString();
+                styleInfo.BodyBackgroundColor = styleInfo.Body.BackgroundColor?.ToString();
+                styleInfo.BodyFontSize = styleInfo.Body.FontSize?.ToString();
             }
         }
 

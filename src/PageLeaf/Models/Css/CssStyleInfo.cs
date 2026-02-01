@@ -5,6 +5,8 @@ namespace PageLeaf.Models.Css
 {
     public class CssStyleInfo
     {
+        public BodyStyle Body { get; } = new BodyStyle();
+
         public string? BodyTextColor { get; set; }
         public string? BodyBackgroundColor { get; set; }
         public string? BodyFontSize { get; set; }
