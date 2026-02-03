@@ -31,8 +31,13 @@ namespace PageLeaf.Models.Css.Elements
             if (rule == null) return;
 
             if (!string.IsNullOrEmpty(LineHeight)) rule.Style.SetProperty("line-height", LineHeight);
+            else rule.Style.RemoveProperty("line-height");
+
             if (MarginBottom != null) rule.Style.SetProperty("margin-bottom", MarginBottom.ToString());
+            else rule.Style.RemoveProperty("margin-bottom");
+
             if (TextIndent != null) rule.Style.SetProperty("text-indent", TextIndent.ToString());
+            else rule.Style.RemoveProperty("text-indent");
         }
     }
 }

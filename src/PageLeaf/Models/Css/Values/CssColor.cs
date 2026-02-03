@@ -15,31 +15,39 @@ namespace PageLeaf.Models.Css.Values
             HexCode = hexCode ?? throw new ArgumentNullException(nameof(hexCode));
         }
 
-        /// <summary>
-        /// CSSの色指定文字列（HEX, RGB, 名前付き）を解析して CssColor インスタンスを生成します。
-        /// </summary>
-        public static CssColor Parse(string colorString)
+        public static CssColor? Parse(string? cssString)
         {
-            if (string.IsNullOrWhiteSpace(colorString))
-                return new CssColor("transparent");
+            if (string.IsNullOrWhiteSpace(cssString) || cssString == "transparent")
+                return new CssColor(cssString ?? "transparent");
 
-            var trimmed = colorString.Trim();
+            var color = cssString.Trim();
 
-            // RGB / RGBA 形式の解析
-            if (trimmed.StartsWith("rgb", StringComparison.OrdinalIgnoreCase))
+            // Handle hex normalization
+            if (color.StartsWith("#"))
             {
-                var match = Regex.Match(trimmed, @"rgba?\((\d+),\s*(\d+),\s*(\d+)");
+                color = color.ToUpper();
+                if (color.Length == 4) // #RGB
+                {
+                    color = "#" + color[1] + color[1] + color[2] + color[2] + color[3] + color[3];
+                }
+                return new CssColor(color);
+            }
+
+            // Handle rgb/rgba to hex conversion
+            if (color.StartsWith("rgb", StringComparison.OrdinalIgnoreCase))
+            {
+                var match = Regex.Match(color, @"rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d\.]+)\s*)?\)", RegexOptions.IgnoreCase);
                 if (match.Success)
                 {
-                    var r = byte.Parse(match.Groups[1].Value);
-                    var g = byte.Parse(match.Groups[2].Value);
-                    var b = byte.Parse(match.Groups[3].Value);
+                    int r = int.Parse(match.Groups[1].Value);
+                    int g = int.Parse(match.Groups[2].Value);
+                    int b = int.Parse(match.Groups[3].Value);
+                    // alpha は無視して HEX (#RRGGBB) に変換
                     return new CssColor($"#{r:X2}{g:X2}{b:X2}");
                 }
             }
 
-            // HEX 形式または名前付きカラー
-            return new CssColor(trimmed);
+            return new CssColor(color);
         }
 
         public override string ToString() => HexCode;

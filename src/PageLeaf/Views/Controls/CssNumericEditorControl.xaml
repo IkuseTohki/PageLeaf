@@ -257,13 +257,10 @@
                 <!-- 通常時：選択可能なComboBox -->
                 <ComboBox HorizontalContentAlignment="Center"
                           IsEditable="True"
+                          ItemsSource="{Binding ElementName=Root, Path=AllUnits}"
                           Style="{StaticResource UnitComboBoxStyle}"
-                          Text="{Binding ElementName=Root, Path=InternalUnit, UpdateSourceTrigger=PropertyChanged}"
-                          Visibility="{Binding ElementName=Root, Path=IsUnitFixed, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}">
-                    <ComboBoxItem Content="px" />
-                    <ComboBoxItem Content="em" />
-                    <ComboBoxItem Content="%" />
-                </ComboBox>
+                          Text="{Binding ElementName=Root, Path=InternalUnit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                          Visibility="{Binding ElementName=Root, Path=IsUnitFixed, Converter={StaticResource BooleanToVisibilityConverter}, ConverterParameter=Inverse}" />
 
                 <!-- 固定時：編集不可のTextBlock -->
                 <TextBlock HorizontalAlignment="Center"

@@ -12,6 +12,7 @@ namespace PageLeaf.Tests.Models.Css.Values
         {
             // テスト観点: "16px" という文字列から数値 16 と単位 Px が正しくパースされること
             var size = CssSize.Parse("16px");
+            Assert.IsNotNull(size);
             Assert.AreEqual(16.0, size.Value);
             Assert.AreEqual(CssUnit.Px, size.Unit);
         }
@@ -21,6 +22,7 @@ namespace PageLeaf.Tests.Models.Css.Values
         {
             // テスト観点: "1.5em" という文字列から数値 1.5 と単位 Em が正しくパースされること
             var size = CssSize.Parse("1.5em");
+            Assert.IsNotNull(size);
             Assert.AreEqual(1.5, size.Value);
             Assert.AreEqual(CssUnit.Em, size.Unit);
         }
@@ -28,8 +30,51 @@ namespace PageLeaf.Tests.Models.Css.Values
         [TestMethod]
         public void Parse_InvalidFormat_ShouldThrowException()
         {
-            // テスト観点: 不正な形式の文字列に対して例外が投げられること
             Assert.ThrowsException<FormatException>(() => CssSize.Parse("invalid"));
+            Assert.ThrowsException<FormatException>(() => CssSize.Parse("10.5.2px"));
+        }
+
+        [TestMethod]
+        public void Parse_ZeroValue_ShouldReturnZeroSize()
+        {
+            // テスト観点: 0px は null ではなく、値 0 のインスタンスとしてパースされること。
+            var size = CssSize.Parse("0px");
+            Assert.IsNotNull(size);
+            Assert.AreEqual(0.0, size.Value);
+            Assert.AreEqual(CssUnit.Px, size.Unit);
+        }
+
+        [TestMethod]
+        public void Parse_UnitlessValue_ShouldReturnNoneUnit()
+        {
+            // テスト観点: 単位がない数値（line-height等）が正しくパースされること。
+            var size = CssSize.Parse("1.5");
+            Assert.IsNotNull(size);
+            Assert.AreEqual(1.5, size.Value);
+            Assert.AreEqual(CssUnit.None, size.Unit);
+        }
+
+        [TestMethod]
+        public void Parse_EmptyOrNull_ShouldReturnNull()
+        {
+            // テスト観点: 空文字や null はインスタンスを生成せず null を返すこと。
+            Assert.IsNull(CssSize.Parse(""));
+            Assert.IsNull(CssSize.Parse(null));
+            Assert.IsNull(CssSize.Parse("   "));
+        }
+
+        [TestMethod]
+        public void ToString_ZeroWithUnit_ShouldIncludeUnit()
+        {
+            var size = new CssSize(0, CssUnit.Px);
+            Assert.AreEqual("0px", size.ToString());
+        }
+
+        [TestMethod]
+        public void ToString_Unitless_ShouldNotIncludeUnit()
+        {
+            var size = new CssSize(1.6, CssUnit.None);
+            Assert.AreEqual("1.6", size.ToString());
         }
 
         [TestMethod]

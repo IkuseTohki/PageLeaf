@@ -11,11 +11,10 @@ namespace PageLeaf.Models.Css.Elements
         public CssColor? TextColor { get; set; }
         public CssSize? FontSize { get; set; }
         public string? FontFamily { get; set; }
-        public string? TextAlignment { get; set; }
+        public CssAlignment TextAlignment { get; set; } = CssAlignment.None;
         public CssSize? MarginBottom { get; set; }
 
         public CssTextStyle TextStyle { get; } = new CssTextStyle();
-
         // Convenience property for backward compatibility or simple binding
         public bool IsBold
         {
@@ -37,7 +36,7 @@ namespace PageLeaf.Models.Css.Elements
             if (!string.IsNullOrEmpty(fontFamily)) FontFamily = fontFamily;
 
             var textAlign = rule.Style.GetPropertyValue("text-align");
-            if (!string.IsNullOrEmpty(textAlign)) TextAlignment = textAlign;
+            TextAlignment = CssAlignmentExtensions.Parse(textAlign);
 
             var marginBottom = rule.Style.GetPropertyValue("margin-bottom");
             if (!string.IsNullOrEmpty(marginBottom)) MarginBottom = CssSize.Parse(marginBottom);
@@ -50,10 +49,20 @@ namespace PageLeaf.Models.Css.Elements
             if (rule == null) return;
 
             if (TextColor != null) rule.Style.SetProperty("color", TextColor.ToString());
+            else rule.Style.RemoveProperty("color");
+
             if (FontSize != null) rule.Style.SetProperty("font-size", FontSize.ToString());
+            else rule.Style.RemoveProperty("font-size");
+
             if (!string.IsNullOrEmpty(FontFamily)) rule.Style.SetProperty("font-family", FontFamily);
-            if (!string.IsNullOrEmpty(TextAlignment)) rule.Style.SetProperty("text-align", TextAlignment);
+            else rule.Style.RemoveProperty("font-family");
+
+            var align = TextAlignment.ToCssString();
+            if (align != null) rule.Style.SetProperty("text-align", align);
+            else rule.Style.RemoveProperty("text-align");
+
             if (MarginBottom != null) rule.Style.SetProperty("margin-bottom", MarginBottom.ToString());
+            else rule.Style.RemoveProperty("margin-bottom");
 
             // Apply text styles (Bold, Italic, Underline)
             // Pass TextColor string for decoration color if needed.

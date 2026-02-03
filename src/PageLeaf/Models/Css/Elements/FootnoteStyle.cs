@@ -1,6 +1,8 @@
 using AngleSharp.Css.Dom;
 using PageLeaf.Models.Css.Values;
+using System;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace PageLeaf.Models.Css.Elements
 {
@@ -20,9 +22,26 @@ namespace PageLeaf.Models.Css.Elements
         public CssSize? AreaMarginTop { get; set; }
 
         // 区切り線 (.footnotes hr)
-        public CssColor? AreaBorderTopColor { get; set; }
-        public CssSize? AreaBorderTopWidth { get; set; }
-        public string? AreaBorderTopStyle { get; set; }
+        public CssBorder? AreaBorder { get; set; }
+
+        // Helpers for synchronization
+        public string? AreaBorderTopWidth
+        {
+            get => AreaBorder?.Width?.ToString();
+            set { if (!string.IsNullOrEmpty(value)) EnsureBorder().Width = CssSize.Parse(value); }
+        }
+        public string? AreaBorderTopStyle
+        {
+            get => AreaBorder?.Style;
+            set { if (!string.IsNullOrEmpty(value)) EnsureBorder().Style = value; }
+        }
+        public CssColor? AreaBorderTopColor
+        {
+            get => AreaBorder?.Color;
+            set { if (value != null) EnsureBorder().Color = value; }
+        }
+
+        private CssBorder EnsureBorder() => AreaBorder ??= new CssBorder();
 
         // リスト項目 (.footnotes li)
         public string? ListItemLineHeight { get; set; }
@@ -66,14 +85,48 @@ namespace PageLeaf.Models.Css.Elements
             var hrRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == ".footnotes hr");
             if (hrRule != null)
             {
-                var width = hrRule.Style.GetPropertyValue("border-top-width");
-                if (!string.IsNullOrEmpty(width)) AreaBorderTopWidth = CssSize.Parse(width);
+                // 全プロパティから border-top 関連を探す
+                string? topWidth = null;
+                string? topStyle = null;
+                string? topColor = null;
 
-                var color = hrRule.Style.GetPropertyValue("border-top-color");
-                if (!string.IsNullOrEmpty(color)) AreaBorderTopColor = CssColor.Parse(color);
+                foreach (var prop in hrRule.Style)
+                {
+                    string val = prop.Value?.Trim() ?? "";
+                    if (string.IsNullOrEmpty(val) || val == "initial" || val == "inherit" || val == "unset") continue;
 
-                var style = hrRule.Style.GetPropertyValue("border-top-style");
-                if (!string.IsNullOrEmpty(style)) AreaBorderTopStyle = style;
+                    if (prop.Name.Equals("border-top-width", StringComparison.OrdinalIgnoreCase)) topWidth = val;
+                    else if (prop.Name.Equals("border-top-style", StringComparison.OrdinalIgnoreCase)) topStyle = val;
+                    else if (prop.Name.Equals("border-top-color", StringComparison.OrdinalIgnoreCase)) topColor = val;
+                }
+
+                // 一括指定 (border-top, border) のパース
+                var shorthands = new[] { "border-top", "border" };
+                foreach (var shName in shorthands)
+                {
+                    var shorthand = hrRule.Style.GetPropertyValue(shName);
+                    if (!string.IsNullOrEmpty(shorthand) && shorthand != "initial" && shorthand != "unset")
+                    {
+                        var parts = Regex.Split(shorthand, @"\s+(?![^\(]*\))").Where(s => !string.IsNullOrEmpty(s)).Select(s => s.Trim()).ToArray();
+                        string? w = parts.FirstOrDefault(p => char.IsDigit(p[0]) || p.EndsWith("px") || p.EndsWith("em") || p.EndsWith("rem") || p.EndsWith("%"));
+                        var knownStyles = new[] { "none", "hidden", "dotted", "dashed", "solid", "double", "groove", "ridge", "inset", "outset" };
+                        string? s = parts.FirstOrDefault(p => knownStyles.Contains(p.ToLower()));
+                        string? c = parts.FirstOrDefault(p => p.StartsWith("#") || p.StartsWith("rgb") || p.StartsWith("rgba") || p.StartsWith("hsl") || p.StartsWith("transparent"));
+
+                        if (topWidth == null && !string.IsNullOrEmpty(w)) topWidth = w;
+                        if (topStyle == null && !string.IsNullOrEmpty(s)) topStyle = s;
+                        if (topColor == null && !string.IsNullOrEmpty(c)) topColor = c;
+                    }
+                }
+
+                // 0 は太さがないことを意味するため、パース対象から除外して Unset 状態を維持しやすくする
+                if (topWidth == "0" || topWidth == "0px" || topWidth == "medium") topWidth = null;
+                if (topStyle == "none") topStyle = null;
+
+                if (!string.IsNullOrEmpty(topWidth) || !string.IsNullOrEmpty(topStyle) || !string.IsNullOrEmpty(topColor))
+                {
+                    AreaBorder = CssBorder.Parse(topWidth, topStyle, topColor);
+                }
             }
 
             // List Item
@@ -115,23 +168,34 @@ namespace PageLeaf.Models.Css.Elements
             // Area
             var areaRule = GetOrCreateRule(stylesheet, ".footnotes");
             if (AreaFontSize != null) areaRule.Style.SetProperty("font-size", AreaFontSize.ToString());
+            else areaRule.Style.RemoveProperty("font-size");
+
             if (AreaTextColor != null) areaRule.Style.SetProperty("color", AreaTextColor.ToString());
+            else areaRule.Style.RemoveProperty("color");
+
             if (AreaMarginTop != null) areaRule.Style.SetProperty("margin-top", AreaMarginTop.ToString());
+            else areaRule.Style.RemoveProperty("margin-top");
 
             // HR
             var hrRule = GetOrCreateRule(stylesheet, ".footnotes hr");
-            if (AreaBorderTopWidth != null || AreaBorderTopColor != null || !string.IsNullOrEmpty(AreaBorderTopStyle))
+            if (AreaBorder != null)
             {
                 hrRule.Style.SetProperty("border", "0");
-                var width = AreaBorderTopWidth?.ToString() ?? "1px";
-                var style = !string.IsNullOrEmpty(AreaBorderTopStyle) ? AreaBorderTopStyle : "solid";
-                var color = AreaBorderTopColor?.ToString() ?? "currentColor";
-                hrRule.Style.SetProperty("border-top", $"{width} {style} {color}");
+                AreaBorder.ApplyTo(hrRule.Style, "top");
+            }
+            else
+            {
+                hrRule.Style.RemoveProperty("border");
+                hrRule.Style.RemoveProperty("border-top");
+                hrRule.Style.RemoveProperty("border-top-width");
+                hrRule.Style.RemoveProperty("border-top-style");
+                hrRule.Style.RemoveProperty("border-top-color");
             }
 
             // List Item
             var liRule = GetOrCreateRule(stylesheet, ".footnotes li");
             if (!string.IsNullOrEmpty(ListItemLineHeight)) liRule.Style.SetProperty("line-height", ListItemLineHeight);
+            else liRule.Style.RemoveProperty("line-height");
 
             // Back Link
             var backLinkRule = GetOrCreateRule(stylesheet, ".footnote-back-ref");

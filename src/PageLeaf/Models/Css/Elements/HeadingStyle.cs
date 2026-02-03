@@ -11,10 +11,9 @@ namespace PageLeaf.Models.Css.Elements
         public CssColor? TextColor { get; set; }
         public CssSize? FontSize { get; set; }
         public string? FontFamily { get; set; }
-        public string? TextAlignment { get; set; }
+        public CssAlignment TextAlignment { get; set; } = CssAlignment.None;
 
         public CssTextStyle TextStyle { get; } = new CssTextStyle();
-
         // Convenience properties for backward compatibility or simple binding
         public bool IsBold
         {
@@ -34,19 +33,14 @@ namespace PageLeaf.Models.Css.Elements
 
         public void UpdateFrom(ICssStyleRule rule)
         {
-            if (rule == null) return;
-
             var color = rule.Style.GetPropertyValue("color");
             if (!string.IsNullOrEmpty(color)) TextColor = CssColor.Parse(color);
 
-            var fontSize = rule.Style.GetPropertyValue("font-size");
-            if (!string.IsNullOrEmpty(fontSize)) FontSize = CssSize.Parse(fontSize);
+            var size = rule.Style.GetPropertyValue("font-size");
+            if (!string.IsNullOrEmpty(size)) FontSize = CssSize.Parse(size);
 
-            var fontFamily = rule.Style.GetPropertyValue("font-family");
-            if (!string.IsNullOrEmpty(fontFamily)) FontFamily = fontFamily;
-
-            var textAlign = rule.Style.GetPropertyValue("text-align");
-            if (!string.IsNullOrEmpty(textAlign)) TextAlignment = textAlign;
+            FontFamily = rule.Style.GetPropertyValue("font-family");
+            TextAlignment = CssAlignmentExtensions.Parse(rule.Style.GetPropertyValue("text-align"));
 
             TextStyle.UpdateFrom(rule);
         }
@@ -56,12 +50,31 @@ namespace PageLeaf.Models.Css.Elements
             if (rule == null) return;
 
             if (TextColor != null) rule.Style.SetProperty("color", TextColor.ToString());
-            if (FontSize != null) rule.Style.SetProperty("font-size", FontSize.ToString());
+            else rule.Style.RemoveProperty("color");
+
+            if (FontSize != null && FontSize.Unit != CssUnit.None)
+            {
+                rule.Style.SetProperty("font-size", FontSize.ToString());
+            }
+            else
+            {
+                rule.Style.RemoveProperty("font-size");
+            }
+
             if (!string.IsNullOrEmpty(FontFamily)) rule.Style.SetProperty("font-family", FontFamily);
-            if (!string.IsNullOrEmpty(TextAlignment)) rule.Style.SetProperty("text-align", TextAlignment);
+            else rule.Style.RemoveProperty("font-family");
+
+            if (TextAlignment != CssAlignment.None)
+            {
+                rule.Style.SetProperty("text-align", TextAlignment.ToCssString());
+            }
+            else
+            {
+                rule.Style.RemoveProperty("text-align");
+            }
 
             // Apply text styles (Bold, Italic, Underline)
-            TextStyle.ApplyTo(rule, TextColor?.ToString());
+            TextStyle.ApplyTo(rule, TextColor?.ToString(), alwaysOutputNormal: false);
         }
     }
 }

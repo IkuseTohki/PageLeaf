@@ -10,9 +10,9 @@ namespace PageLeaf.Tests.Utilities
         [DataRow("16px", 16.0, "px")]
         [DataRow("1.2em", 1.2, "em")]
         [DataRow("150%", 150.0, "%")]
-        [DataRow("24", 24.0, "px")] // 単位なしは px
-        [DataRow(null, 0.0, "px")]
-        [DataRow("", 0.0, "px")]
+        [DataRow("24", 24.0, "")] // 単位なしは空
+        [DataRow(null, 0.0, "")]   // null は空
+        [DataRow("", 0.0, "")]     // 空文字は空
         public void Split_ShouldSeparateValueAndUnit(string? input, double expectedValue, string expectedUnit)
         {
             // テスト観点: CSS文字列を数値と単位に正しく分解できることを確認する。

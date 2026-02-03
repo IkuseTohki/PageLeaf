@@ -74,6 +74,11 @@ namespace PageLeaf.ViewModels
         public ObservableCollection<string> AvailableNumberedListMarkerTypes { get; }
         public string? TargetCssFileName { get; private set; }
 
+        /// <summary>
+        /// CSSプロパティのデフォルト値定義へのアクセスを提供します。
+        /// </summary>
+        public CssDefaults Defaults => CssDefaults.Instance;
+
         public string PreviewCss
         {
             get => _previewCss;

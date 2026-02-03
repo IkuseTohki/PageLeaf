@@ -40,7 +40,7 @@ namespace PageLeaf.Tests.Models.Css.Elements
             Assert.AreEqual(14.0, style.AreaFontSize?.Value);
             Assert.AreEqual("#333333", style.AreaTextColor?.HexCode.ToUpper());
             Assert.AreEqual(2.0, style.AreaMarginTop?.Value);
-            Assert.AreEqual(2.0, style.AreaBorderTopWidth?.Value);
+            Assert.AreEqual("2px", style.AreaBorderTopWidth);
             Assert.AreEqual("#999999", style.AreaBorderTopColor?.HexCode.ToUpper());
             Assert.AreEqual("dashed", style.AreaBorderTopStyle);
             Assert.AreEqual("1.5", style.ListItemLineHeight);

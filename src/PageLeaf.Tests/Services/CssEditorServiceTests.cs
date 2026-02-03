@@ -4,6 +4,7 @@ using PageLeaf.Models;
 using PageLeaf.Models.Markdown;
 using PageLeaf.Models.Css;
 using PageLeaf.Models.Css.Elements;
+using PageLeaf.Models.Css.Values;
 using PageLeaf.Models.Settings;
 using System.Linq;
 using System;
@@ -224,10 +225,6 @@ namespace PageLeaf.Tests.Services
                 "  text-decoration-line: none;",
                 "}",
                 "",
-                "li:has(input[type=\"checkbox\"]) {",
-                "  list-style-type: none;",
-                "}",
-                "",
                 "table {",
                 "  border-collapse: collapse;",
                 "}",
@@ -244,6 +241,11 @@ namespace PageLeaf.Tests.Services
                 ".footnote-ref sup {",
                 "  vertical-align: baseline;",
                 "  font-size: 100%;",
+                "}",
+                "",
+                "li:has(input[type=\"checkbox\"]) {",
+                "  font-weight: normal;",
+                "  list-style-type: none;",
                 "}"
             );
 
@@ -524,18 +526,18 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("24px", parsedUpdatedStyles.HeadingFontSizes["h1"]);
             Assert.AreEqual("Arial", parsedUpdatedStyles.HeadingFontFamilies["h1"]);
             Assert.AreEqual("center", parsedUpdatedStyles.HeadingAlignments["h1"]);
-            Assert.IsTrue(parsedUpdatedStyles.HeadingStyleFlags["h1"].IsBold);
-            Assert.IsTrue(parsedUpdatedStyles.HeadingStyleFlags["h1"].IsUnderline);
-            Assert.IsFalse(parsedUpdatedStyles.HeadingStyleFlags["h1"].IsItalic);
+            Assert.IsTrue(parsedUpdatedStyles.Headings["h1"].IsBold);
+            Assert.IsTrue(parsedUpdatedStyles.Headings["h1"].IsUnderline);
+            Assert.IsFalse(parsedUpdatedStyles.Headings["h1"].IsItalic);
 
             // Assert h2
             Assert.AreEqual("#00FF00", parsedUpdatedStyles.HeadingTextColors["h2"]);
             Assert.AreEqual("1.5em", parsedUpdatedStyles.HeadingFontSizes["h2"]);
             Assert.AreEqual("Verdana", parsedUpdatedStyles.HeadingFontFamilies["h2"]);
             Assert.AreEqual("right", parsedUpdatedStyles.HeadingAlignments["h2"]);
-            Assert.IsTrue(parsedUpdatedStyles.HeadingStyleFlags["h2"].IsItalic);
-            Assert.IsFalse(parsedUpdatedStyles.HeadingStyleFlags["h2"].IsBold);
-            Assert.IsFalse(parsedUpdatedStyles.HeadingStyleFlags["h2"].IsUnderline);
+            Assert.IsTrue(parsedUpdatedStyles.Headings["h2"].IsItalic);
+            Assert.IsFalse(parsedUpdatedStyles.Headings["h2"].IsBold);
+            Assert.IsFalse(parsedUpdatedStyles.Headings["h2"].IsUnderline);
 
             // 既存のbodyスタイルが消えていないことを確認
             Assert.AreEqual("16px", parsedUpdatedStyles.BodyFontSize);
@@ -1218,6 +1220,159 @@ namespace PageLeaf.Tests.Services
             var pRule = stylesheet.Rules.OfType<AngleSharp.Css.Dom.ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "p");
             Assert.IsNotNull(pRule);
             Assert.AreEqual("rgba(0, 0, 0, 1)", pRule.Style.GetPropertyValue("color"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldRemoveProperty_WhenValueIsExplicitlySetToNull()
+        {
+            // テスト観点: 既に値が存在するCSSに対して、空の値（null）を適用した場合、
+            //            プロパティが削除されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var existingCss = "body { font-size: 16px; color: #000000; }";
+
+            // Modelを直接操作して、FontSizeをnullにする（Unset状態）
+            var profile = service.ParseToProfile(existingCss);
+            profile.Body.FontSize = null;
+
+            // Act
+            var updatedCss = service.UpdateCssFromProfile(existingCss, profile);
+
+            // Assert
+            // bodyセレクタのブロックを抽出
+            var bodyMatch = Regex.Match(updatedCss, @"body\s*\{([^\}]+)\}", RegexOptions.Singleline);
+            Assert.IsTrue(bodyMatch.Success);
+            var bodyContent = bodyMatch.Groups[1].Value;
+
+            StringAssert.DoesNotMatch(bodyContent, new Regex(@"font-size"));
+            StringAssert.Contains(bodyContent, "color: rgba(0, 0, 0, 1)"); // 他のプロパティは維持
+        }
+
+        [TestMethod]
+        public void ParseCss_ShouldReturnNull_WhenPropertyIsMissing()
+        {
+            // テスト観点: CSS文字列にプロパティが存在しない場合、パース結果のModelプロパティが null になることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var cssContent = "body { color: #333333; }"; // font-size がない
+
+            // Act
+            var profile = service.ParseToProfile(cssContent);
+
+            // Assert
+            Assert.IsNull(profile.Body.FontSize);
+        }
+
+        [TestMethod]
+        public void SyncStyleInfoToProfile_ShouldNotOverwriteWithNull()
+        {
+            // テスト観点: styleInfo のプロパティが null の場合、profile の既存値を上書き（消去）しないこと。
+            //            (マージ動作の確認)
+            // Arrange
+            var service = new CssEditorService();
+            var profile = new CssStyleProfile();
+            profile.Body.FontSize = CssSize.Parse("16px");
+
+            var styleInfo = new CssStyleInfo();
+            styleInfo.BodyFontSize = null; // 更新対象外
+            styleInfo.BodyTextColor = "#FF0000"; // こちらだけ更新したい
+
+            // Act
+            // 私有メソッドなので Reflection または UpdateCssContent 経由でテスト
+            var updatedCss = service.UpdateCssContent("body { font-size: 16px; }", styleInfo);
+            var parsed = service.ParseToProfile(updatedCss);
+
+            // Assert
+            Assert.AreEqual("16px", parsed.Body.FontSize?.ToString());
+            Assert.AreEqual("#FF0000", parsed.Body.TextColor?.ToString());
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldHandleSkippedHeadingLevels_InNumbering()
+        {
+            // テスト観点: h1 と h3 が採番有効で、h2 が無効な場合、正しい counter ロジックが生成されるか。
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo();
+            styleInfo.HeadingNumberingStates["h1"] = true;
+            styleInfo.HeadingNumberingStates["h2"] = false;
+            styleInfo.HeadingNumberingStates["h3"] = true;
+
+            var updatedCss = service.UpdateCssContent("", styleInfo);
+
+            // h1 は h2 をリセットし、h3 はリセットしない（自身が最後のため。実際には h4 をリセットすべきだが実装を確認）
+            StringAssert.Contains(updatedCss, "h1 {");
+            StringAssert.Contains(updatedCss, "counter-increment: h1");
+            StringAssert.Contains(updatedCss, "counter-reset: h2 0");
+
+            StringAssert.Contains(updatedCss, "h3 {");
+            StringAssert.Contains(updatedCss, "counter-increment: h3");
+
+            // h3::before の content が counter(h1) と counter(h3) を含み、h2 を飛ばしているか
+            StringAssert.Matches(updatedCss, new Regex(@"h3::before\s*\{[^}]*content:\s*counter\(h1\)\s*""\.""\s*counter\(h3\)\s*""\.\s*"";[^}]*\}"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldMaintainHandwrittenProperties_WhileUpdatingOthers()
+        {
+            // テスト観点: ツールで管理していない手書きのプロパティ（opacity等）が維持されること。
+            var service = new CssEditorService();
+            var existingCss = "body { opacity: 0.5; color: red; }";
+            var styleInfo = new CssStyleInfo { BodyTextColor = "#0000FF" };
+
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            StringAssert.Contains(updatedCss, "opacity: 0.5;");
+            StringAssert.Contains(updatedCss, "color: rgba(0, 0, 255, 1);");
+        }
+
+        [TestMethod]
+        public void ParseCss_ShouldHandleComments_And_MultipleSelectors()
+        {
+            // テスト観点: コメントや複数セレクタがある複雑なCSSを正しくパースできること。
+            var service = new CssEditorService();
+            var css = @"
+                /* Global Style */
+                body { 
+                    font-size: 16px; /* base size */
+                    color: #333; 
+                }
+                
+                h1, h2 { font-weight: bold; }
+            ";
+
+            var styleInfo = service.ParseCss(css);
+            Assert.AreEqual("16px", styleInfo.BodyFontSize);
+            Assert.AreEqual("#333333", styleInfo.BodyTextColor);
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldRemoveEmptyRules_AfterUpdate()
+        {
+            // テスト観点: 全てのプロパティが削除され、手書きプロパティもない場合、ルール自体が削除されること。
+            var service = new CssEditorService();
+            var existingCss = "h4 { font-size: 20px; } body { color: red; }";
+
+            // h4 のフォントサイズを null (未設定) にする
+            var profile = service.ParseToProfile(existingCss);
+            profile.Headings["h4"].FontSize = null;
+
+            var updatedCss = service.UpdateCssFromProfile(existingCss, profile);
+
+            StringAssert.DoesNotMatch(updatedCss, new Regex(@"h4\s*\{"));
+            StringAssert.Contains(updatedCss, "body {");
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldHandleZeroValues_Explicitly()
+        {
+            // テスト観点: 0px は null と異なり、明示的に出力されること。
+            var service = new CssEditorService();
+            var existingCss = "body { margin: 10px; }";
+            var styleInfo = new CssStyleInfo { BodyFontSize = "0" }; // 単位なしの0を指定
+
+            var updatedCss = service.UpdateCssContent(existingCss, styleInfo);
+
+            Assert.IsTrue(updatedCss.Contains("font-size: 0;"), $"Expected 'font-size: 0;' in output, but was: {updatedCss}");
         }
 
         [TestMethod]

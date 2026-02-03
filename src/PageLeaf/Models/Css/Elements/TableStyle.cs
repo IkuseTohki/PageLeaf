@@ -10,10 +10,27 @@ namespace PageLeaf.Models.Css.Elements
     public class TableStyle
     {
         // th, td 共通設定
-        public string? BorderWidth { get; set; }
-        public string? BorderStyle { get; set; }
-        public CssColor? BorderColor { get; set; }
+        public CssBorder? Border { get; set; }
         public string? CellPadding { get; set; }
+
+        // Helpers for synchronization
+        public string? BorderWidth
+        {
+            get => Border?.Width?.ToString();
+            set { if (!string.IsNullOrEmpty(value)) EnsureBorder().Width = CssSize.Parse(value); }
+        }
+        public string? BorderStyle
+        {
+            get => Border?.Style;
+            set { if (!string.IsNullOrEmpty(value)) EnsureBorder().Style = value; }
+        }
+        public CssColor? BorderColor
+        {
+            get => Border?.Color;
+            set { if (value != null) EnsureBorder().Color = value; }
+        }
+
+        private CssBorder EnsureBorder() => Border ??= new CssBorder();
 
         // th 専用設定
         public CssColor? HeaderBackgroundColor { get; set; }
@@ -29,14 +46,11 @@ namespace PageLeaf.Models.Css.Elements
             var thTdRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "th, td");
             if (thTdRule != null)
             {
-                var width = thTdRule.Style.GetPropertyValue("border-width");
-                if (!string.IsNullOrEmpty(width)) BorderWidth = width;
-
-                var style = thTdRule.Style.GetPropertyValue("border-style");
-                if (!string.IsNullOrEmpty(style)) BorderStyle = style;
-
-                var color = thTdRule.Style.GetPropertyValue("border-color");
-                if (!string.IsNullOrEmpty(color)) BorderColor = CssColor.Parse(color);
+                Border = CssBorder.Parse(
+                    thTdRule.Style.GetPropertyValue("border-width"),
+                    thTdRule.Style.GetPropertyValue("border-style"),
+                    thTdRule.Style.GetPropertyValue("border-color")
+                );
 
                 var padding = thTdRule.Style.GetPropertyValue("padding");
                 if (!string.IsNullOrEmpty(padding)) CellPadding = padding;
@@ -69,28 +83,35 @@ namespace PageLeaf.Models.Css.Elements
             tableRule.Style.SetProperty("border-collapse", "collapse");
 
             // th, td
-            if (!string.IsNullOrEmpty(BorderWidth) || !string.IsNullOrEmpty(BorderStyle) || BorderColor != null || !string.IsNullOrEmpty(CellPadding))
+            var thTdRule = GetOrCreateRule(stylesheet, "th, td");
+            if (Border != null)
             {
-                var rule = GetOrCreateRule(stylesheet, "th, td");
-                if (!string.IsNullOrEmpty(BorderWidth) || !string.IsNullOrEmpty(BorderStyle) || BorderColor != null)
-                {
-                    var width = !string.IsNullOrEmpty(BorderWidth) ? BorderWidth : "1px";
-                    var style = !string.IsNullOrEmpty(BorderStyle) ? BorderStyle : "solid";
-                    var color = BorderColor?.ToString() ?? "black";
-                    rule.Style.SetProperty("border", $"{width} {style} {color}");
-                }
-                if (!string.IsNullOrEmpty(CellPadding)) rule.Style.SetProperty("padding", CellPadding);
+                Border.ApplyTo(thTdRule.Style);
+            }
+            else
+            {
+                thTdRule.Style.RemoveProperty("border");
+                thTdRule.Style.RemoveProperty("border-width");
+                thTdRule.Style.RemoveProperty("border-style");
+                thTdRule.Style.RemoveProperty("border-color");
             }
 
+            if (!string.IsNullOrEmpty(CellPadding)) thTdRule.Style.SetProperty("padding", CellPadding);
+            else thTdRule.Style.RemoveProperty("padding");
+
             // th
-            if (HeaderBackgroundColor != null || HeaderTextColor != null || !string.IsNullOrEmpty(HeaderFontSize) || !string.IsNullOrEmpty(HeaderAlignment))
-            {
-                var rule = GetOrCreateRule(stylesheet, "th");
-                if (HeaderBackgroundColor != null) rule.Style.SetProperty("background-color", HeaderBackgroundColor.ToString());
-                if (HeaderTextColor != null) rule.Style.SetProperty("color", HeaderTextColor.ToString());
-                if (!string.IsNullOrEmpty(HeaderFontSize)) rule.Style.SetProperty("font-size", HeaderFontSize);
-                if (!string.IsNullOrEmpty(HeaderAlignment)) rule.Style.SetProperty("text-align", HeaderAlignment, "important");
-            }
+            var thRule = GetOrCreateRule(stylesheet, "th");
+            if (HeaderBackgroundColor != null) thRule.Style.SetProperty("background-color", HeaderBackgroundColor.ToString());
+            else thRule.Style.RemoveProperty("background-color");
+
+            if (HeaderTextColor != null) thRule.Style.SetProperty("color", HeaderTextColor.ToString());
+            else thRule.Style.RemoveProperty("color");
+
+            if (!string.IsNullOrEmpty(HeaderFontSize)) thRule.Style.SetProperty("font-size", HeaderFontSize);
+            else thRule.Style.RemoveProperty("font-size");
+
+            if (!string.IsNullOrEmpty(HeaderAlignment)) thRule.Style.SetProperty("text-align", HeaderAlignment, "important");
+            else thRule.Style.RemoveProperty("text-align");
         }
 
         private ICssStyleRule GetOrCreateRule(ICssStyleSheet stylesheet, string selector)

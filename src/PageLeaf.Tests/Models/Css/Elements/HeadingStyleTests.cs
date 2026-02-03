@@ -30,7 +30,7 @@ namespace PageLeaf.Tests.Models.Css.Elements
             Assert.AreEqual(2.0, style.FontSize?.Value);
             Assert.AreEqual(CssUnit.Em, style.FontSize?.Unit);
             Assert.AreEqual("\"Times New Roman\"", style.FontFamily);
-            Assert.AreEqual("right", style.TextAlignment);
+            Assert.AreEqual(CssAlignment.Right, style.TextAlignment);
             Assert.IsTrue(style.IsBold);
             Assert.IsTrue(style.IsItalic);
             Assert.IsTrue(style.IsUnderline);
@@ -45,7 +45,7 @@ namespace PageLeaf.Tests.Models.Css.Elements
                 TextColor = new CssColor("#112233"),
                 FontSize = new CssSize(1.5, CssUnit.Em),
                 FontFamily = "Consolas",
-                TextAlignment = "center",
+                TextAlignment = CssAlignment.Center,
                 IsBold = false,
                 IsItalic = true,
                 IsUnderline = true

@@ -58,46 +58,58 @@ namespace PageLeaf.Models.Css.Elements
             if (stylesheet == null) return;
 
             // ul
+            var ulRule = GetOrCreateRule(stylesheet, "ul");
             if (!string.IsNullOrEmpty(UnorderedListMarkerType))
             {
-                var rule = GetOrCreateRule(stylesheet, "ul");
-                rule.Style.SetProperty("list-style-type", UnorderedListMarkerType);
+                ulRule.Style.SetProperty("list-style-type", UnorderedListMarkerType);
+            }
+            else
+            {
+                ulRule.Style.RemoveProperty("list-style-type");
             }
 
             // ol
+            var olRule = GetOrCreateRule(stylesheet, "ol");
             if (!string.IsNullOrEmpty(OrderedListMarkerType))
             {
-                var rule = GetOrCreateRule(stylesheet, "ol");
                 if (OrderedListMarkerType == "decimal-nested")
                 {
-                    rule.Style.SetProperty("list-style-type", "none");
-                    rule.Style.SetProperty("counter-reset", "item");
+                    olRule.Style.SetProperty("list-style-type", "none");
+                    olRule.Style.SetProperty("counter-reset", "item");
                 }
                 else
                 {
-                    rule.Style.RemoveProperty("counter-reset");
-                    rule.Style.SetProperty("list-style-type", OrderedListMarkerType);
+                    olRule.Style.RemoveProperty("counter-reset");
+                    olRule.Style.SetProperty("list-style-type", OrderedListMarkerType);
                 }
-
-                // Nested styles (li::before etc.) are handled by CssEditorService logic for now 
-                // but should be moved here later for full encapsulation.
+            }
+            else
+            {
+                olRule.Style.RemoveProperty("list-style-type");
+                olRule.Style.RemoveProperty("counter-reset");
             }
 
             // li
+            var liRule = GetOrCreateRule(stylesheet, "li");
             if (MarkerSize != null)
             {
-                var rule = GetOrCreateRule(stylesheet, "li");
-                rule.Style.SetProperty("font-size", MarkerSize.ToString());
+                liRule.Style.SetProperty("font-size", MarkerSize.ToString());
+            }
+            else
+            {
+                liRule.Style.RemoveProperty("font-size");
             }
 
             // List Indent (applied to ul/ol padding-left for consistency)
             if (ListIndent != null)
             {
-                var ulRule = GetOrCreateRule(stylesheet, "ul");
                 ulRule.Style.SetProperty("padding-left", ListIndent.ToString());
-
-                var olRule = GetOrCreateRule(stylesheet, "ol");
                 olRule.Style.SetProperty("padding-left", ListIndent.ToString());
+            }
+            else
+            {
+                ulRule.Style.RemoveProperty("padding-left");
+                olRule.Style.RemoveProperty("padding-left");
             }
         }
 

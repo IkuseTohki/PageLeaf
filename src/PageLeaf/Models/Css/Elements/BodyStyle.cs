@@ -39,8 +39,13 @@ namespace PageLeaf.Models.Css.Elements
             if (rule == null) return;
 
             if (TextColor != null) rule.Style.SetProperty("color", TextColor.ToString());
+            else rule.Style.RemoveProperty("color");
+
             if (BackgroundColor != null) rule.Style.SetProperty("background-color", BackgroundColor.ToString());
+            else rule.Style.RemoveProperty("background-color");
+
             if (FontSize != null) rule.Style.SetProperty("font-size", FontSize.ToString());
+            else rule.Style.RemoveProperty("font-size");
         }
     }
 }

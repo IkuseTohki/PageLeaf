@@ -29,7 +29,7 @@ namespace PageLeaf.Tests.Models.Css.Elements
             Assert.AreEqual("#123456", style.TextColor?.HexCode.ToUpper());
             Assert.AreEqual(24.0, style.FontSize?.Value);
             Assert.AreEqual("Arial", style.FontFamily);
-            Assert.AreEqual("center", style.TextAlignment);
+            Assert.AreEqual(CssAlignment.Center, style.TextAlignment);
             Assert.AreEqual(20.0, style.MarginBottom?.Value);
             Assert.IsTrue(style.IsBold);
             Assert.IsTrue(style.TextStyle.IsItalic);
@@ -45,7 +45,7 @@ namespace PageLeaf.Tests.Models.Css.Elements
                 TextColor = new CssColor("#654321"),
                 FontSize = new CssSize(2.0, CssUnit.Em),
                 FontFamily = "Segoe UI",
-                TextAlignment = "left",
+                TextAlignment = CssAlignment.Left,
                 MarginBottom = new CssSize(1.5, CssUnit.Em),
                 IsBold = true
             };

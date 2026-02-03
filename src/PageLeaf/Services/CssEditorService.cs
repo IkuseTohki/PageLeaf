@@ -21,25 +21,39 @@ namespace PageLeaf.Services
 {
     public class CssEditorService : ICssEditorService
     {
-        public CssStyleInfo ParseCss(string cssContent)
+        public CssStyleProfile ParseToProfile(string cssContent)
         {
             var parser = new CssParser();
             var stylesheet = parser.ParseStyleSheet(cssContent);
 
+            var profile = new CssStyleProfile();
+            profile.UpdateFrom(stylesheet);
+
+            return profile;
+        }
+
+        public CssStyleInfo ParseCss(string cssContent)
+        {
+            var profile = ParseToProfile(cssContent);
             var styleInfo = new CssStyleInfo();
 
-            ParseBodyStyles(stylesheet, styleInfo);
-            ParseParagraphStyles(stylesheet, styleInfo);
-            ParseTitleStyles(stylesheet, styleInfo);
-            ParseHeadingStyles(stylesheet, styleInfo);
-            ParseBlockquoteStyles(stylesheet, styleInfo);
-            ParseListStyles(stylesheet, styleInfo);
-            ParseTableStyles(stylesheet, styleInfo);
-            ParseCodeStyles(stylesheet, styleInfo);
-            ParseNumberingStates(stylesheet, styleInfo);
-            ParseFootnoteStyles(stylesheet, styleInfo);
+            // プロファイルから StyleInfo (旧) へデータを同期
+            SyncProfileToStyleInfo(profile, styleInfo);
 
             return styleInfo;
+        }
+
+        public string UpdateCssFromProfile(string existingCss, CssStyleProfile profile)
+        {
+            if (profile == null) throw new ArgumentNullException(nameof(profile));
+
+            var parser = new CssParser();
+            var stylesheet = parser.ParseStyleSheet(existingCss);
+
+            // プロファイルを適用
+            profile.ApplyTo(stylesheet);
+
+            return FinalizeCssUpdate(stylesheet, profile);
         }
 
         public string UpdateCssContent(string existingCss, CssStyleInfo styleInfo)
@@ -49,123 +63,49 @@ namespace PageLeaf.Services
             var parser = new CssParser();
             var stylesheet = parser.ParseStyleSheet(existingCss);
 
-            // Body
-            UpdateOrCreateRule(stylesheet, "body", (rule, info) =>
+            var profile = new CssStyleProfile();
+            // まず既存のCSSをプロファイルに読み込む
+            profile.UpdateFrom(stylesheet);
+
+            // 次に StyleInfo (旧) からプロファイルへ同期（変更を上書き）
+            SyncStyleInfoToProfile(styleInfo, profile);
+
+            // 更新されたプロファイルを使用してCSSを生成
+            // UpdateCssFromProfile 内でもパースが行われるため、重複を避けるためにロジックを共通化するか、
+            // 内部メソッドを呼び出す。ここではシンプルに UpdateCssFromProfile のロジックを流用する。
+            profile.ApplyTo(stylesheet);
+
+            // 見出し採番、リスト、後処理などを実行
+            // (UpdateCssFromProfile の残りの処理を実行)
+            return FinalizeCssUpdate(stylesheet, profile);
+        }
+
+        private string FinalizeCssUpdate(ICssStyleSheet stylesheet, CssStyleProfile profile)
+        {
+            // 見出し採番の追加処理
+            UpdateHeadingNumbering(stylesheet, profile);
+
+            // リストの動的クリーンアップ・特殊スタイル適用
+            UpdateOrCreateRule(stylesheet, "li", (rule, p) =>
             {
-                // 旧プロパティからモデルへの反映（ViewModelからの入力を受け取るため）
-                info.Body.TextColor = !string.IsNullOrEmpty(info.BodyTextColor) ? CssColor.Parse(info.BodyTextColor) : null;
-                info.Body.BackgroundColor = !string.IsNullOrEmpty(info.BodyBackgroundColor) ? CssColor.Parse(info.BodyBackgroundColor) : null;
-                info.Body.FontSize = !string.IsNullOrEmpty(info.BodyFontSize) ? CssSize.Parse(info.BodyFontSize) : null;
-
-                info.Body.ApplyTo(rule);
-            }, styleInfo);
-
-            // Paragraph
-            UpdateOrCreateRule(stylesheet, "p", (rule, info) =>
-            {
-                // 旧プロパティからモデルへの同期
-                info.Paragraph.LineHeight = info.ParagraphLineHeight;
-                info.Paragraph.MarginBottom = !string.IsNullOrEmpty(info.ParagraphMarginBottom) ? CssSize.Parse(info.ParagraphMarginBottom) : null;
-                info.Paragraph.TextIndent = !string.IsNullOrEmpty(info.ParagraphTextIndent) ? CssSize.Parse(info.ParagraphTextIndent) : null;
-
-                info.Paragraph.ApplyTo(rule);
-            }, styleInfo);
-
-            // Title
-            UpdateOrCreateRule(stylesheet, "#page-title", (rule, info) =>
-            {
-                // 旧プロパティからモデルへの同期
-                info.Title.TextColor = !string.IsNullOrEmpty(info.TitleTextColor) ? CssColor.Parse(info.TitleTextColor) : null;
-                info.Title.FontSize = !string.IsNullOrEmpty(info.TitleFontSize) ? CssSize.Parse(info.TitleFontSize) : null;
-                info.Title.FontFamily = info.TitleFontFamily;
-                info.Title.TextAlignment = info.TitleAlignment;
-                info.Title.MarginBottom = !string.IsNullOrEmpty(info.TitleMarginBottom) ? CssSize.Parse(info.TitleMarginBottom) : null;
-                info.Title.IsBold = info.TitleStyleFlags.IsBold;
-
-                // Note: Italic/Underline are handled via CssTextStyle inside TitleStyle
-                info.Title.TextStyle.IsItalic = info.TitleStyleFlags.IsItalic;
-                info.Title.TextStyle.IsUnderline = info.TitleStyleFlags.IsUnderline;
-
-                info.Title.ApplyTo(rule);
-            }, styleInfo);
-
-            // Headings
-            foreach (var level in new[] { "h1", "h2", "h3", "h4", "h5", "h6" })
-            {
-                UpdateOrCreateRule(stylesheet, level, (rule, info) =>
-                {
-                    var headingStyle = info.Headings[level];
-
-                    // 旧プロパティ(Dictionary)からモデルへの同期
-                    if (info.HeadingTextColors.TryGetValue(level, out var color))
-                        headingStyle.TextColor = !string.IsNullOrEmpty(color) ? CssColor.Parse(color) : null;
-                    if (info.HeadingFontSizes.TryGetValue(level, out var size))
-                        headingStyle.FontSize = !string.IsNullOrEmpty(size) ? CssSize.Parse(size) : null;
-                    if (info.HeadingFontFamilies.TryGetValue(level, out var family))
-                        headingStyle.FontFamily = family;
-                    if (info.HeadingAlignments.TryGetValue(level, out var align))
-                        headingStyle.TextAlignment = align;
-                    if (info.HeadingStyleFlags.TryGetValue(level, out var flags))
-                    {
-                        headingStyle.IsBold = flags.IsBold;
-                        headingStyle.IsItalic = flags.IsItalic;
-                        headingStyle.IsUnderline = flags.IsUnderline;
-                    }
-
-                    headingStyle.ApplyTo(rule);
-                }, styleInfo);
-            }
-
-            // Blockquote
-            UpdateOrCreateRule(stylesheet, "blockquote", (rule, info) =>
-            {
-                // 旧プロパティからモデルへの同期
-                info.Blockquote.TextColor = !string.IsNullOrEmpty(info.QuoteTextColor) ? CssColor.Parse(info.QuoteTextColor!) : null;
-                info.Blockquote.BackgroundColor = !string.IsNullOrEmpty(info.QuoteBackgroundColor) ? CssColor.Parse(info.QuoteBackgroundColor!) : null;
-                info.Blockquote.BorderWidth = info.QuoteBorderWidth;
-                info.Blockquote.BorderStyle = info.QuoteBorderStyle;
-                info.Blockquote.BorderColor = !string.IsNullOrEmpty(info.QuoteBorderColor) ? CssColor.Parse(info.QuoteBorderColor!) : null;
-
-                info.Blockquote.ApplyTo(rule);
-            }, styleInfo);
-
-            // List
-            UpdateOrCreateRule(stylesheet, "ul", (rule, info) =>
-            {
-                info.List.UnorderedListMarkerType = info.ListMarkerType;
-                info.List.OrderedListMarkerType = info.NumberedListMarkerType;
-                info.List.ListIndent = !string.IsNullOrEmpty(info.ListIndent) ? CssSize.Parse(info.ListIndent) : null;
-                info.List.MarkerSize = !string.IsNullOrEmpty(info.ListMarkerSize) ? CssSize.Parse(info.ListMarkerSize) : null;
-
-                info.List.ApplyTo(stylesheet);
-            }, styleInfo);
-
-            UpdateOrCreateRule(stylesheet, "ol", (rule, info) =>
-            {
-                // Note: ListIndent application to ol/ul is handled within ListStyle.ApplyTo
-            }, styleInfo);
-
-            // Cleanup legacy generic selectors if they exist when switching back to standard
-            UpdateOrCreateRule(stylesheet, "li", (rule, info) =>
-            {
-                if (info.NumberedListMarkerType != "decimal-nested")
+                if (p.List.OrderedListMarkerType != "decimal-nested")
                 {
                     rule.Style.RemoveProperty("display");
                 }
-            }, styleInfo);
+            }, profile);
 
-            UpdateOrCreateRule(stylesheet, "li::before", (rule, info) =>
+            UpdateOrCreateRule(stylesheet, "li::before", (rule, p) =>
             {
-                if (info.NumberedListMarkerType != "decimal-nested")
+                if (p.List.OrderedListMarkerType != "decimal-nested")
                 {
                     rule.Style.RemoveProperty("content");
                     rule.Style.RemoveProperty("counter-increment");
                 }
-            }, styleInfo);
+            }, profile);
 
-            UpdateOrCreateRule(stylesheet, "ol > li", (rule, info) =>
+            UpdateOrCreateRule(stylesheet, "ol > li", (rule, p) =>
             {
-                if (info.NumberedListMarkerType == "decimal-nested")
+                if (p.List.OrderedListMarkerType == "decimal-nested")
                 {
                     rule.Style.SetProperty("display", "block");
                 }
@@ -173,11 +113,11 @@ namespace PageLeaf.Services
                 {
                     rule.Style.RemoveProperty("display");
                 }
-            }, styleInfo);
+            }, profile);
 
-            UpdateOrCreateRule(stylesheet, "ol > li::before", (rule, info) =>
+            UpdateOrCreateRule(stylesheet, "ol > li::before", (rule, p) =>
             {
-                if (info.NumberedListMarkerType == "decimal-nested")
+                if (p.List.OrderedListMarkerType == "decimal-nested")
                 {
                     rule.Style.SetProperty("content", "counters(item, \".\") \" \"");
                     rule.Style.SetProperty("counter-increment", "item");
@@ -187,77 +127,276 @@ namespace PageLeaf.Services
                     rule.Style.RemoveProperty("content");
                     rule.Style.RemoveProperty("counter-increment");
                 }
-            }, styleInfo);
+            }, profile);
 
-            UpdateOrCreateRule(stylesheet, "li::marker", (rule, info) =>
+            UpdateOrCreateRule(stylesheet, "li::marker", (rule, p) =>
             {
-                if (!string.IsNullOrEmpty(info.ListMarkerSize)) rule.Style.SetProperty("font-size", info.ListMarkerSize);
-            }, styleInfo);
+                if (p.List.MarkerSize != null) rule.Style.SetProperty("font-size", p.List.MarkerSize.ToString());
+            }, profile);
 
             // チェックボックス（タスクリスト）の場合はマーカーを消す
-            UpdateOrCreateRule(stylesheet, "li:has(input[type=\"checkbox\"])", (rule, info) =>
+            UpdateOrCreateRule(stylesheet, "li:has(input[type=\"checkbox\"])", (rule, p) =>
             {
+                rule.Style.SetProperty("font-weight", "normal");
                 rule.Style.SetProperty("list-style-type", "none");
-            }, styleInfo);
-
-            // Table
-            UpdateOrCreateRule(stylesheet, "table", (rule, info) =>
-            {
-                // 同期
-                info.Table.BorderWidth = info.TableBorderWidth;
-                info.Table.BorderColor = !string.IsNullOrEmpty(info.TableBorderColor) ? CssColor.Parse(info.TableBorderColor!) : null;
-                info.Table.BorderStyle = info.TableBorderStyle;
-                info.Table.CellPadding = info.TableCellPadding;
-                info.Table.HeaderBackgroundColor = !string.IsNullOrEmpty(info.TableHeaderBackgroundColor) ? CssColor.Parse(info.TableHeaderBackgroundColor!) : null;
-                info.Table.HeaderTextColor = !string.IsNullOrEmpty(info.TableHeaderTextColor) ? CssColor.Parse(info.TableHeaderTextColor!) : null;
-                info.Table.HeaderFontSize = info.TableHeaderFontSize;
-                info.Table.HeaderAlignment = info.TableHeaderAlignment;
-
-                info.Table.ApplyTo(stylesheet);
-            }, styleInfo);
-
-            // Code
-            UpdateOrCreateRule(stylesheet, "code", (rule, info) =>
-            {
-                // 同期
-                info.Code.TextColor = !string.IsNullOrEmpty(info.InlineCodeTextColor) ? CssColor.Parse(info.InlineCodeTextColor!) :
-                                     (!string.IsNullOrEmpty(info.CodeTextColor) ? CssColor.Parse(info.CodeTextColor!) : null);
-                info.Code.BackgroundColor = !string.IsNullOrEmpty(info.InlineCodeBackgroundColor) ? CssColor.Parse(info.InlineCodeBackgroundColor!) :
-                                           (!string.IsNullOrEmpty(info.CodeBackgroundColor) ? CssColor.Parse(info.CodeBackgroundColor!) : null);
-                info.Code.FontFamily = info.CodeFontFamily;
-                info.Code.BlockTextColor = !string.IsNullOrEmpty(info.BlockCodeTextColor) ? CssColor.Parse(info.BlockCodeTextColor!) : null;
-                info.Code.BlockBackgroundColor = !string.IsNullOrEmpty(info.BlockCodeBackgroundColor) ? CssColor.Parse(info.BlockCodeBackgroundColor!) : null;
-                info.Code.IsBlockOverrideEnabled = info.IsCodeBlockOverrideEnabled;
-
-                info.Code.ApplyTo(stylesheet);
-            }, styleInfo);
-
-            UpdateHeadingNumbering(stylesheet, styleInfo);
-
-            // Footnotes
-            UpdateOrCreateRule(stylesheet, ".footnote-ref", (rule, info) =>
-            {
-                // 同期 (ViewModelから流れてくる旧プロパティをモデルへ反映)
-                info.Footnote.MarkerTextColor = !string.IsNullOrEmpty(info.FootnoteMarkerTextColor) ? CssColor.Parse(info.FootnoteMarkerTextColor!) : null;
-                info.Footnote.AreaFontSize = !string.IsNullOrEmpty(info.FootnoteAreaFontSize) ? CssSize.Parse(info.FootnoteAreaFontSize!) : null;
-                info.Footnote.AreaTextColor = !string.IsNullOrEmpty(info.FootnoteAreaTextColor) ? CssColor.Parse(info.FootnoteAreaTextColor!) : null;
-                info.Footnote.AreaMarginTop = !string.IsNullOrEmpty(info.FootnoteAreaMarginTop) ? CssSize.Parse(info.FootnoteAreaMarginTop!) : null;
-                info.Footnote.AreaBorderTopWidth = !string.IsNullOrEmpty(info.FootnoteAreaBorderTopWidth) ? CssSize.Parse(info.FootnoteAreaBorderTopWidth!) : null;
-                info.Footnote.AreaBorderTopColor = !string.IsNullOrEmpty(info.FootnoteAreaBorderTopColor) ? CssColor.Parse(info.FootnoteAreaBorderTopColor!) : null;
-                info.Footnote.AreaBorderTopStyle = info.FootnoteAreaBorderTopStyle;
-                info.Footnote.ListItemLineHeight = info.FootnoteListItemLineHeight;
-
-                info.Footnote.ApplyTo(stylesheet);
-            }, styleInfo);
+            }, profile);
 
             // 更新されたスタイルシートを文字列として出力
             string generatedCss;
             using (var writer = new StringWriter())
             {
-                stylesheet.ToCss(writer, new PageLeaf.Utilities.PrettyStyleFormatter()); // PrettyStyleFormatter を使用
+                stylesheet.ToCss(writer, new PageLeaf.Utilities.PrettyStyleFormatter());
                 generatedCss = writer.ToString();
             }
 
+            // 後処理（ショートハンド化、counters構文修正、空ルール削除）
+            return PostProcessCss(generatedCss, profile);
+        }
+
+        private void SyncProfileToStyleInfo(CssStyleProfile profile, CssStyleInfo styleInfo)
+        {
+            // Body
+            styleInfo.BodyTextColor = profile.Body.TextColor?.ToString();
+            styleInfo.BodyBackgroundColor = profile.Body.BackgroundColor?.ToString();
+            styleInfo.BodyFontSize = profile.Body.FontSize?.ToString();
+
+            // Paragraph
+            styleInfo.ParagraphLineHeight = profile.Paragraph.LineHeight;
+            styleInfo.ParagraphMarginBottom = profile.Paragraph.MarginBottom?.ToString();
+            styleInfo.ParagraphTextIndent = profile.Paragraph.TextIndent?.ToString();
+
+            // Title
+            styleInfo.TitleTextColor = profile.Title.TextColor?.ToString();
+            styleInfo.TitleFontSize = profile.Title.FontSize?.ToString();
+            styleInfo.TitleFontFamily = profile.Title.FontFamily;
+            styleInfo.TitleAlignment = profile.Title.TextAlignment.ToCssString();
+            styleInfo.TitleMarginBottom = profile.Title.MarginBottom?.ToString();
+            styleInfo.TitleStyleFlags.IsBold = profile.Title.IsBold;
+            styleInfo.TitleStyleFlags.IsItalic = profile.Title.TextStyle.IsItalic;
+            styleInfo.TitleStyleFlags.IsUnderline = profile.Title.TextStyle.IsUnderline;
+
+            // Headings
+            styleInfo.HeadingTextColors.Clear();
+            styleInfo.HeadingFontSizes.Clear();
+            styleInfo.HeadingFontFamilies.Clear();
+            styleInfo.HeadingAlignments.Clear();
+
+            foreach (var level in new[] { "h1", "h2", "h3", "h4", "h5", "h6" })
+            {
+                var h = profile.Headings[level];
+
+                // オブジェクト同期
+                var targetH = styleInfo.Headings[level];
+                targetH.TextColor = h.TextColor;
+                targetH.FontSize = h.FontSize;
+                targetH.FontFamily = h.FontFamily;
+                targetH.TextAlignment = h.TextAlignment;
+                targetH.IsBold = h.IsBold;
+                targetH.IsItalic = h.IsItalic;
+                targetH.IsUnderline = h.IsUnderline;
+
+                var textColor = h.TextColor?.ToString();
+                if (textColor != null) styleInfo.HeadingTextColors[level] = textColor;
+
+                var fontSize = h.FontSize?.ToString();
+                if (fontSize != null) styleInfo.HeadingFontSizes[level] = fontSize;
+
+                if (h.FontFamily != null) styleInfo.HeadingFontFamilies[level] = h.FontFamily;
+
+                var alignment = h.TextAlignment.ToCssString() ?? "left";
+                styleInfo.HeadingAlignments[level] = alignment;
+
+                styleInfo.HeadingStyleFlags[level] = new HeadingStyleFlags
+                {
+                    IsBold = h.IsBold,
+                    IsItalic = h.IsItalic,
+                    IsUnderline = h.IsUnderline
+                };
+
+                if (profile.HeadingNumberingStates.TryGetValue(level, out var n))
+                    styleInfo.HeadingNumberingStates[level] = n;
+            }
+
+            // Blockquote
+            styleInfo.QuoteTextColor = profile.Blockquote.TextColor?.ToString();
+            styleInfo.QuoteBackgroundColor = profile.Blockquote.BackgroundColor?.ToString();
+            styleInfo.QuoteBorderWidth = profile.Blockquote.BorderWidth;
+            styleInfo.QuoteBorderStyle = profile.Blockquote.BorderStyle;
+
+            var quoteBorderColor = profile.Blockquote.BorderColor?.ToString();
+            if (quoteBorderColor != null) styleInfo.QuoteBorderColor = quoteBorderColor;
+
+            // List
+            styleInfo.ListMarkerType = profile.List.UnorderedListMarkerType;
+            styleInfo.NumberedListMarkerType = profile.List.OrderedListMarkerType;
+            styleInfo.ListIndent = profile.List.ListIndent?.ToString();
+            styleInfo.ListMarkerSize = profile.List.MarkerSize?.ToString();
+
+            // Table
+            styleInfo.TableBorderWidth = profile.Table.BorderWidth;
+
+            var tableBorderColor = profile.Table.BorderColor?.ToString();
+            if (tableBorderColor != null) styleInfo.TableBorderColor = tableBorderColor;
+
+            styleInfo.TableBorderStyle = profile.Table.BorderStyle;
+            styleInfo.TableCellPadding = profile.Table.CellPadding;
+            styleInfo.TableHeaderBackgroundColor = profile.Table.HeaderBackgroundColor?.ToString();
+            styleInfo.TableHeaderTextColor = profile.Table.HeaderTextColor?.ToString();
+            styleInfo.TableHeaderFontSize = profile.Table.HeaderFontSize;
+            styleInfo.TableHeaderAlignment = profile.Table.HeaderAlignment;
+
+            // Code
+            styleInfo.CodeTextColor = profile.Code.TextColor?.ToString();
+            styleInfo.CodeBackgroundColor = profile.Code.BackgroundColor?.ToString();
+            styleInfo.InlineCodeTextColor = profile.Code.TextColor?.ToString();
+            styleInfo.InlineCodeBackgroundColor = profile.Code.BackgroundColor?.ToString();
+            styleInfo.CodeFontFamily = profile.Code.FontFamily;
+            styleInfo.BlockCodeTextColor = profile.Code.BlockTextColor?.ToString();
+            styleInfo.BlockCodeBackgroundColor = profile.Code.BlockBackgroundColor?.ToString();
+            styleInfo.IsCodeBlockOverrideEnabled = profile.IsCodeBlockOverrideEnabled;
+
+            // Footnote
+            styleInfo.FootnoteMarkerTextColor = profile.Footnote.MarkerTextColor?.ToString();
+            styleInfo.Footnote.MarkerTextColor = profile.Footnote.MarkerTextColor;
+            styleInfo.Footnote.IsMarkerBold = profile.Footnote.IsMarkerBold;
+            styleInfo.Footnote.HasMarkerBrackets = profile.Footnote.HasMarkerBrackets;
+
+            styleInfo.FootnoteAreaFontSize = profile.Footnote.AreaFontSize?.ToString();
+            styleInfo.Footnote.AreaFontSize = profile.Footnote.AreaFontSize;
+
+            styleInfo.FootnoteAreaTextColor = profile.Footnote.AreaTextColor?.ToString();
+            styleInfo.Footnote.AreaTextColor = profile.Footnote.AreaTextColor;
+
+            styleInfo.FootnoteAreaMarginTop = profile.Footnote.AreaMarginTop?.ToString();
+            styleInfo.Footnote.AreaMarginTop = profile.Footnote.AreaMarginTop;
+
+            var footnoteBorderColor = profile.Footnote.AreaBorderTopColor?.ToString();
+            if (footnoteBorderColor != null)
+            {
+                styleInfo.FootnoteAreaBorderTopColor = footnoteBorderColor;
+                styleInfo.Footnote.AreaBorderTopColor = profile.Footnote.AreaBorderTopColor;
+            }
+
+            styleInfo.FootnoteAreaBorderTopWidth = profile.Footnote.AreaBorderTopWidth;
+            styleInfo.Footnote.AreaBorderTopWidth = profile.Footnote.AreaBorderTopWidth;
+
+            styleInfo.FootnoteAreaBorderTopStyle = profile.Footnote.AreaBorderTopStyle ?? "solid";
+            styleInfo.Footnote.AreaBorderTopStyle = profile.Footnote.AreaBorderTopStyle ?? "solid";
+
+            styleInfo.FootnoteListItemLineHeight = profile.Footnote.ListItemLineHeight ?? "1";
+            styleInfo.Footnote.ListItemLineHeight = profile.Footnote.ListItemLineHeight ?? "1";
+
+            styleInfo.Footnote.IsBackLinkVisible = profile.Footnote.IsBackLinkVisible;
+        }
+
+        private void SyncStyleInfoToProfile(CssStyleInfo styleInfo, CssStyleProfile profile)
+        {
+            // Body
+            if (!string.IsNullOrEmpty(styleInfo.BodyTextColor)) profile.Body.TextColor = CssColor.Parse(styleInfo.BodyTextColor!);
+            if (!string.IsNullOrEmpty(styleInfo.BodyBackgroundColor)) profile.Body.BackgroundColor = CssColor.Parse(styleInfo.BodyBackgroundColor!);
+            if (!string.IsNullOrEmpty(styleInfo.BodyFontSize)) profile.Body.FontSize = CssSize.Parse(styleInfo.BodyFontSize!);
+
+            // Paragraph
+            if (!string.IsNullOrEmpty(styleInfo.ParagraphLineHeight)) profile.Paragraph.LineHeight = styleInfo.ParagraphLineHeight;
+            if (!string.IsNullOrEmpty(styleInfo.ParagraphMarginBottom)) profile.Paragraph.MarginBottom = CssSize.Parse(styleInfo.ParagraphMarginBottom!);
+            if (!string.IsNullOrEmpty(styleInfo.ParagraphTextIndent)) profile.Paragraph.TextIndent = CssSize.Parse(styleInfo.ParagraphTextIndent!);
+
+            // Title
+            if (!string.IsNullOrEmpty(styleInfo.TitleTextColor)) profile.Title.TextColor = CssColor.Parse(styleInfo.TitleTextColor!);
+            if (!string.IsNullOrEmpty(styleInfo.TitleFontSize)) profile.Title.FontSize = CssSize.Parse(styleInfo.TitleFontSize!);
+            if (styleInfo.TitleFontFamily != null) profile.Title.FontFamily = styleInfo.TitleFontFamily;
+            if (!string.IsNullOrEmpty(styleInfo.TitleAlignment)) profile.Title.TextAlignment = CssAlignmentExtensions.Parse(styleInfo.TitleAlignment);
+            if (!string.IsNullOrEmpty(styleInfo.TitleMarginBottom)) profile.Title.MarginBottom = CssSize.Parse(styleInfo.TitleMarginBottom!);
+
+            // フラグは構造上常に値を持つため、デフォルト(false)との区別が難しいが、
+            // 旧モデルの仕様に合わせる。
+            profile.Title.IsBold = styleInfo.TitleStyleFlags.IsBold;
+            profile.Title.TextStyle.IsItalic = styleInfo.TitleStyleFlags.IsItalic;
+            profile.Title.TextStyle.IsUnderline = styleInfo.TitleStyleFlags.IsUnderline;
+
+            // Headings
+            foreach (var level in new[] { "h1", "h2", "h3", "h4", "h5", "h6" })
+            {
+                var h = profile.Headings[level];
+
+                // 大文字小文字を区別せずに辞書から取得を試みる
+                string? color = styleInfo.HeadingTextColors.FirstOrDefault(x => x.Key.Equals(level, StringComparison.OrdinalIgnoreCase)).Value;
+                if (!string.IsNullOrEmpty(color)) h.TextColor = CssColor.Parse(color.Trim());
+
+                string? size = styleInfo.HeadingFontSizes.FirstOrDefault(x => x.Key.Equals(level, StringComparison.OrdinalIgnoreCase)).Value;
+                if (!string.IsNullOrEmpty(size)) h.FontSize = CssSize.Parse(size.Trim());
+
+                string? family = styleInfo.HeadingFontFamilies.FirstOrDefault(x => x.Key.Equals(level, StringComparison.OrdinalIgnoreCase)).Value;
+                if (!string.IsNullOrEmpty(family)) h.FontFamily = family.Trim();
+
+                string? align = styleInfo.HeadingAlignments.FirstOrDefault(x => x.Key.Equals(level, StringComparison.OrdinalIgnoreCase)).Value;
+                if (!string.IsNullOrEmpty(align)) h.TextAlignment = CssAlignmentExtensions.Parse(align.Trim());
+
+                var flagsKvp = styleInfo.HeadingStyleFlags.FirstOrDefault(x => x.Key.Equals(level, StringComparison.OrdinalIgnoreCase));
+                if (flagsKvp.Key != null && flagsKvp.Value != null)
+                {
+                    var flags = flagsKvp.Value;
+                    h.IsBold = flags.IsBold;
+                    h.IsItalic = flags.IsItalic;
+                    h.IsUnderline = flags.IsUnderline;
+                }
+
+                if (styleInfo.HeadingNumberingStates.TryGetValue(level, out var n)) profile.HeadingNumberingStates[level] = n;
+            }
+
+            // Blockquote
+            if (!string.IsNullOrEmpty(styleInfo.QuoteTextColor)) profile.Blockquote.TextColor = CssColor.Parse(styleInfo.QuoteTextColor!);
+            if (!string.IsNullOrEmpty(styleInfo.QuoteBackgroundColor)) profile.Blockquote.BackgroundColor = CssColor.Parse(styleInfo.QuoteBackgroundColor!);
+            if (!string.IsNullOrEmpty(styleInfo.QuoteBorderWidth)) profile.Blockquote.BorderWidth = styleInfo.QuoteBorderWidth;
+            if (!string.IsNullOrEmpty(styleInfo.QuoteBorderStyle)) profile.Blockquote.BorderStyle = styleInfo.QuoteBorderStyle;
+            if (!string.IsNullOrEmpty(styleInfo.QuoteBorderColor)) profile.Blockquote.BorderColor = CssColor.Parse(styleInfo.QuoteBorderColor!);
+
+            // List
+            if (!string.IsNullOrEmpty(styleInfo.ListMarkerType)) profile.List.UnorderedListMarkerType = styleInfo.ListMarkerType;
+            if (!string.IsNullOrEmpty(styleInfo.NumberedListMarkerType)) profile.List.OrderedListMarkerType = styleInfo.NumberedListMarkerType;
+            if (!string.IsNullOrEmpty(styleInfo.ListIndent)) profile.List.ListIndent = CssSize.Parse(styleInfo.ListIndent!);
+            if (!string.IsNullOrEmpty(styleInfo.ListMarkerSize)) profile.List.MarkerSize = CssSize.Parse(styleInfo.ListMarkerSize!);
+
+            // Table
+            if (!string.IsNullOrEmpty(styleInfo.TableBorderWidth)) profile.Table.BorderWidth = styleInfo.TableBorderWidth;
+            if (!string.IsNullOrEmpty(styleInfo.TableBorderColor)) profile.Table.BorderColor = CssColor.Parse(styleInfo.TableBorderColor!);
+            if (!string.IsNullOrEmpty(styleInfo.TableBorderStyle)) profile.Table.BorderStyle = styleInfo.TableBorderStyle;
+            if (!string.IsNullOrEmpty(styleInfo.TableCellPadding)) profile.Table.CellPadding = styleInfo.TableCellPadding;
+            if (!string.IsNullOrEmpty(styleInfo.TableHeaderBackgroundColor)) profile.Table.HeaderBackgroundColor = CssColor.Parse(styleInfo.TableHeaderBackgroundColor!);
+            if (!string.IsNullOrEmpty(styleInfo.TableHeaderTextColor)) profile.Table.HeaderTextColor = CssColor.Parse(styleInfo.TableHeaderTextColor!);
+            if (!string.IsNullOrEmpty(styleInfo.TableHeaderFontSize)) profile.Table.HeaderFontSize = styleInfo.TableHeaderFontSize;
+            if (!string.IsNullOrEmpty(styleInfo.TableHeaderAlignment)) profile.Table.HeaderAlignment = styleInfo.TableHeaderAlignment;
+
+            // Code
+            string? codeColor = !string.IsNullOrEmpty(styleInfo.InlineCodeTextColor) ? styleInfo.InlineCodeTextColor : styleInfo.CodeTextColor;
+            if (!string.IsNullOrEmpty(codeColor)) profile.Code.TextColor = CssColor.Parse(codeColor);
+
+            string? codeBg = !string.IsNullOrEmpty(styleInfo.InlineCodeBackgroundColor) ? styleInfo.InlineCodeBackgroundColor : styleInfo.CodeBackgroundColor;
+            if (!string.IsNullOrEmpty(codeBg)) profile.Code.BackgroundColor = CssColor.Parse(codeBg);
+
+            if (styleInfo.CodeFontFamily != null) profile.Code.FontFamily = styleInfo.CodeFontFamily;
+            if (!string.IsNullOrEmpty(styleInfo.BlockCodeTextColor)) profile.Code.BlockTextColor = CssColor.Parse(styleInfo.BlockCodeTextColor!);
+            if (!string.IsNullOrEmpty(styleInfo.BlockCodeBackgroundColor)) profile.Code.BlockBackgroundColor = CssColor.Parse(styleInfo.BlockCodeBackgroundColor!);
+            profile.IsCodeBlockOverrideEnabled = styleInfo.IsCodeBlockOverrideEnabled;
+
+            // Footnote
+            if (!string.IsNullOrEmpty(styleInfo.FootnoteMarkerTextColor)) profile.Footnote.MarkerTextColor = CssColor.Parse(styleInfo.FootnoteMarkerTextColor!);
+
+            // Flags
+            profile.Footnote.IsMarkerBold = styleInfo.Footnote.IsMarkerBold;
+            profile.Footnote.HasMarkerBrackets = styleInfo.Footnote.HasMarkerBrackets;
+            profile.Footnote.IsBackLinkVisible = styleInfo.Footnote.IsBackLinkVisible;
+
+            if (!string.IsNullOrEmpty(styleInfo.FootnoteAreaFontSize)) profile.Footnote.AreaFontSize = CssSize.Parse(styleInfo.FootnoteAreaFontSize!);
+            if (!string.IsNullOrEmpty(styleInfo.FootnoteAreaTextColor)) profile.Footnote.AreaTextColor = CssColor.Parse(styleInfo.FootnoteAreaTextColor!);
+            if (!string.IsNullOrEmpty(styleInfo.FootnoteAreaMarginTop)) profile.Footnote.AreaMarginTop = CssSize.Parse(styleInfo.FootnoteAreaMarginTop!);
+            if (!string.IsNullOrEmpty(styleInfo.FootnoteAreaBorderTopColor)) profile.Footnote.AreaBorderTopColor = CssColor.Parse(styleInfo.FootnoteAreaBorderTopColor!);
+            if (!string.IsNullOrEmpty(styleInfo.FootnoteAreaBorderTopWidth)) profile.Footnote.AreaBorderTopWidth = styleInfo.FootnoteAreaBorderTopWidth;
+            if (!string.IsNullOrEmpty(styleInfo.FootnoteAreaBorderTopStyle)) profile.Footnote.AreaBorderTopStyle = styleInfo.FootnoteAreaBorderTopStyle;
+            if (!string.IsNullOrEmpty(styleInfo.FootnoteListItemLineHeight)) profile.Footnote.ListItemLineHeight = styleInfo.FootnoteListItemLineHeight;
+        }
+        private string PostProcessCss(string generatedCss, CssStyleProfile profile)
+        {
             // 後処理で th, td スタイルをショートハンドに置換
             var thTdBlockPattern = @"th,\s*td\s*\{[^\}]+\}";
             var match = Regex.Match(generatedCss, thTdBlockPattern, RegexOptions.Singleline);
@@ -265,20 +404,14 @@ namespace PageLeaf.Services
             if (match.Success)
             {
                 var newStyles = new List<string>();
-                bool hasBorder = !string.IsNullOrEmpty(styleInfo?.TableBorderWidth) || !string.IsNullOrEmpty(styleInfo?.TableBorderColor) || !string.IsNullOrEmpty(styleInfo?.TableBorderStyle);
-                bool hasPadding = !string.IsNullOrEmpty(styleInfo?.TableCellPadding);
-
-                if (hasBorder)
+                if (profile.Table.Border != null)
                 {
-                    var borderWidth = !string.IsNullOrEmpty(styleInfo?.TableBorderWidth) ? styleInfo!.TableBorderWidth : "1px";
-                    var borderStyle = !string.IsNullOrEmpty(styleInfo?.TableBorderStyle) ? styleInfo!.TableBorderStyle : "solid";
-                    var borderColor = !string.IsNullOrEmpty(styleInfo?.TableBorderColor) ? styleInfo!.TableBorderColor : "black";
-                    newStyles.Add($"  border: {borderWidth} {borderStyle} {borderColor};");
+                    newStyles.Add($"  border: {profile.Table.Border};");
                 }
 
-                if (hasPadding)
+                if (!string.IsNullOrEmpty(profile.Table.CellPadding))
                 {
-                    newStyles.Add($"  padding: {styleInfo?.TableCellPadding};");
+                    newStyles.Add($"  padding: {profile.Table.CellPadding};");
                 }
 
                 if (newStyles.Any())
@@ -290,7 +423,6 @@ namespace PageLeaf.Services
             }
 
             // Fix for AngleSharp malformed counters syntax
-            // AngleSharp normalizes 'counters(item, ".")' to 'counters(item .)' which is invalid CSS.
             generatedCss = generatedCss.Replace("counters(item .)", "counters(item, \".\")");
 
             // Final cleanup: remove empty rules (e.g. "h4 {}")
@@ -301,25 +433,25 @@ namespace PageLeaf.Services
             return generatedCss.Trim();
         }
 
-        private void UpdateHeadingNumbering(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        private void UpdateHeadingNumbering(ICssStyleSheet stylesheet, CssStyleProfile profile)
         {
-            if (stylesheet?.Rules == null || styleInfo == null) return;
+            if (stylesheet?.Rules == null || profile == null) return;
 
             ClearExistingNumberingRules(stylesheet);
-            UpdateBodyCounterReset(stylesheet, styleInfo);
-            UpdateHeadingCounterRules(stylesheet, styleInfo);
-            UpdateHeadingBeforeRules(stylesheet, styleInfo);
+            UpdateBodyCounterReset(stylesheet, profile);
+            UpdateHeadingCounterRules(stylesheet, profile);
+            UpdateHeadingBeforeRules(stylesheet, profile);
         }
 
-        private void UpdateHeadingCounterRules(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        private void UpdateHeadingCounterRules(ICssStyleSheet stylesheet, CssStyleProfile profile)
         {
             for (int i = 1; i <= 6; i++)
             {
                 var selector = $"h{i}";
-                UpdateOrCreateRule(stylesheet, selector, (rule, info) =>
+                UpdateOrCreateRule<CssStyleProfile>(stylesheet, selector, (rule, p) =>
                 {
-                    bool isEnabled = info.HeadingNumberingStates != null &&
-                                   info.HeadingNumberingStates.TryGetValue(selector, out bool val) && val;
+                    bool isEnabled = p.HeadingNumberingStates != null &&
+                                   p.HeadingNumberingStates.TryGetValue(selector, out bool val) && val;
 
                     if (isEnabled)
                     {
@@ -331,36 +463,36 @@ namespace PageLeaf.Services
                         rule.Style.RemoveProperty("counter-increment");
                         rule.Style.RemoveProperty("counter-reset");
                     }
-                }, styleInfo);
+                }, profile);
             }
         }
 
-        private void UpdateHeadingBeforeRules(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        private void UpdateHeadingBeforeRules(ICssStyleSheet stylesheet, CssStyleProfile profile)
         {
             for (int i = 1; i <= 6; i++)
             {
                 var selector = $"h{i}";
-                bool isEnabled = styleInfo.HeadingNumberingStates != null &&
-                               styleInfo.HeadingNumberingStates.TryGetValue(selector, out bool val) && val;
+                bool isEnabled = profile.HeadingNumberingStates != null &&
+                               profile.HeadingNumberingStates.TryGetValue(selector, out bool val) && val;
 
                 if (isEnabled)
                 {
-                    UpdateOrCreateRule(stylesheet, $"{selector}::before", (rule, info) =>
+                    UpdateOrCreateRule<CssStyleProfile>(stylesheet, $"{selector}::before", (rule, p) =>
                     {
-                        rule.Style.SetProperty("content", BuildCounterContent(i, info));
-                    }, styleInfo);
+                        rule.Style.SetProperty("content", BuildCounterContent(i, p));
+                    }, profile);
                 }
             }
         }
 
-        private string BuildCounterContent(int level, CssStyleInfo info)
+        private string BuildCounterContent(int level, CssStyleProfile profile)
         {
             var sb = new StringBuilder();
             bool isFirst = true;
             for (int j = 1; j <= level; j++)
             {
                 var h = $"h{j}";
-                if (info.HeadingNumberingStates != null && info.HeadingNumberingStates.TryGetValue(h, out bool val) && val)
+                if (profile.HeadingNumberingStates != null && profile.HeadingNumberingStates.TryGetValue(h, out bool val) && val)
                 {
                     if (!isFirst) sb.Append("\".\"");
                     sb.Append($"counter({h})");
@@ -384,12 +516,12 @@ namespace PageLeaf.Services
             }
         }
 
-        private void UpdateBodyCounterReset(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
+        private void UpdateBodyCounterReset(ICssStyleSheet stylesheet, CssStyleProfile profile)
         {
-            bool anyEnabled = styleInfo.HeadingNumberingStates != null &&
-                             styleInfo.HeadingNumberingStates.Any(kvp => kvp.Value);
+            bool anyEnabled = profile.HeadingNumberingStates != null &&
+                             profile.HeadingNumberingStates.Any(kvp => kvp.Value);
 
-            UpdateOrCreateRule(stylesheet, "body", (rule, info) =>
+            UpdateOrCreateRule<CssStyleProfile>(stylesheet, "body", (rule, p) =>
             {
                 if (anyEnabled)
                 {
@@ -399,193 +531,12 @@ namespace PageLeaf.Services
                 {
                     rule.Style.RemoveProperty("counter-reset");
                 }
-            }, styleInfo);
+            }, profile);
         }
 
-
-        private void UpdateOrCreateRule(ICssStyleSheet stylesheet, string selector, Action<ICssStyleRule, CssStyleInfo> setProperties, CssStyleInfo styleInfo)
+        public string CreateNewStyle(string styleName)
         {
-            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r =>
-                r.SelectorText == selector ||
-                r.SelectorText == selector.Replace(" > ", ">"));
-
-            if (rule == null)
-            {
-                stylesheet.Insert($"{selector} {{}}", stylesheet.Rules.Length);
-                rule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
-            }
-
-            if (rule != null)
-            {
-                setProperties(rule, styleInfo);
-            }
-        }
-
-
-        private void ParseBodyStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
-        {
-            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "body");
-            if (rule != null)
-            {
-                styleInfo.Body.UpdateFrom(rule);
-
-                // 旧プロパティとの同期（既存のViewModel/Viewを壊さないため）
-                styleInfo.BodyTextColor = styleInfo.Body.TextColor?.ToString();
-                styleInfo.BodyBackgroundColor = styleInfo.Body.BackgroundColor?.ToString();
-                styleInfo.BodyFontSize = styleInfo.Body.FontSize?.ToString();
-            }
-        }
-
-        private void ParseParagraphStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
-        {
-            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "p");
-            if (rule != null)
-            {
-                styleInfo.Paragraph.UpdateFrom(rule);
-
-                // 旧プロパティとの同期
-                styleInfo.ParagraphLineHeight = styleInfo.Paragraph.LineHeight;
-                styleInfo.ParagraphMarginBottom = styleInfo.Paragraph.MarginBottom?.ToString();
-                styleInfo.ParagraphTextIndent = styleInfo.Paragraph.TextIndent?.ToString();
-            }
-        }
-
-        private void ParseTitleStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
-        {
-            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "#page-title");
-            if (rule != null)
-            {
-                styleInfo.Title.UpdateFrom(rule);
-
-                // 旧プロパティとの同期
-                styleInfo.TitleTextColor = styleInfo.Title.TextColor?.ToString();
-                styleInfo.TitleFontSize = styleInfo.Title.FontSize?.ToString();
-                styleInfo.TitleFontFamily = styleInfo.Title.FontFamily;
-                styleInfo.TitleAlignment = styleInfo.Title.TextAlignment;
-                styleInfo.TitleMarginBottom = styleInfo.Title.MarginBottom?.ToString();
-                styleInfo.TitleStyleFlags.IsBold = styleInfo.Title.IsBold;
-
-                // Note: IsItalic/IsUnderline are now managed via CssTextStyle in TitleStyle
-                styleInfo.TitleStyleFlags.IsItalic = styleInfo.Title.TextStyle.IsItalic;
-                styleInfo.TitleStyleFlags.IsUnderline = styleInfo.Title.TextStyle.IsUnderline;
-            }
-        }
-
-        private void ParseHeadingStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
-        {
-            foreach (var level in new[] { "h1", "h2", "h3", "h4", "h5", "h6" })
-            {
-                var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == level);
-                if (rule != null)
-                {
-                    var headingStyle = styleInfo.Headings[level];
-                    headingStyle.UpdateFrom(rule);
-
-                    // 旧プロパティ(Dictionary)との同期
-                    styleInfo.HeadingTextColors[level] = headingStyle.TextColor?.ToString();
-                    styleInfo.HeadingFontSizes[level] = headingStyle.FontSize?.ToString();
-                    styleInfo.HeadingFontFamilies[level] = headingStyle.FontFamily;
-                    styleInfo.HeadingAlignments[level] = headingStyle.TextAlignment;
-                    styleInfo.HeadingStyleFlags[level] = new HeadingStyleFlags
-                    {
-                        IsBold = headingStyle.IsBold,
-                        IsItalic = headingStyle.IsItalic,
-                        IsUnderline = headingStyle.IsUnderline
-                    };
-                }
-            }
-        }
-
-        private void ParseBlockquoteStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
-        {
-            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "blockquote");
-            if (rule != null)
-            {
-                styleInfo.Blockquote.UpdateFrom(rule);
-
-                // 旧プロパティとの同期
-                styleInfo.QuoteTextColor = styleInfo.Blockquote.TextColor?.ToString();
-                styleInfo.QuoteBackgroundColor = styleInfo.Blockquote.BackgroundColor?.ToString();
-                styleInfo.QuoteBorderWidth = styleInfo.Blockquote.BorderWidth;
-                styleInfo.QuoteBorderStyle = styleInfo.Blockquote.BorderStyle;
-                styleInfo.QuoteBorderColor = styleInfo.Blockquote.BorderColor?.ToString();
-            }
-        }
-
-        private void ParseListStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
-        {
-            styleInfo.List.UpdateFrom(stylesheet);
-
-            // 旧プロパティとの同期
-            styleInfo.ListMarkerType = styleInfo.List.UnorderedListMarkerType;
-            styleInfo.NumberedListMarkerType = styleInfo.List.OrderedListMarkerType;
-            styleInfo.ListIndent = styleInfo.List.ListIndent?.ToString();
-            styleInfo.ListMarkerSize = styleInfo.List.MarkerSize?.ToString();
-        }
-
-        private void ParseTableStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
-        {
-            styleInfo.Table.UpdateFrom(stylesheet);
-
-            // 旧プロパティとの同期
-            styleInfo.TableBorderWidth = styleInfo.Table.BorderWidth;
-            styleInfo.TableBorderColor = styleInfo.Table.BorderColor?.ToString();
-            styleInfo.TableBorderStyle = styleInfo.Table.BorderStyle;
-            styleInfo.TableCellPadding = styleInfo.Table.CellPadding;
-            styleInfo.TableHeaderBackgroundColor = styleInfo.Table.HeaderBackgroundColor?.ToString();
-            styleInfo.TableHeaderTextColor = styleInfo.Table.HeaderTextColor?.ToString();
-            styleInfo.TableHeaderFontSize = styleInfo.Table.HeaderFontSize;
-            styleInfo.TableHeaderAlignment = styleInfo.Table.HeaderAlignment;
-        }
-
-        private void ParseCodeStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
-        {
-            styleInfo.Code.UpdateFrom(stylesheet);
-
-            // 旧プロパティとの同期
-            styleInfo.CodeTextColor = styleInfo.Code.TextColor?.ToString();
-            styleInfo.CodeBackgroundColor = styleInfo.Code.BackgroundColor?.ToString();
-            styleInfo.InlineCodeTextColor = styleInfo.Code.TextColor?.ToString();
-            styleInfo.InlineCodeBackgroundColor = styleInfo.Code.BackgroundColor?.ToString();
-            styleInfo.CodeFontFamily = styleInfo.Code.FontFamily;
-            styleInfo.BlockCodeTextColor = styleInfo.Code.BlockTextColor?.ToString();
-            styleInfo.BlockCodeBackgroundColor = styleInfo.Code.BlockBackgroundColor?.ToString();
-            styleInfo.IsCodeBlockOverrideEnabled = styleInfo.Code.IsBlockOverrideEnabled;
-        }
-
-        private void ParseNumberingStates(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
-        {
-            for (int i = 1; i <= 6; i++)
-            {
-                var selector = $"h{i}";
-                var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == selector);
-                var beforeRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == $"{selector}::before");
-
-                if (rule?.Style.GetPropertyValue("counter-increment")?.Contains(selector) == true &&
-                    beforeRule?.Style.GetPropertyValue("content")?.Contains($"counter({selector})") == true)
-                {
-                    styleInfo.HeadingNumberingStates[selector] = true;
-                }
-                else
-                {
-                    styleInfo.HeadingNumberingStates[selector] = false;
-                }
-            }
-        }
-
-        private void ParseFootnoteStyles(ICssStyleSheet stylesheet, CssStyleInfo styleInfo)
-        {
-            styleInfo.Footnote.UpdateFrom(stylesheet);
-
-            // 旧プロパティとの同期（既存ロジック・テスト用）
-            styleInfo.FootnoteMarkerTextColor = styleInfo.Footnote.MarkerTextColor?.ToString();
-            styleInfo.FootnoteAreaFontSize = styleInfo.Footnote.AreaFontSize?.ToString();
-            styleInfo.FootnoteAreaTextColor = styleInfo.Footnote.AreaTextColor?.ToString();
-            styleInfo.FootnoteAreaMarginTop = styleInfo.Footnote.AreaMarginTop?.ToString();
-            styleInfo.FootnoteAreaBorderTopWidth = styleInfo.Footnote.AreaBorderTopWidth?.ToString();
-            styleInfo.FootnoteAreaBorderTopColor = styleInfo.Footnote.AreaBorderTopColor?.ToString();
-            styleInfo.FootnoteAreaBorderTopStyle = styleInfo.Footnote.AreaBorderTopStyle;
-            styleInfo.FootnoteListItemLineHeight = styleInfo.Footnote.ListItemLineHeight;
+            throw new NotImplementedException();
         }
 
         private string? GetColorHexFromRule(ICssStyleRule rule, string propertyName)
@@ -607,8 +558,7 @@ namespace PageLeaf.Services
             }
             try
             {
-                // System.Windows.Media.ColorConverter.ConvertFromString は "rgb(r, g, b)" や "rgba(r, g, b, a)" 形式をパースできる
-                var color = (System.Windows.Media.Color)ColorConverter.ConvertFromString(colorValue);
+                var color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(colorValue);
                 return $"#{color.R:X2}{color.G:X2}{color.B:X2}";
             }
             catch
@@ -638,6 +588,24 @@ namespace PageLeaf.Services
                 flags.IsUnderline = true;
             }
             return flags;
+        }
+
+        private void UpdateOrCreateRule<T>(ICssStyleSheet stylesheet, string selector, Action<ICssStyleRule, T> setProperties, T styleData)
+        {
+            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r =>
+                r.SelectorText == selector ||
+                r.SelectorText == selector.Replace(" > ", ">"));
+
+            if (rule == null)
+            {
+                stylesheet.Insert($"{selector} {{}}", stylesheet.Rules.Length);
+                rule = stylesheet.Rules.LastOrDefault() as ICssStyleRule;
+            }
+
+            if (rule != null)
+            {
+                setProperties(rule, styleData);
+            }
         }
     }
 }

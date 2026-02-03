@@ -32,11 +32,12 @@ namespace PageLeaf.Models.Css.Values
 
         /// <summary>
         /// CSS文字列（例: "16px", "1.5em", "2rem"）を解析して CssSize インスタンスを生成します。
+        /// 空文字列または空白の場合は null を返します。
         /// </summary>
-        public static CssSize Parse(string cssString)
+        public static CssSize? Parse(string? cssString)
         {
             if (string.IsNullOrWhiteSpace(cssString))
-                return new CssSize(0, CssUnit.None);
+                return null;
 
             var match = Regex.Match(cssString.Trim(), @"^([0-9\.]+)\s*(px|em|rem|%|)$", RegexOptions.IgnoreCase);
             if (!match.Success)
@@ -51,7 +52,8 @@ namespace PageLeaf.Models.Css.Values
                 "em" => CssUnit.Em,
                 "rem" => CssUnit.Rem,
                 "%" => CssUnit.Percent,
-                _ => CssUnit.Px // 単位なしはデフォルトでpxとする
+                "" => CssUnit.None,
+                _ => CssUnit.Px // 基本的にはここに到達しない
             };
 
             return new CssSize(value, unit);

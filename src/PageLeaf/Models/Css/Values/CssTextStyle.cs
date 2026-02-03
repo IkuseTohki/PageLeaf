@@ -17,15 +17,47 @@ namespace PageLeaf.Models.Css.Values
         {
             if (rule == null) return;
 
-            var fontWeight = rule.Style.GetPropertyValue("font-weight");
-            IsBold = fontWeight == "bold" || (int.TryParse(fontWeight, out var w) && w >= 700);
+            // font-weight
+            string? fontWeight = rule.Style.GetPropertyValue("font-weight");
+            if (string.IsNullOrEmpty(fontWeight))
+            {
+                fontWeight = rule.Style.FirstOrDefault(p => p.Name.Equals("font-weight", System.StringComparison.OrdinalIgnoreCase))?.Value;
+            }
+            fontWeight = fontWeight?.Trim().ToLower();
+            IsBold = fontWeight == "bold" || fontWeight == "bolder" ||
+                     (int.TryParse(fontWeight, out var w) && w >= 600);
 
-            var fontStyle = rule.Style.GetPropertyValue("font-style");
-            IsItalic = fontStyle == "italic";
+            // font-style
+            string? fontStyle = rule.Style.GetPropertyValue("font-style");
+            if (string.IsNullOrEmpty(fontStyle))
+            {
+                fontStyle = rule.Style.FirstOrDefault(p => p.Name.Equals("font-style", System.StringComparison.OrdinalIgnoreCase))?.Value;
+            }
+            fontStyle = fontStyle?.Trim().ToLower();
+            IsItalic = fontStyle == "italic" || fontStyle == "oblique";
 
-            var textDecoration = rule.Style.GetPropertyValue("text-decoration-line");
+            // text-decoration
+            string? textDecoration = rule.Style.GetPropertyValue("text-decoration-line");
             if (string.IsNullOrEmpty(textDecoration)) textDecoration = rule.Style.GetPropertyValue("text-decoration");
-            IsUnderline = textDecoration != null && textDecoration.Contains("underline");
+
+            if (string.IsNullOrEmpty(textDecoration))
+            {
+                // 全プロパティから探す
+                foreach (var prop in rule.Style)
+                {
+                    if (prop.Name.Contains("text-decoration", System.StringComparison.OrdinalIgnoreCase) &&
+                        prop.Value.Contains("underline", System.StringComparison.OrdinalIgnoreCase))
+                    {
+                        IsUnderline = true;
+                        return;
+                    }
+                }
+                IsUnderline = false;
+            }
+            else
+            {
+                IsUnderline = textDecoration.ToLower().Contains("underline");
+            }
         }
 
         /// <summary>
@@ -65,8 +97,8 @@ namespace PageLeaf.Models.Css.Values
             {
                 if (alwaysOutputNormal)
                 {
-                    rule.Style.SetProperty("text-decoration-style", "initial");
-                    rule.Style.SetProperty("text-decoration-line", "none");
+                    rule.Style.SetProperty("text-decoration", "none");
+                    rule.Style.RemoveProperty("text-decoration-color");
                 }
                 else
                 {

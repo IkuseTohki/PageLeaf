@@ -27,17 +27,15 @@ namespace PageLeaf.Utilities
         /// <returns>数値と単位のタプル。</returns>
         public static (double Value, string Unit) Split(string? input)
         {
-            if (string.IsNullOrWhiteSpace(input)) return (0.0, "px");
+            if (string.IsNullOrWhiteSpace(input)) return (0.0, "");
 
             // 数値と単位を分離
             var numPart = new string(input.TakeWhile(c => char.IsDigit(c) || c == '.' || c == '-').ToArray());
             var unitPart = input.Substring(numPart.Length).Trim().ToLower();
 
-            if (!double.TryParse(numPart, out var value)) return (0.0, "px");
+            if (!double.TryParse(numPart, out var value)) return (0.0, "");
 
-            // 入力単位を特定（指定がない場合はpxとみなす）
-            if (string.IsNullOrEmpty(unitPart)) unitPart = "px";
-
+            // 入力単位を特定
             return (value, unitPart);
         }
 
@@ -99,8 +97,8 @@ namespace PageLeaf.Utilities
 
             if (!double.TryParse(numPart, out var value)) return defaultValue;
 
-            // 入力単位を特定（指定がない場合はpxとみなす）
-            if (string.IsNullOrEmpty(unitPart)) unitPart = "px";
+            // 入力単位を特定（指定がない場合はターゲット単位と同じとみなす＝変換なし）
+            if (string.IsNullOrEmpty(unitPart)) unitPart = targetUnit;
 
             // 一旦 px に統一
             double px = unitPart switch
