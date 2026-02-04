@@ -37,6 +37,7 @@
                               Margin="0,0,10,0"
                               HorizontalAlignment="Stretch"
                               VerticalAlignment="Center"
+                              AutomationProperties.AutomationId="CssFileSelector"
                               ItemsSource="{Binding DataContext.AvailableCssFiles, RelativeSource={RelativeSource AncestorType=Window}}"
                               SelectedItem="{Binding DataContext.SelectedCssFile, RelativeSource={RelativeSource AncestorType=Window}}"
                               Style="{StaticResource CompactFormComboBoxStyle}"
@@ -47,6 +48,7 @@
                                 VerticalAlignment="Center"
                                 Orientation="Horizontal">
                         <Button Margin="0,0,5,0"
+                                AutomationProperties.AutomationId="SaveCssButton"
                                 Command="{Binding SaveCssCommand}"
                                 Style="{StaticResource IconButtonStyle}"
                                 ToolTip="CSSを保存">
@@ -56,7 +58,8 @@
                                   Fill="{DynamicResource SecondaryTextBrush}"
                                   Stretch="Uniform" />
                         </Button>
-                        <Button Command="{Binding ResetCommand}"
+                        <Button AutomationProperties.AutomationId="ResetCssButton"
+                                Command="{Binding ResetCommand}"
                                 Style="{StaticResource IconButtonStyle}"
                                 ToolTip="設定をリセット (ファイルから再読み込み)">
                             <Path Width="14"
@@ -72,35 +75,43 @@
                 <ScrollViewer Style="{StaticResource ScrollViewerWithButtonsStyle}">
                     <StackPanel Orientation="Horizontal">
                         <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsTitleTabDirty}"
+                                     AutomationProperties.AutomationId="TitleTab"
                                      Content="タイトル"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Title}}"
                                      Tag="T"
                                      Visibility="{Binding IsTitleTabVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
                         <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsGeneralTabDirty}"
+                                     AutomationProperties.AutomationId="GeneralTab"
                                      Content="全体"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.General}}"
                                      Tag="🌐" />
                         <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsHeadingsTabDirty}"
+                                     AutomationProperties.AutomationId="HeadingsTab"
                                      Content="見出し"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Headings}}"
                                      Tag="#" />
                         <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsQuoteTabDirty}"
+                                     AutomationProperties.AutomationId="QuoteTab"
                                      Content="引用"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Quote}}"
                                      Tag="¶" />
                         <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsListTabDirty}"
+                                     AutomationProperties.AutomationId="ListTab"
                                      Content="リスト"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.List}}"
                                      Tag="≡" />
                         <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsTableTabDirty}"
+                                     AutomationProperties.AutomationId="TableTab"
                                      Content="表"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Table}}"
                                      Tag="▦" />
                         <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsCodeTabDirty}"
+                                     AutomationProperties.AutomationId="CodeTab"
                                      Content="コード"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Code}}"
                                      Tag="&lt;&gt;" />
                         <RadioButton behaviors:StyleBehavior.IsDirty="{Binding IsFootnoteTabDirty}"
+                                     AutomationProperties.AutomationId="FootnoteTab"
                                      Content="注釈"
                                      IsChecked="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Footnote}}"
                                      Tag="†" />
@@ -190,6 +201,7 @@
                     <Label Content="フォント設定" Style="{StaticResource FirstCompactFormGroupHeaderStyle}" />
                     <Label Content="フォントサイズ" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
+                                                      AutomationProperties.AutomationId="BodyFontSizeEditor"
                                                       CssValue="{Binding BodyFontSize, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                       DefaultUnit="{Binding Defaults.General.FontSizeUnit}"
                                                       DefaultValue="{Binding Defaults.General.FontSize}" />
@@ -220,7 +232,8 @@
                     <Label Content="カラー設定" Style="{StaticResource CompactFormGroupHeaderStyle}" />
 
                     <Label Content="文字色" Style="{StaticResource CompactFormLabelStyle}" />
-                    <controls:ColorInputControl ColorText="{Binding BodyTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                    <controls:ColorInputControl AutomationProperties.AutomationId="BodyTextColorEditor"
+                                                ColorText="{Binding BodyTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 CommandParameter="BodyTextColor"
                                                 SelectColorCommand="{Binding SelectColorCommand}" />
 

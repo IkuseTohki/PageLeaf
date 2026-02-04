@@ -254,6 +254,7 @@
                     </Style>
                 </Popup.Style>
                 <Button Padding="0"
+                        AutomationProperties.AutomationId="ToggleCssEditorButton"
                         Command="{Binding ToggleCssEditorCommand}"
                         Style="{StaticResource ToggleHandleButtonStyle}">
                     <Path Width="8"

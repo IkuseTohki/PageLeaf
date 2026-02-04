@@ -189,6 +189,7 @@
                 <!-- スピナーありの場合：シンプルなTextBox -->
                 <TextBox Padding="3,0"
                          VerticalAlignment="Center"
+                         AutomationProperties.AutomationId="ValueTextBox"
                          Background="Transparent"
                          BorderThickness="0"
                          CaretBrush="{DynamicResource PrimaryTextBrush}"
@@ -197,7 +198,8 @@
                          Visibility="{Binding ElementName=Root, Path=ShowSpinner, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <!-- スピナーなしの場合：候補リスト付きComboBox -->
-                <ComboBox IsEditable="True"
+                <ComboBox AutomationProperties.AutomationId="ValueComboBox"
+                          IsEditable="True"
                           ItemsSource="{Binding ElementName=Root, Path=AvailableValues}"
                           Style="{StaticResource SlimComboBoxStyle}"
                           Text="{Binding ElementName=Root, Path=InternalValue, UpdateSourceTrigger=PropertyChanged}"
@@ -226,6 +228,7 @@
                 </StackPanel.Style>
                 <Button Width="16"
                         Height="12"
+                        AutomationProperties.AutomationId="UpButton"
                         Click="UpButton_Click"
                         Style="{StaticResource IconButtonStyle}">
                     <Path Width="6"
@@ -236,6 +239,7 @@
                 </Button>
                 <Button Width="16"
                         Height="12"
+                        AutomationProperties.AutomationId="DownButton"
                         Click="DownButton_Click"
                         Style="{StaticResource IconButtonStyle}">
                     <Path Width="6"
