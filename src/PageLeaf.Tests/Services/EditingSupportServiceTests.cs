@@ -161,15 +161,15 @@ namespace PageLeaf.Tests.Services
 
             // スペース4つ
             var settings = new ApplicationSettings { IndentSize = 4, UseSpacesForIndent = true };
-            Assert.AreEqual("    ", _service.GetIndentString(settings));
+            Assert.AreEqual("    ", settings.GetIndentString());
 
             // スペース2つ
             settings = new ApplicationSettings { IndentSize = 2, UseSpacesForIndent = true };
-            Assert.AreEqual("  ", _service.GetIndentString(settings));
+            Assert.AreEqual("  ", settings.GetIndentString());
 
             // タブ
             settings = new ApplicationSettings { UseSpacesForIndent = false };
-            Assert.AreEqual("\t", _service.GetIndentString(settings));
+            Assert.AreEqual("\t", settings.GetIndentString());
         }
 
         [TestMethod]
@@ -178,10 +178,10 @@ namespace PageLeaf.Tests.Services
             // テスト観点: 行頭のインデントを1レベル分削除する。
             var settings = new ApplicationSettings { IndentSize = 4, UseSpacesForIndent = true };
 
-            Assert.AreEqual("No indent", _service.DecreaseIndent("    No indent", settings));
-            Assert.AreEqual("  Partially removed", _service.DecreaseIndent("      Partially removed", settings));
-            Assert.AreEqual("No indent", _service.DecreaseIndent("\tNo indent", settings)); // タブも削除対象
-            Assert.AreEqual("Normal", _service.DecreaseIndent("Normal", settings)); // インデントなし
+            Assert.AreEqual("No indent", settings.DecreaseIndent("    No indent"));
+            Assert.AreEqual("  Partially removed", settings.DecreaseIndent("      Partially removed"));
+            Assert.AreEqual("No indent", settings.DecreaseIndent("\tNo indent")); // タブも削除対象
+            Assert.AreEqual("Normal", settings.DecreaseIndent("Normal")); // インデントなし
         }
 
         [TestMethod]
@@ -190,11 +190,11 @@ namespace PageLeaf.Tests.Services
             // テスト観点: 行頭に1レベル分のインデントを追加する。
             var settings = new ApplicationSettings { IndentSize = 4, UseSpacesForIndent = true };
 
-            Assert.AreEqual("    * Item", _service.IncreaseIndent("* Item", settings));
-            Assert.AreEqual("        * Item", _service.IncreaseIndent("    * Item", settings));
+            Assert.AreEqual("    * Item", settings.IncreaseIndent("* Item"));
+            Assert.AreEqual("        * Item", settings.IncreaseIndent("    * Item"));
 
             settings = new ApplicationSettings { UseSpacesForIndent = false };
-            Assert.AreEqual("\t* Item", _service.IncreaseIndent("* Item", settings));
+            Assert.AreEqual("\t* Item", settings.IncreaseIndent("* Item"));
         }
 
         [TestMethod]

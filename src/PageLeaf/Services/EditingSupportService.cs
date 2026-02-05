@@ -162,63 +162,6 @@ namespace PageLeaf.Services
         }
 
         /// <summary>
-        /// 設定に基づいたインデント文字列を取得します。
-        /// </summary>
-        /// <param name="settings">アプリケーション設定。</param>
-        /// <returns>インデント文字列。</returns>
-        public string GetIndentString(ApplicationSettings settings)
-        {
-            if (settings.UseSpacesForIndent)
-            {
-                return new string(' ', settings.IndentSize);
-            }
-            return "\t";
-        }
-
-        /// <summary>
-        /// 行頭のインデントを1レベル分削除します。
-        /// </summary>
-        /// <param name="line">対象の行。</param>
-        /// <param name="settings">アプリケーション設定。</param>
-        /// <returns>インデント削除後の行。</returns>
-        public string DecreaseIndent(string line, ApplicationSettings settings)
-        {
-            if (string.IsNullOrEmpty(line)) return line;
-
-            // タブで始まる場合
-            if (line.StartsWith("\t"))
-            {
-                return line.Substring(1);
-            }
-
-            // スペースで始まる場合、設定されたインデント幅分削除を試みる
-            int spaceCount = 0;
-            while (spaceCount < settings.IndentSize && spaceCount < line.Length && line[spaceCount] == ' ')
-            {
-                spaceCount++;
-            }
-
-            if (spaceCount > 0)
-            {
-                return line.Substring(spaceCount);
-            }
-
-            return line;
-        }
-
-        /// <summary>
-        /// 行頭に1レベル分のインデントを追加します。
-        /// </summary>
-        /// <param name="line">対象の行。</param>
-        /// <param name="settings">アプリケーション設定。</param>
-        /// <returns>インデント追加後の行。</returns>
-        public string IncreaseIndent(string line, ApplicationSettings settings)
-        {
-            var indent = GetIndentString(settings);
-            return indent + line;
-        }
-
-        /// <summary>
         /// 指定された行の見出しレベルを切り替えます。
         /// </summary>
         public string ToggleHeading(string line, int level)

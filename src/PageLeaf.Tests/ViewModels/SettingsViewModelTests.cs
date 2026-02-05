@@ -26,7 +26,9 @@ namespace PageLeaf.Tests.ViewModels
             {
                 AdditionalFrontMatter = new List<FrontMatterAdditionalProperty>()
             };
-            _settingsServiceMock.Setup(x => x.CurrentSettings).Returns(_settings);
+            _settingsServiceMock.Setup(x => x.CurrentSettings).Returns(() => _settings);
+            _settingsServiceMock.Setup(x => x.SaveSettings(It.IsAny<ApplicationSettings>()))
+                .Callback<ApplicationSettings>(s => _settings = s);
         }
 
         [TestMethod]

@@ -37,27 +37,6 @@ namespace PageLeaf.Services
         bool IsCodeBlockStart(string currentLine);
 
         /// <summary>
-        /// 設定に基づいたインデント文字列を取得します。
-        /// </summary>
-        /// <param name="settings">アプリケーション設定。</param>
-        /// <returns>インデント文字列。</returns>
-        string GetIndentString(ApplicationSettings settings);
-
-        /// <summary>
-        /// 行頭のインデントを1レベル分削除します。
-        /// </summary>
-        /// <param name="line">対象の行。</param>
-        /// <param name="settings">アプリケーション設定。</param>
-        /// <returns>インデント削除後の行。</returns>
-        string DecreaseIndent(string line, ApplicationSettings settings);
-
-        /// <summary>
-        /// 行頭に1レベル分のインデントを追加します。
-        /// </summary>
-        /// <returns>インデント追加後の行。</returns>
-        string IncreaseIndent(string line, ApplicationSettings settings);
-
-        /// <summary>
         /// 指定された行の見出しレベルを切り替えます。
         /// </summary>
         /// <param name="line">対象の行。</param>

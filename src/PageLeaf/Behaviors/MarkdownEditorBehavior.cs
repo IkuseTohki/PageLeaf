@@ -403,7 +403,7 @@ namespace PageLeaf.Behaviors
             if (Keyboard.Modifiers == ModifierKeys.Shift)
             {
                 // Shift + Tab: アウトデント
-                string newLine = service.DecreaseIndent(currentLine, settings);
+                string newLine = settings.DecreaseIndent(currentLine);
                 if (currentLine != newLine)
                 {
                     textBox.Select(lineStart, currentLine.Length);
@@ -421,7 +421,7 @@ namespace PageLeaf.Behaviors
                 if (isListItem)
                 {
                     // リストアイテムなら行頭にインデント追加
-                    string newLine = service.IncreaseIndent(currentLine, settings);
+                    string newLine = settings.IncreaseIndent(currentLine);
                     textBox.Select(lineStart, currentLine.Length);
                     textBox.SelectedText = newLine;
 
@@ -433,7 +433,7 @@ namespace PageLeaf.Behaviors
                 else
                 {
                     // リストでなければ現在の位置にインデント挿入
-                    var indent = service.GetIndentString(settings);
+                    var indent = settings.GetIndentString();
                     textBox.SelectedText = indent;
                     textBox.CaretIndex = caretIndex + indent.Length;
                     textBox.SelectionLength = 0;
@@ -735,7 +735,7 @@ namespace PageLeaf.Behaviors
 
             if (Keyboard.Modifiers == ModifierKeys.Shift)
             {
-                string newLine = service.DecreaseIndent(currentLine, settings);
+                string newLine = settings.DecreaseIndent(currentLine);
                 if (currentLine != newLine)
                 {
                     editor.Document.Replace(line.Offset, line.Length, newLine);
@@ -745,12 +745,12 @@ namespace PageLeaf.Behaviors
             {
                 if (isListItem)
                 {
-                    string newLine = service.IncreaseIndent(currentLine, settings);
+                    string newLine = settings.IncreaseIndent(currentLine);
                     editor.Document.Replace(line.Offset, line.Length, newLine);
                 }
                 else
                 {
-                    string indent = service.GetIndentString(settings);
+                    string indent = settings.GetIndentString();
                     editor.Document.Insert(editor.CaretOffset, indent);
                 }
             }
