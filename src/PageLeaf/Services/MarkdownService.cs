@@ -249,13 +249,12 @@ namespace PageLeaf.Services
                         // AdvancedExtensions には AutoIdentifiers が含まれているため、
                         // 基本的には ID が自動生成されるはずです。
 
-                        list.Add(new TocItem
-                        {
-                            Level = headingBlock.Level,
-                            Text = text,
-                            Id = id ?? string.Empty,
-                            LineNumber = headingBlock.Line
-                        });
+                        list.Add(new TocItem(
+                            headingBlock.Level,
+                            text,
+                            id ?? string.Empty,
+                            headingBlock.Line
+                        ));
                     }
                 }
             }

@@ -122,7 +122,7 @@ namespace PageLeaf.Tests.ViewModels
             // テスト観点: TOCを開くときにMarkdownServiceからヘッダーをロードすることを確認する。
             // Arrange
             _viewModel.IsTocOpen = false;
-            var headers = new List<TocItem> { new TocItem { Text = "H1", Level = 1, Id = "h1" } };
+            var headers = new List<TocItem> { new TocItem(1, "H1", "h1", 0) };
             _editorServiceMock.Setup(e => e.EditorText).Returns("# H1");
             _markdownServiceMock.Setup(m => m.ExtractHeaders("# H1")).Returns(headers);
 
@@ -165,7 +165,7 @@ namespace PageLeaf.Tests.ViewModels
             _markdownServiceMock.Setup(m => m.ExtractHeaders(It.IsAny<string>())).Returns(new List<TocItem>());
 
             _viewModel.IsTocOpen = true;
-            var item = new TocItem { Id = "target-id" };
+            var item = new TocItem(1, "text", "target-id", 0);
 
             // Act
             _viewModel.NavigateToHeaderCommand.Execute(item);

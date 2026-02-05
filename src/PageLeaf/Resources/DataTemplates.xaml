@@ -177,7 +177,7 @@
                 BorderThickness="0"
                 Command="{Binding DataContext.NavigateToHeaderCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                 CommandParameter="{Binding}">
-            <TextBlock Margin="{Binding Level, Converter={StaticResource LevelToMarginConverter}}"
+            <TextBlock Margin="{Binding Converter={StaticResource LevelToMarginConverter}}"
                        Foreground="{DynamicResource PrimaryTextBrush}"
                        Text="{Binding Text}"
                        TextTrimming="CharacterEllipsis" />

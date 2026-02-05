@@ -79,7 +79,7 @@ public class MainWindowTests
     }
 
     /// <summary>
-    /// アプリケーションが正常に起動し、タイトルに "PageLeaf" が含まれていることを確認します。
+    /// テスト観点: アプリケーションが正常に起動し、メインウィンドウのタイトルに正しいアプリケーション名が含まれていることを確認する。
     /// </summary>
     [TestMethod]
     public void AppLaunch_ShouldHaveCorrectTitle()
@@ -94,6 +94,9 @@ public class MainWindowTests
         StringAssert.Contains(title, "PageLeaf", $"タイトル '{title}' に 'PageLeaf' が含まれていません。");
     }
 
+    /// <summary>
+    /// テスト観点: CSSエディターパネルでの値の変更（フォントサイズ）と保存操作により、実際のCSSファイルの内容が正しく更新されることを確認する。
+    /// </summary>
     [TestMethod]
     public void AppGeneratedCss_Lifecycle_Test()
     {
@@ -138,6 +141,9 @@ public class MainWindowTests
         }
     }
 
+    /// <summary>
+    /// テスト観点: 編集対象のCSSファイルを切り替えた際、エディターパネル内の入力項目の表示値が、選択したファイルの内容に基づいて正しく更新されることを確認する。
+    /// </summary>
     [TestMethod]
     public void ExternalCss_SwitchFile_ShouldUpdateValues()
     {

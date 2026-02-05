@@ -12,9 +12,13 @@ namespace PageLeaf.Utilities
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
+            if (value is Models.Markdown.TocItem item)
+            {
+                return new Thickness((item.Level - 1) * 15, 0, 0, 0);
+            }
             if (value is int level)
             {
-                // レベル1 -> 0, レベル2 -> 15, レベル3 -> 30 のようにインデントを生成
+                // 後方互換性のため残すが、基本的には TocItem を渡すことを推奨
                 return new Thickness((level - 1) * 15, 0, 0, 0);
             }
             return new Thickness(0);
