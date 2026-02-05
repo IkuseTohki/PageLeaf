@@ -231,8 +231,8 @@ namespace PageLeaf.Behaviors
             }
             // Tabキーの処理
             else if (e.Key == Key.Tab) HandleTabKey(textBox, e);
-            // Ctrl + V (貼り付け時のテーブル変換)
-            else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.V) HandlePaste(textBox, e);
+            // Ctrl + Shift + V (貼り付け時のテーブル変換)
+            else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.V) HandlePaste(textBox, e);
             // Ctrl + B (太字)
             else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.B) { e.Handled = true; SurroundSelection(textBox, "**"); }
             // Ctrl + I (イタリック)
@@ -331,6 +331,9 @@ namespace PageLeaf.Behaviors
 
         private static void HandlePaste(TextBox textBox, KeyEventArgs e)
         {
+            // 画像が含まれている場合は、ViewModel側の PasteImageCommand に任せるために何もしない
+            if (Clipboard.ContainsImage()) return;
+
             // クリップボードのテキストを取得
             if (!Clipboard.ContainsText()) return;
             string text = Clipboard.GetText();
@@ -338,16 +341,22 @@ namespace PageLeaf.Behaviors
             var service = App.AppHost?.Services.GetService<IEditingSupportService>();
             if (service == null) return;
 
+            e.Handled = true;
+
             // テーブル変換を試みる
             var markdownTable = service.ConvertToMarkdownTable(text);
             if (markdownTable != null)
             {
-                e.Handled = true;
                 textBox.SelectedText = markdownTable;
-                textBox.SelectionLength = 0;
-                textBox.CaretIndex = textBox.SelectionStart + markdownTable.Length;
             }
-            // テーブル変換できなければ標準の貼り付け動作に任せる (e.Handled = false のまま)
+            else
+            {
+                // テーブル変換できなければ通常の貼り付け
+                textBox.SelectedText = text;
+            }
+
+            textBox.SelectionLength = 0;
+            textBox.CaretIndex = textBox.SelectionStart + (markdownTable?.Length ?? text.Length);
         }
 
         private static void HandleTabKey(TextBox textBox, KeyEventArgs e)
@@ -595,7 +604,7 @@ namespace PageLeaf.Behaviors
                 else HandleEnterKey(editor, e);
             }
             else if (e.Key == Key.Tab) HandleTabKey(editor, e);
-            else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.V) HandlePaste(editor, e);
+            else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.V) HandlePaste(editor, e);
             else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.B) { e.Handled = true; SurroundSelection(editor, "**"); }
             else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.I) { e.Handled = true; SurroundSelection(editor, "*"); }
             else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.X) { e.Handled = true; SurroundSelection(editor, "~~"); }
@@ -667,16 +676,24 @@ namespace PageLeaf.Behaviors
 
         private static void HandlePaste(TextEditor editor, KeyEventArgs e)
         {
+            // 画像が含まれている場合は、ViewModel側の PasteImageCommand に任せるために何もしない
+            if (Clipboard.ContainsImage()) return;
+
             if (!Clipboard.ContainsText()) return;
             string text = Clipboard.GetText();
             var service = App.AppHost?.Services.GetService<IEditingSupportService>();
             if (service == null) return;
 
+            e.Handled = true;
+
             var markdownTable = service.ConvertToMarkdownTable(text);
             if (markdownTable != null)
             {
-                e.Handled = true;
                 editor.Document.Replace(editor.SelectionStart, editor.SelectionLength, markdownTable);
+            }
+            else
+            {
+                editor.Document.Replace(editor.SelectionStart, editor.SelectionLength, text);
             }
         }
 
