@@ -53,7 +53,7 @@ namespace PageLeaf.UseCases
                 // ドメインモデルの振る舞いを使用して保存準備を行う
                 document.UpdateTimestamp();
 
-                if (_settingsService.CurrentSettings.RenumberFootnotesOnSave)
+                if (_settingsService.CurrentSettings.Editor.RenumberFootnotesOnSave)
                 {
                     document.RenumberFootnotes();
                 }

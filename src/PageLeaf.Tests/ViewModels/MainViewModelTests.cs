@@ -57,7 +57,7 @@ namespace PageLeaf.Tests.ViewModels
                 _settingsServiceMock.Object);
 
             _cssManagementServiceMock.Setup(s => s.GetAvailableCssFileNames()).Returns(new List<string> { "default.css" });
-            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { SelectedCss = "default.css" });
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { View = new ViewSettings { SelectedCss = "default.css" } });
 
             _viewModel = new MainViewModel(
                 _fileServiceMock.Object,

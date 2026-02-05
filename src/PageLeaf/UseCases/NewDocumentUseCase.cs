@@ -46,7 +46,7 @@ namespace PageLeaf.UseCases
 
             _editorService.NewDocument();
 
-            if (_settingsService.CurrentSettings.AutoInsertFrontMatter)
+            if (_settingsService.CurrentSettings.Editor.AutoInsertFrontMatter)
             {
                 ApplyDefaultTemplate();
             }
@@ -95,9 +95,9 @@ namespace PageLeaf.UseCases
             resultFrontMatter["syntax_highlight"] = "";
 
             // 2. ユーザー定義の追加プロパティをマージ (標準プロパティの上書きも許可)
-            if (settings.AdditionalFrontMatter != null)
+            if (settings.Editor.AdditionalFrontMatter != null)
             {
-                foreach (var prop in settings.AdditionalFrontMatter)
+                foreach (var prop in settings.Editor.AdditionalFrontMatter)
                 {
                     if (!string.IsNullOrWhiteSpace(prop.Key))
                     {

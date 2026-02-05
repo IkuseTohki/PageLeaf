@@ -53,7 +53,7 @@ namespace PageLeaf.Services
             htmlBuilder.AppendLine("<body>");
 
             // タイトルの挿入
-            if (appSettings.ShowTitleInPreview && frontMatter.TryGetValue("title", out var titleObj) && titleObj is string title && !string.IsNullOrWhiteSpace(title))
+            if (appSettings.View.ShowTitleInPreview && frontMatter.TryGetValue("title", out var titleObj) && titleObj is string title && !string.IsNullOrWhiteSpace(title))
             {
                 htmlBuilder.AppendLine($"<header id=\"page-title\" class=\"title-element\">{System.Net.WebUtility.HtmlEncode(title)}</header>");
             }
@@ -93,8 +93,8 @@ namespace PageLeaf.Services
             var appSettings = _settingsService.CurrentSettings;
             var settings = new EffectiveSettings
             {
-                ThemeName = !string.IsNullOrEmpty(appSettings.CodeBlockTheme) ? appSettings.CodeBlockTheme : DefaultTheme,
-                ResourceSource = appSettings.LibraryResourceSource
+                ThemeName = !string.IsNullOrEmpty(appSettings.View.CodeBlockTheme) ? appSettings.View.CodeBlockTheme : DefaultTheme,
+                ResourceSource = appSettings.Appearance.LibraryResourceSource
             };
 
             // フロントマターによる上書き (テーマ)

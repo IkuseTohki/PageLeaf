@@ -134,7 +134,7 @@ namespace PageLeaf.ViewModels
                     OnPropertyChanged();
 
                     // 設定を保存
-                    _settingsService.CurrentSettings.SelectedCss = value;
+                    _settingsService.CurrentSettings.View.SelectedCss = value;
                     _settingsService.SaveSettings(_settingsService.CurrentSettings);
 
                     // エディタ（WebView）に適用
@@ -283,7 +283,7 @@ namespace PageLeaf.ViewModels
             AvailableCssFiles.Add(NewStylePlaceholder);
 
             // 設定から選択されたCSSを読み込む
-            var loadedCss = _settingsService.CurrentSettings.SelectedCss;
+            var loadedCss = _settingsService.CurrentSettings.View.SelectedCss;
             if (!string.IsNullOrEmpty(loadedCss) && AvailableCssFiles.Contains(loadedCss))
             {
                 SelectedCssFile = loadedCss;
@@ -300,7 +300,7 @@ namespace PageLeaf.ViewModels
             Editor.ApplyCss(SelectedCssFile);
 
             // フォントサイズの反映
-            Editor.EditorFontSize = _settingsService.CurrentSettings.EditorFontSize;
+            Editor.EditorFontSize = _settingsService.CurrentSettings.Editor.EditorFontSize;
         }
 
         private void ExecuteNewDocument(object? parameter)
@@ -529,7 +529,7 @@ namespace PageLeaf.ViewModels
 
                 // 設定の反映（設定画面が閉じられたことを想定）
                 CssEditorViewModel.NotifySettingsChanged();
-                Editor.EditorFontSize = _settingsService.CurrentSettings.EditorFontSize;
+                Editor.EditorFontSize = _settingsService.CurrentSettings.Editor.EditorFontSize;
                 Editor.UpdatePreview();
             }
         }

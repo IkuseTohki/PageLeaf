@@ -1,9 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using PageLeaf.Models;
-using PageLeaf.Models.Markdown;
-using PageLeaf.Models.Css;
-using PageLeaf.Models.Css.Elements;
 using PageLeaf.Models.Settings;
 using PageLeaf.Services;
 
@@ -14,48 +11,55 @@ namespace PageLeaf.Tests.Services
     {
         private Mock<ISettingsService> _mockSettings = null!;
         private Mock<ISystemThemeProvider> _mockSystemTheme = null!;
+        private ThemeService _service = null!;
 
         [TestInitialize]
         public void Setup()
         {
             _mockSettings = new Mock<ISettingsService>();
             _mockSystemTheme = new Mock<ISystemThemeProvider>();
+            _service = new ThemeService(_mockSettings.Object, _mockSystemTheme.Object);
         }
 
         [TestMethod]
-        public void GetActualTheme_ShouldReturnLight_WhenSettingsIsLight()
+        public void GetActualTheme_ShouldReturnLightTheme_WhenConfigured()
         {
-            // テスト観点: 設定がライトモードなら、OS設定に関わらずライトモードを返す。
-            _mockSettings.Setup(x => x.CurrentSettings).Returns(new ApplicationSettings { Theme = AppTheme.Light });
+            // Arrange
+            _mockSettings.Setup(x => x.CurrentSettings).Returns(new ApplicationSettings { Appearance = new AppearanceSettings { Theme = AppTheme.Light } });
+
+            // Act
+            var theme = _service.GetActualTheme();
+
+            // Assert
+            Assert.AreEqual(AppTheme.Light, theme);
+        }
+
+        [TestMethod]
+        public void GetActualTheme_ShouldReturnDarkTheme_WhenConfigured()
+        {
+            // Arrange
+            _mockSettings.Setup(x => x.CurrentSettings).Returns(new ApplicationSettings { Appearance = new AppearanceSettings { Theme = AppTheme.Dark } });
+
+            // Act
+            var theme = _service.GetActualTheme();
+
+            // Assert
+            Assert.AreEqual(AppTheme.Dark, theme);
+        }
+
+        [TestMethod]
+        public void GetActualTheme_ShouldReturnSystemTheme_WhenConfiguredToSystem()
+        {
+            // Arrange
+            _mockSettings.Setup(x => x.CurrentSettings).Returns(new ApplicationSettings { Appearance = new AppearanceSettings { Theme = AppTheme.System } });
             _mockSystemTheme.Setup(x => x.GetSystemTheme()).Returns(AppTheme.Dark);
 
-            var service = new ThemeService(_mockSettings.Object, _mockSystemTheme.Object);
-            Assert.AreEqual(AppTheme.Light, service.GetActualTheme());
-        }
+            // Act
+            var theme = _service.GetActualTheme();
 
-        [TestMethod]
-        public void GetActualTheme_ShouldReturnDark_WhenSettingsIsDark()
-        {
-            // テスト観点: 設定がダークモードなら、OS設定に関わらずダークモードを返す。
-            _mockSettings.Setup(x => x.CurrentSettings).Returns(new ApplicationSettings { Theme = AppTheme.Dark });
-            _mockSystemTheme.Setup(x => x.GetSystemTheme()).Returns(AppTheme.Light);
-
-            var service = new ThemeService(_mockSettings.Object, _mockSystemTheme.Object);
-            Assert.AreEqual(AppTheme.Dark, service.GetActualTheme());
-        }
-
-        [TestMethod]
-        public void GetActualTheme_ShouldFollowSystem_WhenSettingsIsSystem()
-        {
-            // テスト観点: 設定がシステム依存なら、OS設定に従う。
-            _mockSettings.Setup(x => x.CurrentSettings).Returns(new ApplicationSettings { Theme = AppTheme.System });
-
-            _mockSystemTheme.Setup(x => x.GetSystemTheme()).Returns(AppTheme.Dark);
-            var service = new ThemeService(_mockSettings.Object, _mockSystemTheme.Object);
-            Assert.AreEqual(AppTheme.Dark, service.GetActualTheme());
-
-            _mockSystemTheme.Setup(x => x.GetSystemTheme()).Returns(AppTheme.Light);
-            Assert.AreEqual(AppTheme.Light, service.GetActualTheme());
+            // Assert
+            Assert.AreEqual(AppTheme.Dark, theme);
+            _mockSystemTheme.Verify(x => x.GetSystemTheme(), Times.Once);
         }
     }
 }

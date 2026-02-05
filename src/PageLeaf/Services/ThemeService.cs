@@ -24,7 +24,7 @@ namespace PageLeaf.Services
 
         public AppTheme GetActualTheme()
         {
-            var setting = _settingsService.CurrentSettings.Theme;
+            var setting = _settingsService.CurrentSettings.Appearance.Theme;
             if (setting == AppTheme.System)
             {
                 return _systemThemeProvider.GetSystemTheme();

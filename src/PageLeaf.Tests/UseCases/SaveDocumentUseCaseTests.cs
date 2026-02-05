@@ -42,7 +42,7 @@ namespace PageLeaf.Tests.UseCases
         {
             // テスト観点: 設定が有効な場合、保存時に脚注番号が振り直されることを確認する。
             // Arrange
-            var settings = new ApplicationSettings { RenumberFootnotesOnSave = true };
+            var settings = new ApplicationSettings { Editor = new EditorSettings { RenumberFootnotesOnSave = true } };
             _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(settings);
 
             var doc = new MarkdownDocument
@@ -69,7 +69,7 @@ namespace PageLeaf.Tests.UseCases
         {
             // テスト観点: 設定が無効な場合、保存時に脚注番号が振り直されないことを確認する。
             // Arrange
-            var settings = new ApplicationSettings { RenumberFootnotesOnSave = false };
+            var settings = new ApplicationSettings { Editor = new EditorSettings { RenumberFootnotesOnSave = false } };
             _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(settings);
 
             var doc = new MarkdownDocument

@@ -168,10 +168,10 @@ namespace PageLeaf
                 var mainWindow = AppHost.Services.GetRequiredService<MainWindow>();
 
                 // テーマの初期適用（MainWindow 生成後なのでタイトルバーにも適用される）
-                ApplyTheme(settingsService.CurrentSettings.Theme);
+                ApplyTheme(settingsService.CurrentSettings.Appearance.Theme);
 
                 // 設定変更時のテーマ適用
-                settingsService.SettingsChanged += (s, settings) => ApplyTheme(settings.Theme);
+                settingsService.SettingsChanged += (s, settings) => ApplyTheme(settings.Appearance.Theme);
 
                 mainWindow.Show();
             }
@@ -206,7 +206,7 @@ namespace PageLeaf
         {
             if (e.Category == UserPreferenceCategory.General || e.Category == UserPreferenceCategory.VisualStyle)
             {
-                if (_settingsService?.CurrentSettings.Theme == Models.AppTheme.System)
+                if (_settingsService?.CurrentSettings.Appearance.Theme == Models.AppTheme.System)
                 {
                     // UIスレッドで実行
                     Dispatcher.Invoke(() => ApplyTheme(Models.AppTheme.System));

@@ -59,7 +59,7 @@ namespace PageLeaf.Tests.Services
 
             // Assert
             Assert.IsNotNull(settings);
-            Assert.AreEqual("", settings.SelectedCss);
+            Assert.AreEqual("", settings.View.SelectedCss);
         }
 
         [TestMethod]
@@ -67,10 +67,8 @@ namespace PageLeaf.Tests.Services
         {
             // テスト観点: 設定ファイルが存在する場合、LoadSettingsがファイルから設定を正しくロードすることを確認する。
             // Arrange
-            var expectedSettings = new ApplicationSettings
-            {
-                SelectedCss = "solarized-dark.css",
-            };
+            var expectedSettings = new ApplicationSettings();
+            expectedSettings.View.SelectedCss = "solarized-dark.css";
 
             var yaml = _serializer.Serialize(expectedSettings);
             File.WriteAllText(_testSettingsFilePath, yaml);
@@ -82,7 +80,7 @@ namespace PageLeaf.Tests.Services
 
             // Assert
             Assert.IsNotNull(actualSettings);
-            Assert.AreEqual(expectedSettings.SelectedCss, actualSettings.SelectedCss);
+            Assert.AreEqual(expectedSettings.View.SelectedCss, actualSettings.View.SelectedCss);
         }
 
         [TestMethod]
@@ -90,10 +88,8 @@ namespace PageLeaf.Tests.Services
         {
             // テスト観点: LibraryResourceSource プロパティが正しく保存および読み込みされることを確認する。
             // Arrange
-            var settings = new ApplicationSettings
-            {
-                LibraryResourceSource = ResourceSource.Cdn
-            };
+            var settings = new ApplicationSettings();
+            settings.Appearance.LibraryResourceSource = ResourceSource.Cdn;
             var service = new SettingsService(_mockLogger.Object, _testAppDataPath);
 
             // Act
@@ -101,7 +97,7 @@ namespace PageLeaf.Tests.Services
             var loadedSettings = service.LoadSettings();
 
             // Assert
-            Assert.AreEqual(ResourceSource.Cdn, loadedSettings.LibraryResourceSource);
+            Assert.AreEqual(ResourceSource.Cdn, loadedSettings.Appearance.LibraryResourceSource);
         }
 
         [TestMethod]
@@ -109,10 +105,8 @@ namespace PageLeaf.Tests.Services
         {
             // テスト観点: SaveSettingsが設定をファイルに正しく保存することを確認する。
             // Arrange
-            var settingsToSave = new ApplicationSettings
-            {
-                SelectedCss = "github.css",
-            };
+            var settingsToSave = new ApplicationSettings();
+            settingsToSave.View.SelectedCss = "github.css";
 
             var service = new SettingsService(_mockLogger.Object, _testAppDataPath);
 
@@ -122,6 +116,8 @@ namespace PageLeaf.Tests.Services
             // Assert
             Assert.IsTrue(File.Exists(_testSettingsFilePath));
             var savedContent = File.ReadAllText(_testSettingsFilePath);
+            // YAML構造がネストされていることを確認
+            Assert.IsTrue(savedContent.Contains("View:"));
             Assert.IsTrue(savedContent.Contains("SelectedCss: github.css"));
         }
 
@@ -161,7 +157,7 @@ namespace PageLeaf.Tests.Services
 
             // Assert
             Assert.IsNotNull(settings);
-            Assert.AreEqual("", settings.SelectedCss);
+            Assert.AreEqual("", settings.View.SelectedCss);
         }
 
         [TestMethod]
@@ -169,10 +165,8 @@ namespace PageLeaf.Tests.Services
         {
             // テスト観点: EditorFontSize プロパティが正しく保存および読み込みされることを確認する。
             // Arrange
-            var settings = new ApplicationSettings
-            {
-                EditorFontSize = 18
-            };
+            var settings = new ApplicationSettings();
+            settings.Editor.EditorFontSize = 18;
             var service = new SettingsService(_mockLogger.Object, _testAppDataPath);
 
             // Act
@@ -180,7 +174,7 @@ namespace PageLeaf.Tests.Services
             var loadedSettings = service.LoadSettings();
 
             // Assert
-            Assert.AreEqual(18, loadedSettings.EditorFontSize);
+            Assert.AreEqual(18, loadedSettings.Editor.EditorFontSize);
         }
 
         [TestMethod]
@@ -188,10 +182,8 @@ namespace PageLeaf.Tests.Services
         {
             // テスト観点: ShowTitleInPreview プロパティが正しく保存および読み込みされることを確認する。
             // Arrange
-            var settings = new ApplicationSettings
-            {
-                ShowTitleInPreview = true
-            };
+            var settings = new ApplicationSettings();
+            settings.View.ShowTitleInPreview = true;
             var service = new SettingsService(_mockLogger.Object, _testAppDataPath);
 
             // Act
@@ -199,7 +191,7 @@ namespace PageLeaf.Tests.Services
             var loadedSettings = service.LoadSettings();
 
             // Assert
-            Assert.IsTrue(loadedSettings.ShowTitleInPreview);
+            Assert.IsTrue(loadedSettings.View.ShowTitleInPreview);
         }
 
         [TestMethod]
@@ -207,10 +199,8 @@ namespace PageLeaf.Tests.Services
         {
             // テスト観点: Theme プロパティが正しく保存および読み込みされることを確認する。
             // Arrange
-            var settings = new ApplicationSettings
-            {
-                Theme = AppTheme.Dark
-            };
+            var settings = new ApplicationSettings();
+            settings.Appearance.Theme = AppTheme.Dark;
             var service = new SettingsService(_mockLogger.Object, _testAppDataPath);
 
             // Act
@@ -218,7 +208,7 @@ namespace PageLeaf.Tests.Services
             var loadedSettings = service.LoadSettings();
 
             // Assert
-            Assert.AreEqual(AppTheme.Dark, loadedSettings.Theme);
+            Assert.AreEqual(AppTheme.Dark, loadedSettings.Appearance.Theme);
         }
 
         [TestMethod]

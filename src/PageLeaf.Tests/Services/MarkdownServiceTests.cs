@@ -184,7 +184,7 @@ namespace PageLeaf.Tests.Services
             // テスト観点: ConvertToHtml メソッドが生成するHTMLに、設定されたテーマのCSSへの絶対パスリンクが正しく含まれていることを確認する。
             // Arrange
             var customTheme = "vs2015.css";
-            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { CodeBlockTheme = customTheme });
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { View = new ViewSettings { CodeBlockTheme = customTheme } });
             var markdown = "```csharp" + Environment.NewLine + "var x = 1;" + Environment.NewLine + "```";
 
             // Act
@@ -222,7 +222,7 @@ namespace PageLeaf.Tests.Services
             // 実際に存在する可能性の高いテーマ名（githubなど）をシミュレート
             var markdown = "---\nsyntax_highlight: github\n---\n```csharp\ncode\n```";
             var defaultTheme = "vs2015.css";
-            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { CodeBlockTheme = defaultTheme });
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { View = new ViewSettings { CodeBlockTheme = defaultTheme } });
 
             // Act
             var html = _service.ConvertToHtml(markdown, null, null);
@@ -240,7 +240,7 @@ namespace PageLeaf.Tests.Services
             // Arrange
             var markdown = "---\nsyntax_highlight: invalid-theme-name\n---\n```csharp\ncode\n```";
             var defaultTheme = "github.css";
-            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { CodeBlockTheme = defaultTheme });
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { View = new ViewSettings { CodeBlockTheme = defaultTheme } });
 
             // Act
             var html = _service.ConvertToHtml(markdown, null, null);
@@ -299,7 +299,7 @@ namespace PageLeaf.Tests.Services
         {
             // テスト観点: アプリケーション設定で ResourceSource が Cdn の場合、CDNのリンクが含まれることを確認する。
             // Arrange
-            var settings = new ApplicationSettings { LibraryResourceSource = ResourceSource.Cdn };
+            var settings = new ApplicationSettings { Appearance = new AppearanceSettings { LibraryResourceSource = ResourceSource.Cdn } };
             _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(settings);
 
             var markdown = "# Test";
@@ -335,7 +335,7 @@ namespace PageLeaf.Tests.Services
             // テスト観点: ShowTitleInPreviewがONかつタイトルがフロントマターに存在する場合、
             //             HTMLのbody直後にheader要素としてタイトルが挿入されることを確認する。
             // Arrange
-            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { ShowTitleInPreview = true });
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { View = new ViewSettings { ShowTitleInPreview = true } });
             var markdown = "---\ntitle: My Awesome Document\n---\n# Content";
 
             // Act
@@ -351,7 +351,7 @@ namespace PageLeaf.Tests.Services
             // テスト観点: ShowTitleInPreviewがOFFの場合、フロントマターにタイトルがあっても
             //             header要素が挿入されないことを確認する。
             // Arrange
-            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { ShowTitleInPreview = false });
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { View = new ViewSettings { ShowTitleInPreview = false } });
             var markdown = "---\ntitle: My Awesome Document\n---\n# Content";
 
             // Act
@@ -367,7 +367,7 @@ namespace PageLeaf.Tests.Services
             // テスト観点: ShowTitleInPreviewがONでもタイトルが空の場合、
             //             header要素が挿入されないことを確認する。
             // Arrange
-            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { ShowTitleInPreview = true });
+            _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { View = new ViewSettings { ShowTitleInPreview = true } });
             var markdown = "---\ntitle: \"\"\n---\n# Content";
 
             // Act

@@ -87,7 +87,11 @@ namespace PageLeaf.ViewModels
         public double EditorFontSize
         {
             get => _editorFontSize;
-            set { if (_editorFontSize != value) { _editorFontSize = value; OnPropertyChanged(); } }
+            set
+            {
+                var safeValue = Math.Clamp(value, 1.0, 100.0);
+                if (_editorFontSize != safeValue) { _editorFontSize = safeValue; OnPropertyChanged(); }
+            }
         }
 
         /// <summary>
@@ -163,7 +167,11 @@ namespace PageLeaf.ViewModels
         public int IndentSize
         {
             get => _indentSize;
-            set { if (_indentSize != value) { _indentSize = value; OnPropertyChanged(); } }
+            set
+            {
+                var safeValue = Math.Clamp(value, 1, 32);
+                if (_indentSize != safeValue) { _indentSize = safeValue; OnPropertyChanged(); }
+            }
         }
 
         /// <summary>
@@ -220,24 +228,24 @@ namespace PageLeaf.ViewModels
 
             // 現在の設定をロード
             var settings = _settingsService.CurrentSettings;
-            _selectedCodeBlockTheme = settings.CodeBlockTheme;
-            _useCustomCodeBlockStyle = settings.UseCustomCodeBlockStyle;
-            _imageSaveDirectory = settings.ImageSaveDirectory;
-            _imageFileNameTemplate = settings.ImageFileNameTemplate;
-            _indentSize = settings.IndentSize;
-            _useSpacesForIndent = settings.UseSpacesForIndent;
-            _editorFontSize = settings.EditorFontSize;
-            _autoInsertFrontMatter = settings.AutoInsertFrontMatter;
-            _showTitleInPreview = settings.ShowTitleInPreview;
-            _renumberFootnotesOnSave = settings.RenumberFootnotesOnSave;
-            _libraryResourceSource = settings.LibraryResourceSource;
-            _theme = settings.Theme;
+            _selectedCodeBlockTheme = settings.View.CodeBlockTheme;
+            _useCustomCodeBlockStyle = settings.View.UseCustomCodeBlockStyle;
+            _imageSaveDirectory = settings.Image.SaveDirectory;
+            _imageFileNameTemplate = settings.Image.FileNameTemplate;
+            _indentSize = Math.Clamp(settings.Editor.IndentSize, 1, 32);
+            _useSpacesForIndent = settings.Editor.UseSpacesForIndent;
+            _editorFontSize = Math.Clamp(settings.Editor.EditorFontSize, 1.0, 100.0);
+            _autoInsertFrontMatter = settings.Editor.AutoInsertFrontMatter;
+            _showTitleInPreview = settings.View.ShowTitleInPreview;
+            _renumberFootnotesOnSave = settings.Editor.RenumberFootnotesOnSave;
+            _libraryResourceSource = settings.Appearance.LibraryResourceSource;
+            _theme = settings.Appearance.Theme;
 
             // 追加フロントマタープロパティのロード
             DefaultFrontMatterProperties.Clear();
-            if (settings.AdditionalFrontMatter != null)
+            if (settings.Editor.AdditionalFrontMatter != null)
             {
-                foreach (var prop in settings.AdditionalFrontMatter)
+                foreach (var prop in settings.Editor.AdditionalFrontMatter)
                 {
                     DefaultFrontMatterProperties.Add(new FrontMatterProperty { Key = prop.Key, Value = prop.Value });
                 }
@@ -326,21 +334,22 @@ namespace PageLeaf.ViewModels
         private void Save()
         {
             var settings = _settingsService.CurrentSettings;
-            settings.CodeBlockTheme = SelectedCodeBlockTheme;
-            settings.UseCustomCodeBlockStyle = UseCustomCodeBlockStyle;
-            settings.ImageSaveDirectory = ImageSaveDirectory;
-            settings.ImageFileNameTemplate = ImageFileNameTemplate;
-            settings.IndentSize = IndentSize;
-            settings.UseSpacesForIndent = UseSpacesForIndent;
-            settings.EditorFontSize = EditorFontSize;
-            settings.AutoInsertFrontMatter = AutoInsertFrontMatter;
-            settings.ShowTitleInPreview = ShowTitleInPreview;
-            settings.RenumberFootnotesOnSave = RenumberFootnotesOnSave;
-            settings.LibraryResourceSource = LibraryResourceSource;
-            settings.Theme = Theme;
+
+            settings.View.CodeBlockTheme = SelectedCodeBlockTheme;
+            settings.View.UseCustomCodeBlockStyle = UseCustomCodeBlockStyle;
+            settings.Image.SaveDirectory = ImageSaveDirectory;
+            settings.Image.FileNameTemplate = ImageFileNameTemplate;
+            settings.Editor.IndentSize = IndentSize;
+            settings.Editor.UseSpacesForIndent = UseSpacesForIndent;
+            settings.Editor.EditorFontSize = EditorFontSize;
+            settings.Editor.AutoInsertFrontMatter = AutoInsertFrontMatter;
+            settings.View.ShowTitleInPreview = ShowTitleInPreview;
+            settings.Editor.RenumberFootnotesOnSave = RenumberFootnotesOnSave;
+            settings.Appearance.LibraryResourceSource = LibraryResourceSource;
+            settings.Appearance.Theme = Theme;
 
             // 追加フロントマタープロパティの保存 (順序維持)
-            settings.AdditionalFrontMatter = DefaultFrontMatterProperties
+            settings.Editor.AdditionalFrontMatter = DefaultFrontMatterProperties
                 .Where(p => !string.IsNullOrWhiteSpace(p.Key))
                 .Select(p => new FrontMatterAdditionalProperty { Key = p.Key, Value = p.Value?.ToString() ?? "" })
                 .ToList();

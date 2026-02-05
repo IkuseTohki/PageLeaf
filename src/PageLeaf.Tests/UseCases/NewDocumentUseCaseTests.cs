@@ -124,7 +124,7 @@ namespace PageLeaf.Tests.UseCases
             // テスト観点: 新規作成時に、テンプレートの自動挿入設定が有効であれば、
             //            標準プロパティ（title, created, updated等）が適用されることを確認する。
             // Arrange
-            var settings = new ApplicationSettings { AutoInsertFrontMatter = true };
+            var settings = new ApplicationSettings { Editor = new EditorSettings { AutoInsertFrontMatter = true } };
             _settingsServiceMock.Setup(x => x.CurrentSettings).Returns(settings);
 
             var doc = new MarkdownDocument();
@@ -149,7 +149,7 @@ namespace PageLeaf.Tests.UseCases
             // テスト観点: 設定でフロントマターの自動挿入がオフになっている場合、
             //            新規作成時にフロントマターや初期コンテンツが挿入されないことを確認する。
             // Arrange
-            var settings = new ApplicationSettings { AutoInsertFrontMatter = false };
+            var settings = new ApplicationSettings { Editor = new EditorSettings { AutoInsertFrontMatter = false } };
             _settingsServiceMock.Setup(x => x.CurrentSettings).Returns(settings);
 
             var doc = new MarkdownDocument();
@@ -177,8 +177,11 @@ namespace PageLeaf.Tests.UseCases
             };
             var settings = new ApplicationSettings
             {
-                AutoInsertFrontMatter = true,
-                AdditionalFrontMatter = additionalFrontMatter
+                Editor = new EditorSettings
+                {
+                    AutoInsertFrontMatter = true,
+                    AdditionalFrontMatter = additionalFrontMatter
+                }
             };
             _settingsServiceMock.Setup(x => x.CurrentSettings).Returns(settings);
 

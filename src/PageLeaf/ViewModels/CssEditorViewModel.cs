@@ -155,7 +155,7 @@ namespace PageLeaf.ViewModels
         /// <summary>
         /// タイトルタブを表示すべきかどうか。
         /// </summary>
-        public bool IsTitleTabVisible => _settingsService.CurrentSettings.ShowTitleInPreview;
+        public bool IsTitleTabVisible => _settingsService.CurrentSettings.View.ShowTitleInPreview;
 
         /// <summary>
         /// 現在選択されているタブ。
@@ -365,7 +365,7 @@ namespace PageLeaf.ViewModels
         public string? InlineCodeBackgroundColor { get => this[nameof(InlineCodeBackgroundColor)]; set => this[nameof(InlineCodeBackgroundColor)] = value; }
         public string? BlockCodeTextColor { get => this[nameof(BlockCodeTextColor)]; set => this[nameof(BlockCodeTextColor)] = value; }
         public string? BlockCodeBackgroundColor { get => this[nameof(BlockCodeBackgroundColor)]; set => this[nameof(BlockCodeBackgroundColor)] = value; }
-        public bool IsCodeBlockOverrideEnabled => _settingsService.CurrentSettings.UseCustomCodeBlockStyle;
+        public bool IsCodeBlockOverrideEnabled => _settingsService.CurrentSettings.View.UseCustomCodeBlockStyle;
         public string? CodeFontFamily { get => this[nameof(CodeFontFamily)]; set => this[nameof(CodeFontFamily)] = value; }
         public string? ListMarkerType { get => this[nameof(ListMarkerType)]; set => this[nameof(ListMarkerType)] = value; }
         public string? NumberedListMarkerType { get => this[nameof(NumberedListMarkerType)]; set => this[nameof(NumberedListMarkerType)] = value; }

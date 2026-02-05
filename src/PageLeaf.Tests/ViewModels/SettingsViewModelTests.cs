@@ -1,14 +1,12 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using PageLeaf.Models;
-using PageLeaf.Models.Markdown;
-using PageLeaf.Models.Css;
-using PageLeaf.Models.Css.Elements;
 using PageLeaf.Models.Settings;
 using PageLeaf.Services;
 using PageLeaf.ViewModels;
-using System.Linq;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace PageLeaf.Tests.ViewModels
 {
@@ -22,10 +20,10 @@ namespace PageLeaf.Tests.ViewModels
         public void Setup()
         {
             _settingsServiceMock = new Mock<ISettingsService>();
-            _settings = new ApplicationSettings
-            {
-                AdditionalFrontMatter = new List<FrontMatterAdditionalProperty>()
-            };
+            _settings = new ApplicationSettings();
+            // テスト用に初期値を設定
+            _settings.Editor.AdditionalFrontMatter = new List<FrontMatterAdditionalProperty>();
+
             _settingsServiceMock.Setup(x => x.CurrentSettings).Returns(() => _settings);
             _settingsServiceMock.Setup(x => x.SaveSettings(It.IsAny<ApplicationSettings>()))
                 .Callback<ApplicationSettings>(s => _settings = s);
@@ -47,9 +45,9 @@ namespace PageLeaf.Tests.ViewModels
             viewModel.SaveCommand.Execute(null);
 
             // Assert
-            Assert.AreEqual(1, _settings.AdditionalFrontMatter.Count);
-            Assert.AreEqual("test_key", _settings.AdditionalFrontMatter[0].Key);
-            Assert.AreEqual("test_value", _settings.AdditionalFrontMatter[0].Value);
+            Assert.AreEqual(1, _settings.Editor.AdditionalFrontMatter.Count);
+            Assert.AreEqual("test_key", _settings.Editor.AdditionalFrontMatter[0].Key);
+            Assert.AreEqual("test_value", _settings.Editor.AdditionalFrontMatter[0].Value);
         }
 
         [TestMethod]
@@ -70,9 +68,9 @@ namespace PageLeaf.Tests.ViewModels
             viewModel.SaveCommand.Execute(null);
 
             // Assert
-            Assert.AreEqual(2, _settings.AdditionalFrontMatter.Count);
-            Assert.AreEqual("first", _settings.AdditionalFrontMatter[0].Key);
-            Assert.AreEqual("second", _settings.AdditionalFrontMatter[1].Key);
+            Assert.AreEqual(2, _settings.Editor.AdditionalFrontMatter.Count);
+            Assert.AreEqual("first", _settings.Editor.AdditionalFrontMatter[0].Key);
+            Assert.AreEqual("second", _settings.Editor.AdditionalFrontMatter[1].Key);
         }
 
         [TestMethod]
@@ -88,7 +86,7 @@ namespace PageLeaf.Tests.ViewModels
             viewModel.SaveCommand.Execute(null);
 
             // Assert
-            Assert.AreEqual(AppTheme.Dark, _settings.Theme);
+            Assert.AreEqual(AppTheme.Dark, _settings.Appearance.Theme);
             _settingsServiceMock.Verify(x => x.SaveSettings(It.IsAny<ApplicationSettings>()), Times.Once);
         }
 
@@ -98,7 +96,7 @@ namespace PageLeaf.Tests.ViewModels
             // テスト観点: ビューモデル初期化時に設定からテーマが正しく読み込まれることを確認する。
 
             // Arrange
-            _settings.Theme = AppTheme.Light;
+            _settings.Appearance.Theme = AppTheme.Light;
 
             // Act
             var viewModel = new SettingsViewModel(_settingsServiceMock.Object);
@@ -110,30 +108,34 @@ namespace PageLeaf.Tests.ViewModels
         [TestMethod]
         public void IsCdnEnabled_ShouldSyncWithLibraryResourceSource()
         {
-            // テスト観点: IsCdnEnabled と LibraryResourceSource が互いに連動することを確認する。
+            // テスト観点: IsCdnEnabled プロパティ（UI用）が LibraryResourceSource と連動することを確認する。
 
             // Arrange
             var viewModel = new SettingsViewModel(_settingsServiceMock.Object);
 
-            // Act & Assert (Local -> Cdn via IsCdnEnabled)
+            // Act: UIからCDNを有効にする
             viewModel.IsCdnEnabled = true;
+
+            // Assert: 内部的な ResourceSource が Cdn になっていること
             Assert.AreEqual(ResourceSource.Cdn, viewModel.LibraryResourceSource);
 
-            // Act & Assert (Cdn -> Local via LibraryResourceSource)
-            viewModel.LibraryResourceSource = ResourceSource.Local;
-            Assert.IsFalse(viewModel.IsCdnEnabled);
+            // Act: UIからCDNを無効にする
+            viewModel.IsCdnEnabled = false;
+
+            // Assert: 内部的な ResourceSource が Local になっていること
+            Assert.AreEqual(ResourceSource.Local, viewModel.LibraryResourceSource);
         }
 
         [TestMethod]
-        public void Save_ShouldSaveBasicProperties()
+        public void Save_ShouldApplyAllProperties()
         {
-            // テスト観点: 基本的な数値や真偽値の設定が正しく保存されることを確認する。
+            // テスト観点: 全ての設定項目が ViewModel から ApplicationSettings に正しく保存されることを確認する。
 
             // Arrange
             var viewModel = new SettingsViewModel(_settingsServiceMock.Object);
-            viewModel.EditorFontSize = 20.5;
-            viewModel.ShowTitleInPreview = false;
             viewModel.IndentSize = 2;
+            viewModel.EditorFontSize = 18;
+            viewModel.ShowTitleInPreview = false;
             viewModel.UseSpacesForIndent = false;
             viewModel.AutoInsertFrontMatter = false;
 
@@ -141,26 +143,11 @@ namespace PageLeaf.Tests.ViewModels
             viewModel.SaveCommand.Execute(null);
 
             // Assert
-            Assert.AreEqual(20.5, _settings.EditorFontSize);
-            Assert.IsFalse(_settings.ShowTitleInPreview);
-            Assert.AreEqual(2, _settings.IndentSize);
-            Assert.IsFalse(_settings.UseSpacesForIndent);
-            Assert.IsFalse(_settings.AutoInsertFrontMatter);
-        }
-
-        [TestMethod]
-        public void CurrentCategory_ShouldChange()
-        {
-            // テスト観点: カテゴリの切り替えができることを確認する。
-
-            // Arrange
-            var viewModel = new SettingsViewModel(_settingsServiceMock.Object);
-
-            // Act
-            viewModel.CurrentCategory = SettingsCategory.Editor;
-
-            // Assert
-            Assert.AreEqual(SettingsCategory.Editor, viewModel.CurrentCategory);
+            Assert.AreEqual(2, _settings.Editor.IndentSize);
+            Assert.AreEqual(18, _settings.Editor.EditorFontSize);
+            Assert.IsFalse(_settings.View.ShowTitleInPreview);
+            Assert.IsFalse(_settings.Editor.UseSpacesForIndent);
+            Assert.IsFalse(_settings.Editor.AutoInsertFrontMatter);
         }
     }
 }

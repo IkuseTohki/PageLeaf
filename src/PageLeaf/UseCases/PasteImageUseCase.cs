@@ -45,10 +45,10 @@ namespace PageLeaf.UseCases
             var now = DateTime.Now;
 
             // ファイル名と保存先ディレクトリを決定
-            var fileNameNoExt = ImageFileNameResolver.ResolveFileName(settings.ImageFileNameTemplate, currentMarkdownFilePath, now);
+            var fileNameNoExt = ImageFileNameResolver.ResolveFileName(settings.Image.FileNameTemplate, currentMarkdownFilePath, now);
 
             // ResolveFullSavePathはファイルパスを返すため、ダミーファイル名を使ってディレクトリを取得
-            var dummyFullPath = ImageFileNameResolver.ResolveFullSavePath(currentMarkdownFilePath, settings.ImageSaveDirectory, "dummy");
+            var dummyFullPath = ImageFileNameResolver.ResolveFullSavePath(currentMarkdownFilePath, settings.Image.SaveDirectory, "dummy");
             var saveDir = Path.GetDirectoryName(dummyFullPath);
 
             if (string.IsNullOrEmpty(saveDir))
