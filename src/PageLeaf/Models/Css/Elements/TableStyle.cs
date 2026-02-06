@@ -9,6 +9,9 @@ namespace PageLeaf.Models.Css.Elements
     /// </summary>
     public class TableStyle
     {
+        // table 設定
+        public string? Width { get; set; }
+
         // th, td 共通設定
         public CssBorder? Border { get; set; }
         public string? CellPadding { get; set; }
@@ -41,6 +44,14 @@ namespace PageLeaf.Models.Css.Elements
         public void UpdateFrom(ICssStyleSheet stylesheet)
         {
             if (stylesheet == null) return;
+
+            // table ルール
+            var tableRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "table");
+            if (tableRule != null)
+            {
+                var width = tableRule.Style.GetPropertyValue("width");
+                if (!string.IsNullOrEmpty(width)) Width = width;
+            }
 
             // th, td ルール
             var thTdRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "th, td");
@@ -78,9 +89,11 @@ namespace PageLeaf.Models.Css.Elements
         {
             if (stylesheet == null) return;
 
-            // table (固定スタイル)
+            // table
             var tableRule = GetOrCreateRule(stylesheet, "table");
             tableRule.Style.SetProperty("border-collapse", "collapse");
+            if (!string.IsNullOrEmpty(Width)) tableRule.Style.SetProperty("width", Width);
+            else tableRule.Style.RemoveProperty("width");
 
             // th, td
             var thTdRule = GetOrCreateRule(stylesheet, "th, td");

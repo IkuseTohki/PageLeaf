@@ -26,6 +26,7 @@ namespace PageLeaf.Models.Css
         public string? BodyTextColor { get; set; }
         public string? BodyBackgroundColor { get; set; }
         public string? BodyFontSize { get; set; }
+        public string? BodyFontFamily { get; set; }
         public string? ParagraphLineHeight { get; set; }
         public string? ParagraphMarginBottom { get; set; }
         public string? ParagraphTextIndent { get; set; }
@@ -40,12 +41,16 @@ namespace PageLeaf.Models.Css
         public Dictionary<string, string?> HeadingFontSizes { get; } = new Dictionary<string, string?>();
         public Dictionary<string, string?> HeadingFontFamilies { get; } = new Dictionary<string, string?>();
         public Dictionary<string, string?> HeadingAlignments { get; } = new Dictionary<string, string?>();
+        public Dictionary<string, string?> HeadingMarginTops { get; } = new Dictionary<string, string?>();
+        public Dictionary<string, string?> HeadingMarginBottoms { get; } = new Dictionary<string, string?>();
         public Dictionary<string, HeadingStyleFlags> HeadingStyleFlags { get; } = new Dictionary<string, HeadingStyleFlags>();
         public string? QuoteTextColor { get; set; }
         public string? QuoteBackgroundColor { get; set; }
         public string? QuoteBorderColor { get; set; }
         public string? QuoteBorderWidth { get; set; }
         public string? QuoteBorderStyle { get; set; }
+        public string? QuotePadding { get; set; }
+        public string? QuoteBorderRadius { get; set; }
         public string? TableBorderColor { get; set; }
         public string? TableHeaderBackgroundColor { get; set; }
         public string? TableHeaderTextColor { get; set; }
@@ -54,6 +59,7 @@ namespace PageLeaf.Models.Css
         public string? TableBorderStyle { get; set; }
         public string? TableHeaderAlignment { get; set; }
         public string? TableCellPadding { get; set; }
+        public string? TableWidth { get; set; }
         public string? CodeTextColor { get; set; } // General/Inline
         public string? CodeBackgroundColor { get; set; } // General/Inline
         public string? InlineCodeTextColor { get; set; }
@@ -66,6 +72,7 @@ namespace PageLeaf.Models.Css
         public string? NumberedListMarkerType { get; set; }
         public string? ListMarkerSize { get; set; }
         public string? ListIndent { get; set; }
+        public string? ListLineHeight { get; set; }
         public Dictionary<string, bool> HeadingNumberingStates { get; } = new Dictionary<string, bool>();
 
         // Footnote Legacy Properties

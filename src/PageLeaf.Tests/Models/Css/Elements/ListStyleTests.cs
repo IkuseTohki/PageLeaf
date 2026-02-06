@@ -22,18 +22,19 @@ namespace PageLeaf.Tests.Models.Css.Elements
         [TestMethod]
         public void UpdateFrom_ShouldParseListProperties()
         {
-            // テスト観点: ul, ol, li の各種スタイルが正しく抽出されること
+            // テスト観点: ul, ol, li の各種スタイル（新設の行間含む）が正しく抽出されること
             // ListIndent は ul (または ol) の padding-left から取得する
-            var css = "ul { list-style-type: square; padding-left: 20px; } ol { list-style-type: none; counter-reset: item; } li { font-size: 1.2em; }";
+            var css = "ul { list-style-type: square; padding-left: 20px; } ol { list-style-type: none; counter-reset: item; } li { font-size: 1.2em; line-height: 1.8; }";
             var sheet = CreateSheet(css);
             var style = new ListStyle();
 
             style.UpdateFrom(sheet);
 
             Assert.AreEqual("square", style.UnorderedListMarkerType);
-            Assert.AreEqual("decimal-nested", style.OrderedListMarkerType); // counter-reset があれば nested とみなす既存仕様
+            Assert.AreEqual("decimal-nested", style.OrderedListMarkerType);
             Assert.AreEqual(20.0, style.ListIndent?.Value);
             Assert.AreEqual(1.2, style.MarkerSize?.Value);
+            Assert.AreEqual("1.8", style.LineHeight);
         }
 
         [TestMethod]
@@ -45,7 +46,8 @@ namespace PageLeaf.Tests.Models.Css.Elements
                 UnorderedListMarkerType = "circle",
                 OrderedListMarkerType = "decimal",
                 ListIndent = new CssSize(2, CssUnit.Em),
-                MarkerSize = new CssSize(14, CssUnit.Px)
+                MarkerSize = new CssSize(14, CssUnit.Px),
+                LineHeight = "1.6"
             };
             var sheet = CreateSheet("");
 
@@ -56,12 +58,13 @@ namespace PageLeaf.Tests.Models.Css.Elements
             var liRule = sheet.Rules.OfType<ICssStyleRule>().First(r => r.SelectorText == "li");
 
             Assert.AreEqual("circle", ulRule.Style.GetPropertyValue("list-style-type"));
-            Assert.AreEqual("2em", ulRule.Style.GetPropertyValue("padding-left")); // ul にインデントが設定されること
+            Assert.AreEqual("2em", ulRule.Style.GetPropertyValue("padding-left"));
 
             Assert.AreEqual("decimal", olRule.Style.GetPropertyValue("list-style-type"));
-            Assert.AreEqual("2em", olRule.Style.GetPropertyValue("padding-left")); // ol にもインデントが設定されること
+            Assert.AreEqual("2em", olRule.Style.GetPropertyValue("padding-left"));
 
             Assert.AreEqual("14px", liRule.Style.GetPropertyValue("font-size"));
+            Assert.AreEqual("1.6", liRule.Style.GetPropertyValue("line-height"));
         }
     }
 }

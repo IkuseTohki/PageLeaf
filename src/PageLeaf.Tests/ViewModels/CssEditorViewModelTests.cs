@@ -47,6 +47,42 @@ namespace PageLeaf.Tests.ViewModels
         }
 
         [TestMethod]
+        public void NewProperties_ShouldBeAccessibleAndSetDirty()
+        {
+            _viewModel.Load("test.css");
+            Assert.IsFalse(_viewModel.IsDirty);
+
+            _viewModel.BodyFontFamily = "Arial";
+            Assert.AreEqual("Arial", _viewModel.BodyFontFamily);
+            Assert.IsTrue(_viewModel.IsDirty);
+            Assert.IsTrue(_viewModel.IsGeneralTabDirty);
+
+            _viewModel.IsDirty = false;
+            _viewModel.HeadingMarginTop = "10px";
+            Assert.AreEqual("10px", _viewModel.HeadingMarginTop);
+            Assert.IsTrue(_viewModel.IsDirty);
+            Assert.IsTrue(_viewModel.IsHeadingsTabDirty);
+
+            _viewModel.IsDirty = false;
+            _viewModel.ListLineHeight = "1.8";
+            Assert.AreEqual("1.8", _viewModel.ListLineHeight);
+            Assert.IsTrue(_viewModel.IsDirty);
+            Assert.IsTrue(_viewModel.IsListTabDirty);
+
+            _viewModel.IsDirty = false;
+            _viewModel.TableWidth = "100%";
+            Assert.AreEqual("100%", _viewModel.TableWidth);
+            Assert.IsTrue(_viewModel.IsDirty);
+            Assert.IsTrue(_viewModel.IsTableTabDirty);
+
+            _viewModel.IsDirty = false;
+            _viewModel.QuoteIsItalic = true;
+            Assert.IsTrue(_viewModel.QuoteIsItalic);
+            Assert.IsTrue(_viewModel.IsDirty);
+            Assert.IsTrue(_viewModel.IsQuoteTabDirty);
+        }
+
+        [TestMethod]
         public void CodeStyleProperties_ShouldBeAccessible()
         {
             _viewModel.InlineCodeTextColor = "#111111";

@@ -1,5 +1,6 @@
 using AngleSharp.Css.Dom;
 using PageLeaf.Models.Css.Values;
+using System.Linq;
 
 namespace PageLeaf.Models.Css.Elements
 {
@@ -12,6 +13,8 @@ namespace PageLeaf.Models.Css.Elements
         public CssSize? FontSize { get; set; }
         public string? FontFamily { get; set; }
         public CssAlignment TextAlignment { get; set; } = CssAlignment.None;
+        public CssSize? MarginTop { get; set; }
+        public CssSize? MarginBottom { get; set; }
 
         public CssTextStyle TextStyle { get; } = new CssTextStyle();
         // Convenience properties for backward compatibility or simple binding
@@ -39,8 +42,20 @@ namespace PageLeaf.Models.Css.Elements
             var size = rule.Style.GetPropertyValue("font-size");
             if (!string.IsNullOrEmpty(size)) FontSize = CssSize.Parse(size);
 
-            FontFamily = rule.Style.GetPropertyValue("font-family");
+            var fontFamily = rule.Style.GetPropertyValue("font-family");
+            if (!string.IsNullOrEmpty(fontFamily))
+            {
+                FontFamily = string.Join(", ", fontFamily.Split(',')
+                    .Select(f => f.Trim().Trim('"', '\'')));
+            }
+
             TextAlignment = CssAlignmentExtensions.Parse(rule.Style.GetPropertyValue("text-align"));
+
+            var marginTop = rule.Style.GetPropertyValue("margin-top");
+            if (!string.IsNullOrEmpty(marginTop)) MarginTop = CssSize.Parse(marginTop);
+
+            var marginBottom = rule.Style.GetPropertyValue("margin-bottom");
+            if (!string.IsNullOrEmpty(marginBottom)) MarginBottom = CssSize.Parse(marginBottom);
 
             TextStyle.UpdateFrom(rule);
         }
@@ -61,7 +76,11 @@ namespace PageLeaf.Models.Css.Elements
                 rule.Style.RemoveProperty("font-size");
             }
 
-            if (!string.IsNullOrEmpty(FontFamily)) rule.Style.SetProperty("font-family", FontFamily);
+            if (!string.IsNullOrEmpty(FontFamily))
+            {
+                var formatted = FontFamily.Contains(" ") ? $"\"{FontFamily}\"" : FontFamily;
+                rule.Style.SetProperty("font-family", formatted);
+            }
             else rule.Style.RemoveProperty("font-family");
 
             if (TextAlignment != CssAlignment.None)
@@ -72,6 +91,12 @@ namespace PageLeaf.Models.Css.Elements
             {
                 rule.Style.RemoveProperty("text-align");
             }
+
+            if (MarginTop != null) rule.Style.SetProperty("margin-top", MarginTop.ToString());
+            else rule.Style.RemoveProperty("margin-top");
+
+            if (MarginBottom != null) rule.Style.SetProperty("margin-bottom", MarginBottom.ToString());
+            else rule.Style.RemoveProperty("margin-bottom");
 
             // Apply text styles (Bold, Italic, Underline)
             TextStyle.ApplyTo(rule, TextColor?.ToString(), alwaysOutputNormal: false);

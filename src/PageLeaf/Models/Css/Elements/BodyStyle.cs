@@ -1,5 +1,6 @@
 using AngleSharp.Css.Dom;
 using PageLeaf.Models.Css.Values;
+using System.Linq;
 
 namespace PageLeaf.Models.Css.Elements
 {
@@ -11,6 +12,7 @@ namespace PageLeaf.Models.Css.Elements
         public CssColor? TextColor { get; set; }
         public CssColor? BackgroundColor { get; set; }
         public CssSize? FontSize { get; set; }
+        public string? FontFamily { get; set; }
 
         /// <summary>
         /// CSSルールから自身のプロパティを更新します。
@@ -28,6 +30,14 @@ namespace PageLeaf.Models.Css.Elements
 
             var fontSize = rule.Style.GetPropertyValue("font-size");
             if (!string.IsNullOrEmpty(fontSize)) FontSize = CssSize.Parse(fontSize);
+
+            var fontFamily = rule.Style.GetPropertyValue("font-family");
+            if (!string.IsNullOrEmpty(fontFamily))
+            {
+                // 各フォント名から引用符を除去して再結合する
+                FontFamily = string.Join(", ", fontFamily.Split(',')
+                    .Select(f => f.Trim().Trim('"', '\'')));
+            }
         }
 
         /// <summary>
@@ -46,6 +56,17 @@ namespace PageLeaf.Models.Css.Elements
 
             if (FontSize != null) rule.Style.SetProperty("font-size", FontSize.ToString());
             else rule.Style.RemoveProperty("font-size");
+
+            if (!string.IsNullOrEmpty(FontFamily))
+            {
+                // すでに引用符が含まれている場合はそのまま、
+                // 空白を含み、かつ引用符がない場合は囲む
+                var formatted = (FontFamily.Contains(" ") && !FontFamily.Contains("\"") && !FontFamily.Contains("'"))
+                    ? $"\"{FontFamily}\""
+                    : FontFamily;
+                rule.Style.SetProperty("font-family", formatted);
+            }
+            else rule.Style.RemoveProperty("font-family");
         }
     }
 }

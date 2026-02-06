@@ -21,8 +21,8 @@ namespace PageLeaf.Tests.Models.Css.Elements
         [TestMethod]
         public void UpdateFrom_ShouldParseBasicProperties()
         {
-            // テスト観点: CSSルールから文字色、背景色、フォントサイズが正しく抽出されること
-            var rule = CreateRule("color: #ff0000; background-color: rgb(255, 255, 255); font-size: 16px;");
+            // テスト観点: CSSルールから文字色、背景色、フォントサイズ、フォントファミリーが正しく抽出されること
+            var rule = CreateRule("color: #ff0000; background-color: rgb(255, 255, 255); font-size: 16px; font-family: 'Meiryo', sans-serif;");
             var style = new BodyStyle();
 
             style.UpdateFrom(rule);
@@ -31,6 +31,8 @@ namespace PageLeaf.Tests.Models.Css.Elements
             Assert.AreEqual("#FFFFFF", style.BackgroundColor?.HexCode.ToUpper());
             Assert.AreEqual(16.0, style.FontSize?.Value);
             Assert.AreEqual(CssUnit.Px, style.FontSize?.Unit);
+            // フォントファミリーは先頭のものが抽出され、引用符が除去されていること
+            Assert.AreEqual("Meiryo, sans-serif", style.FontFamily);
         }
 
         [TestMethod]
@@ -41,21 +43,22 @@ namespace PageLeaf.Tests.Models.Css.Elements
             {
                 TextColor = new CssColor("#0000FF"),
                 BackgroundColor = new CssColor("#EEEEEE"),
-                FontSize = new CssSize(1.2, CssUnit.Em)
+                FontSize = new CssSize(1.2, CssUnit.Em),
+                FontFamily = "MS Gothic"
             };
             var rule = CreateRule(""); // 空のルール
 
             style.ApplyTo(rule);
 
             var actualColor = rule.Style.GetPropertyValue("color");
-            // AngleSharpは正規化した値を返す可能性があるため、パースし直して比較するか、
-            // 文字列の含有を確認する。ここではHEXへの再変換を想定
             Assert.IsTrue(actualColor.Contains("0, 0, 255") || actualColor.Equals("#0000FF", StringComparison.OrdinalIgnoreCase));
 
             var actualBgColor = rule.Style.GetPropertyValue("background-color");
             Assert.IsTrue(actualBgColor.Contains("238, 238, 238") || actualBgColor.Equals("#EEEEEE", StringComparison.OrdinalIgnoreCase));
 
             Assert.AreEqual("1.2em", rule.Style.GetPropertyValue("font-size"));
+            // 空白を含むフォント名が引用符で囲まれていること
+            Assert.AreEqual("\"MS Gothic\"", rule.Style.GetPropertyValue("font-family"));
         }
     }
 }

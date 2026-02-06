@@ -342,7 +342,7 @@ namespace PageLeaf.Tests.Services
             Assert.IsNotNull(styles.HeadingFontFamilies);
             Assert.AreEqual(2, styles.HeadingFontFamilies.Count);
             Assert.AreEqual("Arial", styles.HeadingFontFamilies["h1"]);
-            Assert.AreEqual("\"Times New Roman\"", styles.HeadingFontFamilies["h2"]);
+            Assert.AreEqual("Times New Roman", styles.HeadingFontFamilies["h2"]);
         }
 
         [TestMethod]

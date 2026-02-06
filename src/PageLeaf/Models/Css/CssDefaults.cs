@@ -38,12 +38,20 @@ namespace PageLeaf.Models.Css
 
             public double TextIndent => 1.0;
             public string TextIndentUnit => "em";
+
+            public string FontFamily => "sans-serif";
         }
 
         public class HeadingsDefaults
         {
             public double FontSize => 1.5;
             public string FontSizeUnit => "em";
+
+            public double MarginTop => 1.0;
+            public string MarginTopUnit => "em";
+
+            public double MarginBottom => 1.0;
+            public string MarginBottomUnit => "em";
         }
 
         public class ListDefaults
@@ -53,6 +61,9 @@ namespace PageLeaf.Models.Css
 
             public double Indent => 2.0;
             public string IndentUnit => "em";
+
+            public double LineHeight => 1.5;
+            public string LineHeightUnit => "";
         }
 
         public class TableDefaults
@@ -65,12 +76,21 @@ namespace PageLeaf.Models.Css
 
             public double CellPadding => 8.0;
             public string CellPaddingUnit => "px"; // Fixed
+
+            public double Width => 100;
+            public string WidthUnit => "%";
         }
 
         public class QuoteDefaults
         {
             public double BorderWidth => 4.0;
             public string BorderWidthUnit => "px"; // Fixed
+
+            public double Padding => 1.0;
+            public string PaddingUnit => "em";
+
+            public double BorderRadius => 4.0;
+            public string BorderRadiusUnit => "px";
         }
 
         public class FootnoteDefaults

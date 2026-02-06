@@ -159,6 +159,7 @@ namespace PageLeaf.Services
             styleInfo.BodyTextColor = profile.Body.TextColor?.ToString();
             styleInfo.BodyBackgroundColor = profile.Body.BackgroundColor?.ToString();
             styleInfo.BodyFontSize = profile.Body.FontSize?.ToString();
+            styleInfo.BodyFontFamily = profile.Body.FontFamily;
 
             // Paragraph
             styleInfo.ParagraphLineHeight = profile.Paragraph.LineHeight;
@@ -180,6 +181,8 @@ namespace PageLeaf.Services
             styleInfo.HeadingFontSizes.Clear();
             styleInfo.HeadingFontFamilies.Clear();
             styleInfo.HeadingAlignments.Clear();
+            styleInfo.HeadingMarginTops.Clear();
+            styleInfo.HeadingMarginBottoms.Clear();
 
             foreach (var level in new[] { "h1", "h2", "h3", "h4", "h5", "h6" })
             {
@@ -191,6 +194,8 @@ namespace PageLeaf.Services
                 targetH.FontSize = h.FontSize;
                 targetH.FontFamily = h.FontFamily;
                 targetH.TextAlignment = h.TextAlignment;
+                targetH.MarginTop = h.MarginTop;
+                targetH.MarginBottom = h.MarginBottom;
                 targetH.IsBold = h.IsBold;
                 targetH.IsItalic = h.IsItalic;
                 targetH.IsUnderline = h.IsUnderline;
@@ -205,6 +210,12 @@ namespace PageLeaf.Services
 
                 var alignment = h.TextAlignment.ToCssString() ?? "left";
                 styleInfo.HeadingAlignments[level] = alignment;
+
+                var marginTop = h.MarginTop?.ToString();
+                if (marginTop != null) styleInfo.HeadingMarginTops[level] = marginTop;
+
+                var marginBottom = h.MarginBottom?.ToString();
+                if (marginBottom != null) styleInfo.HeadingMarginBottoms[level] = marginBottom;
 
                 styleInfo.HeadingStyleFlags[level] = new HeadingStyleFlags
                 {
@@ -222,6 +233,10 @@ namespace PageLeaf.Services
             styleInfo.QuoteBackgroundColor = profile.Blockquote.BackgroundColor?.ToString();
             styleInfo.QuoteBorderWidth = profile.Blockquote.BorderWidth;
             styleInfo.QuoteBorderStyle = profile.Blockquote.BorderStyle;
+            styleInfo.QuotePadding = profile.Blockquote.Padding;
+            styleInfo.QuoteBorderRadius = profile.Blockquote.BorderRadius;
+            styleInfo.Blockquote.IsItalic = profile.Blockquote.IsItalic;
+            styleInfo.Blockquote.ShowIcon = profile.Blockquote.ShowIcon;
 
             var quoteBorderColor = profile.Blockquote.BorderColor?.ToString();
             if (quoteBorderColor != null) styleInfo.QuoteBorderColor = quoteBorderColor;
@@ -231,6 +246,7 @@ namespace PageLeaf.Services
             styleInfo.NumberedListMarkerType = profile.List.OrderedListMarkerType;
             styleInfo.ListIndent = profile.List.ListIndent?.ToString();
             styleInfo.ListMarkerSize = profile.List.MarkerSize?.ToString();
+            styleInfo.ListLineHeight = profile.List.LineHeight;
 
             // Table
             styleInfo.TableBorderWidth = profile.Table.BorderWidth;
@@ -240,6 +256,7 @@ namespace PageLeaf.Services
 
             styleInfo.TableBorderStyle = profile.Table.BorderStyle;
             styleInfo.TableCellPadding = profile.Table.CellPadding;
+            styleInfo.TableWidth = profile.Table.Width;
             styleInfo.TableHeaderBackgroundColor = profile.Table.HeaderBackgroundColor?.ToString();
             styleInfo.TableHeaderTextColor = profile.Table.HeaderTextColor?.ToString();
             styleInfo.TableHeaderFontSize = profile.Table.HeaderFontSize;
@@ -295,6 +312,7 @@ namespace PageLeaf.Services
             if (!string.IsNullOrEmpty(styleInfo.BodyTextColor)) profile.Body.TextColor = CssColor.Parse(styleInfo.BodyTextColor!);
             if (!string.IsNullOrEmpty(styleInfo.BodyBackgroundColor)) profile.Body.BackgroundColor = CssColor.Parse(styleInfo.BodyBackgroundColor!);
             if (!string.IsNullOrEmpty(styleInfo.BodyFontSize)) profile.Body.FontSize = CssSize.Parse(styleInfo.BodyFontSize!);
+            if (styleInfo.BodyFontFamily != null) profile.Body.FontFamily = styleInfo.BodyFontFamily;
 
             // Paragraph
             if (!string.IsNullOrEmpty(styleInfo.ParagraphLineHeight)) profile.Paragraph.LineHeight = styleInfo.ParagraphLineHeight;
@@ -332,6 +350,12 @@ namespace PageLeaf.Services
                 string? align = styleInfo.HeadingAlignments.FirstOrDefault(x => x.Key.Equals(level, StringComparison.OrdinalIgnoreCase)).Value;
                 if (!string.IsNullOrEmpty(align)) h.TextAlignment = CssAlignmentExtensions.Parse(align.Trim());
 
+                string? mt = styleInfo.HeadingMarginTops.FirstOrDefault(x => x.Key.Equals(level, StringComparison.OrdinalIgnoreCase)).Value;
+                if (!string.IsNullOrEmpty(mt)) h.MarginTop = CssSize.Parse(mt.Trim());
+
+                string? mb = styleInfo.HeadingMarginBottoms.FirstOrDefault(x => x.Key.Equals(level, StringComparison.OrdinalIgnoreCase)).Value;
+                if (!string.IsNullOrEmpty(mb)) h.MarginBottom = CssSize.Parse(mb.Trim());
+
                 var flagsKvp = styleInfo.HeadingStyleFlags.FirstOrDefault(x => x.Key.Equals(level, StringComparison.OrdinalIgnoreCase));
                 if (flagsKvp.Key != null && flagsKvp.Value != null)
                 {
@@ -350,18 +374,24 @@ namespace PageLeaf.Services
             if (!string.IsNullOrEmpty(styleInfo.QuoteBorderWidth)) profile.Blockquote.BorderWidth = styleInfo.QuoteBorderWidth;
             if (!string.IsNullOrEmpty(styleInfo.QuoteBorderStyle)) profile.Blockquote.BorderStyle = styleInfo.QuoteBorderStyle;
             if (!string.IsNullOrEmpty(styleInfo.QuoteBorderColor)) profile.Blockquote.BorderColor = CssColor.Parse(styleInfo.QuoteBorderColor!);
+            if (!string.IsNullOrEmpty(styleInfo.QuotePadding)) profile.Blockquote.Padding = styleInfo.QuotePadding;
+            if (!string.IsNullOrEmpty(styleInfo.QuoteBorderRadius)) profile.Blockquote.BorderRadius = styleInfo.QuoteBorderRadius;
+            profile.Blockquote.IsItalic = styleInfo.Blockquote.IsItalic;
+            profile.Blockquote.ShowIcon = styleInfo.Blockquote.ShowIcon;
 
             // List
             if (!string.IsNullOrEmpty(styleInfo.ListMarkerType)) profile.List.UnorderedListMarkerType = styleInfo.ListMarkerType;
             if (!string.IsNullOrEmpty(styleInfo.NumberedListMarkerType)) profile.List.OrderedListMarkerType = styleInfo.NumberedListMarkerType;
             if (!string.IsNullOrEmpty(styleInfo.ListIndent)) profile.List.ListIndent = CssSize.Parse(styleInfo.ListIndent!);
             if (!string.IsNullOrEmpty(styleInfo.ListMarkerSize)) profile.List.MarkerSize = CssSize.Parse(styleInfo.ListMarkerSize!);
+            if (!string.IsNullOrEmpty(styleInfo.ListLineHeight)) profile.List.LineHeight = styleInfo.ListLineHeight;
 
             // Table
             if (!string.IsNullOrEmpty(styleInfo.TableBorderWidth)) profile.Table.BorderWidth = styleInfo.TableBorderWidth;
             if (!string.IsNullOrEmpty(styleInfo.TableBorderColor)) profile.Table.BorderColor = CssColor.Parse(styleInfo.TableBorderColor!);
             if (!string.IsNullOrEmpty(styleInfo.TableBorderStyle)) profile.Table.BorderStyle = styleInfo.TableBorderStyle;
             if (!string.IsNullOrEmpty(styleInfo.TableCellPadding)) profile.Table.CellPadding = styleInfo.TableCellPadding;
+            if (!string.IsNullOrEmpty(styleInfo.TableWidth)) profile.Table.Width = styleInfo.TableWidth;
             if (!string.IsNullOrEmpty(styleInfo.TableHeaderBackgroundColor)) profile.Table.HeaderBackgroundColor = CssColor.Parse(styleInfo.TableHeaderBackgroundColor!);
             if (!string.IsNullOrEmpty(styleInfo.TableHeaderTextColor)) profile.Table.HeaderTextColor = CssColor.Parse(styleInfo.TableHeaderTextColor!);
             if (!string.IsNullOrEmpty(styleInfo.TableHeaderFontSize)) profile.Table.HeaderFontSize = styleInfo.TableHeaderFontSize;

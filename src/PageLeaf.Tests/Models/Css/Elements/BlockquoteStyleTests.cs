@@ -4,55 +4,78 @@ using PageLeaf.Models.Css.Elements;
 using PageLeaf.Models.Css.Values;
 using AngleSharp.Css.Parser;
 using System;
+using System.Linq;
 
 namespace PageLeaf.Tests.Models.Css.Elements
 {
     [TestClass]
     public class BlockquoteStyleTests
     {
-        private ICssStyleRule CreateRule(string css)
+        private ICssStyleSheet CreateSheet(string css)
         {
             var parser = new CssParser();
-            var stylesheet = parser.ParseStyleSheet($"blockquote {{ {css} }}");
+            return parser.ParseStyleSheet(css);
+        }
+
+        private ICssStyleRule CreateRule(string css)
+        {
+            var stylesheet = CreateSheet($"blockquote {{ {css} }}");
             return (ICssStyleRule)stylesheet.Rules[0];
         }
 
         [TestMethod]
         public void UpdateFrom_ShouldParseBlockquoteProperties()
         {
-            // テスト観点: CSSルールから引用の各種プロパティが正しく抽出されること
-            var rule = CreateRule("color: #111111; background-color: #eeeeee; border-left: 5px solid #ff0000;");
+            // テスト観点: CSSルールから引用の各種プロパティ（新設項目含む）が正しく抽出されること
+            var css = "blockquote { color: #111111; background-color: #eeeeee; border-left: 5px solid #ff0000; font-style: italic; padding: 10px; border-radius: 4px; } " +
+                      "blockquote::before { content: '“'; }";
+            var sheet = CreateSheet(css);
             var style = new BlockquoteStyle();
 
-            style.UpdateFrom(rule);
+            style.UpdateFrom(sheet);
 
             Assert.AreEqual("#111111", style.TextColor?.HexCode.ToUpper());
             Assert.AreEqual("#EEEEEE", style.BackgroundColor?.HexCode.ToUpper());
             Assert.AreEqual("#FF0000", style.BorderColor?.HexCode.ToUpper());
             Assert.AreEqual("5px", style.BorderWidth);
             Assert.AreEqual("solid", style.BorderStyle);
+            Assert.IsTrue(style.IsItalic);
+            Assert.AreEqual("10px", style.Padding);
+            Assert.AreEqual("4px", style.BorderRadius);
+            Assert.IsTrue(style.ShowIcon);
         }
 
         [TestMethod]
         public void ApplyTo_ShouldSetPropertiesToRule()
         {
-            // テスト観点: モデルの状態がCSSルールへ正しく書き出されること
+            // テスト観点: モデルの状態がCSSシートへ正しく書き出されること
             var style = new BlockquoteStyle
             {
                 TextColor = new CssColor("#222222"),
                 BackgroundColor = new CssColor("#F0F0F0"),
                 BorderColor = new CssColor("#0000FF"),
                 BorderWidth = "2px",
-                BorderStyle = "dashed"
+                BorderStyle = "dashed",
+                IsItalic = true,
+                Padding = "15px",
+                BorderRadius = "8px",
+                ShowIcon = true
             };
-            var rule = CreateRule("");
+            var sheet = CreateSheet("");
 
-            style.ApplyTo(rule);
+            style.ApplyTo(sheet);
 
+            var rule = sheet.Rules.OfType<ICssStyleRule>().First(r => r.SelectorText == "blockquote");
             var styleDecl = rule.Style;
             Assert.IsTrue(styleDecl.GetPropertyValue("color").Contains("34, 34, 34") || styleDecl.GetPropertyValue("color").Equals("#222222", StringComparison.OrdinalIgnoreCase));
-            // border-left は一括指定で設定される
             Assert.IsTrue(styleDecl.GetPropertyValue("border-left").Contains("2px dashed") || styleDecl.GetPropertyValue("border-left").Contains("#0000FF"));
+            Assert.AreEqual("italic", styleDecl.GetPropertyValue("font-style"));
+            Assert.AreEqual("15px", styleDecl.GetPropertyValue("padding"));
+            Assert.AreEqual("8px", styleDecl.GetPropertyValue("border-radius"));
+
+            var beforeRule = sheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "blockquote::before");
+            Assert.IsNotNull(beforeRule);
+            Assert.AreEqual("\"“\"", beforeRule.Style.GetPropertyValue("content"));
         }
     }
 }

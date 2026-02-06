@@ -58,8 +58,7 @@ namespace PageLeaf.Models.Css
                 if (rule != null) kvp.Value.UpdateFrom(rule);
             }
 
-            var quoteRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "blockquote");
-            if (quoteRule != null) Blockquote.UpdateFrom(quoteRule);
+            Blockquote.UpdateFrom(stylesheet);
 
             // 構造が複雑な要素はシート全体を渡す
             List.UpdateFrom(stylesheet);
@@ -90,7 +89,7 @@ namespace PageLeaf.Models.Css
                 heading.ApplyTo(GetOrCreateRule(stylesheet, selector));
             }
 
-            Blockquote.ApplyTo(GetOrCreateRule(stylesheet, "blockquote"));
+            Blockquote.ApplyTo(stylesheet);
 
             List.ApplyTo(stylesheet);
             Table.ApplyTo(stylesheet);

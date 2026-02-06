@@ -23,10 +23,10 @@ namespace PageLeaf.ViewModels
         Title,
         General,
         Headings,
-        Quote,
         List,
         Table,
         Code,
+        Quote,
         Footnote
     }
 
@@ -43,16 +43,16 @@ namespace PageLeaf.ViewModels
 
         private static readonly string[] StylePropertyNames = new[]
         {
-            "BodyTextColor", "BodyBackgroundColor", "BodyFontSize",
+            "BodyTextColor", "BodyBackgroundColor", "BodyFontSize", "BodyFontFamily",
             "ParagraphLineHeight", "ParagraphMarginBottom", "ParagraphTextIndent",
             "TitleTextColor", "TitleFontSize", "TitleFontFamily", "TitleAlignment", "TitleMarginBottom",
             "QuoteTextColor", "QuoteBackgroundColor", "QuoteBorderColor",
-            "QuoteBorderWidth", "QuoteBorderStyle",
-            "TableBorderColor", "TableHeaderBackgroundColor", "TableHeaderTextColor", "TableHeaderFontSize", "TableBorderWidth", "TableBorderStyle", "TableHeaderAlignment", "TableCellPadding",
+            "QuoteBorderWidth", "QuoteBorderStyle", "QuotePadding", "QuoteBorderRadius",
+            "TableBorderColor", "TableHeaderBackgroundColor", "TableHeaderTextColor", "TableHeaderFontSize", "TableBorderWidth", "TableBorderStyle", "TableHeaderAlignment", "TableCellPadding", "TableWidth",
             "CodeTextColor", "CodeBackgroundColor", "CodeFontFamily",
             "InlineCodeTextColor", "InlineCodeBackgroundColor",
             "BlockCodeTextColor", "BlockCodeBackgroundColor",
-            "ListMarkerType", "NumberedListMarkerType", "ListMarkerSize", "ListIndent",
+            "ListMarkerType", "NumberedListMarkerType", "ListMarkerSize", "ListIndent", "ListLineHeight",
             "FootnoteMarkerTextColor", "FootnoteAreaFontSize", "FootnoteAreaTextColor", "FootnoteAreaMarginTop",
             "FootnoteAreaBorderTopColor", "FootnoteAreaBorderTopWidth", "FootnoteAreaBorderTopStyle", "FootnoteListItemLineHeight"
         };
@@ -144,7 +144,7 @@ namespace PageLeaf.ViewModels
             if (propertyName.StartsWith("Title") || propertyName.StartsWith("IsTitle")) return CssEditorTab.Title;
             if (propertyName.StartsWith("h") && propertyName.Length >= 2 && char.IsDigit(propertyName[1])) return CssEditorTab.Headings;
             if (propertyName.Contains("Heading") || propertyName.Contains("IsHeading")) return CssEditorTab.Headings;
-            if (propertyName.StartsWith("Quote")) return CssEditorTab.Quote;
+            if (propertyName.StartsWith("Quote") || propertyName.StartsWith("IsQuote")) return CssEditorTab.Quote;
             if (propertyName.StartsWith("List") || propertyName.StartsWith("NumberedList")) return CssEditorTab.List;
             if (propertyName.StartsWith("Table")) return CssEditorTab.Table;
             if (propertyName.Contains("Code")) return CssEditorTab.Code;
@@ -270,6 +270,8 @@ namespace PageLeaf.ViewModels
                 _styles[$"{level}.FontSize"] = styleInfo.HeadingFontSizes.TryGetValue(level, out var s) ? s : null;
                 _styles[$"{level}.FontFamily"] = styleInfo.HeadingFontFamilies.TryGetValue(level, out var f) ? f : null;
                 _styles[$"{level}.Alignment"] = styleInfo.HeadingAlignments.TryGetValue(level, out var a) ? a : null;
+                _styles[$"{level}.MarginTop"] = styleInfo.HeadingMarginTops.TryGetValue(level, out var mt) ? mt : null;
+                _styles[$"{level}.MarginBottom"] = styleInfo.HeadingMarginBottoms.TryGetValue(level, out var mb) ? mb : null;
 
                 if (styleInfo.HeadingStyleFlags.TryGetValue(level, out var flags))
                 {
@@ -278,6 +280,10 @@ namespace PageLeaf.ViewModels
                 }
                 _flags[$"{level}.IsNumberingEnabled"] = styleInfo.HeadingNumberingStates.TryGetValue(level, out var n) && n;
             }
+
+            // 引用のフラグをロード
+            _flags["Quote.IsItalic"] = styleInfo.Blockquote.IsItalic;
+            _flags["Quote.ShowIcon"] = styleInfo.Blockquote.ShowIcon;
 
             // 脚注のスタイルをロード
             _styles[nameof(FootnoteMarkerTextColor)] = styleInfo.Footnote.MarkerTextColor?.ToString();
@@ -329,6 +335,7 @@ namespace PageLeaf.ViewModels
         public string? BodyTextColor { get => this[nameof(BodyTextColor)]; set => this[nameof(BodyTextColor)] = value; }
         public string? BodyBackgroundColor { get => this[nameof(BodyBackgroundColor)]; set => this[nameof(BodyBackgroundColor)] = value; }
         public string? BodyFontSize { get => this[nameof(BodyFontSize)]; set => this[nameof(BodyFontSize)] = value; }
+        public string? BodyFontFamily { get => this[nameof(BodyFontFamily)]; set => this[nameof(BodyFontFamily)] = value; }
 
         public string? ParagraphLineHeight { get => this[nameof(ParagraphLineHeight)]; set => this[nameof(ParagraphLineHeight)] = value; }
         public string? ParagraphMarginBottom { get => this[nameof(ParagraphMarginBottom)]; set => this[nameof(ParagraphMarginBottom)] = value; }
@@ -351,6 +358,11 @@ namespace PageLeaf.ViewModels
         public string? QuoteBorderColor { get => this[nameof(QuoteBorderColor)]; set => this[nameof(QuoteBorderColor)] = value; }
         public string? QuoteBorderWidth { get => this[nameof(QuoteBorderWidth)]; set => this[nameof(QuoteBorderWidth)] = value; }
         public string? QuoteBorderStyle { get => this[nameof(QuoteBorderStyle)]; set => this[nameof(QuoteBorderStyle)] = value; }
+        public string? QuotePadding { get => this[nameof(QuotePadding)]; set => this[nameof(QuotePadding)] = value; }
+        public string? QuoteBorderRadius { get => this[nameof(QuoteBorderRadius)]; set => this[nameof(QuoteBorderRadius)] = value; }
+        public bool QuoteIsItalic { get => GetFlag("Quote", "IsItalic"); set => SetFlag("Quote", "IsItalic", value, CssEditorTab.Quote); }
+        public bool QuoteShowIcon { get => GetFlag("Quote", "ShowIcon"); set => SetFlag("Quote", "ShowIcon", value, CssEditorTab.Quote); }
+
         public string? TableBorderColor { get => this[nameof(TableBorderColor)]; set => this[nameof(TableBorderColor)] = value; }
         public string? TableHeaderBackgroundColor { get => this[nameof(TableHeaderBackgroundColor)]; set => this[nameof(TableHeaderBackgroundColor)] = value; }
         public string? TableHeaderTextColor { get => this[nameof(TableHeaderTextColor)]; set => this[nameof(TableHeaderTextColor)] = value; }
@@ -359,6 +371,8 @@ namespace PageLeaf.ViewModels
         public string? TableBorderStyle { get => this[nameof(TableBorderStyle)]; set => this[nameof(TableBorderStyle)] = value; }
         public string? TableHeaderAlignment { get => this[nameof(TableHeaderAlignment)]; set => this[nameof(TableHeaderAlignment)] = value; }
         public string? TableCellPadding { get => this[nameof(TableCellPadding)]; set => this[nameof(TableCellPadding)] = value; }
+        public string? TableWidth { get => this[nameof(TableWidth)]; set => this[nameof(TableWidth)] = value; }
+
         public string? CodeTextColor { get => this[nameof(CodeTextColor)]; set => this[nameof(CodeTextColor)] = value; }
         public string? CodeBackgroundColor { get => this[nameof(CodeBackgroundColor)]; set => this[nameof(CodeBackgroundColor)] = value; }
         public string? InlineCodeTextColor { get => this[nameof(InlineCodeTextColor)]; set => this[nameof(InlineCodeTextColor)] = value; }
@@ -371,6 +385,7 @@ namespace PageLeaf.ViewModels
         public string? NumberedListMarkerType { get => this[nameof(NumberedListMarkerType)]; set => this[nameof(NumberedListMarkerType)] = value; }
         public string? ListMarkerSize { get => this[nameof(ListMarkerSize)]; set => this[nameof(ListMarkerSize)] = value; }
         public string? ListIndent { get => this[nameof(ListIndent)]; set => this[nameof(ListIndent)] = value; }
+        public string? ListLineHeight { get => this[nameof(ListLineHeight)]; set => this[nameof(ListLineHeight)] = value; }
 
         public string? FootnoteMarkerTextColor { get => this[nameof(FootnoteMarkerTextColor)]; set => this[nameof(FootnoteMarkerTextColor)] = value; }
         public bool IsFootnoteMarkerBold { get => GetFootnoteFlag(nameof(FootnoteStyle.IsMarkerBold)); set => SetFootnoteFlag(nameof(FootnoteStyle.IsMarkerBold), value); }
@@ -391,15 +406,17 @@ namespace PageLeaf.ViewModels
         public string? HeadingFontSize { get => this[$"{_selectedHeadingLevel}.FontSize"]; set => this[$"{_selectedHeadingLevel}.FontSize"] = value; }
         public string? HeadingFontFamily { get => this[$"{_selectedHeadingLevel}.FontFamily"]; set => this[$"{_selectedHeadingLevel}.FontFamily"] = value; }
         public string? HeadingAlignment { get => this[$"{_selectedHeadingLevel}.Alignment"]; set => this[$"{_selectedHeadingLevel}.Alignment"] = value; }
-        public bool IsHeadingBold { get => GetFlag("IsBold"); set => SetFlag("IsBold", value); }
-        public bool IsHeadingItalic { get => GetFlag("IsItalic"); set => SetFlag("IsItalic", value); }
-        public bool IsHeadingUnderline { get => GetFlag("IsUnderline"); set => SetFlag("IsUnderline", value); }
-        public bool IsHeadingNumberingEnabled { get => GetFlag("IsNumberingEnabled"); set => SetFlag("IsNumberingEnabled", value); }
+        public string? HeadingMarginTop { get => this[$"{_selectedHeadingLevel}.MarginTop"]; set => this[$"{_selectedHeadingLevel}.MarginTop"] = value; }
+        public string? HeadingMarginBottom { get => this[$"{_selectedHeadingLevel}.MarginBottom"]; set => this[$"{_selectedHeadingLevel}.MarginBottom"] = value; }
+        public bool IsHeadingBold { get => GetFlag(_selectedHeadingLevel, "IsBold"); set => SetFlag(_selectedHeadingLevel, "IsBold", value, CssEditorTab.Headings); }
+        public bool IsHeadingItalic { get => GetFlag(_selectedHeadingLevel, "IsItalic"); set => SetFlag(_selectedHeadingLevel, "IsItalic", value, CssEditorTab.Headings); }
+        public bool IsHeadingUnderline { get => GetFlag(_selectedHeadingLevel, "IsUnderline"); set => SetFlag(_selectedHeadingLevel, "IsUnderline", value, CssEditorTab.Headings); }
+        public bool IsHeadingNumberingEnabled { get => GetFlag(_selectedHeadingLevel, "IsNumberingEnabled"); set => SetFlag(_selectedHeadingLevel, "IsNumberingEnabled", value, CssEditorTab.Headings); }
 
-        private bool GetFlag(string attr) => _selectedHeadingLevel != null && _flags.TryGetValue($"{_selectedHeadingLevel}.{attr}", out var b) && b;
-        private void SetFlag(string attr, bool value) { if (_selectedHeadingLevel == null) return; var key = $"{_selectedHeadingLevel}.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; MarkTabDirty(CssEditorTab.Headings); UpdatePreview(); OnPropertyChanged($"IsHeading{attr}"); } }
+        private bool GetFlag(string? prefix, string attr) => prefix != null && _flags.TryGetValue($"{prefix}.{attr}", out var b) && b;
+        private void SetFlag(string? prefix, string attr, bool value, CssEditorTab tab) { if (prefix == null) return; var key = $"{prefix}.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; MarkTabDirty(tab); UpdatePreview(); OnPropertyChanged(key.Replace(".", "")); UpdateHeadingProperties(); OnPropertyChanged(nameof(QuoteIsItalic)); OnPropertyChanged(nameof(QuoteShowIcon)); } }
         public string? SelectedHeadingLevel { get => _selectedHeadingLevel; set { if (_selectedHeadingLevel != value) { _selectedHeadingLevel = value; OnPropertyChanged(); UpdateHeadingProperties(); } } }
-        private void UpdateHeadingProperties() { OnPropertyChanged(nameof(HeadingTextColor)); OnPropertyChanged(nameof(HeadingFontSize)); OnPropertyChanged(nameof(HeadingFontFamily)); OnPropertyChanged(nameof(HeadingAlignment)); OnPropertyChanged(nameof(IsHeadingBold)); OnPropertyChanged(nameof(IsHeadingItalic)); OnPropertyChanged(nameof(IsHeadingUnderline)); OnPropertyChanged(nameof(IsHeadingNumberingEnabled)); }
+        private void UpdateHeadingProperties() { OnPropertyChanged(nameof(HeadingTextColor)); OnPropertyChanged(nameof(HeadingFontSize)); OnPropertyChanged(nameof(HeadingFontFamily)); OnPropertyChanged(nameof(HeadingAlignment)); OnPropertyChanged(nameof(HeadingMarginTop)); OnPropertyChanged(nameof(HeadingMarginBottom)); OnPropertyChanged(nameof(IsHeadingBold)); OnPropertyChanged(nameof(IsHeadingItalic)); OnPropertyChanged(nameof(IsHeadingUnderline)); OnPropertyChanged(nameof(IsHeadingNumberingEnabled)); }
 
         public void NotifySettingsChanged()
         {
@@ -453,6 +470,8 @@ namespace PageLeaf.ViewModels
                 if (_styles.TryGetValue($"{lv}.FontSize", out var s) && s != null) styleInfo.HeadingFontSizes[lv] = s;
                 if (_styles.TryGetValue($"{lv}.FontFamily", out var f) && f != null) styleInfo.HeadingFontFamilies[lv] = f;
                 if (_styles.TryGetValue($"{lv}.Alignment", out var a)) styleInfo.HeadingAlignments[lv] = a;
+                if (_styles.TryGetValue($"{lv}.MarginTop", out var mt) && mt != null) styleInfo.HeadingMarginTops[lv] = mt;
+                if (_styles.TryGetValue($"{lv}.MarginBottom", out var mb) && mb != null) styleInfo.HeadingMarginBottoms[lv] = mb;
                 styleInfo.HeadingStyleFlags[lv] = new HeadingStyleFlags
                 {
                     IsBold = _flags.TryGetValue($"{lv}.IsBold", out var b) && b,
@@ -461,6 +480,10 @@ namespace PageLeaf.ViewModels
                 };
                 if (_flags.TryGetValue($"{lv}.IsNumberingEnabled", out var n)) styleInfo.HeadingNumberingStates[lv] = n;
             }
+
+            // 引用のフラグを同期
+            styleInfo.Blockquote.IsItalic = _flags.TryGetValue("Quote.IsItalic", out var qi) && qi;
+            styleInfo.Blockquote.ShowIcon = _flags.TryGetValue("Quote.ShowIcon", out var qs) && qs;
 
             // 脚注のフラグを同期
             styleInfo.Footnote.IsMarkerBold = GetFootnoteFlag("IsMarkerBold");

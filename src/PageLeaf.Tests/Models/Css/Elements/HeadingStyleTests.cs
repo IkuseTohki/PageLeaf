@@ -20,8 +20,8 @@ namespace PageLeaf.Tests.Models.Css.Elements
         [TestMethod]
         public void UpdateFrom_ShouldParseHeadingProperties()
         {
-            // テスト観点: CSSルールから見出しの各種プロパティが正しく抽出されること
-            var rule = CreateRule("h1", "color: #ff00ff; font-size: 2em; font-family: 'Times New Roman'; text-align: right; font-weight: bold; font-style: italic; text-decoration: underline;");
+            // テスト観点: CSSルールから見出しの各種プロパティ（新設のマージン含む）が正しく抽出されること
+            var rule = CreateRule("h1", "color: #ff00ff; font-size: 2em; font-family: 'Times New Roman'; text-align: right; font-weight: bold; font-style: italic; text-decoration: underline; margin-top: 10px; margin-bottom: 20px;");
             var style = new HeadingStyle();
 
             style.UpdateFrom(rule);
@@ -29,11 +29,14 @@ namespace PageLeaf.Tests.Models.Css.Elements
             Assert.AreEqual("#FF00FF", style.TextColor?.HexCode.ToUpper());
             Assert.AreEqual(2.0, style.FontSize?.Value);
             Assert.AreEqual(CssUnit.Em, style.FontSize?.Unit);
-            Assert.AreEqual("\"Times New Roman\"", style.FontFamily);
+            // フォントファミリーは引用符なしで保持されること
+            Assert.AreEqual("Times New Roman", style.FontFamily);
             Assert.AreEqual(CssAlignment.Right, style.TextAlignment);
             Assert.IsTrue(style.IsBold);
             Assert.IsTrue(style.IsItalic);
             Assert.IsTrue(style.IsUnderline);
+            Assert.AreEqual(10.0, style.MarginTop?.Value);
+            Assert.AreEqual(20.0, style.MarginBottom?.Value);
         }
 
         [TestMethod]
@@ -46,6 +49,8 @@ namespace PageLeaf.Tests.Models.Css.Elements
                 FontSize = new CssSize(1.5, CssUnit.Em),
                 FontFamily = "Consolas",
                 TextAlignment = CssAlignment.Center,
+                MarginTop = new CssSize(1.0, CssUnit.Em),
+                MarginBottom = new CssSize(0, CssUnit.Px),
                 IsBold = false,
                 IsItalic = true,
                 IsUnderline = true
@@ -61,6 +66,9 @@ namespace PageLeaf.Tests.Models.Css.Elements
             Assert.AreEqual("center", styleDecl.GetPropertyValue("text-align"));
             Assert.AreEqual("italic", styleDecl.GetPropertyValue("font-style"));
             Assert.IsTrue(styleDecl.GetPropertyValue("text-decoration").Contains("underline"));
+            Assert.AreEqual("1em", styleDecl.GetPropertyValue("margin-top"));
+            var actualMarginBottom = styleDecl.GetPropertyValue("margin-bottom");
+            Assert.IsTrue(actualMarginBottom == "0px" || actualMarginBottom == "0");
         }
     }
 }

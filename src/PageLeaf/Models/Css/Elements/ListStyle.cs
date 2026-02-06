@@ -13,6 +13,7 @@ namespace PageLeaf.Models.Css.Elements
         public string? OrderedListMarkerType { get; set; }
         public CssSize? MarkerSize { get; set; }
         public CssSize? ListIndent { get; set; }
+        public string? LineHeight { get; set; }
 
         public void UpdateFrom(ICssStyleSheet stylesheet)
         {
@@ -40,6 +41,8 @@ namespace PageLeaf.Models.Css.Elements
 
                 var size = liRule.Style.GetPropertyValue("font-size");
                 if (!string.IsNullOrEmpty(size)) MarkerSize = CssSize.Parse(size);
+
+                LineHeight = liRule.Style.GetPropertyValue("line-height");
             }
 
             // Fallback for ListIndent from ul/ol padding-left (Legacy compatibility)
@@ -98,6 +101,15 @@ namespace PageLeaf.Models.Css.Elements
             else
             {
                 liRule.Style.RemoveProperty("font-size");
+            }
+
+            if (!string.IsNullOrEmpty(LineHeight))
+            {
+                liRule.Style.SetProperty("line-height", LineHeight);
+            }
+            else
+            {
+                liRule.Style.RemoveProperty("line-height");
             }
 
             // List Indent (applied to ul/ol padding-left for consistency)
