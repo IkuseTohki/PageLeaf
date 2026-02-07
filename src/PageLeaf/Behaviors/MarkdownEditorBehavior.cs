@@ -22,6 +22,18 @@ namespace PageLeaf.Behaviors
         private static ISettingsService? _settingsService;
         private static ILogger? _logger;
 
+        /// <summary>
+        /// 自動挿入された閉じ記号の情報を保持します。
+        /// </summary>
+        private class PendingCompletionState
+        {
+            public char ClosingChar { get; set; }
+            public int ExpectedOffset { get; set; }
+        }
+
+        private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<object, PendingCompletionState> _pendingCompletions =
+            new System.Runtime.CompilerServices.ConditionalWeakTable<object, PendingCompletionState>();
+
         private static ILogger? Logger
         {
             get
@@ -152,6 +164,21 @@ namespace PageLeaf.Behaviors
 
             if (sender is TextBox textBox)
             {
+                // 閉じ記号のスキップ（自動補完直後のみ）
+                if (_pendingCompletions.TryGetValue(textBox, out var pending) &&
+                    pending.ClosingChar == input &&
+                    textBox.CaretIndex == pending.ExpectedOffset)
+                {
+                    e.Handled = true;
+                    textBox.CaretIndex++;
+                    _pendingCompletions.Remove(textBox);
+                    ScrollToCaretLogic(textBox);
+                    return;
+                }
+
+                // いかなる入力でも既存の待機状態は解除される
+                _pendingCompletions.Remove(textBox);
+
                 if (pair.HasValue)
                 {
                     // 選択範囲がある場合は「選択範囲の囲み」機能
@@ -172,12 +199,34 @@ namespace PageLeaf.Behaviors
                         int caretIndex = textBox.CaretIndex;
                         textBox.SelectedText = input.ToString() + pair.Value.ToString();
                         textBox.CaretIndex = caretIndex + 1;
+
+                        // 閉じ記号の補完を記録
+                        _pendingCompletions.Add(textBox, new PendingCompletionState
+                        {
+                            ClosingChar = pair.Value,
+                            ExpectedOffset = caretIndex + 1
+                        });
                     }
                     ScrollToCaretLogic(textBox);
                 }
             }
             else if (sender is TextEditor editor)
             {
+                // 閉じ記号のスキップ（自動補完直後のみ）
+                if (_pendingCompletions.TryGetValue(editor, out var pending) &&
+                    pending.ClosingChar == input &&
+                    editor.CaretOffset == pending.ExpectedOffset)
+                {
+                    e.Handled = true;
+                    editor.CaretOffset++;
+                    _pendingCompletions.Remove(editor);
+                    ScrollToLineWithMargin(editor);
+                    return;
+                }
+
+                // 待機状態解除
+                _pendingCompletions.Remove(editor);
+
                 if (pair.HasValue)
                 {
                     e.Handled = true;
@@ -193,6 +242,13 @@ namespace PageLeaf.Behaviors
                         int caretOffset = editor.CaretOffset;
                         editor.Document.Insert(caretOffset, input.ToString() + pair.Value.ToString());
                         editor.CaretOffset = caretOffset + 1;
+
+                        // 閉じ記号の補完を記録
+                        _pendingCompletions.Add(editor, new PendingCompletionState
+                        {
+                            ClosingChar = pair.Value,
+                            ExpectedOffset = caretOffset + 1
+                        });
                     }
                     ScrollToLineWithMargin(editor);
                 }
@@ -202,6 +258,21 @@ namespace PageLeaf.Behaviors
         private static void OnPreviewKeyDown(object sender, KeyEventArgs e)
         {
             var key = e.Key == Key.System ? e.SystemKey : e.Key;
+
+            // スクロール調整（移動後）
+            if (e.Key == Key.Up || e.Key == Key.Down || e.Key == Key.Left || e.Key == Key.Right || e.Key == Key.Back || e.Key == Key.Delete)
+            {
+                if (sender is TextBox tb)
+                {
+                    tb.Dispatcher.BeginInvoke(new Action(() => ScrollToCaretLogic(tb)), System.Windows.Threading.DispatcherPriority.Render);
+                    _pendingCompletions.Remove(tb);
+                }
+                else if (sender is TextEditor te)
+                {
+                    te.Dispatcher.BeginInvoke(new Action(() => ScrollToLineWithMargin(te)), System.Windows.Threading.DispatcherPriority.Render);
+                    _pendingCompletions.Remove(te);
+                }
+            }
 
             if (Keyboard.Modifiers == (ModifierKeys.Alt | ModifierKeys.Shift) &&
                 (key == Key.Left || key == Key.Right))
@@ -286,20 +357,19 @@ namespace PageLeaf.Behaviors
         #region TextBox Handlers
         private static void HandleTextBoxKeyDown(TextBox textBox, KeyEventArgs e)
         {
-            // 上下左右、Backspaceなどの操作後にもマージンを維持する
-            if (e.Key == Key.Up || e.Key == Key.Down || e.Key == Key.Left || e.Key == Key.Right || e.Key == Key.Back || e.Key == Key.Delete)
-            {
-                textBox.Dispatcher.BeginInvoke(new Action(() => ScrollToCaretLogic(textBox)), System.Windows.Threading.DispatcherPriority.Render);
-            }
-
             // Enterキーの処理
             if (e.Key == Key.Enter)
             {
                 if (Keyboard.Modifiers == ModifierKeys.Shift) HandleShiftEnter(textBox, e);
                 else HandleEnterKey(textBox, e);
+                _pendingCompletions.Remove(textBox);
             }
             // Tabキーの処理
-            else if (e.Key == Key.Tab) HandleTabKey(textBox, e);
+            else if (e.Key == Key.Tab)
+            {
+                HandleTabKey(textBox, e);
+                _pendingCompletions.Remove(textBox);
+            }
             // Ctrl + Shift + V (貼り付け時のテーブル変換)
             else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.V) HandlePaste(textBox, e);
             // Ctrl + B (太字)
@@ -694,18 +764,17 @@ namespace PageLeaf.Behaviors
         #region TextEditor Handlers
         private static void HandleTextEditorKeyDown(TextEditor editor, KeyEventArgs e)
         {
-            // 上下左右、Backspaceなどの操作後にもマージンを維持する
-            if (e.Key == Key.Up || e.Key == Key.Down || e.Key == Key.Left || e.Key == Key.Right || e.Key == Key.Back || e.Key == Key.Delete)
-            {
-                editor.Dispatcher.BeginInvoke(new Action(() => ScrollToLineWithMargin(editor)), System.Windows.Threading.DispatcherPriority.Render);
-            }
-
             if (e.Key == Key.Enter)
             {
                 if (Keyboard.Modifiers == ModifierKeys.Shift) HandleShiftEnter(editor, e);
                 else HandleEnterKey(editor, e);
+                _pendingCompletions.Remove(editor);
             }
-            else if (e.Key == Key.Tab) HandleTabKey(editor, e);
+            else if (e.Key == Key.Tab)
+            {
+                HandleTabKey(editor, e);
+                _pendingCompletions.Remove(editor);
+            }
             else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.V) HandlePaste(editor, e);
             else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.B) { e.Handled = true; SurroundSelection(editor, "**"); }
             else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.I) { e.Handled = true; SurroundSelection(editor, "*"); }

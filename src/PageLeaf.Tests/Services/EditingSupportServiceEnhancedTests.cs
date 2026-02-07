@@ -229,6 +229,44 @@ namespace PageLeaf.Tests.Services
 
         #endregion
 
+        #region Auto-Pairing Skip
+
+        [TestMethod]
+        public void ShouldSkipClosingCharacter_ShouldReturnTrue_WhenMatchesNextChar()
+        {
+            // テスト観点: カーソル直後の文字と入力文字が一致する場合、かつそれが閉じ記号対象である場合、スキップを許可する。
+            Assert.IsTrue(_service.ShouldSkipClosingCharacter(']', "[]", 1));
+            Assert.IsTrue(_service.ShouldSkipClosingCharacter(')', "()", 1));
+            Assert.IsTrue(_service.ShouldSkipClosingCharacter('}', "{}", 1));
+            Assert.IsTrue(_service.ShouldSkipClosingCharacter('"', "\"\"", 1));
+            Assert.IsTrue(_service.ShouldSkipClosingCharacter('\'', "''", 1));
+            Assert.IsTrue(_service.ShouldSkipClosingCharacter('`', "``", 1));
+        }
+
+        [TestMethod]
+        public void ShouldSkipClosingCharacter_ShouldReturnFalse_WhenNotMatchesNextChar()
+        {
+            // テスト観点: カーソル直後の文字と一致しない場合はスキップしない。
+            Assert.IsFalse(_service.ShouldSkipClosingCharacter(']', "[}", 1));
+            Assert.IsFalse(_service.ShouldSkipClosingCharacter(')', "(]", 1));
+        }
+
+        [TestMethod]
+        public void ShouldSkipClosingCharacter_ShouldReturnFalse_WhenAtEnd()
+        {
+            // テスト観点: カーソルが末尾にある（次の文字がない）場合はスキップしない。
+            Assert.IsFalse(_service.ShouldSkipClosingCharacter(']', "[]", 2));
+        }
+
+        [TestMethod]
+        public void ShouldSkipClosingCharacter_ShouldReturnFalse_WhenNotClosingTarget()
+        {
+            // テスト観点: a などの普通の文字は、一致していてもスキップ（上書き）しない。
+            Assert.IsFalse(_service.ShouldSkipClosingCharacter('a', "aa", 1));
+        }
+
+        #endregion
+
         [TestMethod]
         public void EnforceEmptyLineAtEnd_ShouldAddNewline_WhenMissing()
         {

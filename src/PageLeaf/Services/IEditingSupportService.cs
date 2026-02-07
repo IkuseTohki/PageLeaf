@@ -123,5 +123,14 @@ namespace PageLeaf.Services
         /// <param name="text">対象のテキスト。</param>
         /// <returns>末尾に空行が追加されたテキスト。</returns>
         string EnforceEmptyLineAtEnd(string text);
+
+        /// <summary>
+        /// 入力された文字が、カーソル直後の閉じ記号を上書き（スキップ）すべきものかどうかを判定します。
+        /// </summary>
+        /// <param name="input">入力された文字。</param>
+        /// <param name="fullText">エディタの全テキスト。</param>
+        /// <param name="caretIndex">現在のカーソル位置。</param>
+        /// <returns>スキップすべきであれば true、そうでなければ false。</returns>
+        bool ShouldSkipClosingCharacter(char input, string fullText, int caretIndex);
     }
 }

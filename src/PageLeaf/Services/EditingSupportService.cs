@@ -436,6 +436,18 @@ namespace PageLeaf.Services
 
             return text + Environment.NewLine;
         }
+
+        public bool ShouldSkipClosingCharacter(char input, string fullText, int caretIndex)
+        {
+            if (string.IsNullOrEmpty(fullText) || caretIndex >= fullText.Length) return false;
+
+            // スキップ対象の閉じ記号
+            char[] closingChars = { ']', ')', '}', '"', '\'', '`' };
+            if (Array.IndexOf(closingChars, input) == -1) return false;
+
+            // カーソル直後の文字と比較
+            return fullText[caretIndex] == input;
+        }
     }
 }
 
