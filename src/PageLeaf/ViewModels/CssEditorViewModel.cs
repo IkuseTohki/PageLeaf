@@ -107,6 +107,7 @@ namespace PageLeaf.ViewModels
 
         private void MarkTabDirty(CssEditorTab tab)
         {
+            IsDirty = true;
             if (_dirtyTabs.Add(tab))
             {
                 OnPropertyChanged(nameof(IsTabDirty));
@@ -127,6 +128,7 @@ namespace PageLeaf.ViewModels
         private void ClearDirtyTabs()
         {
             _dirtyTabs.Clear();
+            IsDirty = false;
             OnPropertyChanged(nameof(IsTabDirty));
             OnPropertyChanged(nameof(IsTitleTabDirty));
             OnPropertyChanged(nameof(IsGeneralTabDirty));
@@ -298,7 +300,16 @@ namespace PageLeaf.ViewModels
             _styles[nameof(FootnoteListItemLineHeight)] = styleInfo.Footnote.ListItemLineHeight;
             _flags["Footnote.IsBackLinkVisible"] = styleInfo.Footnote.IsBackLinkVisible;
 
-            IsDirty = false;
+            // リストのスタイルをロード
+            if (styleInfo.HasNumberedListPeriod.HasValue)
+            {
+                _flags["List.HasPeriod"] = styleInfo.HasNumberedListPeriod.Value;
+            }
+            else
+            {
+                _flags.Remove("List.HasPeriod");
+            }
+
             ClearDirtyTabs();
             OnPropertyChanged(string.Empty);
             UpdateHeadingProperties();
@@ -318,7 +329,6 @@ namespace PageLeaf.ViewModels
             if (!_styles.TryGetValue(key, out var current) || current != value)
             {
                 _styles[key] = value;
-                IsDirty = true;
                 MarkTabDirty(GetTabFromPropertyName(key));
                 UpdatePreview();
                 OnPropertyChanged("Item[]");
@@ -351,7 +361,17 @@ namespace PageLeaf.ViewModels
         public bool IsTitleUnderline { get => GetTitleFlag("IsUnderline"); set => SetTitleFlag("IsUnderline", value); }
 
         private bool GetTitleFlag(string attr) => _flags.TryGetValue($"Title.{attr}", out var b) && b;
-        private void SetTitleFlag(string attr, bool value) { var key = $"Title.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; MarkTabDirty(CssEditorTab.Title); UpdatePreview(); OnPropertyChanged($"IsTitle{attr}"); } }
+        private void SetTitleFlag(string attr, bool value)
+        {
+            var key = $"Title.{attr}";
+            if (!_flags.TryGetValue(key, out var current) || current != value)
+            {
+                _flags[key] = value;
+                MarkTabDirty(CssEditorTab.Title);
+                UpdatePreview();
+                OnPropertyChanged($"IsTitle{attr}");
+            }
+        }
 
         public string? QuoteTextColor { get => this[nameof(QuoteTextColor)]; set => this[nameof(QuoteTextColor)] = value; }
         public string? QuoteBackgroundColor { get => this[nameof(QuoteBackgroundColor)]; set => this[nameof(QuoteBackgroundColor)] = value; }
@@ -386,6 +406,20 @@ namespace PageLeaf.ViewModels
         public string? ListMarkerSize { get => this[nameof(ListMarkerSize)]; set => this[nameof(ListMarkerSize)] = value; }
         public string? ListIndent { get => this[nameof(ListIndent)]; set => this[nameof(ListIndent)] = value; }
         public string? ListLineHeight { get => this[nameof(ListLineHeight)]; set => this[nameof(ListLineHeight)] = value; }
+        public bool NumberedListHasPeriod { get => GetListFlag("HasPeriod"); set => SetListFlag("HasPeriod", value); }
+
+        private bool GetListFlag(string attr) => !_flags.TryGetValue($"List.{attr}", out var b) || b;
+        private void SetListFlag(string attr, bool value)
+        {
+            var key = $"List.{attr}";
+            if (!_flags.TryGetValue(key, out var current) || current != value)
+            {
+                _flags[key] = value;
+                MarkTabDirty(CssEditorTab.List);
+                UpdatePreview();
+                OnPropertyChanged(nameof(NumberedListHasPeriod));
+            }
+        }
 
         public string? FootnoteMarkerTextColor { get => this[nameof(FootnoteMarkerTextColor)]; set => this[nameof(FootnoteMarkerTextColor)] = value; }
         public bool IsFootnoteMarkerBold { get => GetFootnoteFlag(nameof(FootnoteStyle.IsMarkerBold)); set => SetFootnoteFlag(nameof(FootnoteStyle.IsMarkerBold), value); }
@@ -400,7 +434,20 @@ namespace PageLeaf.ViewModels
         public bool IsFootnoteBackLinkVisible { get => GetFootnoteFlag(nameof(FootnoteStyle.IsBackLinkVisible)); set => SetFootnoteFlag(nameof(FootnoteStyle.IsBackLinkVisible), value); }
 
         private bool GetFootnoteFlag(string attr) => _flags.TryGetValue($"Footnote.{attr}", out var b) && b;
-        private void SetFootnoteFlag(string attr, bool value) { var key = $"Footnote.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; MarkTabDirty(CssEditorTab.Footnote); UpdatePreview(); OnPropertyChanged(key.Replace(".", "")); OnPropertyChanged(nameof(IsFootnoteMarkerBold)); OnPropertyChanged(nameof(HasFootnoteMarkerBrackets)); OnPropertyChanged(nameof(IsFootnoteBackLinkVisible)); } }
+        private void SetFootnoteFlag(string attr, bool value)
+        {
+            var key = $"Footnote.{attr}";
+            if (!_flags.TryGetValue(key, out var current) || current != value)
+            {
+                _flags[key] = value;
+                MarkTabDirty(CssEditorTab.Footnote);
+                UpdatePreview();
+                OnPropertyChanged(key.Replace(".", ""));
+                OnPropertyChanged(nameof(IsFootnoteMarkerBold));
+                OnPropertyChanged(nameof(HasFootnoteMarkerBrackets));
+                OnPropertyChanged(nameof(IsFootnoteBackLinkVisible));
+            }
+        }
 
         public string? HeadingTextColor { get => this[$"{_selectedHeadingLevel}.TextColor"]; set => this[$"{_selectedHeadingLevel}.TextColor"] = value; }
         public string? HeadingFontSize { get => this[$"{_selectedHeadingLevel}.FontSize"]; set => this[$"{_selectedHeadingLevel}.FontSize"] = value; }
@@ -414,9 +461,47 @@ namespace PageLeaf.ViewModels
         public bool IsHeadingNumberingEnabled { get => GetFlag(_selectedHeadingLevel, "IsNumberingEnabled"); set => SetFlag(_selectedHeadingLevel, "IsNumberingEnabled", value, CssEditorTab.Headings); }
 
         private bool GetFlag(string? prefix, string attr) => prefix != null && _flags.TryGetValue($"{prefix}.{attr}", out var b) && b;
-        private void SetFlag(string? prefix, string attr, bool value, CssEditorTab tab) { if (prefix == null) return; var key = $"{prefix}.{attr}"; if (!_flags.TryGetValue(key, out var current) || current != value) { _flags[key] = value; IsDirty = true; MarkTabDirty(tab); UpdatePreview(); OnPropertyChanged(key.Replace(".", "")); UpdateHeadingProperties(); OnPropertyChanged(nameof(QuoteIsItalic)); OnPropertyChanged(nameof(QuoteShowIcon)); } }
-        public string? SelectedHeadingLevel { get => _selectedHeadingLevel; set { if (_selectedHeadingLevel != value) { _selectedHeadingLevel = value; OnPropertyChanged(); UpdateHeadingProperties(); } } }
-        private void UpdateHeadingProperties() { OnPropertyChanged(nameof(HeadingTextColor)); OnPropertyChanged(nameof(HeadingFontSize)); OnPropertyChanged(nameof(HeadingFontFamily)); OnPropertyChanged(nameof(HeadingAlignment)); OnPropertyChanged(nameof(HeadingMarginTop)); OnPropertyChanged(nameof(HeadingMarginBottom)); OnPropertyChanged(nameof(IsHeadingBold)); OnPropertyChanged(nameof(IsHeadingItalic)); OnPropertyChanged(nameof(IsHeadingUnderline)); OnPropertyChanged(nameof(IsHeadingNumberingEnabled)); }
+        private void SetFlag(string? prefix, string attr, bool value, CssEditorTab tab)
+        {
+            if (prefix == null) return; var key = $"{prefix}.{attr}";
+            if (!_flags.TryGetValue(key, out var current) || current != value)
+            {
+                _flags[key] = value;
+                MarkTabDirty(tab);
+                UpdatePreview();
+                OnPropertyChanged(key.Replace(".", ""));
+                UpdateHeadingProperties();
+                OnPropertyChanged(nameof(QuoteIsItalic));
+                OnPropertyChanged(nameof(QuoteShowIcon));
+            }
+        }
+        public string? SelectedHeadingLevel
+        {
+            get => _selectedHeadingLevel;
+            set
+            {
+                if (_selectedHeadingLevel != value)
+                {
+                    _selectedHeadingLevel = value;
+                    OnPropertyChanged();
+                    UpdateHeadingProperties();
+                }
+            }
+        }
+        private void UpdateHeadingProperties()
+        {
+            OnPropertyChanged(nameof(HeadingTextColor));
+            OnPropertyChanged(nameof(HeadingFontSize));
+            OnPropertyChanged(nameof(HeadingFontFamily));
+            OnPropertyChanged(nameof(HeadingAlignment));
+            OnPropertyChanged(nameof(HeadingMarginTop));
+            OnPropertyChanged(nameof(HeadingMarginBottom));
+            OnPropertyChanged(nameof(IsHeadingBold));
+            OnPropertyChanged(nameof(IsHeadingItalic));
+            OnPropertyChanged(nameof(IsHeadingUnderline));
+            OnPropertyChanged(nameof(IsHeadingNumberingEnabled));
+
+        }
 
         public void NotifySettingsChanged()
         {
@@ -439,7 +524,6 @@ namespace PageLeaf.ViewModels
             if (!CanExecuteSaveCss(parameter)) return;
             var styleInfo = CreateStyleInfo();
             _saveCssUseCase.Execute(TargetCssFileName!, styleInfo);
-            IsDirty = false;
             ClearDirtyTabs();
             CssSaved?.Invoke(this, EventArgs.Empty);
         }
@@ -489,6 +573,9 @@ namespace PageLeaf.ViewModels
             styleInfo.Footnote.IsMarkerBold = GetFootnoteFlag("IsMarkerBold");
             styleInfo.Footnote.HasMarkerBrackets = GetFootnoteFlag("HasMarkerBrackets");
             styleInfo.Footnote.IsBackLinkVisible = GetFootnoteFlag("IsBackLinkVisible");
+
+            // リストのフラグを同期
+            styleInfo.HasNumberedListPeriod = _flags.TryGetValue("List.HasPeriod", out var lp) ? lp : (bool?)null;
 
             return styleInfo;
         }

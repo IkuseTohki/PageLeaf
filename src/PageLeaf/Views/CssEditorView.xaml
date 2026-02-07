@@ -364,6 +364,11 @@
                         </ListBox.ItemsPanel>
                     </ListBox>
 
+                    <CheckBox Margin="0,0,0,12"
+                              Content="番号の後にピリオドを表示する"
+                              IsChecked="{Binding NumberedListHasPeriod, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Style="{StaticResource CompactFormCheckBoxStyle}" />
+
                     <Label Content="文字スタイル" Style="{StaticResource CompactFormGroupHeaderStyle}" />
                     <Label Content="フォントサイズ" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"

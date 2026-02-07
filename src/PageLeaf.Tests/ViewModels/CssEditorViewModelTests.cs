@@ -80,6 +80,38 @@ namespace PageLeaf.Tests.ViewModels
             Assert.IsTrue(_viewModel.QuoteIsItalic);
             Assert.IsTrue(_viewModel.IsDirty);
             Assert.IsTrue(_viewModel.IsQuoteTabDirty);
+
+            // リストのピリオド設定のテスト
+            _viewModel.IsDirty = false;
+            _viewModel.NumberedListHasPeriod = false;
+            Assert.IsFalse(_viewModel.NumberedListHasPeriod);
+            Assert.IsTrue(_viewModel.IsDirty, "フラグ変更時に IsDirty が true になること");
+            Assert.IsTrue(_viewModel.IsListTabDirty, "フラグ変更時に IsListTabDirty が true になること");
+        }
+
+        [TestMethod]
+        public void IsDirty_ShouldBeCentralizedInMarkTabDirty()
+        {
+            // テスト観点: 各カテゴリのフラグや値を変更した際、
+            //            集約された MarkTabDirty を経由して IsDirty が正しくセットされることを網羅的に確認する。
+
+            // 1. Title
+            _viewModel.IsDirty = false;
+            _viewModel.IsTitleBold = true;
+            Assert.IsTrue(_viewModel.IsDirty);
+            Assert.IsTrue(_viewModel.IsTitleTabDirty);
+
+            // 2. Footnote
+            _viewModel.IsDirty = false;
+            _viewModel.IsFootnoteMarkerBold = true;
+            Assert.IsTrue(_viewModel.IsDirty);
+            Assert.IsTrue(_viewModel.IsFootnoteTabDirty);
+
+            // 3. Headings
+            _viewModel.IsDirty = false;
+            _viewModel.IsHeadingBold = true;
+            Assert.IsTrue(_viewModel.IsDirty);
+            Assert.IsTrue(_viewModel.IsHeadingsTabDirty);
         }
 
         [TestMethod]

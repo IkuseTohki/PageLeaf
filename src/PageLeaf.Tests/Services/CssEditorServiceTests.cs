@@ -1433,6 +1433,110 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
+        public void UpdateCssContent_ShouldMaintainPeriodToggleStyles()
+        {
+            // テスト観点: 番号付きリストのピリオドを非表示に設定した場合、
+            //            UpdateCssContent 実行後も ol > li::before の content プロパティが保持されることを確認する。
+            //            (不具合再現用: FinalizeCssUpdate で誤って削除されていないか)
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo
+            {
+                NumberedListMarkerType = "decimal",
+                HasNumberedListPeriod = false // ピリオドなし
+            };
+
+            // Act
+            var updatedCss = service.UpdateCssContent(string.Empty, styleInfo);
+
+            // Assert
+            // ol: list-style-type: none; が設定されていること
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*\{[^}]*list-style-type:\s*none;?[^}]*\}"));
+
+            // ol > li::before: content: counter(list-item) " "; が保持されていること
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*>?\s*li::before\s*\{[^}]*content:\s*counter\(list-item(,\s*decimal)?\)\s*""\s"";?[^}]*\}"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldApplyNegativeMarginToCorrectIndent()
+        {
+            // テスト観点: 階層化リストやピリオド制御時、インデントずれを防ぐために
+            //            ol > li::before にネガティブマージンが適用されること。
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo
+            {
+                NumberedListMarkerType = "decimal-nested",
+                ListIndent = "40px"
+            };
+
+            var updatedCss = service.UpdateCssContent(string.Empty, styleInfo);
+
+            // display: inline-block
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*>\s*li::before\s*\{[^}]*display:\s*inline-block;[^}]*\}"));
+            // margin-left: -40px
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*>\s*li::before\s*\{[^}]*margin-left:\s*-40px;[^}]*\}"));
+            // width: 40px
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*>\s*li::before\s*\{[^}]*width:\s*40px;[^}]*\}"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_NestedDecimal_ShouldNotAffectUnorderedListMarkers()
+        {
+            // テスト観点: OrderedListMarkerType が "decimal-nested" の場合でも、
+            //            汎用的な li セレクタに display: block が適用されてはならない。
+            //            (適用されると ul のマーカーも消えてしまうため)
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo
+            {
+                NumberedListMarkerType = "decimal-nested",
+                ListMarkerType = "disc" // 箇条書きは黒丸
+            };
+
+            var updatedCss = service.UpdateCssContent(string.Empty, styleInfo);
+
+            // 検証: 汎用的な li セレクタに display: block が含まれていないこと
+            // (もし設定が必要なら ol > li に限定されるべき)
+            Assert.IsFalse(Regex.IsMatch(updatedCss, @"(?<![ol\s]>)\s*li\s*\{[^}]*display:\s*block"),
+                "Standard li should not be set to display: block, as it breaks ul markers.");
+
+            // 検証: 階層化リスト用の display: block は ol > li に適用されていること
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*>\s*li\s*\{[^}]*display:\s*block;[^}]*\}"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldSupportVariousMarkerTypesWithPeriod()
+        {
+            // テスト観点: lower-alpha 等のタイプとピリオド設定が組み合わされた際、
+            //            正しい counter(list-item, TYPE) ". " が生成されること。
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo
+            {
+                NumberedListMarkerType = "lower-alpha",
+                HasNumberedListPeriod = true
+            };
+
+            var updatedCss = service.UpdateCssContent(string.Empty, styleInfo);
+
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*>\s*li::before\s*\{[^}]*content:\s*counter\(list-item,\s*lower-alpha\)\s*""\.\s*"";[^}]*\}"));
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_ShouldSupportNestedDecimalWithPeriod()
+        {
+            // テスト観点: decimal-nested においてピリオドを有効にした場合、
+            //            counters(item, ".") ". " が生成されること。
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo
+            {
+                NumberedListMarkerType = "decimal-nested",
+                HasNumberedListPeriod = true
+            };
+
+            var updatedCss = service.UpdateCssContent(string.Empty, styleInfo);
+
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*>\s*li::before\s*\{[^}]*content:\s*counters\(item,\s*""\.""\)\s*""\.\s*"";[^}]*\}"));
+        }
+
+        [TestMethod]
         public void ParseCss_ShouldHandleVariousColorFormats()
         {
             // テスト観点: 脚注の文字色において、#RGB, #RRGGBB, rgb() などの形式が正しく解析されることを確認する。
@@ -1451,6 +1555,46 @@ namespace PageLeaf.Tests.Services
                 var styles = service.ParseCss(css);
                 Assert.AreEqual(expectedHex, styles.FootnoteMarkerTextColor, $"Failed to parse color: {css}");
             }
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_DynamicStyle_Unconfigured_ShouldNotHaveBefore()
+        {
+            // テスト観点: CSSファイルにリスト設定がない（未設定）の場合、
+            //            dynamic-style に ol > li::before が出力されてはならない。
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo
+            {
+                HasNumberedListPeriod = null // 未設定
+            };
+
+            var updatedCss = service.UpdateCssContent(string.Empty, styleInfo);
+
+            // 検証: ol > li::before が含まれていないこと
+            Assert.IsFalse(updatedCss.Contains("ol > li::before"), "Unconfigured state should not have ol > li::before");
+            Assert.IsFalse(updatedCss.Contains("ol>li::before"), "Unconfigured state should not have ol>li::before");
+            // 検証: ol に対して list-style-type: none が適用されていないこと
+            Assert.IsFalse(Regex.IsMatch(updatedCss, @"ol\s*\{[^}]*list-style-type:\s*none"), "Unconfigured state should not suppress ol default markers");
+        }
+
+        [TestMethod]
+        public void UpdateCssContent_DynamicStyle_Configured_ShouldHaveNoneAndBefore()
+        {
+            // テスト観点: ピリオド設定（あり/なし問わず）が行われた場合、
+            //            二重表示を防ぐために ol { list-style-type: none } が必須。
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo
+            {
+                NumberedListMarkerType = "decimal",
+                HasNumberedListPeriod = false // ピリオドなし設定
+            };
+
+            var updatedCss = service.UpdateCssContent(string.Empty, styleInfo);
+
+            // 検証: 二重表示防止の list-style-type: none が ol に適用されていること
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*\{[^}]*list-style-type:\s*none;[^}]*\}"));
+            // 検証: 疑似要素による描画が有効であること
+            StringAssert.Matches(updatedCss, new Regex(@"ol\s*>\s*li::before\s*\{[^}]*content:\s*counter\(list-item(,\s*decimal)?\)\s*""\s"";[^}]*\}"));
         }
     }
 }

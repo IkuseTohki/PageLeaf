@@ -85,28 +85,44 @@ namespace PageLeaf.Services
             // 見出し採番の追加処理
             UpdateHeadingNumbering(stylesheet, profile);
 
-            // リストの動的クリーンアップ・特殊スタイル適用
+            // リスト採番ルールの徹底クリーンアップ
+            CleanupListBeforeRules(stylesheet);
+
+            // 1. ol (list-style-type) の制御
+            UpdateOrCreateRule(stylesheet, "ol", (rule, p) =>
+            {
+                if (p.List.OrderedListMarkerType == "decimal-nested" || p.List.HasOrderedListPeriod.HasValue)
+                {
+                    // 階層採番またはピリオド設定がある場合は、確実に none にする
+                    rule.Style.SetProperty("list-style-type", "none");
+                }
+                else if (!string.IsNullOrEmpty(p.List.OrderedListMarkerType))
+                {
+                    // それ以外（decimal 等）
+                    rule.Style.SetProperty("list-style-type", p.List.OrderedListMarkerType);
+                }
+            }, profile);
+
+            // 2. li (display) の制御
             UpdateOrCreateRule(stylesheet, "li", (rule, p) =>
             {
-                if (p.List.OrderedListMarkerType != "decimal-nested")
-                {
-                    rule.Style.RemoveProperty("display");
-                }
+                // 全体的な li に対する display 操作は行わず、各リストタイプごとの詳細ルールに任せる
+                rule.Style.RemoveProperty("display");
             }, profile);
 
+            // 3. li::before (汎用) のクリーンアップ
             UpdateOrCreateRule(stylesheet, "li::before", (rule, p) =>
             {
-                if (p.List.OrderedListMarkerType != "decimal-nested")
-                {
-                    rule.Style.RemoveProperty("content");
-                    rule.Style.RemoveProperty("counter-increment");
-                }
+                rule.Style.RemoveProperty("content");
+                rule.Style.RemoveProperty("counter-increment");
             }, profile);
 
+            // 4. ol > li (詳細) の制御
             UpdateOrCreateRule(stylesheet, "ol > li", (rule, p) =>
             {
                 if (p.List.OrderedListMarkerType == "decimal-nested")
                 {
+                    // 階層採番の場合のみ block にする (::before を正しく表示するため)
                     rule.Style.SetProperty("display", "block");
                 }
                 else
@@ -115,20 +131,50 @@ namespace PageLeaf.Services
                 }
             }, profile);
 
-            UpdateOrCreateRule(stylesheet, "ol > li::before", (rule, p) =>
+            // 5. ol > li::before (詳細) の制御
+            // 階層採番またはピリオド設定がある場合のみ、この詳細ルールを制御（作成・更新）する
+            if (profile.List.OrderedListMarkerType == "decimal-nested" || profile.List.HasOrderedListPeriod.HasValue)
             {
-                if (p.List.OrderedListMarkerType == "decimal-nested")
+                UpdateOrCreateRule(stylesheet, "ol > li::before", (rule, p) =>
                 {
-                    rule.Style.SetProperty("content", "counters(item, \".\") \" \"");
-                    rule.Style.SetProperty("counter-increment", "item");
-                }
-                else
-                {
-                    rule.Style.RemoveProperty("content");
-                    rule.Style.RemoveProperty("counter-increment");
-                }
-            }, profile);
+                    var suffix = (p.List.HasOrderedListPeriod ?? false) ? "\". \"" : "\" \"";
 
+                    // インデント調整用スタイル
+                    rule.Style.SetProperty("display", "inline-block");
+                    rule.Style.SetProperty("text-align", "right");
+                    rule.Style.SetProperty("padding-right", "0.5em"); // マーカーとテキストの間隔
+
+                    // ListIndent に基づくネガティブマージンと幅の設定
+                    // デフォルトは 2em と仮定（またはブラウザデフォルトに合わせる）
+                    var indent = p.List.ListIndent?.ToString() ?? "2em";
+                    rule.Style.SetProperty("width", indent);
+                    rule.Style.SetProperty("margin-left", $"-{indent}");
+
+                    if (p.List.OrderedListMarkerType == "decimal-nested")
+                    {
+                        rule.Style.SetProperty("content", $"counters(item, \".\") {suffix}");
+                        rule.Style.SetProperty("counter-increment", "item");
+                    }
+                    else
+                    {
+                        // 方式D: OrderedListMarkerType が decimal の場合は省略形 counter(list-item) を出力する
+                        // それ以外（lower-alpha等）の場合は明示的にタイプを指定する
+                        var type = (string.IsNullOrEmpty(p.List.OrderedListMarkerType) || p.List.OrderedListMarkerType == "decimal")
+                                   ? "" : $", {p.List.OrderedListMarkerType}";
+                        rule.Style.SetProperty("content", $"counter(list-item{type}) {suffix}");
+                        rule.Style.RemoveProperty("counter-increment");
+                    }
+                }, profile);
+            }
+            else
+            {
+                // 未設定時は、もしルールが存在していれば content を消す（Cleanupで消えているはずだが念のため）
+                var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r =>
+                    r.SelectorText != null && r.SelectorText.Replace(" ", "") == "ol>li::before");
+                rule?.Style.RemoveProperty("content");
+            }
+
+            // 6. その他
             UpdateOrCreateRule(stylesheet, "li::marker", (rule, p) =>
             {
                 if (p.List.MarkerSize != null) rule.Style.SetProperty("font-size", p.List.MarkerSize.ToString());
@@ -244,6 +290,7 @@ namespace PageLeaf.Services
             // List
             styleInfo.ListMarkerType = profile.List.UnorderedListMarkerType;
             styleInfo.NumberedListMarkerType = profile.List.OrderedListMarkerType;
+            styleInfo.HasNumberedListPeriod = profile.List.HasOrderedListPeriod;
             styleInfo.ListIndent = profile.List.ListIndent?.ToString();
             styleInfo.ListMarkerSize = profile.List.MarkerSize?.ToString();
             styleInfo.ListLineHeight = profile.List.LineHeight;
@@ -382,6 +429,7 @@ namespace PageLeaf.Services
             // List
             if (!string.IsNullOrEmpty(styleInfo.ListMarkerType)) profile.List.UnorderedListMarkerType = styleInfo.ListMarkerType;
             if (!string.IsNullOrEmpty(styleInfo.NumberedListMarkerType)) profile.List.OrderedListMarkerType = styleInfo.NumberedListMarkerType;
+            profile.List.HasOrderedListPeriod = styleInfo.HasNumberedListPeriod;
             if (!string.IsNullOrEmpty(styleInfo.ListIndent)) profile.List.ListIndent = CssSize.Parse(styleInfo.ListIndent!);
             if (!string.IsNullOrEmpty(styleInfo.ListMarkerSize)) profile.List.MarkerSize = CssSize.Parse(styleInfo.ListMarkerSize!);
             if (!string.IsNullOrEmpty(styleInfo.ListLineHeight)) profile.List.LineHeight = styleInfo.ListLineHeight;
@@ -456,7 +504,8 @@ namespace PageLeaf.Services
             generatedCss = generatedCss.Replace("counters(item .)", "counters(item, \".\")");
 
             // Final cleanup: remove empty rules (e.g. "h4 {}")
-            generatedCss = Regex.Replace(generatedCss, @"[^\r\n\}]+\s*\{\s*\}", "");
+            // セレクター部分に改行が含まれるケースや、複雑なセレクターも考慮
+            generatedCss = Regex.Replace(generatedCss, @"(?m)^[^{}\r\n]+\s*\{\s*\}[\r\n]*", "");
             // Remove excessive newlines caused by empty rule removal
             generatedCss = Regex.Replace(generatedCss, @"(\r?\n){3,}", Environment.NewLine + Environment.NewLine);
 
@@ -562,6 +611,22 @@ namespace PageLeaf.Services
                     rule.Style.RemoveProperty("counter-reset");
                 }
             }, profile);
+        }
+
+        private void CleanupListBeforeRules(ICssStyleSheet stylesheet)
+        {
+            for (int i = stylesheet.Rules.Length - 1; i >= 0; i--)
+            {
+                var rule = stylesheet.Rules[i];
+                if (rule is ICssStyleRule styleRule && styleRule.SelectorText != null)
+                {
+                    var normalized = styleRule.SelectorText.Replace(" ", "");
+                    if (normalized == "li::before" || normalized == "ol>li::before")
+                    {
+                        stylesheet.RemoveAt(i);
+                    }
+                }
+            }
         }
 
         public string CreateNewStyle(string styleName)

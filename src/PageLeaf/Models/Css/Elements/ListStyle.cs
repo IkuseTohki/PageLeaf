@@ -11,6 +11,7 @@ namespace PageLeaf.Models.Css.Elements
     {
         public string? UnorderedListMarkerType { get; set; }
         public string? OrderedListMarkerType { get; set; }
+        public bool? HasOrderedListPeriod { get; set; }
         public CssSize? MarkerSize { get; set; }
         public CssSize? ListIndent { get; set; }
         public string? LineHeight { get; set; }
@@ -31,6 +32,19 @@ namespace PageLeaf.Models.Css.Elements
                     OrderedListMarkerType = "decimal-nested";
                 else
                     OrderedListMarkerType = type;
+            }
+
+            var markerRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText != null && r.SelectorText.Replace(" ", "").EndsWith("li::before"));
+            if (markerRule != null)
+            {
+                var content = markerRule.Style.GetPropertyValue("content");
+                if (!string.IsNullOrEmpty(content))
+                {
+                    if (content.Contains("\". \"") || content.Contains("'. '"))
+                        HasOrderedListPeriod = true;
+                    else if (content.Contains("\" \"") || content.Contains("' '"))
+                        HasOrderedListPeriod = false;
+                }
             }
 
             var liRule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == "li");
@@ -127,7 +141,8 @@ namespace PageLeaf.Models.Css.Elements
 
         private ICssStyleRule GetOrCreateRule(ICssStyleSheet stylesheet, string selector)
         {
-            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText == selector);
+            var normalizedSelector = selector.Replace(" ", "");
+            var rule = stylesheet.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText != null && r.SelectorText.Replace(" ", "") == normalizedSelector);
             if (rule == null)
             {
                 stylesheet.Insert(selector + " {}", stylesheet.Rules.Length);

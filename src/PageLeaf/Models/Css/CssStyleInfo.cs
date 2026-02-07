@@ -70,6 +70,7 @@ namespace PageLeaf.Models.Css
         public string? CodeFontFamily { get; set; }
         public string? ListMarkerType { get; set; }
         public string? NumberedListMarkerType { get; set; }
+        public bool? HasNumberedListPeriod { get; set; }
         public string? ListMarkerSize { get; set; }
         public string? ListIndent { get; set; }
         public string? ListLineHeight { get; set; }

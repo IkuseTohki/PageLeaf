@@ -38,6 +38,28 @@ namespace PageLeaf.Tests.Models.Css.Elements
         }
 
         [TestMethod]
+        public void UpdateFrom_ShouldParsePeriodVisibility()
+        {
+            // テスト観点: li::before の content からピリオドの有無が正しく抽出されること
+            // ピリオドなし
+            var css1 = "ol { list-style-type: none; } ol > li::before { content: counter(list-item) \" \"; }";
+            var style1 = new ListStyle();
+            style1.UpdateFrom(CreateSheet(css1));
+            Assert.IsFalse(style1.HasOrderedListPeriod);
+
+            // ピリオドあり（明示的設定）
+            var css2 = "ol { list-style-type: none; } ol > li::before { content: counter(list-item) \". \"; }";
+            var style2 = new ListStyle();
+            style2.UpdateFrom(CreateSheet(css2));
+            Assert.IsTrue(style2.HasOrderedListPeriod);
+
+            // 未設定
+            var style3 = new ListStyle();
+            style3.UpdateFrom(CreateSheet(""));
+            Assert.IsNull(style3.HasOrderedListPeriod);
+        }
+
+        [TestMethod]
         public void ApplyTo_ShouldSetPropertiesToSheet()
         {
             // テスト観点: モデルの状態がCSSシートへ正しく書き出されること
@@ -65,6 +87,30 @@ namespace PageLeaf.Tests.Models.Css.Elements
 
             Assert.AreEqual("14px", liRule.Style.GetPropertyValue("font-size"));
             Assert.AreEqual("1.6", liRule.Style.GetPropertyValue("line-height"));
+        }
+
+        [TestMethod]
+        public void ApplyTo_ShouldSetPeriodVisibility()
+        {
+            // テスト観点: HasOrderedListPeriod の値が設定されている場合でも、
+            //            ListStyle.ApplyTo 自体は疑似要素ルールを生成しないこと。
+            //            (二重定義防止のため、ルールの生成・制御は CssEditorService に一任された)
+
+            // false の場合
+            var style1 = new ListStyle { HasOrderedListPeriod = false, OrderedListMarkerType = "decimal" };
+            var sheet1 = CreateSheet("");
+            style1.ApplyTo(sheet1);
+
+            var markerRule1 = sheet1.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText.Replace(" ", "").Contains("li::before"));
+            Assert.IsNull(markerRule1, "ListStyle.ApplyTo は疑似要素ルールを生成してはならない");
+
+            // true の場合
+            var style2 = new ListStyle { HasOrderedListPeriod = true, OrderedListMarkerType = "decimal" };
+            var sheet2 = CreateSheet("");
+            style2.ApplyTo(sheet2);
+
+            var markerRule2 = sheet2.Rules.OfType<ICssStyleRule>().FirstOrDefault(r => r.SelectorText.Replace(" ", "").Contains("li::before"));
+            Assert.IsNull(markerRule2, "ListStyle.ApplyTo は疑似要素ルールを生成してはならない");
         }
     }
 }
