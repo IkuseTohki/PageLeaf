@@ -1,6 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using PageLeaf.Infrastructure.Logging;
+using PageLeaf.Models.Settings;
 using PageLeaf.Services;
 using PageLeaf.UseCases;
 using PageLeaf.ViewModels;
@@ -23,6 +25,7 @@ namespace PageLeaf
     public partial class App : Application
     {
         private ISettingsService? _settingsService;
+        private LoggingBootstrapper? _loggingBootstrapper;
 
         [DllImport("dwmapi.dll")]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
@@ -89,6 +92,10 @@ namespace PageLeaf
             // リソースの初期化（SingleFile対応）
             InitializeResources();
 
+            // ロギング設定の先行読み込み（循環依存回避のため Bootstrapper に委譲）
+            _loggingBootstrapper = new LoggingBootstrapper(BaseDirectory);
+            _loggingBootstrapper.LoadInitialSettings();
+
             // AngleSharpが色をHEX形式で出力するように設定
             Color.UseHex = true;
 
@@ -100,21 +107,21 @@ namespace PageLeaf
                     var logPath = Path.Combine(BaseDirectory, "logs", "PageLeaf-.txt");
 
                     configuration
-                        .MinimumLevel.Debug()
+                        .MinimumLevel.ControlledBy(_loggingBootstrapper.LevelSwitch)
                         .Enrich.FromLogContext()
-                        .WriteTo.File(
-                            logPath,
-                            rollingInterval: RollingInterval.Day,
-                            retainedFileCountLimit: 7,
-                            outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                        .WriteTo.Conditional(
+                            evt => _loggingBootstrapper.EnableFileLogging,
+                            wt => wt.File(
+                                logPath,
+                                rollingInterval: RollingInterval.Day,
+                                retainedFileCountLimit: 7,
+                                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                            )
                         );
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
                     // Services をDIコンテナに登録
-                    // いくつかの Service は複数の依存関係を持つが、コンストラクタが一つであり、
-                    // 全ての依存関係がDIコンテナに登録されているため、自動解決が可能。
-                    // 可読性と一貫性のため、シンプルな登録方法を採用している。
                     services.AddSingleton<IResourceExtractionService>(sp => new ResourceExtractionService(typeof(App).Assembly));
                     services.AddSingleton<IFileService, FileService>();
                     services.AddSingleton<ICssService, CssService>();
@@ -123,12 +130,12 @@ namespace PageLeaf
                     services.AddSingleton<IThemeService, ThemeService>();
                     services.AddSingleton<IDialogService, DialogService>();
                     services.AddSingleton<IMarkdownService, MarkdownService>();
-                    services.AddSingleton<IEditorService, EditorService>(); // EditorService を登録
+                    services.AddSingleton<IEditorService, EditorService>();
                     services.AddSingleton<ICssEditorService, CssEditorService>();
                     services.AddSingleton<ICssManagementService, CssManagementService>();
-                    services.AddSingleton<IImagePasteService, ImagePasteService>(); // 画像貼り付けサービス
-                    services.AddSingleton<IEditingSupportService, EditingSupportService>(); // 編集支援サービス
-                    services.AddSingleton<IWindowService, WindowService>(); // Window管理サービス
+                    services.AddSingleton<IImagePasteService, ImagePasteService>();
+                    services.AddSingleton<IEditingSupportService, EditingSupportService>();
+                    services.AddSingleton<IWindowService, WindowService>();
 
                     // UseCases
                     services.AddTransient<ISaveAsDocumentUseCase, SaveAsDocumentUseCase>();
@@ -137,12 +144,12 @@ namespace PageLeaf
                     services.AddTransient<IOpenDocumentUseCase, OpenDocumentUseCase>();
                     services.AddTransient<ILoadCssUseCase, LoadCssUseCase>();
                     services.AddTransient<ISaveCssUseCase, SaveCssUseCase>();
-                    services.AddTransient<IPasteImageUseCase, PasteImageUseCase>(); // 画像貼り付けUseCase
+                    services.AddTransient<IPasteImageUseCase, PasteImageUseCase>();
 
                     // ViewModels と Views をDIコンテナに登録
                     services.AddTransient<SettingsViewModel>();
-                    services.AddTransient<CheatSheetViewModel>(); // チートシートViewModel
-                    services.AddTransient<AboutViewModel>(); // バージョン情報ViewModel
+                    services.AddTransient<CheatSheetViewModel>();
+                    services.AddTransient<AboutViewModel>();
                     services.AddSingleton<CssEditorViewModel>();
                     services.AddSingleton<MainViewModel>();
                     services.AddSingleton<MainWindow>();
@@ -167,11 +174,16 @@ namespace PageLeaf
                 // 先に MainWindow を生成（DI経由）
                 var mainWindow = AppHost.Services.GetRequiredService<MainWindow>();
 
-                // テーマの初期適用（MainWindow 生成後なのでタイトルバーにも適用される）
+                // 設定の初期適用
                 ApplyTheme(settingsService.CurrentSettings.Appearance.Theme);
+                _loggingBootstrapper.UpdateFromSettings(settingsService.CurrentSettings.Logging);
 
-                // 設定変更時のテーマ適用
-                settingsService.SettingsChanged += (s, settings) => ApplyTheme(settings.Appearance.Theme);
+                // 設定変更時の適用
+                settingsService.SettingsChanged += (s, settings) =>
+                {
+                    ApplyTheme(settings.Appearance.Theme);
+                    _loggingBootstrapper.UpdateFromSettings(settings.Logging);
+                };
 
                 mainWindow.Show();
             }
@@ -246,9 +258,6 @@ namespace PageLeaf
             }
         }
 
-        // GetSystemTheme メソッドは ThemeService に移行したため削除可能ですが、
-        // 既存の OnUserPreferenceChanged 等で使われている場合は適宜修正します。
-
         /// <summary>
         /// ウィンドウのタイトルバーのテーマを更新します。
         /// </summary>
@@ -279,6 +288,7 @@ namespace PageLeaf
                 MainWindow.SourceInitialized += handler;
             }
         }
+
         /// <summary>
         /// アプリケーション全体でハンドルされなかった例外を補足し、ログに記録します。
         /// </summary>
@@ -297,8 +307,6 @@ namespace PageLeaf
             DispatcherUnhandledException += (sender, e) =>
             {
                 HandleFatalException(e.Exception);
-                // アプリケーションを終了させるため、ここでは処理済みとはせず、
-                // HandleFatalException 内で終了処理を促すか、e.Handled を false のままにする。
                 e.Handled = true;
             };
         }

@@ -305,14 +305,14 @@ namespace PageLeaf.ViewModels
 
         private void ExecuteNewDocument(object? parameter)
         {
-            _logger.LogInformation("NewDocumentCommand executed.");
+            _logger.LogDebug("NewDocumentCommand executed.");
             _fileService.StopMonitoring();
             _newDocumentUseCase.Execute();
         }
 
         private void ExecuteOpenFile(object? parameter)
         {
-            _logger.LogInformation("OpenFileCommand executed.");
+            _logger.LogDebug("OpenFileCommand executed.");
             _openDocumentUseCase.Execute();
             ApplyDocumentMetadata();
 
@@ -324,7 +324,7 @@ namespace PageLeaf.ViewModels
 
         private void ExecuteSaveFile(object? parameter)
         {
-            _logger.LogInformation("ExecuteSaveFile command triggered.");
+            _logger.LogDebug("ExecuteSaveFile command triggered.");
             _saveDocumentUseCase.Execute();
 
             if (!string.IsNullOrEmpty(Editor.CurrentDocument.FilePath))
@@ -335,7 +335,7 @@ namespace PageLeaf.ViewModels
 
         private void ExecuteSaveAsFile(object? parameter)
         {
-            _logger.LogInformation("ExecuteSaveAsFile command triggered.");
+            _logger.LogDebug("ExecuteSaveAsFile command triggered.");
             _saveAsDocumentUseCase.Execute();
 
             if (!string.IsNullOrEmpty(Editor.CurrentDocument.FilePath))
@@ -379,7 +379,7 @@ namespace PageLeaf.ViewModels
         }
         private async void ExecutePasteImage(object? parameter)
         {
-            _logger.LogInformation("PasteImageCommand executed.");
+            _logger.LogDebug("PasteImageCommand executed.");
             var filePath = Editor.CurrentDocument.FilePath ?? string.Empty;
             await _pasteImageUseCase.ExecuteAsync(filePath);
         }
@@ -388,7 +388,7 @@ namespace PageLeaf.ViewModels
         {
             if (parameter is string filePath)
             {
-                _logger.LogInformation("OpenFileByPathCommand executed for: {FilePath}", filePath);
+                _logger.LogDebug("OpenFileByPathCommand executed for: {FilePath}", filePath);
                 _openDocumentUseCase.OpenPath(filePath);
                 ApplyDocumentMetadata();
 

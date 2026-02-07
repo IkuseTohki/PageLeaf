@@ -238,7 +238,7 @@ namespace PageLeaf.Services
 
                 if (charsetDetector.Charset != null)
                 {
-                    _logger.LogInformation("Detected charset: {Charset}, Confidence: {Confidence}", charsetDetector.Charset, charsetDetector.Confidence);
+                    _logger.LogDebug("Detected charset: {Charset}, Confidence: {Confidence}", charsetDetector.Charset, charsetDetector.Confidence);
                     try
                     {
                         return Encoding.GetEncoding(charsetDetector.Charset);
@@ -252,7 +252,7 @@ namespace PageLeaf.Services
                 }
                 else
                 {
-                    _logger.LogInformation("Charset detection failed. Falling back to UTF-8.");
+                    _logger.LogDebug("Charset detection failed. Falling back to UTF-8.");
                     // 判別できなかった場合もデフォルト（UTF-8）にフォールバック
                     return Encoding.UTF8;
                 }

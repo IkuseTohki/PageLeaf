@@ -184,6 +184,22 @@ namespace PageLeaf.Models.Settings
     }
 
     /// <summary>
+    /// ログ出力に関する設定を保持するモデルクラスです。
+    /// </summary>
+    public class LoggingSettings
+    {
+        /// <summary>
+        /// ログ出力レベル。
+        /// </summary>
+        public LogOutputLevel MinimumLevel { get; set; } = LogOutputLevel.Standard;
+
+        /// <summary>
+        /// ファイルへのログ出力を有効にするかどうか。
+        /// </summary>
+        public bool EnableFileLogging { get; set; } = true;
+    }
+
+    /// <summary>
     /// アプリケーションの全設定を統合するルートモデルクラスです。
     /// </summary>
     public class ApplicationSettings
@@ -207,6 +223,11 @@ namespace PageLeaf.Models.Settings
         /// 表示に関する設定。
         /// </summary>
         public ViewSettings View { get; set; } = new ViewSettings();
+
+        /// <summary>
+        /// ログ出力に関する設定。
+        /// </summary>
+        public LoggingSettings Logging { get; set; } = new LoggingSettings();
 
         /// <summary>
         /// デフォルトコンストラクタ。

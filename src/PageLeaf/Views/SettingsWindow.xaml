@@ -53,6 +53,10 @@
                                  IsChecked="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Code}}"
                                  Style="{StaticResource SidebarMenuItemStyle}"
                                  Tag="🧩" />
+                    <RadioButton Content="診断・ログ"
+                                 IsChecked="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Diagnostic}}"
+                                 Style="{StaticResource SidebarMenuItemStyle}"
+                                 Tag="🛠️" />
                 </StackPanel>
             </Border>
 
@@ -213,6 +217,22 @@
                         <TextBlock Margin="5,15,0,0"
                                    Style="{StaticResource AnnotationTextStyle}"
                                    Text="※CDNを選択すると、インターネット経由で最新のライブラリを読み込みます（オフライン時は表示できません）。" />
+                    </StackPanel>
+
+                    <!-- Diagnostic Settings -->
+                    <StackPanel Visibility="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Diagnostic}}">
+                        <Label Content="診断・ログ設定" Style="{StaticResource FirstSectionHeaderLabelStyle}" />
+
+                        <Label Content="ログ出力レベル" Style="{StaticResource FormLabelStyle}" />
+                        <ComboBox ItemsSource="{Binding AvailableLogLevels}"
+                                  SelectedItem="{Binding MinimumLogLevel}"
+                                  Style="{StaticResource FormComboBoxMediumStyle}" />
+                        <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※出力されるログの最小レベルを指定します。" />
+
+                        <CheckBox Content="ログをファイルに保存する"
+                                  IsChecked="{Binding EnableFileLogging}"
+                                  Style="{StaticResource FormCheckBoxStyle}" />
+                        <TextBlock Style="{StaticResource AnnotationTextStyle}" Text="※ログを logs フォルダ内のファイルに保存します。" />
                     </StackPanel>
                 </Grid>
             </ScrollViewer>

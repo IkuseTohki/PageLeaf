@@ -22,7 +22,8 @@ namespace PageLeaf.ViewModels
         Appearance,
         Editor,
         Image,
-        Code
+        Code,
+        Diagnostic
     }
 
     /// <summary>
@@ -43,6 +44,8 @@ namespace PageLeaf.ViewModels
         private bool _renumberFootnotesOnSave = true;
         private ResourceSource _libraryResourceSource = ResourceSource.Local;
         private AppTheme _theme = AppTheme.System;
+        private LogOutputLevel _minimumLogLevel = LogOutputLevel.Standard;
+        private bool _enableFileLogging = true;
         private SettingsCategory _currentCategory = SettingsCategory.Appearance;
 
         /// <summary>
@@ -62,6 +65,29 @@ namespace PageLeaf.ViewModels
             get => _theme;
             set { if (_theme != value) { _theme = value; OnPropertyChanged(); } }
         }
+
+        /// <summary>
+        /// ログ出力レベル。
+        /// </summary>
+        public LogOutputLevel MinimumLogLevel
+        {
+            get => _minimumLogLevel;
+            set { if (_minimumLogLevel != value) { _minimumLogLevel = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
+        /// ファイルへのログ出力を有効にするかどうか。
+        /// </summary>
+        public bool EnableFileLogging
+        {
+            get => _enableFileLogging;
+            set { if (_enableFileLogging != value) { _enableFileLogging = value; OnPropertyChanged(); } }
+        }
+
+        /// <summary>
+        /// 利用可能なログレベルのリスト。
+        /// </summary>
+        public ObservableCollection<LogOutputLevel> AvailableLogLevels { get; } = new ObservableCollection<LogOutputLevel>((LogOutputLevel[])Enum.GetValues(typeof(LogOutputLevel)));
 
         /// <summary>
         /// プレビューの最上部にフロントマターのタイトルを表示するかどうか。
@@ -240,6 +266,8 @@ namespace PageLeaf.ViewModels
             _renumberFootnotesOnSave = settings.Editor.RenumberFootnotesOnSave;
             _libraryResourceSource = settings.Appearance.LibraryResourceSource;
             _theme = settings.Appearance.Theme;
+            _minimumLogLevel = settings.Logging.MinimumLevel;
+            _enableFileLogging = settings.Logging.EnableFileLogging;
 
             // 追加フロントマタープロパティのロード
             DefaultFrontMatterProperties.Clear();
@@ -347,6 +375,8 @@ namespace PageLeaf.ViewModels
             settings.Editor.RenumberFootnotesOnSave = RenumberFootnotesOnSave;
             settings.Appearance.LibraryResourceSource = LibraryResourceSource;
             settings.Appearance.Theme = Theme;
+            settings.Logging.MinimumLevel = MinimumLogLevel;
+            settings.Logging.EnableFileLogging = EnableFileLogging;
 
             // 追加フロントマタープロパティの保存 (順序維持)
             settings.Editor.AdditionalFrontMatter = DefaultFrontMatterProperties

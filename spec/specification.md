@@ -18,6 +18,7 @@ Markdown エディターとしての機能も兼ね備えており、スタイ�
 - **[ファイル操作・管理](functional/file_management.md)**: 新規作成、保存、外部変更検知など。
 - **[CSS 編集・管理](functional/css_editor.md)**: GUI によるスタイル編集、単位変換、ファイル管理。
 - **[YAML フロントマター](functional/frontmatter.md)**: メタデータ処理、予約プロパティ、プレビュー制御。
+- **[システム設定](functional/system_settings.md)**: ログ出力設定、アプリケーションの動作環境設定。
 
 ### 2.2. UI/UX 仕様 (User Interface)
 
