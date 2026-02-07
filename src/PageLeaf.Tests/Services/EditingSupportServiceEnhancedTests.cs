@@ -167,24 +167,6 @@ namespace PageLeaf.Tests.Services
         #region String Construction
 
         [TestMethod]
-        public void GetCodeBlockCompletion_ShouldReturnCorrectFormat()
-        {
-            // テスト観点: コードブロック補完用の文字列が正しい形式（改行、インデント、閉じ記号）で生成されること。
-            string indent = "    ";
-            string expected = "\r\n    \r\n    ```";
-            Assert.AreEqual(expected, _service.GetCodeBlockCompletion(indent));
-        }
-
-        [TestMethod]
-        public void GetCodeBlockCompletion_ShouldHandleEmptyIndent()
-        {
-            // テスト観点: インデントがない場合でも正しく補完されること。
-            string indent = "";
-            string expected = "\r\n\r\n```";
-            Assert.AreEqual(expected, _service.GetCodeBlockCompletion(indent));
-        }
-
-        [TestMethod]
         public void GetShiftEnterInsertion_ShouldReturnPageBreakAndNewline()
         {
             // テスト観点: 改ページタグの後に改行が含まれていること。

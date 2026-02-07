@@ -30,13 +30,6 @@ namespace PageLeaf.Services
         char? GetPairCharacter(char input);
 
         /// <summary>
-        /// 指定された行がコードブロックの開始（バックティック3つ）であるかどうかを判定します。
-        /// </summary>
-        /// <param name="currentLine">判定対象の行文字列。</param>
-        /// <returns>コードブロックの開始であれば true。</returns>
-        bool IsCodeBlockStart(string currentLine);
-
-        /// <summary>
         /// 指定された行の見出しレベルを切り替えます。
         /// </summary>
         /// <param name="line">対象の行。</param>
@@ -87,13 +80,6 @@ namespace PageLeaf.Services
         /// <param name="line">対象の行。</param>
         /// <returns>整形後の行。</returns>
         string FormatTableLine(string line);
-
-        /// <summary>
-        /// コードブロック開始行に対する補完文字列（閉じるための文字列）を取得します。
-        /// </summary>
-        /// <param name="indent">現在の行のインデント。</param>
-        /// <returns>挿入すべき補完文字列。</returns>
-        string GetCodeBlockCompletion(string indent);
 
         /// <summary>
         /// Shift+Enter（強制改ページ）時に挿入すべき文字列を取得します。

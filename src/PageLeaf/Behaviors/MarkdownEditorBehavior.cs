@@ -643,25 +643,7 @@ namespace PageLeaf.Behaviors
 
             var indent = service.GetAutoIndent(currentLine);
 
-            // コードブロック開始の判定
-            if (service.IsCodeBlockStart(currentLine))
-            {
-                e.Handled = true;
 
-                // Service から補完文字列を取得
-                var closingText = service.GetCodeBlockCompletion(indent);
-                textBox.SelectedText = closingText;
-
-                // カーソルを中間の行に移動
-                // 注: Behavior は「移動先」を知る必要があるが、それは挿入テキストの構造に依存する。
-                // 厳密にはこれも Service から取得すべきだが、ここでは文字列の構造から計算する。
-                // 挿入文字列は "\r\n" + indent + "\r\n" + ...
-                var firstLineBreak = "\r\n" + indent;
-                textBox.CaretIndex = textBox.SelectionStart + firstLineBreak.Length;
-                textBox.SelectionLength = 0;
-                ScrollToCaretLogic(textBox);
-                return;
-            }
 
             int lineOffset = caretIndex - lineStart;
 
@@ -981,17 +963,6 @@ namespace PageLeaf.Behaviors
             }
 
             var indent = service.GetAutoIndent(currentLine);
-
-            if (service.IsCodeBlockStart(currentLine))
-            {
-                e.Handled = true;
-                string closing = service.GetCodeBlockCompletion(indent);
-                editor.Document.Insert(editor.CaretOffset, closing);
-                // Move cursor to middle line
-                editor.CaretOffset = line.EndOffset + Environment.NewLine.Length + indent.Length;
-                ScrollToLineWithMargin(editor);
-                return;
-            }
 
             int lineOffset = editor.CaretOffset - line.Offset;
 

@@ -23,8 +23,6 @@ namespace PageLeaf.Services
         private static readonly Regex TaskListRegex = new Regex(@"^(\s*)([*+-])\s+\[([ xX])\]\s+");
         // 引用: 任意の空白 + > + (任意の >) + 任意の空白
         private static readonly Regex BlockquoteRegex = new Regex(@"^(\s*)(>+)(\s*)");
-        // コードブロック開始: 任意の空白 + バックティックまたはチルダ3つ以上
-        private static readonly Regex CodeBlockStartRegex = new Regex(@"^(\s*)(?:`{3,}|~{3,})");
 
         /// <summary>
         /// 指定された行のインデント（先頭の空白文字列）を取得します。
@@ -117,21 +115,6 @@ namespace PageLeaf.Services
             return null;
         }
 
-        // ... (GetPairCharacter, IsCodeBlockStart, GetIndentString, DecreaseIndent, IncreaseIndent, ToggleHeading, ConvertToMarkdownTable, GetPageBreakString implementation kept same) ...
-        // Note: I will only replace the top part and append new methods,
-        // using "old_string" to cover the top part of the file.
-        // Wait, "replace" tool requires exact match.
-        // It's safer to read the file fully and replace the specific blocks or use larger context.
-        // I'll replace the regex definitions and GetAutoListMarker method.
-        // And append the new methods at the end.
-
-        // Actually, replacing the whole file content via `write_file` might be easier if I had the full content.
-        // But `replace` is safer to preserve other methods I didn't read fully?
-        // I read fully in previous turn.
-
-        // Let's use `replace` for Regex definitions and GetAutoListMarker first.
-
-
         /// <summary>
         /// 指定された文字に対して、自動補完すべき対となる文字を取得します。
         /// </summary>
@@ -148,17 +131,6 @@ namespace PageLeaf.Services
                 '\'' => '\'',
                 _ => (char?)null
             };
-        }
-
-        /// <summary>
-        /// 指定された行がコードブロックの開始（バックティック3つ）であるかどうかを判定します。
-        /// </summary>
-        /// <param name="currentLine">判定対象の行文字列。</param>
-        /// <returns>コードブロックの開始であれば true。</returns>
-        public bool IsCodeBlockStart(string currentLine)
-        {
-            if (string.IsNullOrEmpty(currentLine)) return false;
-            return CodeBlockStartRegex.IsMatch(currentLine);
         }
 
         /// <summary>
@@ -339,13 +311,6 @@ namespace PageLeaf.Services
             var currentIndent = GetAutoIndent(line);
             var text = line.TrimStart();
             return $"{currentIndent}- [ ] {text}";
-        }
-
-        public string GetCodeBlockCompletion(string indent)
-        {
-            // 構成: \r\n (インデント) \r\n (インデント) ```
-            // これにより、カーソルを中間の行に配置する余地を作る
-            return "\r\n" + indent + "\r\n" + indent + "```";
         }
 
         public string GetShiftEnterInsertion()
