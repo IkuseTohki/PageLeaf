@@ -116,5 +116,12 @@ namespace PageLeaf.Services
         /// <param name="currentOffset">現在の行内オフセット。</param>
         /// <returns>前のセルの開始オフセット。前がない場合は 0。</returns>
         int GetPreviousCellOffset(string line, int currentOffset);
+
+        /// <summary>
+        /// テキストの末尾が空行（改行で終わる状態）であることを保証します。
+        /// </summary>
+        /// <param name="text">対象のテキスト。</param>
+        /// <returns>末尾に空行が追加されたテキスト。</returns>
+        string EnforceEmptyLineAtEnd(string text);
     }
 }

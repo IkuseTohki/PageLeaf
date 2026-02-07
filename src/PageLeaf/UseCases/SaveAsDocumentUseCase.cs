@@ -16,6 +16,7 @@ namespace PageLeaf.UseCases
         private readonly IEditorService _editorService;
         private readonly IFileService _fileService;
         private readonly IDialogService _dialogService;
+        private readonly IEditingSupportService _editingSupportService;
 
         /// <summary>
         /// <see cref="SaveAsDocumentUseCase"/> クラスの新しいインスタンスを初期化します。
@@ -23,11 +24,13 @@ namespace PageLeaf.UseCases
         /// <param name="editorService">エディタサービス。</param>
         /// <param name="fileService">ファイルサービス。</param>
         /// <param name="dialogService">ダイアログサービス。</param>
-        public SaveAsDocumentUseCase(IEditorService editorService, IFileService fileService, IDialogService dialogService)
+        /// <param name="editingSupportService">編集支援サービス。</param>
+        public SaveAsDocumentUseCase(IEditorService editorService, IFileService fileService, IDialogService dialogService, IEditingSupportService editingSupportService)
         {
             _editorService = editorService;
             _fileService = fileService;
             _dialogService = dialogService;
+            _editingSupportService = editingSupportService;
         }
 
         /// <inheritdoc />
@@ -51,7 +54,10 @@ namespace PageLeaf.UseCases
 
                 // タイムスタンプ更新とシリアライズ
                 document.UpdateTimestamp();
-                var fullContent = document.ToFullString();
+                var fullContent = document.ToFullString() ?? string.Empty;
+
+                // 末尾の空行を強制する
+                fullContent = _editingSupportService.EnforceEmptyLineAtEnd(fullContent);
 
                 var saveTarget = new MarkdownDocument
                 {

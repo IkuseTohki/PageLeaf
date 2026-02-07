@@ -17,6 +17,7 @@ namespace PageLeaf.UseCases
         private readonly IFileService _fileService;
         private readonly ISaveAsDocumentUseCase _saveAsDocumentUseCase;
         private readonly ISettingsService _settingsService;
+        private readonly IEditingSupportService _editingSupportService;
 
         /// <summary>
         /// <see cref="SaveDocumentUseCase"/> クラスの新しいインスタンスを初期化します。
@@ -25,12 +26,14 @@ namespace PageLeaf.UseCases
         /// <param name="fileService">ファイルサービス。</param>
         /// <param name="saveAsDocumentUseCase">名前を付けて保存ユースケース。</param>
         /// <param name="settingsService">設定サービス。</param>
-        public SaveDocumentUseCase(IEditorService editorService, IFileService fileService, ISaveAsDocumentUseCase saveAsDocumentUseCase, ISettingsService settingsService)
+        /// <param name="editingSupportService">編集支援サービス。</param>
+        public SaveDocumentUseCase(IEditorService editorService, IFileService fileService, ISaveAsDocumentUseCase saveAsDocumentUseCase, ISettingsService settingsService, IEditingSupportService editingSupportService)
         {
             _editorService = editorService;
             _fileService = fileService;
             _saveAsDocumentUseCase = saveAsDocumentUseCase;
             _settingsService = settingsService;
+            _editingSupportService = editingSupportService;
         }
 
         /// <inheritdoc />
@@ -59,7 +62,10 @@ namespace PageLeaf.UseCases
                 }
 
                 // 保存用に結合されたテキストを取得
-                var fullContent = document.ToFullString();
+                var fullContent = document.ToFullString() ?? string.Empty;
+
+                // 末尾の空行を強制する
+                fullContent = _editingSupportService.EnforceEmptyLineAtEnd(fullContent);
 
                 // FileService.Save は document オブジェクトを受け取る設計のため、
                 // 一時的に保存用のクローンを作成して渡す

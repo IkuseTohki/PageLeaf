@@ -228,5 +228,42 @@ namespace PageLeaf.Tests.Services
         }
 
         #endregion
+
+        [TestMethod]
+        public void EnforceEmptyLineAtEnd_ShouldAddNewline_WhenMissing()
+        {
+            // テスト観点: 末尾に改行がない場合、新しく改行が追加されること。
+            var service = new EditingSupportService();
+            var input = "hoge";
+            var expected = "hoge" + Environment.NewLine;
+
+            var result = service.EnforceEmptyLineAtEnd(input);
+
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestMethod]
+        public void EnforceEmptyLineAtEnd_ShouldNotAddNewline_WhenAlreadyPresent()
+        {
+            // テスト観点: すでに末尾が改行で終わっている場合、何も追加されないこと。
+            var service = new EditingSupportService();
+            var input = "hoge" + Environment.NewLine;
+
+            var result = service.EnforceEmptyLineAtEnd(input);
+
+            Assert.AreEqual(input, result);
+        }
+
+        [TestMethod]
+        public void EnforceEmptyLineAtEnd_ShouldHandleNull()
+        {
+            // テスト観点: 入力が null の場合、改行のみが返されること。
+            var service = new EditingSupportService();
+            string input = null!;
+
+            var result = service.EnforceEmptyLineAtEnd(input);
+
+            Assert.AreEqual(Environment.NewLine, result);
+        }
     }
 }

@@ -17,6 +17,7 @@ namespace PageLeaf.Tests.UseCases
         private Mock<IEditorService> _editorServiceMock = null!;
         private Mock<IFileService> _fileServiceMock = null!;
         private Mock<IDialogService> _dialogServiceMock = null!;
+        private Mock<IEditingSupportService> _editingSupportServiceMock = null!;
         private SaveAsDocumentUseCase _useCase = null!;
 
         [TestInitialize]
@@ -25,7 +26,34 @@ namespace PageLeaf.Tests.UseCases
             _editorServiceMock = new Mock<IEditorService>();
             _fileServiceMock = new Mock<IFileService>();
             _dialogServiceMock = new Mock<IDialogService>();
-            _useCase = new SaveAsDocumentUseCase(_editorServiceMock.Object, _fileServiceMock.Object, _dialogServiceMock.Object);
+            _editingSupportServiceMock = new Mock<IEditingSupportService>();
+
+            // デフォルトではそのまま返す
+            _editingSupportServiceMock.Setup(x => x.EnforceEmptyLineAtEnd(It.IsAny<string>())).Returns<string>(s => s);
+
+            _useCase = new SaveAsDocumentUseCase(
+                _editorServiceMock.Object,
+                _fileServiceMock.Object,
+                _dialogServiceMock.Object,
+                _editingSupportServiceMock.Object);
+        }
+
+        [TestMethod]
+        public void Execute_ShouldEnforceEmptyLineAtEnd()
+        {
+            // テスト観点: 名前を付けて保存時に IEditingSupportService.EnforceEmptyLineAtEnd が呼び出されることを確認する。
+            // Arrange
+            var doc = new MarkdownDocument { FilePath = "old.md", Content = "No newline", IsDirty = true };
+            _editorServiceMock.Setup(x => x.CurrentDocument).Returns(doc);
+            _dialogServiceMock.Setup(x => x.ShowSaveFileDialog(It.IsAny<string>(), It.IsAny<string>(), "old.md")).Returns("new.md");
+            _editingSupportServiceMock.Setup(x => x.EnforceEmptyLineAtEnd(It.IsAny<string>())).Returns("No newline\n");
+
+            // Act
+            _useCase.Execute();
+
+            // Assert
+            _editingSupportServiceMock.Verify(x => x.EnforceEmptyLineAtEnd(It.IsAny<string>()), Times.Once);
+            _fileServiceMock.Verify(x => x.Save(It.Is<MarkdownDocument>(d => d.Content == "No newline\n")), Times.Once);
         }
 
         [TestMethod]

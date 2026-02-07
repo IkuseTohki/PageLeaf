@@ -82,6 +82,9 @@ namespace PageLeaf.Behaviors
                     editor.PreviewKeyDown += OnPreviewKeyDown;
                     editor.PreviewTextInput += OnPreviewTextInput;
 
+                    // 文末以降のスクロールを許可する
+                    editor.Options.AllowScrollBelowDocument = true;
+
                     // テーマ変更イベントの購読
                     if (_settingsService != null)
                     {
@@ -170,6 +173,7 @@ namespace PageLeaf.Behaviors
                         textBox.SelectedText = input.ToString() + pair.Value.ToString();
                         textBox.CaretIndex = caretIndex + 1;
                     }
+                    ScrollToCaretLogic(textBox);
                 }
             }
             else if (sender is TextEditor editor)
@@ -190,6 +194,7 @@ namespace PageLeaf.Behaviors
                         editor.Document.Insert(caretOffset, input.ToString() + pair.Value.ToString());
                         editor.CaretOffset = caretOffset + 1;
                     }
+                    ScrollToLineWithMargin(editor);
                 }
             }
         }
@@ -220,9 +225,73 @@ namespace PageLeaf.Behaviors
             }
         }
 
+        private static void ScrollToCaretLogic(TextBox textBox)
+        {
+            var rect = textBox.GetRectFromCharacterIndex(textBox.CaretIndex);
+            if (rect.IsEmpty) return;
+
+            // 1行の高さをおおよそ計算（マージン用）
+            double lineHeight = textBox.FontSize * 1.5;
+            double scrolloff = 5;
+            double margin = lineHeight * scrolloff;
+
+            // ビューポートに対してマージンが大きすぎる場合の調整
+            if (margin * 2 > textBox.ViewportHeight)
+            {
+                margin = Math.Max(0, textBox.ViewportHeight / 4);
+            }
+
+            if (rect.Top < margin)
+            {
+                // 上部マージン不足：上にスクロール
+                textBox.ScrollToVerticalOffset(Math.Max(0, textBox.VerticalOffset + rect.Top - margin));
+            }
+            else if (rect.Bottom > textBox.ViewportHeight - margin)
+            {
+                // 下部マージン不足：下にスクロール
+                textBox.ScrollToVerticalOffset(textBox.VerticalOffset + rect.Bottom - textBox.ViewportHeight + margin);
+            }
+        }
+
+        private static void ScrollToLineWithMargin(TextEditor editor)
+        {
+            var textView = editor.TextArea.TextView;
+            double lineHeight = textView.DefaultLineHeight;
+            double scrolloff = 5;
+            double margin = lineHeight * scrolloff;
+
+            if (margin * 2 > textView.ActualHeight)
+            {
+                margin = textView.ActualHeight / 4;
+            }
+
+            var caret = editor.TextArea.Caret;
+            var rect = caret.CalculateCaretRectangle();
+
+            // ビューポート相対座標に変換
+            double top = rect.Top - editor.VerticalOffset;
+            double bottom = rect.Bottom - editor.VerticalOffset;
+
+            if (top < margin)
+            {
+                editor.ScrollToVerticalOffset(Math.Max(0, editor.VerticalOffset + top - margin));
+            }
+            else if (bottom > textView.ActualHeight - margin)
+            {
+                // AllowScrollBelowDocument = true のおかげで、文末でも下にスクロールしてマージンを確保できる
+                editor.ScrollToVerticalOffset(editor.VerticalOffset + bottom - textView.ActualHeight + margin);
+            }
+        }
+
         #region TextBox Handlers
         private static void HandleTextBoxKeyDown(TextBox textBox, KeyEventArgs e)
         {
+            // 上下左右、Backspaceなどの操作後にもマージンを維持する
+            if (e.Key == Key.Up || e.Key == Key.Down || e.Key == Key.Left || e.Key == Key.Right || e.Key == Key.Back || e.Key == Key.Delete)
+            {
+                textBox.Dispatcher.BeginInvoke(new Action(() => ScrollToCaretLogic(textBox)), System.Windows.Threading.DispatcherPriority.Render);
+            }
+
             // Enterキーの処理
             if (e.Key == Key.Enter)
             {
@@ -282,6 +351,7 @@ namespace PageLeaf.Behaviors
             textBox.SelectedText = newLine + lineBreaks;
             textBox.CaretIndex = lineStart + newLine.Length;
             textBox.SelectionLength = 0;
+            ScrollToCaretLogic(textBox);
         }
 
         private static void HandleLink(TextBox textBox, KeyEventArgs e)
@@ -303,6 +373,7 @@ namespace PageLeaf.Behaviors
                 textBox.SelectedText = "[]()";
                 textBox.CaretIndex = start + 1;
             }
+            ScrollToCaretLogic(textBox);
         }
 
         /// <summary>
@@ -327,6 +398,7 @@ namespace PageLeaf.Behaviors
                 textBox.SelectedText = marker + marker;
                 textBox.CaretIndex = start + markerLen;
             }
+            ScrollToCaretLogic(textBox);
         }
 
         private static void HandlePaste(TextBox textBox, KeyEventArgs e)
@@ -357,6 +429,7 @@ namespace PageLeaf.Behaviors
 
             textBox.SelectionLength = 0;
             textBox.CaretIndex = textBox.SelectionStart + (markdownTable?.Length ?? text.Length);
+            ScrollToCaretLogic(textBox);
         }
 
         private static void HandleTabKey(TextBox textBox, KeyEventArgs e)
@@ -403,6 +476,7 @@ namespace PageLeaf.Behaviors
                     if (len > 0 && nextOffset + len - 1 < lineWithoutBreaks.Length && lineWithoutBreaks[nextOffset + len - 1] == ' ') len--;
                     if (len > 0) textBox.Select(start, len);
                 }
+                ScrollToCaretLogic(textBox);
                 return;
             }
 
@@ -448,6 +522,7 @@ namespace PageLeaf.Behaviors
                     textBox.SelectionLength = 0;
                 }
             }
+            ScrollToCaretLogic(textBox);
         }
 
         private static void HandleShiftEnter(TextBox textBox, KeyEventArgs e)
@@ -466,6 +541,7 @@ namespace PageLeaf.Behaviors
             // カーソルを挿入後の位置へ
             textBox.CaretIndex = caretIndex + insertText.Length;
             textBox.SelectionLength = 0;
+            ScrollToCaretLogic(textBox);
         }
 
         private static void HandleEnterKey(TextBox textBox, KeyEventArgs e)
@@ -513,6 +589,7 @@ namespace PageLeaf.Behaviors
                 var firstLineBreak = "\r\n" + indent;
                 textBox.CaretIndex = textBox.SelectionStart + firstLineBreak.Length;
                 textBox.SelectionLength = 0;
+                ScrollToCaretLogic(textBox);
                 return;
             }
 
@@ -539,6 +616,9 @@ namespace PageLeaf.Behaviors
                     }
                     textBox.CaretIndex = textBox.SelectionStart + textBox.SelectionLength;
                     textBox.SelectionLength = 0;
+
+                    // カーソルを確実に表示領域内に保つ
+                    ScrollToCaretLogic(textBox);
                     return;
                 }
             }
@@ -562,6 +642,9 @@ namespace PageLeaf.Behaviors
                     }
                     textBox.CaretIndex = textBox.SelectionStart + textBox.SelectionLength;
                     textBox.SelectionLength = 0;
+
+                    // カーソルを確実に表示領域内に保つ
+                    ScrollToCaretLogic(textBox);
                 }
             }
             else if (lineOffset == 0)
@@ -571,6 +654,18 @@ namespace PageLeaf.Behaviors
                 textBox.SelectedText = "\r\n";
                 textBox.CaretIndex = textBox.SelectionStart + textBox.SelectionLength;
                 textBox.SelectionLength = 0;
+
+                // カーソルを確実に表示領域内に保つ
+                ScrollToCaretLogic(textBox);
+            }
+            else if (caretIndex >= textBox.Text.Length)
+            {
+                // 文末での単純なEnter
+                e.Handled = true;
+                textBox.SelectedText = "\r\n";
+                textBox.CaretIndex = textBox.SelectionStart + textBox.SelectionLength;
+                textBox.SelectionLength = 0;
+                ScrollToCaretLogic(textBox);
             }
         }
 
@@ -592,12 +687,19 @@ namespace PageLeaf.Behaviors
             string lineBreaks = currentLine.Substring(lineWithoutBreaks.Length);
             textBox.SelectedText = newLine + lineBreaks;
             textBox.CaretIndex = lineStart + newLine.Length;
+            ScrollToCaretLogic(textBox);
         }
         #endregion
 
         #region TextEditor Handlers
         private static void HandleTextEditorKeyDown(TextEditor editor, KeyEventArgs e)
         {
+            // 上下左右、Backspaceなどの操作後にもマージンを維持する
+            if (e.Key == Key.Up || e.Key == Key.Down || e.Key == Key.Left || e.Key == Key.Right || e.Key == Key.Back || e.Key == Key.Delete)
+            {
+                editor.Dispatcher.BeginInvoke(new Action(() => ScrollToLineWithMargin(editor)), System.Windows.Threading.DispatcherPriority.Render);
+            }
+
             if (e.Key == Key.Enter)
             {
                 if (Keyboard.Modifiers == ModifierKeys.Shift) HandleShiftEnter(editor, e);
@@ -638,6 +740,7 @@ namespace PageLeaf.Behaviors
 
             editor.Document.Replace(line.Offset, line.Length, newLine);
             editor.CaretOffset = line.Offset + newLine.Length;
+            ScrollToLineWithMargin(editor);
         }
 
         private static void HandleLink(TextEditor editor, KeyEventArgs e)
@@ -654,6 +757,7 @@ namespace PageLeaf.Behaviors
                 editor.Document.Insert(editor.CaretOffset, "[]()");
                 editor.CaretOffset -= 3;
             }
+            ScrollToLineWithMargin(editor);
         }
 
         private static void SurroundSelection(TextEditor editor, string marker)
@@ -672,6 +776,7 @@ namespace PageLeaf.Behaviors
                 editor.Document.Insert(editor.CaretOffset, marker + marker);
                 editor.CaretOffset -= marker.Length;
             }
+            ScrollToLineWithMargin(editor);
         }
 
         private static void HandlePaste(TextEditor editor, KeyEventArgs e)
@@ -695,6 +800,7 @@ namespace PageLeaf.Behaviors
             {
                 editor.Document.Replace(editor.SelectionStart, editor.SelectionLength, text);
             }
+            ScrollToLineWithMargin(editor);
         }
 
         private static void HandleTabKey(TextEditor editor, KeyEventArgs e)
@@ -745,6 +851,7 @@ namespace PageLeaf.Behaviors
                         if (len > 0) editor.Select(start, len);
                     }
                 }
+                ScrollToLineWithMargin(editor);
                 return;
             }
 
@@ -771,6 +878,7 @@ namespace PageLeaf.Behaviors
                     editor.Document.Insert(editor.CaretOffset, indent);
                 }
             }
+            ScrollToLineWithMargin(editor);
         }
 
         private static void HandleShiftEnter(TextEditor editor, KeyEventArgs e)
@@ -780,6 +888,7 @@ namespace PageLeaf.Behaviors
             e.Handled = true;
             string insertText = service.GetShiftEnterInsertion();
             editor.Document.Insert(editor.CaretOffset, insertText);
+            ScrollToLineWithMargin(editor);
         }
 
         private static void HandleEnterKey(TextEditor editor, KeyEventArgs e)
@@ -811,6 +920,7 @@ namespace PageLeaf.Behaviors
                 editor.Document.Insert(editor.CaretOffset, closing);
                 // Move cursor to middle line
                 editor.CaretOffset = line.EndOffset + Environment.NewLine.Length + indent.Length;
+                ScrollToLineWithMargin(editor);
                 return;
             }
 
@@ -832,6 +942,9 @@ namespace PageLeaf.Behaviors
                         editor.Document.Insert(editor.CaretOffset, Environment.NewLine + listMarker);
                     }
                 }
+
+                // カーソルを表示領域内に保つ
+                ScrollToLineWithMargin(editor);
                 return;
             }
 
@@ -851,6 +964,9 @@ namespace PageLeaf.Behaviors
                         // コンテンツ途中でのEnter: 通常のオートインデント
                         editor.Document.Insert(editor.CaretOffset, Environment.NewLine + indent);
                     }
+
+                    // カーソルを表示領域内に保つ
+                    ScrollToLineWithMargin(editor);
                 }
             }
             else if (lineOffset == 0)
@@ -858,6 +974,16 @@ namespace PageLeaf.Behaviors
                 // 絶対行頭でのEnter: インデントを引き継がず、純粋な改行のみを挿入する
                 e.Handled = true;
                 editor.Document.Insert(editor.CaretOffset, Environment.NewLine);
+
+                // カーソルを表示領域内に保つ
+                ScrollToLineWithMargin(editor);
+            }
+            else if (editor.CaretOffset >= editor.Document.TextLength)
+            {
+                // 文末での単純なEnter
+                e.Handled = true;
+                editor.Document.Insert(editor.CaretOffset, Environment.NewLine);
+                ScrollToLineWithMargin(editor);
             }
         }
 
@@ -873,7 +999,9 @@ namespace PageLeaf.Behaviors
 
             editor.Document.Replace(line.Offset, line.Length, newLine);
             editor.CaretOffset = line.Offset + newLine.Length;
+            editor.ScrollToLine(editor.TextArea.Caret.Line);
         }
+        #endregion
 
         private static void HandleFootnote(TextBox textBox)
         {
@@ -955,6 +1083,7 @@ namespace PageLeaf.Behaviors
 
                     // カーソルを本文中のマーカー直後に戻す
                     textBox.CaretIndex = targetCaretIndex;
+                    ScrollToCaretLogic(textBox);
                 }
                 textBox.Focus();
             };
@@ -1070,7 +1199,7 @@ namespace PageLeaf.Behaviors
 
             // カーソル位置をマーカーの後ろに設定
             editor.CaretOffset = newCaretOffset;
+            ScrollToLineWithMargin(editor);
         }
-        #endregion
     }
 }

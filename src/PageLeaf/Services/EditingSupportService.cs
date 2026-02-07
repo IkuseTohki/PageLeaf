@@ -427,6 +427,15 @@ namespace PageLeaf.Services
 
             return 0;
         }
+
+        public string EnforceEmptyLineAtEnd(string text)
+        {
+            if (text == null) return Environment.NewLine;
+            if (text.EndsWith(Environment.NewLine)) return text;
+            if (text.EndsWith("\n") || text.EndsWith("\r")) return text + (text.EndsWith("\r") ? "\n" : "");
+
+            return text + Environment.NewLine;
+        }
     }
 }
 
