@@ -174,6 +174,31 @@ namespace PageLeaf.Services
                 rule?.Style.RemoveProperty("content");
             }
 
+            // 5b. 脚注内のリスト採番干渉対策
+            // 階層採番（decimal-nested）やピリオド設定が有効な場合、または一般のリスト形式が変更されている場合、
+            // 脚注内のリスト番号にも影響が出てしまうため、脚注エリア内ではこれらを明示的に無効化し、
+            // 標準の list-style-type (decimal) に強制する。
+            if (profile.List.OrderedListMarkerType == "decimal-nested" ||
+                profile.List.HasOrderedListPeriod.HasValue ||
+                (!string.IsNullOrEmpty(profile.List.OrderedListMarkerType) && profile.List.OrderedListMarkerType != "decimal"))
+            {
+                UpdateOrCreateRule(stylesheet, ".footnotes ol", (rule, p) =>
+                {
+                    rule.Style.SetProperty("list-style-type", "decimal");
+                    rule.Style.SetProperty("counter-reset", "none");
+                }, profile);
+
+                UpdateOrCreateRule(stylesheet, ".footnotes ol > li", (rule, p) =>
+                {
+                    rule.Style.SetProperty("display", "list-item");
+                }, profile);
+
+                UpdateOrCreateRule(stylesheet, ".footnotes ol > li::before", (rule, p) =>
+                {
+                    rule.Style.SetProperty("content", "none");
+                }, profile);
+            }
+
             // 6. その他
             UpdateOrCreateRule(stylesheet, "li::marker", (rule, p) =>
             {

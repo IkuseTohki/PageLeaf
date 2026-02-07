@@ -326,6 +326,42 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
+        public void FinalizeCssUpdate_ShouldPreventHierarchicalNumberingInFootnotes()
+        {
+            // テスト観点: 階層採番（decimal-nested）が有効な場合、脚注内の ol > li に干渉しないよう
+            // .footnotes ol > li::before { content: none; } が追加されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo();
+            styleInfo.NumberedListMarkerType = "decimal-nested";
+
+            // Act
+            var updatedCss = service.UpdateCssContent("", styleInfo);
+
+            // Assert
+            Assert.IsTrue(updatedCss.Contains(".footnotes ol>li::before"), "脚注用のリセットルールが含まれていること");
+            Assert.IsTrue(updatedCss.Contains("content: none"), "脚注内では::beforeコンテンツが無効化されていること");
+        }
+
+        [TestMethod]
+        public void FinalizeCssUpdate_ShouldForceDecimalNumberingInFootnotes_EvenIfListStyleIsChanged()
+        {
+            // テスト観点: 一般のリスト形式が lower-alpha 等に変更されていても、
+            // 脚注内の ol は常に decimal に強制されることを確認する。
+            // Arrange
+            var service = new CssEditorService();
+            var styleInfo = new CssStyleInfo();
+            styleInfo.NumberedListMarkerType = "lower-alpha"; // a, b, c...
+
+            // Act
+            var updatedCss = service.UpdateCssContent("", styleInfo);
+
+            // Assert
+            Assert.IsTrue(updatedCss.Contains(".footnotes ol"), "脚注用の ol ルールが含まれていること");
+            Assert.IsTrue(updatedCss.Contains("list-style-type: decimal"), "脚注内のリスト形式が decimal に強制されていること");
+        }
+
+        [TestMethod]
         public void ParseCss_ShouldParseHeadingFontSizesAndFamilies()
         {
             // テスト観点: ParseCssが、複数の見出し(h1, h2)のfont-sizeとfont-familyプロパティを解析し、
