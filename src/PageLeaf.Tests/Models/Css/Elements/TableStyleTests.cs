@@ -63,5 +63,22 @@ namespace PageLeaf.Tests.Models.Css.Elements
             Assert.AreEqual("8px", thTdRule.Style.GetPropertyValue("padding"));
             Assert.AreEqual("rgba(242, 242, 242, 1)", thRule.Style.GetPropertyValue("background-color"));
         }
+
+        [TestMethod]
+        public void ApplyTo_ShouldApplyDefaultBorder_WhenNotSpecified()
+        {
+            // テスト観点: 枠線が未設定の場合、デフォルトの 1px solid black が適用されること
+            var style = new TableStyle();
+            var sheet = CreateSheet("");
+
+            style.ApplyTo(sheet);
+
+            var thTdRule = sheet.Rules.OfType<ICssStyleRule>().First(r => r.SelectorText == "th, td");
+            var border = thTdRule.Style.GetPropertyValue("border");
+
+            // 1px と solid が含まれていることを確認
+            Assert.IsTrue(border.Contains("1px"), "太さのデフォルト値 1px が適用されていること");
+            Assert.IsTrue(border.Contains("solid"), "種類のデフォルト値 solid が適用されていること");
+        }
     }
 }

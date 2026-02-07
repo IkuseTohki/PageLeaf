@@ -35,6 +35,21 @@ namespace PageLeaf.Models.Css.Elements
 
         private CssBorder EnsureBorder() => Border ??= new CssBorder();
 
+        /// <summary>
+        /// デフォルト値を適用した実効的な枠線設定を取得します。
+        /// </summary>
+        public CssBorder GetEffectiveBorder()
+        {
+            var border = Border ?? new CssBorder();
+            var defaults = CssDefaults.Instance.Table;
+
+            var width = border.Width ?? CssSize.Parse($"{defaults.BorderWidth}{defaults.BorderWidthUnit}");
+            var style = !string.IsNullOrEmpty(border.Style) ? border.Style : defaults.BorderStyle;
+            var color = border.Color ?? CssColor.Parse(defaults.BorderColor);
+
+            return new CssBorder(width, style, color);
+        }
+
         // th 専用設定
         public CssColor? HeaderBackgroundColor { get; set; }
         public CssColor? HeaderTextColor { get; set; }
@@ -97,17 +112,9 @@ namespace PageLeaf.Models.Css.Elements
 
             // th, td
             var thTdRule = GetOrCreateRule(stylesheet, "th, td");
-            if (Border != null)
-            {
-                Border.ApplyTo(thTdRule.Style);
-            }
-            else
-            {
-                thTdRule.Style.RemoveProperty("border");
-                thTdRule.Style.RemoveProperty("border-width");
-                thTdRule.Style.RemoveProperty("border-style");
-                thTdRule.Style.RemoveProperty("border-color");
-            }
+
+            // 枠線が未設定または部分的に未設定の場合にデフォルト値で補完する
+            GetEffectiveBorder().ApplyTo(thTdRule.Style);
 
             if (!string.IsNullOrEmpty(CellPadding)) thTdRule.Style.SetProperty("padding", CellPadding);
             else thTdRule.Style.RemoveProperty("padding");

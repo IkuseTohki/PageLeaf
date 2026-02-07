@@ -482,10 +482,8 @@ namespace PageLeaf.Services
             if (match.Success)
             {
                 var newStyles = new List<string>();
-                if (profile.Table.Border != null)
-                {
-                    newStyles.Add($"  border: {profile.Table.Border};");
-                }
+                var effectiveBorder = profile.Table.GetEffectiveBorder();
+                newStyles.Add($"  border: {effectiveBorder};");
 
                 if (!string.IsNullOrEmpty(profile.Table.CellPadding))
                 {

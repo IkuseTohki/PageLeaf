@@ -71,6 +71,9 @@ namespace PageLeaf.Models.Css
             public double BorderWidth => 1.0;
             public string BorderWidthUnit => "px"; // Fixed
 
+            public string BorderStyle => "solid";
+            public string BorderColor => "#000000";
+
             public double FontSize => 1.1;
             public string FontSizeUnit => "em";
 

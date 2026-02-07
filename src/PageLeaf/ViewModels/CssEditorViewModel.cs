@@ -320,10 +320,17 @@ namespace PageLeaf.ViewModels
 
         private void SetStyleValue(string key, string? value)
         {
-            // 枠線の種類が解除された場合はデフォルトの solid を適用する
-            if (string.IsNullOrEmpty(value) && (key == nameof(TableBorderStyle) || key == nameof(QuoteBorderStyle)))
+            // 枠線の種類や色が解除された場合はデフォルト値を適用する
+            if (string.IsNullOrEmpty(value))
             {
-                value = "solid";
+                if (key == nameof(TableBorderStyle) || key == nameof(QuoteBorderStyle))
+                {
+                    value = "solid";
+                }
+                else if (key == nameof(TableBorderColor))
+                {
+                    value = "#000000";
+                }
             }
 
             if (!_styles.TryGetValue(key, out var current) || current != value)
