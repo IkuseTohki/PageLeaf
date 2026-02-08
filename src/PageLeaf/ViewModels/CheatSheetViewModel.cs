@@ -50,6 +50,7 @@ namespace PageLeaf.ViewModels
                 new CheatSheetItem { Category = "引用・コード", Syntax = "```\ncode\n```", Description = "コードブロック", Note = "```の後に言語名指定でシンタックスハイライト" },
                 new CheatSheetItem { Category = "テーブル", Syntax = "| A | B |\n|---|---|", Description = "テーブル作成" },
                 new CheatSheetItem { Category = "その他", Syntax = "---", Description = "水平線" },
+                new CheatSheetItem { Category = "その他", Syntax = "[cite: 出典]", Description = "引用元の表示", Note = "blockquote内で使用可能", RelatedShortcut = "Ctrl + Shift + Q" },
                 new CheatSheetItem { Category = "その他", Syntax = "[^1] / [^1]: ...", Description = "脚注 (Footnote)", Note = "文中に [^1]、末尾に詳細を記述", RelatedShortcut = "Ctrl + Alt + F" },
                 new CheatSheetItem { Category = "独自機能", Syntax = "Shift + Enter", Description = "強制改ページ挿入", Note = "<div style=\"page-break-after: always;\"></div>", RelatedShortcut = "Shift + Enter" }
             };
@@ -69,6 +70,7 @@ namespace PageLeaf.ViewModels
                 new CheatSheetItem { Category = "編集操作", Syntax = "Ctrl + I", Description = "斜体" },
                 new CheatSheetItem { Category = "編集操作", Syntax = "Ctrl + Shift + X", Description = "取り消し線" },
                 new CheatSheetItem { Category = "編集操作", Syntax = "Ctrl + Shift + C", Description = "インラインコード" },
+                new CheatSheetItem { Category = "編集操作", Syntax = "Ctrl + Shift + Q", Description = "引用元の挿入" },
                 new CheatSheetItem { Category = "編集操作", Syntax = "Ctrl + K", Description = "リンク挿入" },
                 new CheatSheetItem { Category = "編集操作", Syntax = "Ctrl + Alt + F", Description = "脚注挿入", Note = "ポップアップから脚注を入力" },
                 new CheatSheetItem { Category = "編集操作", Syntax = "Ctrl + Shift + V", Description = "画像を貼り付け" },

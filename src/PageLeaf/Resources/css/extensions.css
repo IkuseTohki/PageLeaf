@@ -1,3 +1,84 @@
+/* --- Preset Variables --- */
+:root {
+    --pageleaf-quote-bg: rgba(0, 120, 212, 0.05);
+    --pageleaf-quote-border: #0078d4;
+    --pageleaf-cite-color: #666666;
+    --pageleaf-card-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    --pageleaf-panel-bg: #f8f9fa;
+    --pageleaf-accent-gradient: linear-gradient(to bottom, #0078d4, #00bcf2);
+}
+
+/* --- Base Blockquote Styles --- */
+blockquote {
+    margin: 16px 0;
+    padding: 20px 25px;
+    position: relative;
+    color: inherit;
+}
+
+blockquote p { margin: 0; }
+
+cite {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--pageleaf-cite-color);
+    text-align: right;
+    font-style: normal;
+    margin-top: 10px;
+}
+cite::before { content: "— "; }
+
+/* --- Unified Icon Style --- */
+.has-icon blockquote {
+    padding-left: 55px !important;
+}
+
+.has-icon blockquote::before {
+    content: "“";
+    font-family: serif;
+    position: absolute;
+    font-size: 3.5rem;
+    opacity: 0.3;
+    color: var(--pageleaf-quote-border);
+    line-height: 1;
+    left: 12px;
+    top: 5px;
+}
+
+/* 1. Simple (横ライン) */
+.bq-simple blockquote {
+    border-left: 4px solid var(--pageleaf-quote-border);
+    background-color: var(--pageleaf-quote-bg);
+}
+
+/* 2. Card (カード型) */
+.bq-card blockquote {
+    background-color: var(--pageleaf-panel-bg);
+    border-radius: 8px;
+    box-shadow: var(--pageleaf-card-shadow);
+    border: 1px solid rgba(128,128,128,0.2);
+}
+
+/* 3. TopBottom (上下ライン) */
+.bq-topbottom blockquote {
+    border-top: 2px solid var(--pageleaf-quote-border);
+    border-bottom: 2px solid var(--pageleaf-quote-border);
+}
+
+/* 4. Modern (モダン) */
+.bq-modern.has-icon blockquote {
+    font-style: italic;
+}
+
+/* アイコンなし：グラデーションアクセント */
+.bq-modern.no-icon blockquote {
+    padding-left: 30px;
+    border-left: 6px solid transparent;
+    border-image: var(--pageleaf-accent-gradient) 1;
+    background: linear-gradient(to right, var(--pageleaf-quote-bg), transparent);
+    font-weight: 500;
+}
+
 .code-block-container {
     border: 1px solid #d0d7de;
     border-radius: 6px;

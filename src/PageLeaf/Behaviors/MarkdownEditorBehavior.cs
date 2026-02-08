@@ -380,6 +380,8 @@ namespace PageLeaf.Behaviors
             else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.X) { e.Handled = true; SurroundSelection(textBox, "~~"); }
             // Ctrl + Shift + C (インラインコード)
             else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.C) { e.Handled = true; SurroundSelection(textBox, "`"); }
+            // Ctrl + Shift + Q (引用元の挿入)
+            else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.Q) HandleCitation(textBox, e);
             // Ctrl + K (リンク)
             else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.K) HandleLink(textBox, e);
             // Ctrl + Alt + F (脚注)
@@ -467,6 +469,28 @@ namespace PageLeaf.Behaviors
                 // 選択範囲がない場合はペアを挿入して中央にカーソル移動
                 textBox.SelectedText = marker + marker;
                 textBox.CaretIndex = start + markerLen;
+            }
+            ScrollToCaretLogic(textBox);
+        }
+
+        private static void HandleCitation(TextBox textBox, KeyEventArgs e)
+        {
+            e.Handled = true;
+            var selectedText = textBox.SelectedText;
+            var start = textBox.SelectionStart;
+
+            if (textBox.SelectionLength > 0)
+            {
+                // [cite: 選択範囲] を作成
+                textBox.SelectedText = "[cite: " + selectedText + "]";
+                // 閉じカッコの直前にカーソルを移動
+                textBox.CaretIndex = start + selectedText.Length + 7;
+            }
+            else
+            {
+                // [cite: ] を挿入して : の後にカーソル移動
+                textBox.SelectedText = "[cite: ]";
+                textBox.CaretIndex = start + 7;
             }
             ScrollToCaretLogic(textBox);
         }
@@ -762,6 +786,7 @@ namespace PageLeaf.Behaviors
             else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.I) { e.Handled = true; SurroundSelection(editor, "*"); }
             else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.X) { e.Handled = true; SurroundSelection(editor, "~~"); }
             else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.C) { e.Handled = true; SurroundSelection(editor, "`"); }
+            else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Shift) && e.Key == Key.Q) HandleCitation(editor, e);
             else if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.K) HandleLink(editor, e);
             // Ctrl + Alt + F (脚注)
             else if (Keyboard.Modifiers == (ModifierKeys.Control | ModifierKeys.Alt) && e.Key == Key.F)
@@ -826,6 +851,23 @@ namespace PageLeaf.Behaviors
             {
                 editor.Document.Insert(editor.CaretOffset, marker + marker);
                 editor.CaretOffset -= marker.Length;
+            }
+            ScrollToLineWithMargin(editor);
+        }
+
+        private static void HandleCitation(TextEditor editor, KeyEventArgs e)
+        {
+            e.Handled = true;
+            if (editor.SelectionLength > 0)
+            {
+                string selectedText = editor.SelectedText;
+                editor.Document.Replace(editor.SelectionStart, editor.SelectionLength, $"[cite: {selectedText}]");
+                editor.CaretOffset -= 1;
+            }
+            else
+            {
+                editor.Document.Insert(editor.CaretOffset, "[cite: ]");
+                editor.CaretOffset -= 1;
             }
             ScrollToLineWithMargin(editor);
         }

@@ -21,6 +21,7 @@ namespace PageLeaf.Tests.ViewModels
         private Mock<ISaveCssUseCase> _mockSaveCssUseCase = null!;
         private Mock<IDialogService> _mockDialogService = null!;
         private Mock<ISettingsService> _mockSettingsService = null!;
+        private Mock<IEditorService> _mockEditorService = null!;
         private CssEditorViewModel _viewModel = null!;
 
         [TestInitialize]
@@ -31,8 +32,10 @@ namespace PageLeaf.Tests.ViewModels
             _mockSaveCssUseCase = new Mock<ISaveCssUseCase>();
             _mockDialogService = new Mock<IDialogService>();
             _mockSettingsService = new Mock<ISettingsService>();
+            _mockEditorService = new Mock<IEditorService>();
 
             _mockSettingsService.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings());
+            _mockEditorService.Setup(s => s.CurrentDocument).Returns(new PageLeaf.Models.Markdown.MarkdownDocument());
 
             _mockCssManagementService.Setup(s => s.GetCssContent(It.IsAny<string>())).Returns("");
             _mockCssManagementService.Setup(s => s.GenerateCss(It.IsAny<string>(), It.IsAny<CssStyleInfo>())).Returns("");
@@ -43,7 +46,8 @@ namespace PageLeaf.Tests.ViewModels
                 _mockLoadCssUseCase.Object,
                 _mockSaveCssUseCase.Object,
                 _mockDialogService.Object,
-                _mockSettingsService.Object);
+                _mockSettingsService.Object,
+                _mockEditorService.Object);
         }
 
         [TestMethod]

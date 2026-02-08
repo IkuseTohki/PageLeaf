@@ -549,9 +549,68 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Quote Tab (Previously named Quote, using for Blockquote) -->
+                <!-- Quote Tab (Blockquote) -->
                 <StackPanel Visibility="{Binding SelectedTab, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:CssEditorTab.Quote}}">
-                    <Label Content="文字スタイル" Style="{StaticResource FirstCompactFormGroupHeaderStyle}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Label Content="デザインプリセット" Style="{StaticResource FirstCompactFormGroupHeaderStyle}" />
+                        <Button Grid.Column="1"
+                                Margin="0,0,10,0"
+                                VerticalAlignment="Center"
+                                Command="{Binding ClearQuoteStyleCommand}"
+                                Style="{StaticResource IconButtonStyle}"
+                                ToolTip="選択を解除">
+                            <Path Width="10"
+                                  Height="10"
+                                  Data="M0,0 L10,10 M10,0 L0,10"
+                                  Stroke="{DynamicResource SecondaryTextBrush}"
+                                  StrokeThickness="1.5" />
+                        </Button>
+                    </Grid>
+                    <ListBox Margin="0,0,0,12"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"
+                             ItemContainerStyle="{StaticResource ListMarkerListBoxItemStyle}"
+                             ItemsSource="{Binding AvailableQuoteStyles}"
+                             SelectedItem="{Binding QuoteStyle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <UniformGrid Columns="2" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock x:Name="PresetText"
+                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Text="{Binding}"
+                                           TextAlignment="Center" />
+                                <DataTemplate.Triggers>
+                                    <DataTrigger Binding="{Binding}" Value="simple">
+                                        <Setter TargetName="PresetText" Property="Text" Value="標準 (Simple)" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding}" Value="card">
+                                        <Setter TargetName="PresetText" Property="Text" Value="カード (Card)" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding}" Value="topbottom">
+                                        <Setter TargetName="PresetText" Property="Text" Value="上下線 (Line)" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding}" Value="modern">
+                                        <Setter TargetName="PresetText" Property="Text" Value="モダン (Modern)" />
+                                    </DataTrigger>
+                                </DataTemplate.Triggers>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <CheckBox Margin="0,4,0,12"
+                              Content="引用符アイコン (“) を表示"
+                              IsChecked="{Binding QuoteShowIcon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                              Style="{StaticResource CompactFormCheckBoxStyle}" />
+
+                    <Label Content="プリセットの上書き (CSS保存)" Style="{StaticResource CompactFormGroupHeaderStyle}" />
                     <Label Content="文字色" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:ColorInputControl ColorText="{Binding QuoteTextColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 CommandParameter="QuoteTextColor"
@@ -562,21 +621,12 @@
                               IsChecked="{Binding QuoteIsItalic, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                               Style="{StaticResource CompactFormCheckBoxStyle}" />
 
-                    <Label Content="装飾・ボックス" Style="{StaticResource CompactFormGroupHeaderStyle}" />
                     <Label Content="背景色" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:ColorInputControl ColorText="{Binding QuoteBackgroundColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 CommandParameter="QuoteBackgroundColor"
                                                 SelectColorCommand="{Binding SelectColorCommand}" />
 
-                    <Label Content="左枠線" Style="{StaticResource CompactFormLabelStyle}" />
-                    <controls:CssNumericEditorControl HorizontalAlignment="Left"
-                                                      CssValue="{Binding QuoteBorderWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                      DefaultValue="{Binding Defaults.Quote.BorderWidth}"
-                                                      FixedUnit="{Binding Defaults.Quote.BorderWidthUnit}"
-                                                      IsUnitFixed="True"
-                                                      ShowSpinner="True" />
-
-                    <Label Content="左枠線 色" Style="{StaticResource CompactFormLabelStyle}" />
+                    <Label Content="枠線の色" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:ColorInputControl ColorText="{Binding QuoteBorderColor, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                                 CommandParameter="QuoteBorderColor"
                                                 SelectColorCommand="{Binding SelectColorCommand}" />
@@ -589,12 +639,6 @@
                                                       IsUnitFixed="True"
                                                       ShowSpinner="True" />
 
-                    <CheckBox Margin="0,12,0,0"
-                              Content="引用符アイコン (“) を表示"
-                              IsChecked="{Binding QuoteShowIcon, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                              Style="{StaticResource CompactFormCheckBoxStyle}" />
-
-                    <Label Content="レイアウト・余白" Style="{StaticResource CompactFormGroupHeaderStyle}" />
                     <Label Content="内側の余白 (パディング)" Style="{StaticResource CompactFormLabelStyle}" />
                     <controls:CssNumericEditorControl HorizontalAlignment="Left"
                                                       CssValue="{Binding QuotePadding, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"

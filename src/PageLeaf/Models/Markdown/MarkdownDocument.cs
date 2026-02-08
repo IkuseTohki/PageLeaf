@@ -59,6 +59,57 @@ namespace PageLeaf.Models.Markdown
         public string? SuggestedCss => FrontMatter.TryGetValue("css", out var v) ? v?.ToString() : null;
 
         /// <summary>
+        /// 引用ブロックのプリセットスタイルを取得または設定します。
+        /// </summary>
+        public string? QuoteStyle
+        {
+            get => FrontMatter.TryGetValue("quote_style", out var v) ? v?.ToString()?.ToLower() : null;
+            set
+            {
+                var current = QuoteStyle;
+                if (current != value?.ToLower())
+                {
+                    if (string.IsNullOrEmpty(value))
+                    {
+                        _frontMatter.Remove("quote_style");
+                    }
+                    else
+                    {
+                        _frontMatter["quote_style"] = value.ToLower();
+                    }
+                    IsDirty = true;
+                    OnPropertyChanged(nameof(QuoteStyle));
+                }
+            }
+        }
+
+        /// <summary>
+        /// 引用ブロックにアイコンを表示するかどうかを取得または設定します。
+        /// </summary>
+        public bool QuoteIcon
+        {
+            get
+            {
+                if (FrontMatter.TryGetValue("quote_icon", out var v))
+                {
+                    if (v is bool b) return b;
+                    if (v is string s && bool.TryParse(s, out var b2)) return b2;
+                }
+                return true;
+            }
+            set
+            {
+                var current = QuoteIcon;
+                if (current != value)
+                {
+                    _frontMatter["quote_icon"] = value;
+                    IsDirty = true;
+                    OnPropertyChanged(nameof(QuoteIcon));
+                }
+            }
+        }
+
+        /// <summary>
         /// フロントマターで指定された優先シンタックスハイライトテーマ名を取得します。指定がない場合は null です。
         /// </summary>
         public string? PreferredSyntaxHighlight => FrontMatter.TryGetValue("syntax_highlight", out var v) ? v?.ToString() : null;

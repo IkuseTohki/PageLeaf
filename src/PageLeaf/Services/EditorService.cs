@@ -172,6 +172,11 @@ namespace PageLeaf.Services
                 OnPropertyChanged(nameof(EditorText)); // EditorText の変更を通知
                 UpdateHtmlContent(); // プレビューも更新
             }
+            else if (e.PropertyName == nameof(MarkdownDocument.QuoteStyle) || e.PropertyName == nameof(MarkdownDocument.QuoteIcon))
+            {
+                // 引用設定のみの変更なら、フルリロードせず同期のみ行う
+                SyncQuoteSettings();
+            }
             else if (e.PropertyName == nameof(MarkdownDocument.FrontMatter))
             {
                 UpdateHtmlContent(); // プレビューも更新
@@ -217,6 +222,11 @@ namespace PageLeaf.Services
             UpdateHtmlContent();
         }
 
+        public void SyncQuoteSettings()
+        {
+            SyncQuoteSettingsRequested?.Invoke(this, EventArgs.Empty);
+        }
+
         public void RequestInsertText(string text)
         {
             TextInsertionRequested?.Invoke(this, text);
@@ -235,6 +245,7 @@ namespace PageLeaf.Services
         public event EventHandler<string>? TextInsertionRequested;
         public event EventHandler<DisplayMode>? FocusRequested;
         public event EventHandler<TocItem>? ScrollToHeaderRequested;
+        public event EventHandler? SyncQuoteSettingsRequested;
 
         private void UpdateVisibility()
         {

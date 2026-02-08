@@ -452,8 +452,6 @@ namespace PageLeaf.Tests.Services
             // Assert
             Assert.AreEqual("#123456", styles.QuoteTextColor);
             Assert.AreEqual("#ABCDEF", styles.QuoteBackgroundColor);
-            Assert.AreEqual("3px", styles.QuoteBorderWidth);
-            Assert.AreEqual("solid", styles.QuoteBorderStyle);
             Assert.AreEqual("#987654", styles.QuoteBorderColor);
         }
 
@@ -595,9 +593,7 @@ namespace PageLeaf.Tests.Services
             {
                 QuoteTextColor = "#112233",
                 QuoteBackgroundColor = "#445566",
-                QuoteBorderColor = "#778899",
-                QuoteBorderWidth = "5px",
-                QuoteBorderStyle = "dotted"
+                QuoteBorderColor = "#778899"
             };
 
             // Act
@@ -608,8 +604,6 @@ namespace PageLeaf.Tests.Services
             Assert.AreEqual("#112233", parsedUpdatedStyles.QuoteTextColor);
             Assert.AreEqual("#445566", parsedUpdatedStyles.QuoteBackgroundColor);
             Assert.AreEqual("#778899", parsedUpdatedStyles.QuoteBorderColor);
-            Assert.AreEqual("5px", parsedUpdatedStyles.QuoteBorderWidth);
-            Assert.AreEqual("dotted", parsedUpdatedStyles.QuoteBorderStyle);
         }
 
         [TestMethod]

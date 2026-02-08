@@ -49,12 +49,15 @@ namespace PageLeaf.Tests.ViewModels
             _pasteImageUseCaseMock = new Mock<IPasteImageUseCase>();
             _markdownServiceMock = new Mock<IMarkdownService>();
 
+            _editorServiceMock.Setup(s => s.CurrentDocument).Returns(new PageLeaf.Models.Markdown.MarkdownDocument());
+
             _cssEditorViewModel = new CssEditorViewModel(
                 _cssManagementServiceMock.Object,
                 new Mock<ILoadCssUseCase>().Object,
                 new Mock<ISaveCssUseCase>().Object,
                 _dialogServiceMock.Object,
-                _settingsServiceMock.Object);
+                _settingsServiceMock.Object,
+                _editorServiceMock.Object);
 
             _cssManagementServiceMock.Setup(s => s.GetAvailableCssFileNames()).Returns(new List<string> { "default.css" });
             _settingsServiceMock.Setup(s => s.CurrentSettings).Returns(new ApplicationSettings { View = new ViewSettings { SelectedCss = "default.css" } });

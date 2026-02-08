@@ -37,6 +37,7 @@ namespace PageLeaf.ViewModels
         private readonly ISaveCssUseCase _saveCssUseCase;
         private readonly IDialogService _dialogService;
         private readonly ISettingsService _settingsService;
+        private readonly IEditorService _editorService;
         private readonly Dictionary<string, string?> _styles = new Dictionary<string, string?>();
         private readonly Dictionary<string, bool> _flags = new Dictionary<string, bool>();
         private readonly HashSet<CssEditorTab> _dirtyTabs = new HashSet<CssEditorTab>();
@@ -47,7 +48,7 @@ namespace PageLeaf.ViewModels
             "ParagraphLineHeight", "ParagraphMarginBottom", "ParagraphTextIndent",
             "TitleTextColor", "TitleFontSize", "TitleFontFamily", "TitleAlignment", "TitleMarginBottom",
             "QuoteTextColor", "QuoteBackgroundColor", "QuoteBorderColor",
-            "QuoteBorderWidth", "QuoteBorderStyle", "QuotePadding", "QuoteBorderRadius",
+            "QuotePadding", "QuoteBorderRadius",
             "TableBorderColor", "TableHeaderBackgroundColor", "TableHeaderTextColor", "TableHeaderFontSize", "TableBorderWidth", "TableBorderStyle", "TableHeaderAlignment", "TableCellPadding", "TableWidth",
             "CodeTextColor", "CodeBackgroundColor", "CodeFontFamily",
             "InlineCodeTextColor", "InlineCodeBackgroundColor",
@@ -67,11 +68,13 @@ namespace PageLeaf.ViewModels
         public ICommand SaveCssCommand { get; }
         public ICommand ResetCommand { get; }
         public ICommand SelectColorCommand { get; }
+        public ICommand ClearQuoteStyleCommand { get; }
         public ObservableCollection<string> AvailableHeadingLevels { get; }
         public ObservableCollection<string> AvailableUnits { get; }
         public ObservableCollection<string> AvailableAlignments { get; }
         public ObservableCollection<string> AvailableListMarkerTypes { get; }
         public ObservableCollection<string> AvailableNumberedListMarkerTypes { get; }
+        public ObservableCollection<string> AvailableQuoteStyles { get; }
         public string? TargetCssFileName { get; private set; }
 
         /// <summary>
@@ -175,29 +178,43 @@ namespace PageLeaf.ViewModels
             ILoadCssUseCase loadCssUseCase,
             ISaveCssUseCase saveCssUseCase,
             IDialogService dialogService,
-            ISettingsService settingsService)
+            ISettingsService settingsService,
+            IEditorService editorService)
         {
             ArgumentNullException.ThrowIfNull(cssManagementService);
             ArgumentNullException.ThrowIfNull(loadCssUseCase);
             ArgumentNullException.ThrowIfNull(saveCssUseCase);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(settingsService);
+            ArgumentNullException.ThrowIfNull(editorService);
 
             _cssManagementService = cssManagementService;
             _loadCssUseCase = loadCssUseCase;
             _saveCssUseCase = saveCssUseCase;
             _dialogService = dialogService;
             _settingsService = settingsService;
+            _editorService = editorService;
+
+            _editorService.PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName == nameof(IEditorService.CurrentDocument))
+                {
+                    OnPropertyChanged(nameof(QuoteStyle));
+                    OnPropertyChanged(nameof(QuoteShowIcon));
+                }
+            };
 
             SaveCssCommand = new DelegateCommand(ExecuteSaveCss, CanExecuteSaveCss);
             ResetCommand = new DelegateCommand(ExecuteReset, CanExecuteReset);
             SelectColorCommand = new DelegateCommand(ExecuteSelectColor);
+            ClearQuoteStyleCommand = new DelegateCommand(_ => QuoteStyle = null);
             AvailableHeadingLevels = new ObservableCollection<string>(Enumerable.Range(1, 6).Select(i => $"h{i}"));
             SelectedHeadingLevel = AvailableHeadingLevels.FirstOrDefault();
             AvailableUnits = new ObservableCollection<string> { "px", "em", "%" };
             AvailableAlignments = new ObservableCollection<string> { "left", "center", "right" };
             AvailableListMarkerTypes = new ObservableCollection<string> { "disc", "circle", "square", "none" };
             AvailableNumberedListMarkerTypes = new ObservableCollection<string> { "decimal", "decimal-leading-zero", "lower-alpha", "upper-alpha", "lower-roman", "upper-roman", "decimal-nested" };
+            AvailableQuoteStyles = new ObservableCollection<string> { "simple", "card", "topbottom", "modern" };
         }
 
         private void ExecuteSelectColor(object? parameter)
@@ -285,7 +302,6 @@ namespace PageLeaf.ViewModels
 
             // 引用のフラグをロード
             _flags["Quote.IsItalic"] = styleInfo.Blockquote.IsItalic;
-            _flags["Quote.ShowIcon"] = styleInfo.Blockquote.ShowIcon;
 
             // 脚注のスタイルをロード
             _styles[nameof(FootnoteMarkerTextColor)] = styleInfo.Footnote.MarkerTextColor?.ToString();
@@ -312,6 +328,8 @@ namespace PageLeaf.ViewModels
 
             ClearDirtyTabs();
             OnPropertyChanged(string.Empty);
+            OnPropertyChanged(nameof(QuoteStyle));
+            OnPropertyChanged(nameof(QuoteShowIcon));
             UpdateHeadingProperties();
             UpdatePreview();
         }
@@ -323,7 +341,7 @@ namespace PageLeaf.ViewModels
             // 枠線の種類や色が解除された場合はデフォルト値を適用する
             if (string.IsNullOrEmpty(value))
             {
-                if (key == nameof(TableBorderStyle) || key == nameof(QuoteBorderStyle))
+                if (key == nameof(TableBorderStyle))
                 {
                     value = "solid";
                 }
@@ -383,12 +401,35 @@ namespace PageLeaf.ViewModels
         public string? QuoteTextColor { get => this[nameof(QuoteTextColor)]; set => this[nameof(QuoteTextColor)] = value; }
         public string? QuoteBackgroundColor { get => this[nameof(QuoteBackgroundColor)]; set => this[nameof(QuoteBackgroundColor)] = value; }
         public string? QuoteBorderColor { get => this[nameof(QuoteBorderColor)]; set => this[nameof(QuoteBorderColor)] = value; }
-        public string? QuoteBorderWidth { get => this[nameof(QuoteBorderWidth)]; set => this[nameof(QuoteBorderWidth)] = value; }
-        public string? QuoteBorderStyle { get => this[nameof(QuoteBorderStyle)]; set => this[nameof(QuoteBorderStyle)] = value; }
         public string? QuotePadding { get => this[nameof(QuotePadding)]; set => this[nameof(QuotePadding)] = value; }
         public string? QuoteBorderRadius { get => this[nameof(QuoteBorderRadius)]; set => this[nameof(QuoteBorderRadius)] = value; }
         public bool QuoteIsItalic { get => GetFlag("Quote", "IsItalic"); set => SetFlag("Quote", "IsItalic", value, CssEditorTab.Quote); }
-        public bool QuoteShowIcon { get => GetFlag("Quote", "ShowIcon"); set => SetFlag("Quote", "ShowIcon", value, CssEditorTab.Quote); }
+
+        public string? QuoteStyle
+        {
+            get => _editorService.CurrentDocument?.QuoteStyle;
+            set
+            {
+                if (_editorService.CurrentDocument != null && _editorService.CurrentDocument.QuoteStyle != value)
+                {
+                    _editorService.CurrentDocument.QuoteStyle = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public bool QuoteShowIcon
+        {
+            get => _editorService.CurrentDocument?.QuoteIcon ?? true;
+            set
+            {
+                if (_editorService.CurrentDocument != null && _editorService.CurrentDocument.QuoteIcon != value)
+                {
+                    _editorService.CurrentDocument.QuoteIcon = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public string? TableBorderColor { get => this[nameof(TableBorderColor)]; set => this[nameof(TableBorderColor)] = value; }
         public string? TableHeaderBackgroundColor { get => this[nameof(TableHeaderBackgroundColor)]; set => this[nameof(TableHeaderBackgroundColor)] = value; }
@@ -574,7 +615,6 @@ namespace PageLeaf.ViewModels
 
             // 引用のフラグを同期
             styleInfo.Blockquote.IsItalic = _flags.TryGetValue("Quote.IsItalic", out var qi) && qi;
-            styleInfo.Blockquote.ShowIcon = _flags.TryGetValue("Quote.ShowIcon", out var qs) && qs;
 
             // 脚注のフラグを同期
             styleInfo.Footnote.IsMarkerBold = GetFootnoteFlag("IsMarkerBold");

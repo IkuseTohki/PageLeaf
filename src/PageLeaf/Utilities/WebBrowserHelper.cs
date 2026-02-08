@@ -73,6 +73,59 @@ namespace PageLeaf.Utilities
             obj.SetValue(InjectedCssProperty, value);
         }
 
+        public static readonly DependencyProperty EditorServiceProperty =
+            DependencyProperty.RegisterAttached("EditorService", typeof(PageLeaf.Services.IEditorService), typeof(WebBrowserHelper), new PropertyMetadata(OnEditorServiceChanged));
+
+        public static PageLeaf.Services.IEditorService GetEditorService(DependencyObject obj)
+        {
+            return (PageLeaf.Services.IEditorService)obj.GetValue(EditorServiceProperty);
+        }
+
+        public static void SetEditorService(DependencyObject obj, PageLeaf.Services.IEditorService value)
+        {
+            obj.SetValue(EditorServiceProperty, value);
+        }
+
+        private static void OnEditorServiceChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
+        {
+            if (obj is WebView2 webView2)
+            {
+                if (e.OldValue is PageLeaf.Services.IEditorService oldService)
+                {
+                    oldService.SyncQuoteSettingsRequested -= (s, ev) => SyncQuoteSettings(webView2, oldService);
+                }
+
+                if (e.NewValue is PageLeaf.Services.IEditorService newService)
+                {
+                    newService.SyncQuoteSettingsRequested += (s, ev) => SyncQuoteSettings(webView2, newService);
+                }
+            }
+        }
+
+        private static async void SyncQuoteSettings(WebView2 webView2, PageLeaf.Services.IEditorService service)
+        {
+            if (webView2.CoreWebView2 != null && service.CurrentDocument != null)
+            {
+                var doc = service.CurrentDocument;
+                var quoteStyle = doc.QuoteStyle;
+                var quoteIcon = doc.QuoteIcon;
+
+                var className = $"{(quoteStyle != null && quoteStyle != "none" ? $"bq-{quoteStyle}" : "")} {(quoteIcon ? "has-icon" : "no-icon")}".Trim();
+                var escapedClassName = System.Text.Json.JsonSerializer.Serialize(className);
+
+                var script = $@"document.body.className = {escapedClassName};";
+
+                try
+                {
+                    await webView2.CoreWebView2.ExecuteScriptAsync(script);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error syncing quote settings: {ex.Message}");
+                }
+            }
+        }
+
         /// <summary>
         /// Html 添付プロパティの値が変更されたときに呼び出されます。
         /// </summary>

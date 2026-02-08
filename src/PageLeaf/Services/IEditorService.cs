@@ -83,6 +83,11 @@ namespace PageLeaf.Services
         void UpdatePreview();
 
         /// <summary>
+        /// 引用設定（スタイルとアイコン）のみをプレビューへ同期します（リロードなし）。
+        /// </summary>
+        void SyncQuoteSettings();
+
+        /// <summary>
         /// エディタの現在のカーソル位置にテキストを挿入することを要求します。
         /// </summary>
         /// <param name="text">挿入するテキスト。</param>
@@ -114,5 +119,10 @@ namespace PageLeaf.Services
         /// 見出しへのスクロールが要求されたときに発生します。
         /// </summary>
         event EventHandler<TocItem> ScrollToHeaderRequested;
+
+        /// <summary>
+        /// 引用設定のプレビューへの同期（リロードなし）が要求されたときに発生します。
+        /// </summary>
+        event EventHandler SyncQuoteSettingsRequested;
     }
 }

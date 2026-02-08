@@ -121,6 +121,7 @@
                               behaviors:EditorFocusBehavior.EditorService="{Binding Editor}"
                               behaviors:EditorFocusBehavior.TargetMode="Viewer"
                               behaviors:EditorScrollBehavior.EditorService="{Binding Editor}"
+                              utils:WebBrowserHelper.EditorService="{Binding Editor}"
                               utils:WebBrowserHelper.Html="{Binding Editor.HtmlFilePath}"
                               utils:WebBrowserHelper.InjectedCss="{Binding CssEditorViewModel.PreviewCss}"
                               Visibility="{Binding Editor.IsViewerVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />

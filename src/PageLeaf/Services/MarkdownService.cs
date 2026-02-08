@@ -33,6 +33,8 @@ namespace PageLeaf.Services
         {
             public string ThemeName { get; set; }
             public ResourceSource ResourceSource { get; set; }
+            public string QuoteStyle { get; set; }
+            public bool QuoteIcon { get; set; }
         }
 
         public string ConvertToHtml(string markdown, string? cssPath, string? baseDirectory = null)
@@ -50,7 +52,9 @@ namespace PageLeaf.Services
             htmlBuilder.AppendLine("<head>");
             htmlBuilder.Append(BuildHead(cssPath, baseDirectory, settings));
             htmlBuilder.AppendLine("</head>");
-            htmlBuilder.AppendLine("<body>");
+
+            var quoteClasses = $"{(settings.QuoteStyle != "none" ? $"bq-{settings.QuoteStyle}" : "")} {(settings.QuoteIcon ? "has-icon" : "no-icon")}";
+            htmlBuilder.AppendLine($"<body class=\"{quoteClasses.Trim()}\">");
 
             // タイトルの挿入
             if (appSettings.View.ShowTitleInPreview && frontMatter.TryGetValue("title", out var titleObj) && titleObj is string title && !string.IsNullOrWhiteSpace(title))
@@ -85,6 +89,7 @@ namespace PageLeaf.Services
                 .UseAdvancedExtensions()
                 .UseYamlFrontMatter()
                 .UseCodeBlockHeader()
+                .UseCitation()
                 .Build();
         }
 
@@ -94,7 +99,9 @@ namespace PageLeaf.Services
             var settings = new EffectiveSettings
             {
                 ThemeName = !string.IsNullOrEmpty(appSettings.View.CodeBlockTheme) ? appSettings.View.CodeBlockTheme : DefaultTheme,
-                ResourceSource = appSettings.Appearance.LibraryResourceSource
+                ResourceSource = appSettings.Appearance.LibraryResourceSource,
+                QuoteStyle = "none",
+                QuoteIcon = true
             };
 
             // フロントマターによる上書き (テーマ)
@@ -109,6 +116,18 @@ namespace PageLeaf.Services
                 {
                     settings.ThemeName = candidateTheme;
                 }
+            }
+
+            // 引用スタイルの取得
+            if (frontMatter.TryGetValue("quote_style", out var qsObj) && qsObj is string qs && !string.IsNullOrWhiteSpace(qs))
+            {
+                settings.QuoteStyle = qs.ToLower();
+            }
+
+            if (frontMatter.TryGetValue("quote_icon", out var qiObj))
+            {
+                if (qiObj is bool qi) settings.QuoteIcon = qi;
+                else if (qiObj is string qiStr && bool.TryParse(qiStr, out var qiParsed)) settings.QuoteIcon = qiParsed;
             }
 
             return settings;

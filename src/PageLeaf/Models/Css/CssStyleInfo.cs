@@ -47,7 +47,6 @@ namespace PageLeaf.Models.Css
         public string? QuoteTextColor { get; set; }
         public string? QuoteBackgroundColor { get; set; }
         public string? QuoteBorderColor { get; set; }
-        public string? QuoteBorderWidth { get; set; }
         public string? QuoteBorderStyle { get; set; }
         public string? QuotePadding { get; set; }
         public string? QuoteBorderRadius { get; set; }

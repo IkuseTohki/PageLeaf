@@ -302,12 +302,9 @@ namespace PageLeaf.Services
             // Blockquote
             styleInfo.QuoteTextColor = profile.Blockquote.TextColor?.ToString();
             styleInfo.QuoteBackgroundColor = profile.Blockquote.BackgroundColor?.ToString();
-            styleInfo.QuoteBorderWidth = profile.Blockquote.BorderWidth;
-            styleInfo.QuoteBorderStyle = profile.Blockquote.BorderStyle;
             styleInfo.QuotePadding = profile.Blockquote.Padding;
             styleInfo.QuoteBorderRadius = profile.Blockquote.BorderRadius;
             styleInfo.Blockquote.IsItalic = profile.Blockquote.IsItalic;
-            styleInfo.Blockquote.ShowIcon = profile.Blockquote.ShowIcon;
 
             var quoteBorderColor = profile.Blockquote.BorderColor?.ToString();
             if (quoteBorderColor != null) styleInfo.QuoteBorderColor = quoteBorderColor;
@@ -443,13 +440,10 @@ namespace PageLeaf.Services
             // Blockquote
             if (!string.IsNullOrEmpty(styleInfo.QuoteTextColor)) profile.Blockquote.TextColor = CssColor.Parse(styleInfo.QuoteTextColor!);
             if (!string.IsNullOrEmpty(styleInfo.QuoteBackgroundColor)) profile.Blockquote.BackgroundColor = CssColor.Parse(styleInfo.QuoteBackgroundColor!);
-            if (!string.IsNullOrEmpty(styleInfo.QuoteBorderWidth)) profile.Blockquote.BorderWidth = styleInfo.QuoteBorderWidth;
-            if (!string.IsNullOrEmpty(styleInfo.QuoteBorderStyle)) profile.Blockquote.BorderStyle = styleInfo.QuoteBorderStyle;
-            if (!string.IsNullOrEmpty(styleInfo.QuoteBorderColor)) profile.Blockquote.BorderColor = CssColor.Parse(styleInfo.QuoteBorderColor!);
+            if (!string.IsNullOrEmpty(styleInfo.QuoteBorderColor)) profile.Blockquote.BorderColor = styleInfo.QuoteBorderColor;
             if (!string.IsNullOrEmpty(styleInfo.QuotePadding)) profile.Blockquote.Padding = styleInfo.QuotePadding;
             if (!string.IsNullOrEmpty(styleInfo.QuoteBorderRadius)) profile.Blockquote.BorderRadius = styleInfo.QuoteBorderRadius;
             profile.Blockquote.IsItalic = styleInfo.Blockquote.IsItalic;
-            profile.Blockquote.ShowIcon = styleInfo.Blockquote.ShowIcon;
 
             // List
             if (!string.IsNullOrEmpty(styleInfo.ListMarkerType)) profile.List.UnorderedListMarkerType = styleInfo.ListMarkerType;
