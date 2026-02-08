@@ -163,7 +163,7 @@ namespace PageLeaf.Services
             {
                 // ユーザーCSSも絶対URIに変換（エスケープを避けるためToStringを使用）
                 var userCssUri = new Uri(cssPath).ToString();
-                sb.AppendLine($"<link rel=\"stylesheet\" href=\"{userCssUri}\">");
+                sb.AppendLine($"<link id=\"user-css\" rel=\"stylesheet\" href=\"{userCssUri}\">");
             }
 
             sb.AppendLine("<style id=\"dynamic-style\"></style>");

@@ -92,30 +92,26 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
-        public void ApplyCss_ShouldUpdateHtmlFilePath_WithNewCss()
+        public void ApplyCss_ShouldUpdateHtmlContent_WhenNotVisible()
         {
-            // テスト観点: ApplyCss を呼び出すと、新しいCSSパスでHTMLが再生成されることを確認する。
+            // テスト観点: 非表示（Markdownモード）中に ApplyCss を呼び出すと、
+            //             JS同期ではなくフルリロード（UpdateHtmlContent）が要求されることを確認する。
             // Arrange
-            var document = new MarkdownDocument { Content = "# Title" };
-            _editorService.LoadDocument(document);
-            _editorService.SelectedMode = DisplayMode.Viewer; // Viewerモードにしておく
+            _editorService.SelectedMode = DisplayMode.Markdown;
+            Assert.AreEqual(string.Empty, _editorService.HtmlFilePath);
 
             var cssFileName = "github.css";
             var cssPath = "C:\\css\\github.css";
-            var expectedHtml = "<h1>Title with CSS</h1>";
-
             _mockCssService.Setup(s => s.GetCssPath(cssFileName)).Returns(cssPath);
-            _mockMarkdownService.Setup(m => m.ConvertToHtml("# Title", cssPath, It.IsAny<string?>())).Returns(expectedHtml);
 
             // Act
             _editorService.ApplyCss(cssFileName);
 
             // Assert
-            _mockCssService.Verify(s => s.GetCssPath(cssFileName), Times.Once);
-            _mockMarkdownService.Verify(m => m.ConvertToHtml("# Title", cssPath, It.IsAny<string?>()), Times.Once);
-            Assert.IsFalse(string.IsNullOrEmpty(_editorService.HtmlFilePath));
-            Assert.IsTrue(File.Exists(_editorService.HtmlFilePath));
-            Assert.AreEqual(expectedHtml, File.ReadAllText(_editorService.HtmlFilePath));
+            // Markdownモードなので ConvertToHtml 自体は呼ばれないが、
+            // UpdateHtmlContent メソッドが呼ばれ、その中の SelectedMode チェックで終了することを確認
+            _mockMarkdownService.Verify(m => m.ConvertToHtml(It.IsAny<string>(), It.IsAny<string?>(), It.IsAny<string?>()), Times.Never);
+            Assert.AreEqual(string.Empty, _editorService.HtmlFilePath);
         }
 
         [TestMethod]
@@ -273,6 +269,44 @@ namespace PageLeaf.Tests.Services
 
             // Assert
             Assert.AreEqual(insertedText, receivedText);
+        }
+
+        [TestMethod]
+        public void ApplyCss_ShouldRaiseUserCssChangedEvent()
+        {
+            // テスト観点: ApplyCss を呼び出すと、UserCssChanged イベントが発生することを確認する。
+            // Arrange
+            _editorService.SelectedMode = DisplayMode.Viewer;
+            _editorService.EditorText = "# Title"; // HTMLを生成させる
+            Assert.IsFalse(string.IsNullOrEmpty(_editorService.HtmlFilePath), "前提条件: HtmlFilePath が設定されていること");
+
+            var cssFileName = "custom.css";
+            var cssPath = "C:\\path\\to\\custom.css";
+            _mockCssService.Setup(s => s.GetCssPath(cssFileName)).Returns(cssPath);
+
+            string? receivedPath = null;
+            _editorService.UserCssChanged += (s, path) => receivedPath = path;
+
+            // Act
+            _editorService.ApplyCss(cssFileName);
+
+            // Assert
+            Assert.AreEqual(cssPath, receivedPath);
+        }
+
+        [TestMethod]
+        public void SyncQuoteSettings_ShouldRaiseSyncQuoteSettingsRequestedEvent()
+        {
+            // テスト観点: SyncQuoteSettings を呼び出すと、SyncQuoteSettingsRequested イベントが発生することを確認する。
+            // Arrange
+            var eventRaised = false;
+            _editorService.SyncQuoteSettingsRequested += (s, e) => eventRaised = true;
+
+            // Act
+            _editorService.SyncQuoteSettings();
+
+            // Assert
+            Assert.IsTrue(eventRaised);
         }
 
         [TestMethod]

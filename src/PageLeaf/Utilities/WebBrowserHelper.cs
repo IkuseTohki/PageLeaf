@@ -93,11 +93,42 @@ namespace PageLeaf.Utilities
                 if (e.OldValue is PageLeaf.Services.IEditorService oldService)
                 {
                     oldService.SyncQuoteSettingsRequested -= (s, ev) => SyncQuoteSettings(webView2, oldService);
+                    oldService.UserCssChanged -= (s, path) => SwapUserCss(webView2, path);
                 }
 
                 if (e.NewValue is PageLeaf.Services.IEditorService newService)
                 {
                     newService.SyncQuoteSettingsRequested += (s, ev) => SyncQuoteSettings(webView2, newService);
+                    newService.UserCssChanged += (s, path) => SwapUserCss(webView2, path);
+                }
+            }
+        }
+
+        private static async void SwapUserCss(WebView2 webView2, string cssPath)
+        {
+            if (webView2.CoreWebView2 != null && !string.IsNullOrEmpty(cssPath))
+            {
+                var cssUri = new Uri(cssPath).ToString();
+                // キャッシュ回避のためにタイムスタンプを付与
+                var timestamp = DateTime.Now.Ticks;
+                var finalUri = cssUri + (cssUri.Contains("?") ? "&" : "?") + "t=" + timestamp;
+                var escapedUri = System.Text.Json.JsonSerializer.Serialize(finalUri);
+
+                var script = $@"
+                    (function() {{
+                        var link = document.getElementById('user-css');
+                        if (link) {{
+                            link.href = {escapedUri};
+                        }}
+                    }})();";
+
+                try
+                {
+                    await webView2.CoreWebView2.ExecuteScriptAsync(script);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error swapping user CSS: {ex.Message}");
                 }
             }
         }

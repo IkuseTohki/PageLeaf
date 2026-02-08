@@ -56,9 +56,10 @@
 
 ---
 
-## 3. ウィンドウ管理
+## 3. ウィンドウ管理・プレビュー同期
 
 - **IWindowService**: ViewModel から直接 View (Window) を生成・操作することを避け、テスト容易性を確保する。ウィンドウの重複起動防止（Activate制御）を集約する。
+- **リロードなしの同期 (Hot-Swapping)**: 引用設定や CSS ファイルの切り替え時、`IEditorService` が発行するイベントを Presentation 層の `WebBrowserHelper` が購読し、WebView2 に対して最小限の JavaScript 命令（DOM操作）を実行することで、高速な同期を実現する。これによりフルリロードによるチラつきや状態喪失を防ぐ。
 
 ---
 

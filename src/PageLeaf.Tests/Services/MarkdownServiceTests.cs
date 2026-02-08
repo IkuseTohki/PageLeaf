@@ -54,8 +54,25 @@ namespace PageLeaf.Tests.Services
             string actualHtml = _service.ConvertToHtml(markdown, cssPath, null);
 
             // Assert
-            // Regex.Escape を使用してパスを安全にエスケープしつつ検証
-            string expectedPattern = @"<link\s+rel=""stylesheet""\s+href=""" + Regex.Escape(expectedUri) + @""">";
+            // id 属性が含まれていても通るように修正
+            string expectedPattern = @"<link\s+([^>]*\s+)?rel=""stylesheet""\s+href=""" + Regex.Escape(expectedUri) + @"""";
+            StringAssert.Matches(actualHtml, new Regex(expectedPattern));
+        }
+
+        [TestMethod]
+        public void ConvertToHtml_ShouldIncludeCssLink_WithId_WhenCssPathIsProvided()
+        {
+            // テスト観点: CSSパスが提供された場合、生成されるHTMLの<link>タグに id="user-css" が付与されていることを確認する。
+            // Arrange
+            string markdown = "# Hello";
+            string cssPath = @"C:\styles\github.css";
+            var expectedUri = new Uri(cssPath).ToString();
+
+            // Act
+            string actualHtml = _service.ConvertToHtml(markdown, cssPath, null);
+
+            // Assert
+            string expectedPattern = @"<link\s+id=""user-css""\s+rel=""stylesheet""\s+href=""" + Regex.Escape(expectedUri) + @""">";
             StringAssert.Matches(actualHtml, new Regex(expectedPattern));
         }
 

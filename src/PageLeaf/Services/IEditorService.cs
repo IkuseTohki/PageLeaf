@@ -124,5 +124,10 @@ namespace PageLeaf.Services
         /// 引用設定のプレビューへの同期（リロードなし）が要求されたときに発生します。
         /// </summary>
         event EventHandler SyncQuoteSettingsRequested;
+
+        /// <summary>
+        /// ユーザーCSSファイルが変更されたときに発生します。
+        /// </summary>
+        event EventHandler<string> UserCssChanged;
     }
 }

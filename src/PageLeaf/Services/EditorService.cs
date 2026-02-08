@@ -192,7 +192,17 @@ namespace PageLeaf.Services
         public void ApplyCss(string cssFileName)
         {
             _currentCssPath = _cssService.GetCssPath(cssFileName);
-            UpdateHtmlContent();
+            
+            if (_selectedMode == DisplayMode.Viewer && !string.IsNullOrEmpty(HtmlFilePath))
+            {
+                // すでに表示中の場合はJSで同期（Hot-Swapping）
+                UserCssChanged?.Invoke(this, _currentCssPath ?? string.Empty);
+            }
+            else
+            {
+                // 非表示中や初回ロード時はフルリロード
+                UpdateHtmlContent();
+            }
         }
 
         /// <summary>
@@ -246,6 +256,7 @@ namespace PageLeaf.Services
         public event EventHandler<DisplayMode>? FocusRequested;
         public event EventHandler<TocItem>? ScrollToHeaderRequested;
         public event EventHandler? SyncQuoteSettingsRequested;
+        public event EventHandler<string>? UserCssChanged;
 
         private void UpdateVisibility()
         {
