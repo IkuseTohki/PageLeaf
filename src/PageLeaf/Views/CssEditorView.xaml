@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="PageLeaf.Views.CssEditorView"
+<UserControl x:Class="PageLeaf.Views.CssEditorView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:behaviors="clr-namespace:PageLeaf.Behaviors"
@@ -13,7 +13,7 @@
         <Style BasedOn="{StaticResource HorizontalTabRadioButtonStyle}" TargetType="RadioButton" />
     </UserControl.Resources>
 
-    <Grid Background="{DynamicResource PanelBackgroundBrush}">
+    <Grid Background="{DynamicResource SurfaceLayer1Brush}">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -22,7 +22,7 @@
         <!-- Header Area (File Selector & Toolbar) -->
         <Border Grid.Row="0"
                 Padding="2,12,2,0"
-                BorderBrush="{DynamicResource BorderBrush}"
+                BorderBrush="{DynamicResource OutlineBaseBrush}"
                 BorderThickness="0,0,0,1">
             <StackPanel>
                 <!-- Controls Row -->
@@ -55,7 +55,7 @@
                             <Path Width="14"
                                   Height="14"
                                   Data="{StaticResource SaveIconGeometry}"
-                                  Fill="{DynamicResource SecondaryTextBrush}"
+                                  Fill="{DynamicResource TextSecondaryBrush}"
                                   Stretch="Uniform" />
                         </Button>
                         <Button AutomationProperties.AutomationId="ResetCssButton"
@@ -65,7 +65,7 @@
                             <Path Width="14"
                                   Height="14"
                                   Data="{StaticResource RefreshIconGeometry}"
-                                  Fill="{DynamicResource SecondaryTextBrush}"
+                                  Fill="{DynamicResource TextSecondaryBrush}"
                                   Stretch="Uniform" />
                         </Button>
                     </StackPanel>
@@ -336,8 +336,8 @@
                     <Label Content="マーカー設定" Style="{StaticResource FirstCompactFormGroupHeaderStyle}" />
                     <Label Content="箇条書き (ul)" Style="{StaticResource CompactFormLabelStyle}" />
                     <ListBox Margin="0,0,0,8"
-                             Background="{DynamicResource WindowBackgroundBrush}"
-                             BorderBrush="{DynamicResource BorderBrush}"
+                             Background="{DynamicResource SurfaceBaseBrush}"
+                             BorderBrush="{DynamicResource OutlineBaseBrush}"
                              ItemContainerStyle="{StaticResource ListMarkerListBoxItemStyle}"
                              ItemTemplate="{StaticResource ListMarkerItemTemplate}"
                              ItemsSource="{Binding AvailableListMarkerTypes}"
@@ -351,8 +351,8 @@
 
                     <Label Content="番号付き (ol)" Style="{StaticResource CompactFormLabelStyle}" />
                     <ListBox Margin="0,0,0,8"
-                             Background="{DynamicResource WindowBackgroundBrush}"
-                             BorderBrush="{DynamicResource BorderBrush}"
+                             Background="{DynamicResource SurfaceBaseBrush}"
+                             BorderBrush="{DynamicResource OutlineBaseBrush}"
                              ItemContainerStyle="{StaticResource ListMarkerListBoxItemStyle}"
                              ItemTemplate="{StaticResource ListMarkerItemTemplate}"
                              ItemsSource="{Binding AvailableNumberedListMarkerTypes}"
@@ -566,13 +566,13 @@
                             <Path Width="10"
                                   Height="10"
                                   Data="M0,0 L10,10 M10,0 L0,10"
-                                  Stroke="{DynamicResource SecondaryTextBrush}"
+                                  Stroke="{DynamicResource TextSecondaryBrush}"
                                   StrokeThickness="1.5" />
                         </Button>
                     </Grid>
                     <ListBox Margin="0,0,0,12"
-                             Background="{DynamicResource WindowBackgroundBrush}"
-                             BorderBrush="{DynamicResource BorderBrush}"
+                             Background="{DynamicResource SurfaceBaseBrush}"
+                             BorderBrush="{DynamicResource OutlineBaseBrush}"
                              ItemContainerStyle="{StaticResource ListMarkerListBoxItemStyle}"
                              ItemsSource="{Binding AvailableQuoteStyles}"
                              SelectedItem="{Binding QuoteStyle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
@@ -584,7 +584,7 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock x:Name="PresetText"
-                                           Foreground="{DynamicResource PrimaryTextBrush}"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"
                                            Text="{Binding}"
                                            TextAlignment="Center" />
                                 <DataTemplate.Triggers>

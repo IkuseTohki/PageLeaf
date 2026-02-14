@@ -13,7 +13,7 @@
             <Setter Property="Padding" Value="2,0" />
             <Setter Property="BorderThickness" Value="0" />
             <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Template">
                 <Setter.Value>
@@ -37,7 +37,7 @@
                                      VerticalAlignment="Center"
                                      Background="Transparent"
                                      BorderThickness="0"
-                                     CaretBrush="{DynamicResource PrimaryTextBrush}"
+                                     CaretBrush="{DynamicResource TextPrimaryBrush}"
                                      Focusable="True"
                                      Foreground="{TemplateBinding Foreground}"
                                      IsReadOnly="{TemplateBinding IsReadOnly}"
@@ -50,7 +50,7 @@
                                   HorizontalAlignment="Right"
                                   VerticalAlignment="Center"
                                   Data="M 0 0 L 3.5 4 L 7 0 Z"
-                                  Fill="{DynamicResource SecondaryTextBrush}"
+                                  Fill="{DynamicResource TextSecondaryBrush}"
                                   IsHitTestVisible="False"
                                   Opacity="0" />
                             <Popup Name="Popup"
@@ -64,9 +64,15 @@
                                       MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                     <Border x:Name="DropDownBorder"
                                             Background="{DynamicResource ComboBoxDropDownBackgroundBrush}"
-                                            BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderBrush="{DynamicResource OutlineBaseBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="2" />
+                                            CornerRadius="4">
+                                        <Border.Effect>
+                                            <DropShadowEffect BlurRadius="10"
+                                                              Opacity="0.2"
+                                                              ShadowDepth="2" />
+                                        </Border.Effect>
+                                    </Border>
                                     <ScrollViewer Margin="1" SnapsToDevicePixels="True">
                                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                     </ScrollViewer>
@@ -119,7 +125,7 @@
                                      HorizontalContentAlignment="Center"
                                      Background="Transparent"
                                      BorderThickness="0"
-                                     CaretBrush="{DynamicResource PrimaryTextBrush}"
+                                     CaretBrush="{DynamicResource TextPrimaryBrush}"
                                      Focusable="True"
                                      Foreground="{TemplateBinding Foreground}"
                                      IsReadOnly="{TemplateBinding IsReadOnly}"
@@ -131,7 +137,7 @@
                                   HorizontalAlignment="Right"
                                   VerticalAlignment="Center"
                                   Data="M 0 0 L 3.5 4 L 7 0 Z"
-                                  Fill="{DynamicResource SecondaryTextBrush}"
+                                  Fill="{DynamicResource TextSecondaryBrush}"
                                   IsHitTestVisible="False"
                                   Opacity="0" />
                             <Popup Name="Popup"
@@ -145,9 +151,15 @@
                                       MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                     <Border x:Name="DropDownBorder"
                                             Background="{DynamicResource ComboBoxDropDownBackgroundBrush}"
-                                            BorderBrush="{DynamicResource BorderBrush}"
+                                            BorderBrush="{DynamicResource OutlineBaseBrush}"
                                             BorderThickness="1"
-                                            CornerRadius="2" />
+                                            CornerRadius="4">
+                                        <Border.Effect>
+                                            <DropShadowEffect BlurRadius="10"
+                                                              Opacity="0.2"
+                                                              ShadowDepth="2" />
+                                        </Border.Effect>
+                                    </Border>
                                     <ScrollViewer Margin="1" SnapsToDevicePixels="True">
                                         <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Contained" />
                                     </ScrollViewer>
@@ -171,8 +183,8 @@
     <Border Width="120"
             Height="28"
             HorizontalAlignment="Left"
-            Background="{DynamicResource WindowBackgroundBrush}"
-            BorderBrush="{DynamicResource BorderBrush}"
+            Background="{DynamicResource SurfaceBaseBrush}"
+            BorderBrush="{DynamicResource OutlineBaseBrush}"
             BorderThickness="1"
             CornerRadius="4"
             SnapsToDevicePixels="True">
@@ -192,8 +204,8 @@
                          AutomationProperties.AutomationId="ValueTextBox"
                          Background="Transparent"
                          BorderThickness="0"
-                         CaretBrush="{DynamicResource PrimaryTextBrush}"
-                         Foreground="{DynamicResource PrimaryTextBrush}"
+                         CaretBrush="{DynamicResource TextPrimaryBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
                          Text="{Binding ElementName=Root, Path=InternalValue, UpdateSourceTrigger=PropertyChanged}"
                          Visibility="{Binding ElementName=Root, Path=ShowSpinner, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
@@ -234,7 +246,7 @@
                     <Path Width="6"
                           Height="6"
                           Data="{StaticResource ArrowUpIconGeometry}"
-                          Fill="{DynamicResource SecondaryTextBrush}"
+                          Fill="{DynamicResource TextSecondaryBrush}"
                           Stretch="Uniform" />
                 </Button>
                 <Button Width="16"
@@ -245,7 +257,7 @@
                     <Path Width="6"
                           Height="6"
                           Data="{StaticResource ArrowDownIconGeometry}"
-                          Fill="{DynamicResource SecondaryTextBrush}"
+                          Fill="{DynamicResource TextSecondaryBrush}"
                           Stretch="Uniform" />
                 </Button>
             </StackPanel>
@@ -254,7 +266,7 @@
             <Rectangle Grid.Column="2"
                        Width="1"
                        Margin="0,4"
-                       Fill="{DynamicResource BorderBrush}" />
+                       Fill="{DynamicResource OutlineBaseBrush}" />
 
             <!-- 単位表示エリア -->
             <Grid Grid.Column="3" Width="45">
@@ -269,7 +281,7 @@
                 <!-- 固定時：編集不可のTextBlock -->
                 <TextBlock HorizontalAlignment="Center"
                            VerticalAlignment="Center"
-                           Foreground="{DynamicResource SecondaryTextBrush}"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
                            Text="{Binding ElementName=Root, Path=FixedUnit}"
                            Visibility="{Binding ElementName=Root, Path=IsUnitFixed, Converter={StaticResource BooleanToVisibilityConverter}}" />
             </Grid>

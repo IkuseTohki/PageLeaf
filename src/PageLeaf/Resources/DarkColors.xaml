@@ -1,24 +1,37 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- カラー値の定義 (アニメーション等で直接使用) -->
-    <Color x:Key="PrimaryActionColor">#0091FF</Color>
-    <Color x:Key="PrimaryActionHoverColor">#1C9FFF</Color>
+    <Color x:Key="BrandPrimaryColor">#0091FF</Color>
+    <Color x:Key="BrandPrimaryHoverColor">#1C9FFF</Color>
     <Color x:Key="SwitchOffColor">#FF444444</Color>
     <Color x:Key="SecondaryTextColor">#9D9D9D</Color>
 
+    <!-- セマンティック・トークン (新しい標準) -->
+    <SolidColorBrush x:Key="BrandPrimaryBrush" Color="{StaticResource BrandPrimaryColor}" />
+    <SolidColorBrush x:Key="BrandPrimaryHoverBrush" Color="{StaticResource BrandPrimaryHoverColor}" />
+    <SolidColorBrush x:Key="SurfaceBaseBrush" Color="#1E1E1E" />
+    <SolidColorBrush x:Key="SurfaceLayer1Brush" Color="#252526" />
+    <SolidColorBrush x:Key="OutlineBaseBrush" Color="#3E3E42" />
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#D4D4D4" />
+    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource SecondaryTextColor}" />
+    <SolidColorBrush x:Key="StateHoverBrush" Color="#FF3E3E42" />
+    <SolidColorBrush x:Key="EmphasisLowBrush" Color="#590091FF" />
+    <!-- 35% opacity of accent -->
+    <SolidColorBrush x:Key="EmphasisHighBrush" Color="{StaticResource BrandPrimaryColor}" />
+
     <!-- 基本・レイアウト -->
-    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="#1E1E1E" />
+    <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{Binding Color, Source={StaticResource SurfaceBaseBrush}}" />
     <SolidColorBrush x:Key="WindowBorderBrush" Color="#3E3E42" />
-    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="#252526" />
-    <SolidColorBrush x:Key="BorderBrush" Color="#3E3E42" />
-    <SolidColorBrush x:Key="PrimaryTextBrush" Color="#D4D4D4" />
-    <SolidColorBrush x:Key="SecondaryTextBrush" Color="{StaticResource SecondaryTextColor}" />
+    <SolidColorBrush x:Key="PanelBackgroundBrush" Color="{Binding Color, Source={StaticResource SurfaceLayer1Brush}}" />
+    <SolidColorBrush x:Key="BorderBrush" Color="{Binding Color, Source={StaticResource OutlineBaseBrush}}" />
+    <SolidColorBrush x:Key="PrimaryTextBrush" Color="{Binding Color, Source={StaticResource TextPrimaryBrush}}" />
+    <SolidColorBrush x:Key="SecondaryTextBrush" Color="{Binding Color, Source={StaticResource TextSecondaryBrush}}" />
     <SolidColorBrush x:Key="AnnotationTextBrush" Color="{StaticResource SecondaryTextColor}" />
 
     <!-- アクション -->
-    <SolidColorBrush x:Key="PrimaryActionBrush" Color="{StaticResource PrimaryActionColor}" />
-    <SolidColorBrush x:Key="PrimaryActionHoverBrush" Color="{StaticResource PrimaryActionHoverColor}" />
-    <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource PrimaryActionColor}" />
+    <SolidColorBrush x:Key="PrimaryActionBrush" Color="{Binding Color, Source={StaticResource BrandPrimaryBrush}}" />
+    <SolidColorBrush x:Key="PrimaryActionHoverBrush" Color="{Binding Color, Source={StaticResource BrandPrimaryHoverBrush}}" />
+    <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource BrandPrimaryColor}" />
     <SolidColorBrush x:Key="SecondaryActionBrush" Color="{StaticResource SecondaryTextColor}" />
 
     <!-- サイドバー -->
@@ -37,14 +50,13 @@
     <!-- Button -->
     <SolidColorBrush x:Key="ButtonSecondaryBackgroundBrush" Color="#3E3E42" />
     <SolidColorBrush x:Key="ButtonSecondaryHoverBackgroundBrush" Color="#4E4E52" />
-    <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="#3E3E42" />
+    <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="{Binding Color, Source={StaticResource StateHoverBrush}}" />
     <SolidColorBrush x:Key="ButtonHoverBorderBrush" Color="#5E5E62" />
     <SolidColorBrush x:Key="ButtonCheckedBackgroundBrush" Color="#004D80" />
-    <SolidColorBrush x:Key="ButtonCheckedBorderBrush" Color="{StaticResource PrimaryActionColor}" />
+    <SolidColorBrush x:Key="ButtonCheckedBorderBrush" Color="{StaticResource BrandPrimaryColor}" />
     <SolidColorBrush x:Key="ButtonMouseOverBackgroundBrush" Color="#2A2D2E" />
-    <SolidColorBrush x:Key="IconButtonSelectedBackgroundBrush" Color="#590091FF" />
-    <!-- 35% opacity of PrimaryActionColor -->
-    <SolidColorBrush x:Key="IconButtonSelectedIconBrush" Color="{StaticResource PrimaryActionColor}" />
+    <SolidColorBrush x:Key="IconButtonSelectedBackgroundBrush" Color="{Binding Color, Source={StaticResource EmphasisLowBrush}}" />
+    <SolidColorBrush x:Key="IconButtonSelectedIconBrush" Color="{Binding Color, Source={StaticResource EmphasisHighBrush}}" />
 
     <!-- Floating Button / ScrollBar -->
     <SolidColorBrush x:Key="FloatingButtonHoverBackgroundBrush" Color="#33FFFFFF" />

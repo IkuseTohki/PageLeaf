@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <!-- フォーム用ラベルスタイル -->
     <Style x:Key="FormLabelStyle" TargetType="Label">
@@ -18,9 +18,9 @@
 
     <!-- フォーム用テキストボックススタイル -->
     <Style x:Key="FormTextBoxStyle" TargetType="TextBox">
-        <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBaseBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource OutlineBaseBrush}" />
         <Setter Property="Margin" Value="0,0,0,20" />
         <Setter Property="Padding" Value="8" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -44,10 +44,10 @@
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource FormDisabledBackgroundBrush}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="true">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryActionBrush}" />
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource BrandPrimaryBrush}" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="true">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryActionBrush}" />
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource BrandPrimaryBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -75,7 +75,7 @@
     <Style x:Key="FormComboBoxStyle"
            BasedOn="{StaticResource BaseComboBoxStyle}"
            TargetType="ComboBox">
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="Margin" Value="0,0,0,20" />
         <Setter Property="Padding" Value="8,6" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -91,7 +91,7 @@
 
     <!-- フォーム用チェックボックススタイル -->
     <Style x:Key="FormCheckBoxStyle" TargetType="CheckBox">
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="Margin" Value="0,0,0,20" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="FontSize" Value="13" />
@@ -103,15 +103,15 @@
                             <Border x:Name="columnHeaderBorder"
                                     Width="16"
                                     Height="16"
-                                    Background="{DynamicResource WindowBackgroundBrush}"
-                                    BorderBrush="{DynamicResource BorderBrush}"
+                                    Background="{DynamicResource SurfaceBaseBrush}"
+                                    BorderBrush="{DynamicResource OutlineBaseBrush}"
                                     BorderThickness="1"
-                                    CornerRadius="3">
+                                    CornerRadius="4">
                                 <Grid>
                                     <Path x:Name="optionMark"
                                           Margin="2"
                                           Data="M1,4.5 L4,7.5 L9,1"
-                                          Stroke="{DynamicResource PrimaryActionBrush}"
+                                          Stroke="{DynamicResource BrandPrimaryBrush}"
                                           StrokeThickness="2"
                                           Visibility="Collapsed" />
                                 </Grid>
@@ -126,10 +126,10 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsChecked" Value="true">
                             <Setter TargetName="optionMark" Property="Visibility" Value="Visible" />
-                            <Setter TargetName="columnHeaderBorder" Property="BorderBrush" Value="{DynamicResource PrimaryActionBrush}" />
+                            <Setter TargetName="columnHeaderBorder" Property="BorderBrush" Value="{DynamicResource BrandPrimaryBrush}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="true">
-                            <Setter TargetName="columnHeaderBorder" Property="BorderBrush" Value="{DynamicResource PrimaryActionBrush}" />
+                            <Setter TargetName="columnHeaderBorder" Property="BorderBrush" Value="{DynamicResource BrandPrimaryBrush}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="false">
                             <Setter Property="Foreground" Value="{DynamicResource FormDisabledBorderBrush}" />
@@ -150,7 +150,7 @@
     <Style x:Key="SettingsTitleTextStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="18" />
         <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="Margin" Value="10,0,0,20" />
     </Style>
 
@@ -184,7 +184,7 @@
     <Style x:Key="SectionHeaderLabelStyle" TargetType="Label">
         <Setter Property="FontSize" Value="18" />
         <Setter Property="FontWeight" Value="Normal" />
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource SectionHeaderBorderBrush}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
         <Setter Property="Margin" Value="0,20,0,20" />
@@ -201,7 +201,7 @@
     <!-- 注釈テキスト用スタイル -->
     <Style x:Key="AnnotationTextStyle" TargetType="TextBlock">
         <Setter Property="FontSize" Value="11" />
-        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
         <Setter Property="Margin" Value="0,-12,0,15" />
         <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
@@ -212,7 +212,7 @@
         <Setter Property="Padding" Value="0" />
         <Setter Property="FontSize" Value="12" />
         <Setter Property="FontWeight" Value="SemiBold" />
-        <Setter Property="Foreground" Value="{DynamicResource SecondaryTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}" />
     </Style>
 
     <!-- コンパクト形式: グループヘッダースタイル -->
@@ -221,8 +221,8 @@
         <Setter Property="Padding" Value="0,0,0,4" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="FontWeight" Value="Bold" />
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource OutlineBaseBrush}" />
         <Setter Property="BorderThickness" Value="0,0,0,1" />
     </Style>
 
@@ -235,9 +235,9 @@
 
     <!-- コンパクト形式: TextBoxスタイル -->
     <Style x:Key="CompactFormTextBoxStyle" TargetType="TextBox">
-        <Setter Property="Background" Value="{DynamicResource WindowBackgroundBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="Background" Value="{DynamicResource SurfaceBaseBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource OutlineBaseBrush}" />
         <Setter Property="Margin" Value="0,0,0,12" />
         <Setter Property="Padding" Value="6,4" />
         <Setter Property="FontSize" Value="13" />
@@ -262,10 +262,10 @@
                             <Setter TargetName="border" Property="Background" Value="{DynamicResource FormDisabledBackgroundBrush}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="true">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryActionBrush}" />
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource BrandPrimaryBrush}" />
                         </Trigger>
                         <Trigger Property="IsKeyboardFocused" Value="true">
-                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource PrimaryActionBrush}" />
+                            <Setter TargetName="border" Property="BorderBrush" Value="{DynamicResource BrandPrimaryBrush}" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -285,7 +285,7 @@
     <Style x:Key="CompactFormComboBoxStyle"
            BasedOn="{StaticResource BaseComboBoxStyle}"
            TargetType="ComboBox">
-        <Setter Property="Foreground" Value="{DynamicResource PrimaryTextBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="Margin" Value="0,0,0,12" />
         <Setter Property="Padding" Value="6,4" />
         <Setter Property="FontSize" Value="13" />

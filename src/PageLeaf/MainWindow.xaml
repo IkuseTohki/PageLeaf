@@ -1,4 +1,4 @@
-﻿<Window x:Class="PageLeaf.MainWindow"
+<Window x:Class="PageLeaf.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
@@ -15,7 +15,7 @@
         Height="600"
         behaviors:FileDropBehavior.Command="{Binding OpenFileByPathCommand}"
         behaviors:WindowLifecycleBehavior.ClosedCommand="{Binding WindowClosedCommand}"
-        Background="{DynamicResource WindowBackgroundBrush}"
+        Background="{DynamicResource SurfaceBaseBrush}"
         Icon="{StaticResource AppIconImage}"
         mc:Ignorable="d">
     <Window.InputBindings>
@@ -206,8 +206,8 @@
                     <Border MinWidth="200"
                             MaxHeight="400"
                             Padding="5"
-                            Background="{DynamicResource PanelBackgroundBrush}"
-                            BorderBrush="{DynamicResource BorderBrush}"
+                            Background="{DynamicResource SurfaceLayer1Brush}"
+                            BorderBrush="{DynamicResource OutlineBaseBrush}"
                             BorderThickness="1"
                             CornerRadius="4">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
@@ -260,7 +260,7 @@
                         Style="{StaticResource ToggleHandleButtonStyle}">
                     <Path Width="8"
                           Height="8"
-                          Fill="{DynamicResource PrimaryTextBrush}"
+                          Fill="{DynamicResource TextPrimaryBrush}"
                           Stretch="Uniform">
                         <Path.Style>
                             <Style TargetType="Path">

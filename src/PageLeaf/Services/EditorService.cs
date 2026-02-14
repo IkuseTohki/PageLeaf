@@ -192,7 +192,7 @@ namespace PageLeaf.Services
         public void ApplyCss(string cssFileName)
         {
             _currentCssPath = _cssService.GetCssPath(cssFileName);
-            
+
             if (_selectedMode == DisplayMode.Viewer && !string.IsNullOrEmpty(HtmlFilePath))
             {
                 // すでに表示中の場合はJSで同期（Hot-Swapping）
