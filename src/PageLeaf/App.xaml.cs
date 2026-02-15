@@ -16,6 +16,7 @@ using AngleSharp.Css.Values;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Microsoft.Win32;
+using LeafKit.UI.Services;
 
 namespace PageLeaf
 {
@@ -128,6 +129,7 @@ namespace PageLeaf
                     services.AddSingleton<ISettingsService>(sp => new SettingsService(sp.GetRequiredService<ILogger<SettingsService>>(), App.BaseDirectory));
                     services.AddSingleton<ISystemThemeProvider, SystemThemeProvider>();
                     services.AddSingleton<IThemeService, ThemeService>();
+                    services.AddSingleton<IThemeManager, ThemeManager>();
                     services.AddSingleton<IDialogService, DialogService>();
                     services.AddSingleton<IMarkdownService, MarkdownService>();
                     services.AddSingleton<IEditorService, EditorService>();
@@ -233,28 +235,20 @@ namespace PageLeaf
         private void ApplyTheme(Models.AppTheme theme)
         {
             var themeService = AppHost!.Services.GetRequiredService<IThemeService>();
-            var actualTheme = themeService.GetActualTheme();
-
-            var themeUri = actualTheme == Models.AppTheme.Dark
-                ? new Uri("Resources/DarkColors.xaml", UriKind.Relative)
-                : new Uri("Resources/LightColors.xaml", UriKind.Relative);
 
             try
             {
-                // MergedDictionariesの最初のリソース（ThemeColors）を差し替える
-                var dictionaries = Application.Current.Resources.MergedDictionaries;
-                if (dictionaries.Count > 0)
-                {
-                    dictionaries[0] = new ResourceDictionary { Source = themeUri };
-                }
+                // テーマ決定から適用までのオーケストレーションをサービスに移譲
+                themeService.ApplyActualTheme();
 
                 // タイトルバーのダークモード対応 (Windows 11)
+                var actualTheme = themeService.GetActualTheme();
                 UpdateTitleBarTheme(actualTheme == Models.AppTheme.Dark);
             }
             catch (Exception ex)
             {
                 var logger = AppHost?.Services.GetService<ILogger<App>>();
-                logger?.LogError(ex, "Failed to apply theme: {ThemeUri}", themeUri);
+                logger?.LogError(ex, "Failed to apply theme.");
             }
         }
 
