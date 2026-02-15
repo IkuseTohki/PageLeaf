@@ -13,7 +13,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
+                            CornerRadius="{StaticResource ControlCornerRadius}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                 </ControlTemplate>
@@ -78,7 +78,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
+                            CornerRadius="{StaticResource ControlCornerRadius}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -127,7 +127,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
+                            CornerRadius="{StaticResource ControlCornerRadius}">
                         <ContentPresenter />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -158,7 +158,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
+                            CornerRadius="{StaticResource ControlCornerRadius}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -191,7 +191,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
+                            CornerRadius="{StaticResource ControlCornerRadius}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -222,7 +222,7 @@
                             Margin="0,0,0,4"
                             Padding="15,10"
                             Background="{TemplateBinding Background}"
-                            CornerRadius="6">
+                            CornerRadius="{StaticResource ControlCornerRadius}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="30" />
@@ -479,7 +479,7 @@
                                         Background="{DynamicResource ComboBoxDropDownBackgroundBrush}"
                                         BorderBrush="{DynamicResource OutlineBaseBrush}"
                                         BorderThickness="1"
-                                        CornerRadius="4">
+                                        CornerRadius="{StaticResource ContainerCornerRadius}">
                                     <Border.Effect>
                                         <DropShadowEffect BlurRadius="10"
                                                           Opacity="0.2"
@@ -524,7 +524,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4">
+                            CornerRadius="{StaticResource ControlCornerRadius}">
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                     </Border>
                     <ControlTemplate.Triggers>
@@ -598,7 +598,7 @@
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4" />
+                                CornerRadius="{StaticResource ControlCornerRadius}" />
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition x:Name="Col0" Width="Auto" />
@@ -646,7 +646,7 @@
                                     Background="{DynamicResource MenuDropdownBackgroundBrush}"
                                     BorderBrush="{DynamicResource MenuDropdownBorderBrush}"
                                     BorderThickness="1"
-                                    CornerRadius="4">
+                                    CornerRadius="{StaticResource ContainerCornerRadius}">
                                 <ScrollViewer x:Name="SubmenuScrollViewer"
                                               Margin="0"
                                               Padding="0"

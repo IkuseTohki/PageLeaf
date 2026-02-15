@@ -7,7 +7,7 @@
         <Setter Property="Background" Value="#05000000" />
         <Setter Property="BorderBrush" Value="{DynamicResource OutlineBaseBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
     </Style>
 
     <!-- SettingsWindow 用のボーダースタイル -->
@@ -15,7 +15,7 @@
         <Setter Property="Background" Value="{DynamicResource SurfaceBaseBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource WindowBorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="CornerRadius" Value="{StaticResource ContainerCornerRadius}" />
         <Setter Property="Effect">
             <Setter.Value>
                 <DropShadowEffect BlurRadius="25"

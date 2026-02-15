@@ -79,4 +79,8 @@
     <Resource Include="Resources\Markdown.xshd" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\LeafKit.UI\src\LeafKit.UI\LeafKit.UI.csproj" />
+  </ItemGroup>
+
 </Project>

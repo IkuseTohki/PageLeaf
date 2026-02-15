@@ -31,7 +31,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4"
+                            CornerRadius="{StaticResource ControlCornerRadius}"
                             SnapsToDevicePixels="True">
                         <ScrollViewer x:Name="PART_ContentHost"
                                       Focusable="false"
@@ -106,7 +106,7 @@
                                     Background="{DynamicResource SurfaceBaseBrush}"
                                     BorderBrush="{DynamicResource OutlineBaseBrush}"
                                     BorderThickness="1"
-                                    CornerRadius="4">
+                                    CornerRadius="{StaticResource ControlCornerRadius}">
                                 <Grid>
                                     <Path x:Name="optionMark"
                                           Margin="2"
@@ -249,7 +249,7 @@
                             Background="{TemplateBinding Background}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="4"
+                            CornerRadius="{StaticResource ControlCornerRadius}"
                             SnapsToDevicePixels="True">
                         <ScrollViewer x:Name="PART_ContentHost"
                                       Focusable="false"
