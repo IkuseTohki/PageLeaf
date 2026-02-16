@@ -5,18 +5,6 @@
 
     <!-- カラー値の定義 (アニメーション等で直接使用) -->
     <Color x:Key="SwitchOffColor">#FF444444</Color>
-    <Color x:Key="SecondaryTextColor">#9D9D9D</Color>
-
-    <!-- セマンティック・トークン (新しい標準) -->
-    <SolidColorBrush x:Key="SurfaceBaseBrush" Color="#1E1E1E" />
-    <SolidColorBrush x:Key="SurfaceLayer1Brush" Color="#252526" />
-    <SolidColorBrush x:Key="OutlineBaseBrush" Color="#3E3E42" />
-    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#D4D4D4" />
-    <SolidColorBrush x:Key="TextSecondaryBrush" Color="{StaticResource SecondaryTextColor}" />
-    <SolidColorBrush x:Key="StateHoverBrush" Color="#FF3E3E42" />
-    <SolidColorBrush x:Key="EmphasisLowBrush" Color="#590091FF" />
-    <!-- 35% opacity of accent -->
-    <SolidColorBrush x:Key="EmphasisHighBrush" Color="{StaticResource BrandPrimaryColor}" />
 
     <!-- 基本・レイアウト -->
     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{Binding Color, Source={StaticResource SurfaceBaseBrush}}" />
