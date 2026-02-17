@@ -3,9 +3,6 @@
         <ResourceDictionary Source="pack://application:,,,/LeafKit.UI;component/Resources/DarkColors.xaml" />
     </ResourceDictionary.MergedDictionaries>
 
-    <!-- カラー値の定義 (アニメーション等で直接使用) -->
-    <Color x:Key="SwitchOffColor">#FF444444</Color>
-
     <!-- 基本・レイアウト -->
     <SolidColorBrush x:Key="WindowBackgroundBrush" Color="{Binding Color, Source={StaticResource SurfaceBaseBrush}}" />
     <SolidColorBrush x:Key="WindowBorderBrush" Color="#3E3E42" />
@@ -20,11 +17,6 @@
     <SolidColorBrush x:Key="PrimaryActionHoverBrush" Color="{Binding Color, Source={StaticResource BrandPrimaryHoverBrush}}" />
     <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource BrandPrimaryColor}" />
     <SolidColorBrush x:Key="SecondaryActionBrush" Color="{StaticResource SecondaryTextColor}" />
-
-    <!-- サイドバー -->
-    <SolidColorBrush x:Key="SidebarHoverBrush" Color="#2A2D2E" />
-    <SolidColorBrush x:Key="SidebarSelectedBrush" Color="#37373D" />
-    <SolidColorBrush x:Key="SidebarSelectedTextBrush" Color="#FFFFFF" />
 
     <!-- ComboBox -->
     <SolidColorBrush x:Key="ComboBoxBackgroundBrush" Color="#3C3C3C" />
@@ -64,7 +56,6 @@
     <SolidColorBrush x:Key="ExpanderHeaderBackgroundBrush" Color="#252526" />
 
     <!-- Switch / Segmented Button -->
-    <SolidColorBrush x:Key="SwitchOffBrush" Color="{StaticResource SwitchOffColor}" />
     <SolidColorBrush x:Key="SegmentedButtonForegroundBrush" Color="#999999" />
     <SolidColorBrush x:Key="SegmentedButtonHoverBackgroundBrush" Color="#333333" />
 

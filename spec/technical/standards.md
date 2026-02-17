@@ -11,9 +11,14 @@
 
 #### スタイルとテンプレート
 
-- **ControlStyles.xaml**: 基本的なコントロールスタイルを定義する
+- **ControlStyles.xaml (Atoms)**:
+  - WPF 標準コントロール（Button, TextBox, CheckBox 等）のプリミティブな外観を定義する
+  - アプリ全体で共有される「土台」となるスタイルを保持する
+- **ComponentStyles.xaml (Molecules)**:
+  - 標準コントロールを組み合わせ、特定の役割を持たせたコンポーネント（SidebarItem, Switch, Expander 等）を定義する
+  - セマンティック（意味論的）な意図が明確な UI パターンを保持する
 - **DataTemplates.xaml**: データ表示用のテンプレートを管理する
-- **Styles.xaml**: 複数のリソースを組み合わせた複合的なスタイルを記述する
+- **Styles.xaml**: 複数のリソースを組み合わせた、ページ特有または最終的な複合スタイルを記述する
 
 #### 変換とその他
 

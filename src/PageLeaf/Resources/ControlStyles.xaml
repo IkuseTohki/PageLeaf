@@ -204,54 +204,6 @@
         </Setter>
     </Style>
 
-    <!-- 設定画面サイドバーメニュー用スタイル (RadioButtonをメニュー項目として扱う) -->
-    <Style x:Key="SidebarMenuItemStyle" TargetType="RadioButton">
-        <Setter Property="Padding" Value="10,8" />
-        <Setter Property="Margin" Value="0" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="FontWeight" Value="Normal" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="GroupName" Value="SettingsCategory" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="RadioButton">
-                    <Border x:Name="Border"
-                            Margin="0,0,0,4"
-                            Padding="15,10"
-                            Background="{TemplateBinding Background}"
-                            CornerRadius="{StaticResource ControlCornerRadius}">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="30" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <!-- Icon Placeholder (Content string contains emoji or use Tag) -->
-                            <TextBlock Grid.Column="0"
-                                       FontSize="16"
-                                       Text="{Binding Tag, RelativeSource={RelativeSource TemplatedParent}}" />
-                            <ContentPresenter x:Name="Content"
-                                              Grid.Column="1"
-                                              VerticalAlignment="Center" />
-                        </Grid>
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource SidebarHoverBrush}" />
-                        </Trigger>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Setter TargetName="Border" Property="Background" Value="{DynamicResource SidebarSelectedBrush}" />
-                            <Setter Property="Foreground" Value="{DynamicResource SidebarSelectedTextBrush}" />
-                            <Setter Property="FontWeight" Value="SemiBold" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <!-- ScrollBar Styles (Fluent Modern) -->
     <Style x:Key="ScrollBarThumbStyle" TargetType="Thumb">
         <Setter Property="OverridesDefaultStyle" Value="true" />
