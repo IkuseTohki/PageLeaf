@@ -1,4 +1,4 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/LeafKit.UI;component/Resources/LightColors.xaml" />
     </ResourceDictionary.MergedDictionaries>
@@ -47,14 +47,6 @@
     <SolidColorBrush x:Key="MDQuoteBrush" Color="#608B4E" />
     <SolidColorBrush x:Key="MDLinkBrush" Color="#569CD6" />
     <SolidColorBrush x:Key="MDListMarkerBrush" Color="#333333" />
-
-    <!-- Menu Bar -->
-    <SolidColorBrush x:Key="MenuBarBackgroundBrush" Color="White" />
-    <SolidColorBrush x:Key="MenuBarForegroundBrush" Color="#333333" />
-    <SolidColorBrush x:Key="MenuHoverBackgroundBrush" Color="#EAEAEA" />
-    <SolidColorBrush x:Key="MenuSeparatorBrush" Color="#E1E1E1" />
-    <SolidColorBrush x:Key="MenuDropdownBackgroundBrush" Color="White" />
-    <SolidColorBrush x:Key="MenuDropdownBorderBrush" Color="#DDDDDD" />
 
     <!-- Other -->
     <SolidColorBrush x:Key="SelectionBackgroundBrush" Color="#0078D4" />
