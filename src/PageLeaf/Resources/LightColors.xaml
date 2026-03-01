@@ -34,9 +34,6 @@
     <!-- Floating Button / ScrollBar -->
     <SolidColorBrush x:Key="FloatingButtonHoverBackgroundBrush" Color="#1A000000" />
     <SolidColorBrush x:Key="FloatingButtonCheckedBackgroundBrush" Color="#33000000" />
-    <SolidColorBrush x:Key="ScrollBarThumbBrush" Color="#4D000000" />
-    <SolidColorBrush x:Key="ScrollBarThumbHoverBrush" Color="#80000000" />
-    <SolidColorBrush x:Key="ScrollBarThumbDraggingBrush" Color="#A6000000" />
 
     <!-- ToolBar / Form / Expander -->
     <SolidColorBrush x:Key="ToolBarBackgroundBrush" Color="#FFE0E0E0" />
