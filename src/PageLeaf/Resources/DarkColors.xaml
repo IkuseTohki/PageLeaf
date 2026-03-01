@@ -30,8 +30,6 @@
     <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="{Binding Color, Source={StaticResource StateHoverBrush}}" />
     <SolidColorBrush x:Key="ButtonHoverBorderBrush" Color="#5E5E62" />
     <SolidColorBrush x:Key="ButtonCheckedBackgroundBrush" Color="#004D80" />
-    <SolidColorBrush x:Key="ButtonCheckedBorderBrush" Color="{StaticResource BrandPrimaryColor}" />
-    <SolidColorBrush x:Key="ButtonMouseOverBackgroundBrush" Color="#2A2D2E" />
 
     <!-- Floating Button / ScrollBar -->
     <SolidColorBrush x:Key="FloatingButtonHoverBackgroundBrush" Color="#33FFFFFF" />

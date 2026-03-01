@@ -2,37 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit">
 
-    <!-- つまみボタン（トグル）用スタイル -->
-    <Style x:Key="ToggleHandleButtonStyle" TargetType="Button">
-        <Setter Property="Width" Value="16" />
-        <Setter Property="Height" Value="32" />
-        <Setter Property="Background" Value="{DynamicResource SurfaceBaseBrush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource OutlineBaseBrush}" />
-        <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="HorizontalContentAlignment" Value="Center" />
-        <Setter Property="VerticalContentAlignment" Value="Center" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border x:Name="RootBorder"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="{StaticResource ControlCornerRadius}">
-                        <ContentPresenter />
-                    </Border>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="RootBorder" Property="Background" Value="{DynamicResource ButtonMouseOverBackgroundBrush}" />
-                            <Setter TargetName="RootBorder" Property="BorderBrush" Value="{DynamicResource ButtonCheckedBorderBrush}" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
     <!-- フローティングトグルボタン用スタイル -->
     <Style x:Key="FloatingToggleButtonStyle" TargetType="ToggleButton">
         <Setter Property="Width" Value="32" />
