@@ -34,21 +34,4 @@
         <Setter Property="CornerRadius" Value="8,0,0,8" />
     </Style>
 
-    <!-- パネル共通ツールバースタイル -->
-    <Style x:Key="PanelToolbarBorderStyle" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource SurfaceLayer1Brush}" />
-        <Setter Property="BorderBrush" Value="{DynamicResource OutlineBaseBrush}" />
-        <Setter Property="BorderThickness" Value="0,0,0,1" />
-        <Setter Property="Padding" Value="5,2" />
-        <Setter Property="Height" Value="28" />
-    </Style>
-
-    <!-- ツールバー風ボーダースタイル -->
-    <Style x:Key="ToolBarLikeBorder" TargetType="Border">
-        <Setter Property="Background" Value="{DynamicResource ToolBarBackgroundBrush}" />
-        <Setter Property="Padding" Value="4" />
-        <Setter Property="BorderBrush" Value="{DynamicResource ButtonHoverBorderBrush}" />
-        <Setter Property="BorderThickness" Value="0,0,0,1" />
-    </Style>
-
 </ResourceDictionary>

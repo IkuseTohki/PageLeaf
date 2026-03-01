@@ -26,14 +26,7 @@
     <SolidColorBrush x:Key="FloatingButtonHoverBackgroundBrush" Color="#33FFFFFF" />
     <SolidColorBrush x:Key="FloatingButtonCheckedBackgroundBrush" Color="#4DFFFFFF" />
 
-    <!-- ToolBar / Form / Expander -->
-    <SolidColorBrush x:Key="ToolBarBackgroundBrush" Color="#2D2D2D" />
-    <SolidColorBrush x:Key="ToolBarButtonHoverBackgroundBrush" Color="#3E3E42" />
-    <SolidColorBrush x:Key="ToolBarButtonHoverBorderBrush" Color="#505050" />
-    <SolidColorBrush x:Key="FormLabelForegroundBrush" Color="#BBBBBB" />
-    <SolidColorBrush x:Key="FormDisabledBorderBrush" Color="#666666" />
-    <SolidColorBrush x:Key="FormDisabledBackgroundBrush" Color="#333333" />
-    <SolidColorBrush x:Key="SectionHeaderBorderBrush" Color="#333333" />
+    <!-- Expander -->
     <SolidColorBrush x:Key="ExpanderBackgroundBrush" Color="#1E1E1E" />
     <SolidColorBrush x:Key="ExpanderHeaderBackgroundBrush" Color="#252526" />
 

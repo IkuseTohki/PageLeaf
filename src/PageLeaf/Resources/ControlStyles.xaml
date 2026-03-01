@@ -65,30 +65,6 @@
         </Setter>
     </Style>
 
-    <!-- ToolBarスタイル -->
-    <Style TargetType="ToolBar">
-        <Setter Property="Background" Value="{DynamicResource ToolBarBackgroundBrush}" />
-        <Setter Property="Padding" Value="2" />
-    </Style>
-
-    <Style x:Key="ToolBarButtonStyle" TargetType="Button">
-        <Setter Property="Background" Value="Transparent" />
-        <Setter Property="BorderBrush" Value="Transparent" />
-        <Setter Property="Padding" Value="5,2" />
-        <Setter Property="Margin" Value="2" />
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource ToolBarButtonHoverBackgroundBrush}" />
-                <Setter Property="BorderBrush" Value="{DynamicResource ToolBarButtonHoverBorderBrush}" />
-            </Trigger>
-            <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Opacity" Value="0.5" />
-                <Setter Property="Background" Value="Transparent" />
-                <Setter Property="BorderBrush" Value="Transparent" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
     <!-- AvalonEdit TextEditor Style -->
     <Style TargetType="{x:Type avalonEdit:TextEditor}">
         <Setter Property="Background" Value="{DynamicResource SurfaceBaseBrush}" />
