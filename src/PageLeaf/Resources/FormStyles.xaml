@@ -71,24 +71,6 @@
         <Setter Property="HorizontalAlignment" Value="Left" />
     </Style>
 
-    <!-- フォーム用コンボボックススタイル -->
-    <Style x:Key="FormComboBoxStyle"
-           BasedOn="{StaticResource BaseComboBoxStyle}"
-           TargetType="ComboBox">
-        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
-        <Setter Property="Margin" Value="0,0,0,20" />
-        <Setter Property="Padding" Value="8,6" />
-        <Setter Property="HorizontalAlignment" Value="Stretch" />
-    </Style>
-
-    <!-- フォーム用コンボボックススタイル (Medium: 300px) -->
-    <Style x:Key="FormComboBoxMediumStyle"
-           BasedOn="{StaticResource FormComboBoxStyle}"
-           TargetType="ComboBox">
-        <Setter Property="Width" Value="300" />
-        <Setter Property="HorizontalAlignment" Value="Left" />
-    </Style>
-
     <!-- フォーム用チェックボックススタイル -->
     <Style x:Key="FormCheckBoxStyle" TargetType="CheckBox">
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
@@ -278,33 +260,6 @@
            BasedOn="{StaticResource CompactFormTextBoxStyle}"
            TargetType="TextBox">
         <Setter Property="Width" Value="300" />
-        <Setter Property="HorizontalAlignment" Value="Left" />
-    </Style>
-
-    <!-- コンパクト形式: ComboBoxスタイル -->
-    <Style x:Key="CompactFormComboBoxStyle"
-           BasedOn="{StaticResource BaseComboBoxStyle}"
-           TargetType="ComboBox">
-        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
-        <Setter Property="Margin" Value="0,0,0,12" />
-        <Setter Property="Padding" Value="6,4" />
-        <Setter Property="FontSize" Value="13" />
-        <Setter Property="HorizontalAlignment" Value="Stretch" />
-    </Style>
-
-    <!-- コンパクト形式: ComboBoxスタイル (Wide: 120px) -->
-    <Style x:Key="CompactFormComboBoxWideStyle"
-           BasedOn="{StaticResource CompactFormComboBoxStyle}"
-           TargetType="ComboBox">
-        <Setter Property="Width" Value="120" />
-        <Setter Property="HorizontalAlignment" Value="Left" />
-    </Style>
-
-    <!-- コンパクト形式: ComboBoxスタイル (Small: 80px) -->
-    <Style x:Key="CompactFormComboBoxSmallStyle"
-           BasedOn="{StaticResource CompactFormComboBoxStyle}"
-           TargetType="ComboBox">
-        <Setter Property="Width" Value="80" />
         <Setter Property="HorizontalAlignment" Value="Left" />
     </Style>
 

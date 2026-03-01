@@ -16,15 +16,6 @@
     <SolidColorBrush x:Key="PrimaryActionBrush" Color="{Binding Color, Source={StaticResource BrandPrimaryBrush}}" />
     <SolidColorBrush x:Key="PrimaryActionHoverBrush" Color="{Binding Color, Source={StaticResource BrandPrimaryHoverBrush}}" />
     <SolidColorBrush x:Key="AccentBlueBrush" Color="{StaticResource BrandPrimaryColor}" />
-    <SolidColorBrush x:Key="SecondaryActionBrush" Color="{StaticResource SecondaryTextColor}" />
-
-    <!-- ComboBox -->
-    <SolidColorBrush x:Key="ComboBoxBackgroundBrush" Color="#3C3C3C" />
-    <SolidColorBrush x:Key="ComboBoxHoverBackgroundBrush" Color="#454545" />
-    <SolidColorBrush x:Key="ComboBoxPressedBackgroundBrush" Color="#505050" />
-    <SolidColorBrush x:Key="ComboBoxDropDownBackgroundBrush" Color="#252526" />
-    <SolidColorBrush x:Key="ComboBoxItemHoverBackgroundBrush" Color="#2A2D2E" />
-    <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#3E3E42" />
 
     <!-- Button -->
     <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="{Binding Color, Source={StaticResource StateHoverBrush}}" />

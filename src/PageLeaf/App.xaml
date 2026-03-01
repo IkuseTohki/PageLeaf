@@ -7,6 +7,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary x:Name="ThemeColors" Source="Resources/LightColors.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/LeafKit.UI;component/Resources/Icons.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/LeafKit.UI;component/Resources/ControlStyles.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/LeafKit.UI;component/Resources/ComponentStyles.xaml" />
                 <ResourceDictionary Source="Resources/Icons.xaml" />
