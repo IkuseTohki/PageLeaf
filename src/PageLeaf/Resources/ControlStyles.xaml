@@ -2,49 +2,6 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit">
 
-    <!-- 基本的なボタン用スタイル -->
-    <Style x:Key="BaseButtonStyle" TargetType="Button">
-        <Setter Property="Padding" Value="15,5" />
-        <Setter Property="BorderThickness" Value="0" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Padding="{TemplateBinding Padding}"
-                            Background="{TemplateBinding Background}"
-                            BorderBrush="{TemplateBinding BorderBrush}"
-                            BorderThickness="{TemplateBinding BorderThickness}"
-                            CornerRadius="{StaticResource ControlCornerRadius}">
-                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style x:Key="PrimaryButtonStyle"
-           BasedOn="{StaticResource BaseButtonStyle}"
-           TargetType="Button">
-        <Setter Property="Background" Value="{StaticResource BrandPrimaryBrush}" />
-        <Setter Property="Foreground" Value="White" />
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{StaticResource BrandPrimaryHoverBrush}" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
-    <Style x:Key="SecondaryButtonStyle"
-           BasedOn="{StaticResource BaseButtonStyle}"
-           TargetType="Button">
-        <Setter Property="Background" Value="{DynamicResource ButtonSecondaryBackgroundBrush}" />
-        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
-        <Style.Triggers>
-            <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="{DynamicResource ButtonSecondaryHoverBackgroundBrush}" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-
     <!-- アイコンボタン用スタイル -->
     <Style x:Key="IconButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent" />

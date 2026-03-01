@@ -27,8 +27,6 @@
     <SolidColorBrush x:Key="ComboBoxBorderBrush" Color="#FFCCCCCC" />
 
     <!-- Button -->
-    <SolidColorBrush x:Key="ButtonSecondaryBackgroundBrush" Color="#FFE0E0E0" />
-    <SolidColorBrush x:Key="ButtonSecondaryHoverBackgroundBrush" Color="#FFD0D0D0" />
     <SolidColorBrush x:Key="ButtonHoverBackgroundBrush" Color="{Binding Color, Source={StaticResource StateHoverBrush}}" />
     <SolidColorBrush x:Key="ButtonHoverBorderBrush" Color="#FFACACAC" />
     <SolidColorBrush x:Key="ButtonCheckedBackgroundBrush" Color="#FFD0D0D0" />
