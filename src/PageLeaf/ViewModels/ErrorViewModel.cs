@@ -37,7 +37,7 @@ namespace PageLeaf.ViewModels
         /// <param name="exception">詳細情報を含む例外オブジェクト。</param>
         public ErrorViewModel(string message, Exception exception)
         {
-            ArgumentNullException.ThrowIfNull(exception);
+            PageLeaf.Utilities.Guard.ThrowIfNull(exception);
 
             _errorMessage = $"{message}\n\n" +
                             $"[Message]\n{exception.Message}\n\n" +

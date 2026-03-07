@@ -59,16 +59,16 @@ namespace PageLeaf
 
                 if (!string.IsNullOrEmpty(processPath))
                 {
-                    return Path.GetDirectoryName(processPath)!;
+                    return Path.GetDirectoryName(processPath) ?? AppDomain.CurrentDomain.BaseDirectory ?? ".";
                 }
-                return AppDomain.CurrentDomain.BaseDirectory;
+                return AppDomain.CurrentDomain.BaseDirectory ?? ".";
             }
         }
 
         /// <summary>
         /// アプリケーション専用の一時ディレクトリパスを取得します。
         /// </summary>
-        public static string AppInternalTempDirectory => Path.Combine(Path.GetTempPath(), "PageLeaf", "v1.1.23");
+        public static string AppInternalTempDirectory => Path.Combine(Path.GetTempPath(), "PageLeaf", "v1.2.0");
 
         /// <summary>
         /// DIコンテナやロギングなどのアプリケーションサービスをホストします。

@@ -90,11 +90,14 @@ namespace PageLeaf.Utilities
             var (maskedText, _) = MaskCode(text);
             var matches = FootnoteMarkerRegex.Matches(maskedText);
             var max = 0;
-            foreach (Match m in matches)
+            foreach (var m in matches)
             {
-                if (int.TryParse(m.Groups[1].Value, out var n))
+                if (m is Match match && match.Groups.Count > 1)
                 {
-                    max = Math.Max(max, n);
+                    if (int.TryParse(match.Groups[1].Value, out var n))
+                    {
+                        max = Math.Max(max, n);
+                    }
                 }
             }
             return max + 1;

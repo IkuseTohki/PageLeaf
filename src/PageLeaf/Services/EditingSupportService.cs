@@ -361,15 +361,18 @@ namespace PageLeaf.Services
         {
             if (string.IsNullOrEmpty(line)) return 0;
             var matches = Regex.Matches(line, @"(?<!\\)\|");
-            foreach (Match match in matches)
+            foreach (var m in matches)
             {
-                if (match.Index >= currentOffset)
+                if (m is Match match)
                 {
-                    int pos = match.Index + 1;
-                    if (pos < line.Length && line[pos] == ' ') pos++;
-                    // もし現在の位置と同じなら（例：| の直後にいる場合）、さらに次のパイプを探す
-                    if (pos <= currentOffset) continue;
-                    return pos;
+                    if (match.Index >= currentOffset)
+                    {
+                        int pos = match.Index + 1;
+                        if (pos < line.Length && line[pos] == ' ') pos++;
+                        // もし現在の位置と同じなら（例：| の直後にいる場合）、さらに次のパイプを探す
+                        if (pos <= currentOffset) continue;
+                        return pos;
+                    }
                 }
             }
             return line.Length;

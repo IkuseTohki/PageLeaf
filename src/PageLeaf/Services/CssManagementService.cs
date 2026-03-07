@@ -18,10 +18,10 @@ namespace PageLeaf.Services
 
         public CssManagementService(ICssService cssService, ICssEditorService cssEditorService, IFileService fileService, ILogger<CssManagementService> logger)
         {
-            ArgumentNullException.ThrowIfNull(cssService);
-            ArgumentNullException.ThrowIfNull(cssEditorService);
-            ArgumentNullException.ThrowIfNull(fileService);
-            ArgumentNullException.ThrowIfNull(logger);
+            PageLeaf.Utilities.Guard.ThrowIfNull(cssService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(cssEditorService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(fileService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(logger);
 
             _cssService = cssService;
             _cssEditorService = cssEditorService;

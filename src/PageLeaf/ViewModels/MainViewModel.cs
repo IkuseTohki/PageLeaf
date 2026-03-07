@@ -224,20 +224,20 @@ namespace PageLeaf.ViewModels
             IPasteImageUseCase pasteImageUseCase,
             IMarkdownService markdownService)
         {
-            ArgumentNullException.ThrowIfNull(fileService);
-            ArgumentNullException.ThrowIfNull(logger);
-            ArgumentNullException.ThrowIfNull(dialogService);
-            ArgumentNullException.ThrowIfNull(windowService);
-            ArgumentNullException.ThrowIfNull(editorService);
-            ArgumentNullException.ThrowIfNull(settingsService);
-            ArgumentNullException.ThrowIfNull(cssManagementService);
-            ArgumentNullException.ThrowIfNull(cssEditorViewModel);
-            ArgumentNullException.ThrowIfNull(newDocumentUseCase);
-            ArgumentNullException.ThrowIfNull(openDocumentUseCase);
-            ArgumentNullException.ThrowIfNull(saveDocumentUseCase);
-            ArgumentNullException.ThrowIfNull(saveAsDocumentUseCase);
-            ArgumentNullException.ThrowIfNull(pasteImageUseCase);
-            ArgumentNullException.ThrowIfNull(markdownService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(fileService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(logger);
+            PageLeaf.Utilities.Guard.ThrowIfNull(dialogService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(windowService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(editorService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(settingsService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(cssManagementService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(cssEditorViewModel);
+            PageLeaf.Utilities.Guard.ThrowIfNull(newDocumentUseCase);
+            PageLeaf.Utilities.Guard.ThrowIfNull(openDocumentUseCase);
+            PageLeaf.Utilities.Guard.ThrowIfNull(saveDocumentUseCase);
+            PageLeaf.Utilities.Guard.ThrowIfNull(saveAsDocumentUseCase);
+            PageLeaf.Utilities.Guard.ThrowIfNull(pasteImageUseCase);
+            PageLeaf.Utilities.Guard.ThrowIfNull(markdownService);
 
             _fileService = fileService;
             _logger = logger;

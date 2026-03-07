@@ -37,7 +37,7 @@ namespace PageLeaf.Services
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
             // 設定ファイルの保存ディレクトリを決定（デフォルトは実行ファイルと同階層）
-            var finalPath = basePath ?? AppDomain.CurrentDomain.BaseDirectory;
+            var finalPath = basePath ?? App.BaseDirectory;
             if (!Directory.Exists(finalPath))
             {
                 Directory.CreateDirectory(finalPath);
@@ -105,7 +105,7 @@ namespace PageLeaf.Services
         /// <param name="settings">保存する ApplicationSettings オブジェクト。</param>
         public void SaveSettings(ApplicationSettings settings)
         {
-            ArgumentNullException.ThrowIfNull(settings);
+            PageLeaf.Utilities.Guard.ThrowIfNull(settings);
 
             try
             {

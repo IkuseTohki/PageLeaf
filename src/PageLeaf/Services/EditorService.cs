@@ -144,9 +144,9 @@ namespace PageLeaf.Services
 
         public EditorService(IMarkdownService markdownService, ICssService cssService, IDialogService dialogService)
         {
-            ArgumentNullException.ThrowIfNull(markdownService);
-            ArgumentNullException.ThrowIfNull(cssService);
-            ArgumentNullException.ThrowIfNull(dialogService); // IDialogService の null チェック
+            PageLeaf.Utilities.Guard.ThrowIfNull(markdownService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(cssService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(dialogService); // IDialogService の null チェック
 
             _markdownService = markdownService;
             _cssService = cssService;

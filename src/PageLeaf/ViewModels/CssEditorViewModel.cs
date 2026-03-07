@@ -181,12 +181,12 @@ namespace PageLeaf.ViewModels
             ISettingsService settingsService,
             IEditorService editorService)
         {
-            ArgumentNullException.ThrowIfNull(cssManagementService);
-            ArgumentNullException.ThrowIfNull(loadCssUseCase);
-            ArgumentNullException.ThrowIfNull(saveCssUseCase);
-            ArgumentNullException.ThrowIfNull(dialogService);
-            ArgumentNullException.ThrowIfNull(settingsService);
-            ArgumentNullException.ThrowIfNull(editorService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(cssManagementService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(loadCssUseCase);
+            PageLeaf.Utilities.Guard.ThrowIfNull(saveCssUseCase);
+            PageLeaf.Utilities.Guard.ThrowIfNull(dialogService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(settingsService);
+            PageLeaf.Utilities.Guard.ThrowIfNull(editorService);
 
             _cssManagementService = cssManagementService;
             _loadCssUseCase = loadCssUseCase;
