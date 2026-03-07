@@ -35,7 +35,7 @@
                     Grid.Column="0"
                     Style="{StaticResource SidebarPanelBorderStyle}">
                 <StackPanel Margin="10,20">
-                    <TextBlock Style="{StaticResource SettingsTitleTextStyle}" Text="設定" />
+                    <TextBlock Style="{StaticResource FormTitleTextStyle}" Text="設定" />
 
                     <RadioButton Content="外観"
                                  IsChecked="{Binding CurrentCategory, Converter={StaticResource ComparisonConverter}, ConverterParameter={x:Static vm:SettingsCategory.Appearance}}"
