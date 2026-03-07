@@ -5,6 +5,7 @@ using PageLeaf.Models.Css.Elements;
 using PageLeaf.Models.Settings;
 using System;
 using System.ComponentModel;
+using LeafKit.UI.Services;
 
 namespace PageLeaf.Services
 {
@@ -12,7 +13,7 @@ namespace PageLeaf.Services
     /// Markdownエディタの状態管理と操作を提供するサービスインターフェースです。
     /// テキストの編集、表示モードの切り替え、CSSの適用などを管理します。
     /// </summary>
-    public interface IEditorService : INotifyPropertyChanged
+    public interface IEditorService : INotifyPropertyChanged, IFocusRequestService
     {
         /// <summary>
         /// 現在編集中のMarkdownドキュメントを取得します。
@@ -109,11 +110,6 @@ namespace PageLeaf.Services
         /// テキスト挿入が要求されたときに発生します。View側で購読して実際の挿入処理を行います。
         /// </summary>
         event EventHandler<string> TextInsertionRequested;
-
-        /// <summary>
-        /// フォーカスが要求されたときに発生します。
-        /// </summary>
-        event EventHandler<DisplayMode> FocusRequested;
 
         /// <summary>
         /// 見出しへのスクロールが要求されたときに発生します。
