@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PageLeaf.Utilities;
+using LeafKit.UI.Converters;
 using System.Globalization;
 
 namespace PageLeaf.Tests.Utilities
@@ -7,38 +8,6 @@ namespace PageLeaf.Tests.Utilities
     [TestClass]
     public class ConverterTests
     {
-        // ==========================================
-        // MultiValueConverter Tests
-        // ==========================================
-
-        [TestMethod]
-        public void MultiValueConverter_Convert_ShouldReturnClonedArray()
-        {
-            /*
-            テスト観点:
-            MultiValueConverterが、入力されたオブジェクト配列の複製（クローン）を正しく返すか確認する。
-            */
-            // Arrange
-            var converter = new MultiValueConverter();
-            var values = new object[] { "Test", 123, true };
-
-            // Act
-            var result = converter.Convert(values, typeof(object), null!, CultureInfo.InvariantCulture);
-
-            // Assert
-            Assert.IsInstanceOfType(result, typeof(object[]));
-            var resultArray = (object[])result!;
-
-            // Reference checks
-            Assert.AreNotSame(values, resultArray, "Result should be a clone, not the same reference.");
-
-            // Content checks
-            Assert.AreEqual(values.Length, resultArray.Length);
-            Assert.AreEqual(values[0], resultArray[0]);
-            Assert.AreEqual(values[1], resultArray[1]);
-            Assert.AreEqual(values[2], resultArray[2]);
-        }
-
         // ==========================================
         // StringToUpperCaseConverter Tests
         // ==========================================
