@@ -11,6 +11,7 @@
     <lk:MultiValueConverter x:Key="MultiValueConverter" />
     <utilities:StringToUpperCaseConverter x:Key="StringToUpperCaseConverter" />
     <lk:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    <lk:CollectionCountToVisibilityConverter x:Key="CollectionCountToVisibilityConverter" />
     <utilities:ListMarkerTypeToContentConverter x:Key="ListMarkerTypeToContentConverter" />
 
 </ResourceDictionary>

@@ -7,6 +7,7 @@ using PageLeaf.Models.Settings;
 using PageLeaf.Services;
 using PageLeaf.UseCases;
 using LeafKit.UI.Services;
+using LeafKit.UI.ViewModels;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;

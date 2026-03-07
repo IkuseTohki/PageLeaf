@@ -4,6 +4,7 @@ using PageLeaf.Views;
 using System;
 using System.Windows;
 using LeafKit.UI.Services;
+using LeafKit.UI.ViewModels;
 
 namespace PageLeaf.Services
 {

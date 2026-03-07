@@ -237,7 +237,7 @@ namespace PageLeaf.Services
             SyncQuoteSettingsRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        public void RequestInsertText(string text)
+        public void RequestInsertion(string text)
         {
             TextInsertionRequested?.Invoke(this, text);
         }

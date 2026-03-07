@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
 using PageLeaf.Infrastructure.Logging;
 using PageLeaf.Models.Settings;
 using PageLeaf.Services;
@@ -11,13 +12,13 @@ using Serilog;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Windows;
-using AngleSharp.Css.Values;
-using System.Runtime.InteropServices;
-using System.Windows.Interop;
-using Microsoft.Win32;
-using LeafKit.UI.Services;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Windows;
+using System.Windows.Interop;
+using AngleSharp.Css.Values;
+using LeafKit.UI.Services;
+using LeafKit.UI.ViewModels;
 
 namespace PageLeaf
 {
@@ -152,7 +153,7 @@ namespace PageLeaf
                     // ViewModels と Views をDIコンテナに登録
                     services.AddTransient<SettingsViewModel>();
                     services.AddTransient<CheatSheetViewModel>();
-                    services.AddTransient<AboutViewModel>();
+                    services.AddTransient<AboutViewModel>(sp => new AboutViewModel(typeof(App).Assembly));
                     services.AddSingleton<CssEditorViewModel>();
                     services.AddSingleton<MainViewModel>();
                     services.AddSingleton<MainWindow>();
@@ -185,7 +186,7 @@ namespace PageLeaf
                 var windowService = (LeafKit.UI.Services.WindowService)AppHost.Services.GetRequiredService<IWindowService>();
                 windowService.Register<SettingsViewModel>(sp => new SettingsWindow(sp.GetRequiredService<SettingsViewModel>()));
                 windowService.Register<CheatSheetViewModel>(sp => new CheatSheetWindow { DataContext = sp.GetRequiredService<CheatSheetViewModel>() });
-                windowService.Register<AboutViewModel>(sp => new AboutWindow(sp.GetRequiredService<AboutViewModel>()));
+                windowService.Register<LeafKit.UI.ViewModels.AboutViewModel>(sp => new LeafKit.UI.Controls.AboutWindow(sp.GetRequiredService<LeafKit.UI.ViewModels.AboutViewModel>()));
 
                 // 設定変更時の適用
                 settingsService.SettingsChanged += (s, settings) =>

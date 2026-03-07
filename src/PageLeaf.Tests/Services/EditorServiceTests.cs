@@ -255,9 +255,9 @@ namespace PageLeaf.Tests.Services
         }
 
         [TestMethod]
-        public void RequestInsertText_ShouldRaiseTextInsertionRequestedEvent()
+        public void RequestInsertion_ShouldRaiseTextInsertionRequestedEvent()
         {
-            // テスト観点: RequestInsertText を呼び出すと、TextInsertionRequested イベントが発生することを確認する。
+            // テスト観点: RequestInsertion を呼び出すと、TextInsertionRequested イベントが発生することを確認する。
 
             // Arrange
             string insertedText = "Inserted Text";
@@ -265,7 +265,7 @@ namespace PageLeaf.Tests.Services
             _editorService.TextInsertionRequested += (s, text) => receivedText = text;
 
             // Act
-            _editorService.RequestInsertText(insertedText);
+            _editorService.RequestInsertion(insertedText);
 
             // Assert
             Assert.AreEqual(insertedText, receivedText);
