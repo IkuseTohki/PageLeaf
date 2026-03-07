@@ -17,6 +17,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Interop;
 using Microsoft.Win32;
 using LeafKit.UI.Services;
+using System.Linq;
 
 namespace PageLeaf
 {
@@ -130,7 +131,7 @@ namespace PageLeaf
                     services.AddSingleton<ISystemThemeProvider, SystemThemeProvider>();
                     services.AddSingleton<IThemeService, ThemeService>();
                     services.AddSingleton<IThemeManager, ThemeManager>();
-                    services.AddSingleton<IDialogService, DialogService>();
+                    services.AddSingleton<PageLeaf.Services.IDialogService, PageLeaf.Services.DialogService>();
                     services.AddSingleton<IMarkdownService, MarkdownService>();
                     services.AddSingleton<IEditorService, EditorService>();
                     services.AddSingleton<ICssEditorService, CssEditorService>();
@@ -318,7 +319,7 @@ namespace PageLeaf
             // ユーザー通知
             // AppHostが構築されていない、またはサービスが取得できない場合に備えて
             // 直接ErrorWindowを出すフォールバックも考慮する
-            var dialogService = AppHost?.Services.GetService<IDialogService>();
+            var dialogService = AppHost?.Services.GetService<PageLeaf.Services.IDialogService>();
             if (dialogService != null)
             {
                 dialogService.ShowExceptionDialog("致命的なエラーが発生したため、アプリケーションを終了します。", ex);
