@@ -18,8 +18,8 @@
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         mc:Ignorable="d">
-    <Border KeyboardNavigation.TabNavigation="Cycle" Style="{StaticResource SettingsWindowBorderStyle}">
-        <Grid Margin="25">
+    <Border KeyboardNavigation.TabNavigation="Cycle" Style="{StaticResource ModalWindowBorderStyle}">
+        <Grid Margin="28">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />

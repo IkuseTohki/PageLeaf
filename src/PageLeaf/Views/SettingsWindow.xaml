@@ -18,7 +18,7 @@
         WindowStartupLocation="CenterOwner"
         WindowStyle="None"
         mc:Ignorable="d">
-    <Border KeyboardNavigation.TabNavigation="Cycle" Style="{StaticResource SettingsWindowBorderStyle}">
+    <Border KeyboardNavigation.TabNavigation="Cycle" Style="{StaticResource ModalWindowBorderStyle}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="200" />
@@ -33,7 +33,7 @@
             <Border Grid.Row="0"
                     Grid.RowSpan="2"
                     Grid.Column="0"
-                    Style="{StaticResource SidebarPanelBorderStyle}">
+                    Style="{StaticResource SidebarBorderStyle}">
                 <StackPanel Margin="10,20">
                     <TextBlock Style="{StaticResource FormTitleTextStyle}" Text="設定" />
 
@@ -63,7 +63,7 @@
             <!-- Content Area -->
             <ScrollViewer Grid.Row="0"
                           Grid.Column="1"
-                          Margin="25,25,25,10"
+                          Margin="28,28,28,12"
                           VerticalScrollBarVisibility="Auto">
                 <Grid>
                     <!-- Appearance Settings -->
@@ -128,7 +128,7 @@
 
                         <StackPanel IsEnabled="{Binding AutoInsertFrontMatter}">
                             <Label Content="追加で挿入するプロパティ" Style="{StaticResource FormLabelStyle}" />
-                            <Border Style="{StaticResource PropertyGridContainerStyle}">
+                            <Border Style="{StaticResource GroupContainerBorderStyle}">
                                 <StackPanel>
                                     <ItemsControl ItemTemplate="{StaticResource SettingsFrontMatterPropertyTemplate}" ItemsSource="{Binding DefaultFrontMatterProperties}" />
                                     <Button HorizontalAlignment="Left"
@@ -240,7 +240,7 @@
             <!-- Footer Buttons -->
             <StackPanel Grid.Row="1"
                         Grid.Column="1"
-                        Margin="0,0,25,20"
+                        Margin="0,0,28,20"
                         HorizontalAlignment="Right"
                         Orientation="Horizontal">
                 <Button Width="90"
