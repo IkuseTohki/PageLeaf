@@ -237,14 +237,19 @@ namespace PageLeaf.Services
             SyncQuoteSettingsRequested?.Invoke(this, EventArgs.Empty);
         }
 
-        public void RequestInsertText(string text)
+        public void RequestInsertion(string text)
         {
             TextInsertionRequested?.Invoke(this, text);
         }
 
         public void RequestFocus(DisplayMode mode)
         {
-            FocusRequested?.Invoke(this, mode);
+            RequestFocus(mode.ToString());
+        }
+
+        public void RequestFocus(string targetId)
+        {
+            FocusRequested?.Invoke(this, targetId);
         }
 
         public void RequestScrollToHeader(TocItem item)
@@ -253,7 +258,7 @@ namespace PageLeaf.Services
         }
 
         public event EventHandler<string>? TextInsertionRequested;
-        public event EventHandler<DisplayMode>? FocusRequested;
+        public event EventHandler<string>? FocusRequested;
         public event EventHandler<TocItem>? ScrollToHeaderRequested;
         public event EventHandler? SyncQuoteSettingsRequested;
         public event EventHandler<string>? UserCssChanged;

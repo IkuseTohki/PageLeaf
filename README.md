@@ -87,5 +87,5 @@ dotnet run --project src/PageLeaf/PageLeaf.csproj
 
 ## ⚖️ ライセンス
 
-Copyright © 2026 PageLeaf Project.  
+Copyright © 2026 Leaf Project.  
 このプロジェクトは [MIT ライセンス](LICENSE) の下で公開されています。

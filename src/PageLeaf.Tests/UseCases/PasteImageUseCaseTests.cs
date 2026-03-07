@@ -64,7 +64,7 @@ namespace PageLeaf.Tests.UseCases
 
             // Assert
             // WindowsパスがMarkdown用のスラッシュに変換されていることも確認
-            _editorServiceMock.Verify(x => x.RequestInsertText(It.Is<string>(s => s.Contains("images/pasted_image.png"))), Times.Once);
+            _editorServiceMock.Verify(x => x.RequestInsertion(It.Is<string>(s => s.Contains("images/pasted_image.png"))), Times.Once);
         }
 
         [TestMethod]
@@ -81,7 +81,7 @@ namespace PageLeaf.Tests.UseCases
             await _useCase.ExecuteAsync(currentMarkdownPath);
 
             // Assert
-            _editorServiceMock.Verify(x => x.RequestInsertText(It.IsAny<string>()), Times.Never);
+            _editorServiceMock.Verify(x => x.RequestInsertion(It.IsAny<string>()), Times.Never);
         }
     }
 }

@@ -1,73 +1,23 @@
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Win32;
 using PageLeaf.Models;
-using PageLeaf.Models.Markdown;
-using PageLeaf.Models.Css;
-using PageLeaf.Models.Css.Elements;
-using PageLeaf.Models.Settings;
 using PageLeaf.ViewModels;
 using PageLeaf.Views;
 using System;
-using System.Windows; // MessageBox
+using System.Windows;
+using LeafKit.UI.Services;
+using LeafKit.UI.ViewModels;
 
 namespace PageLeaf.Services
 {
     /// <summary>
-    /// ファイルダイアログ操作の具体的な実装を提供します。
+    /// PageLeaf 固有のダイアログ操作を含むサービスの実装を提供します。
     /// </summary>
-    public class DialogService : IDialogService
+    public class DialogService : LeafKit.UI.Services.DialogService, IDialogService
     {
-        private readonly IServiceProvider _serviceProvider;
         private readonly IWindowService _windowService;
 
-        public DialogService(IServiceProvider serviceProvider, IWindowService windowService)
+        public DialogService(IWindowService windowService)
         {
-            _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
             _windowService = windowService ?? throw new ArgumentNullException(nameof(windowService));
-        }
-
-        /// <summary>
-        /// ファイルを開くダイアログを表示し、選択されたファイルのパスを返します。
-        /// </summary>
-        /// <param name="title">ダイアログのタイトル。</param>
-        /// <param name="filter">ファイルフィルタ文字列 (例: "Markdown files (*.md)|*.md|All files (*.*)|*.*")。</param>
-        /// <returns>選択されたファイルの絶対パス。キャンセルされた場合はnull。</returns>
-        public string? ShowOpenFileDialog(string title, string filter)
-        {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
-            openFileDialog.Title = title;
-            openFileDialog.Filter = filter;
-
-            if (openFileDialog.ShowDialog() == true)
-            {
-                return openFileDialog.FileName;
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// ファイルを保存するダイアログを表示し、選択されたファイルのパスを返します。
-        /// </summary>
-        /// <param name="title">ダイアログのタイトル。</param>
-        /// <param name="filter">ファイルフィルタ文字列 (例: "Markdown files (*.md)|*.md|All files (*.*)|*.*")。</param>
-        /// <param name="initialFileName">ダイアログの初期ファイル名。</param>
-        /// <returns>選択されたファイルの絶対パス。キャンセルされた場合はnull。</returns>
-        public string? ShowSaveFileDialog(string title, string filter, string? initialFileName = null)
-        {
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Title = title;
-            saveFileDialog.Filter = filter;
-            if (!string.IsNullOrEmpty(initialFileName))
-            {
-                saveFileDialog.FileName = System.IO.Path.GetFileName(initialFileName); // ファイル名のみ設定
-                saveFileDialog.InitialDirectory = System.IO.Path.GetDirectoryName(initialFileName); // 初期ディレクトリを設定
-            }
-
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                return saveFileDialog.FileName;
-            }
-            return null;
         }
 
         /// <summary>
@@ -89,7 +39,7 @@ namespace PageLeaf.Services
                 MessageBoxResult.Yes => SaveConfirmationResult.Save,
                 MessageBoxResult.No => SaveConfirmationResult.Discard,
                 MessageBoxResult.Cancel => SaveConfirmationResult.Cancel,
-                _ => SaveConfirmationResult.Cancel // デフォルトはキャンセル
+                _ => SaveConfirmationResult.Cancel
             };
         }
 
@@ -141,7 +91,7 @@ namespace PageLeaf.Services
         /// </summary>
         public void ShowSettingsDialog()
         {
-            _windowService.ShowWindow<SettingsViewModel>();
+            _windowService.Show<SettingsViewModel>();
         }
 
         /// <summary>
@@ -149,37 +99,7 @@ namespace PageLeaf.Services
         /// </summary>
         public void ShowAboutDialog()
         {
-            _windowService.ShowWindow<AboutViewModel>();
-        }
-
-        public bool ShowConfirmationDialog(string message, string title)
-        {
-            return MessageBox.Show(Application.Current.MainWindow, message, title, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes;
-        }
-
-        public void ShowMessage(string message, string title)
-        {
-            MessageBox.Show(Application.Current.MainWindow, message, title, MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        public string? ShowInputDialog(string title, string message, string defaultInput = "")
-        {
-            var viewModel = new ViewModels.InputViewModel
-            {
-                Title = title,
-                Message = message,
-                InputText = defaultInput
-            };
-
-            var dialog = new InputDialog();
-            dialog.DataContext = viewModel;
-            dialog.Owner = Application.Current.MainWindow;
-
-            if (dialog.ShowDialog() == true)
-            {
-                return viewModel.InputText;
-            }
-            return null;
+            _windowService.Show<AboutViewModel>();
         }
     }
 }

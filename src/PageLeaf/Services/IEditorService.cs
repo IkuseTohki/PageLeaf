@@ -5,6 +5,7 @@ using PageLeaf.Models.Css.Elements;
 using PageLeaf.Models.Settings;
 using System;
 using System.ComponentModel;
+using LeafKit.UI.Services;
 
 namespace PageLeaf.Services
 {
@@ -12,7 +13,7 @@ namespace PageLeaf.Services
     /// Markdownエディタの状態管理と操作を提供するサービスインターフェースです。
     /// テキストの編集、表示モードの切り替え、CSSの適用などを管理します。
     /// </summary>
-    public interface IEditorService : INotifyPropertyChanged
+    public interface IEditorService : INotifyPropertyChanged, IFocusRequestService, ITextInsertionService
     {
         /// <summary>
         /// 現在編集中のMarkdownドキュメントを取得します。
@@ -88,12 +89,6 @@ namespace PageLeaf.Services
         void SyncQuoteSettings();
 
         /// <summary>
-        /// エディタの現在のカーソル位置にテキストを挿入することを要求します。
-        /// </summary>
-        /// <param name="text">挿入するテキスト。</param>
-        void RequestInsertText(string text);
-
-        /// <summary>
         /// 指定された表示モードにフォーカスすることを要求します。
         /// </summary>
         /// <param name="mode">フォーカスするモード。</param>
@@ -104,16 +99,6 @@ namespace PageLeaf.Services
         /// </summary>
         /// <param name="item">スクロール先の見出しアイテム。</param>
         void RequestScrollToHeader(TocItem item);
-
-        /// <summary>
-        /// テキスト挿入が要求されたときに発生します。View側で購読して実際の挿入処理を行います。
-        /// </summary>
-        event EventHandler<string> TextInsertionRequested;
-
-        /// <summary>
-        /// フォーカスが要求されたときに発生します。
-        /// </summary>
-        event EventHandler<DisplayMode> FocusRequested;
 
         /// <summary>
         /// 見出しへのスクロールが要求されたときに発生します。

@@ -23,13 +23,13 @@
 
     <!-- アプリケーションのメタデータ -->
     <SatelliteResourceLanguages>_</SatelliteResourceLanguages>
-    <Version>1.1.45</Version>
-    <AssemblyVersion>1.1.45.0</AssemblyVersion>
-    <FileVersion>1.1.45.0</FileVersion>
-    <Company>PageLeaf Project</Company>
+    <Version>1.2.0</Version>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
+    <Company>Leaf Project</Company>
     <Product>PageLeaf</Product>
     <Description>Markdown CSS エディター &amp; ビューアー</Description>
-    <Copyright>Copyright © 2026 PageLeaf Project</Copyright>
+    <Copyright>Copyright © 2026 Leaf Project</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
@@ -77,6 +77,10 @@
     <Resource Include="Resources\Fonts\*.otf" />
     <Resource Include="Resources\Fonts\*.ttf" />
     <Resource Include="Resources\Markdown.xshd" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\LeafKit.UI\src\LeafKit.UI\LeafKit.UI.csproj" />
   </ItemGroup>
 
 </Project>

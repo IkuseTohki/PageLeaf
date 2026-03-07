@@ -1,0 +1,4 @@
+[submodule "LeafKit.UI"]
+	path = LeafKit.UI
+	url = https://github.com/IkuseTohki/LeafKit.UI.git
+	branch = main

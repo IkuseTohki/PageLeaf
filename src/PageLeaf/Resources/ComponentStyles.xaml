@@ -1,6 +1,7 @@
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:behaviors="clr-namespace:PageLeaf.Behaviors">
+                    xmlns:behaviors="clr-namespace:PageLeaf.Behaviors"
+                    xmlns:ui="http://schemas.leafkit.com/wpf/ui/behaviors">
 
     <!-- リストマーカー選択用ListBoxItemスタイル -->
     <Style x:Key="ListMarkerListBoxItemStyle" TargetType="ListBoxItem">
@@ -83,7 +84,7 @@
                         </StackPanel>
                     </Border>
                     <ControlTemplate.Triggers>
-                        <Trigger Property="behaviors:StyleBehavior.IsDirty" Value="True">
+                        <Trigger Property="ui:StyleBehavior.IsDirty" Value="True">
                             <Setter TargetName="DirtyIndicator" Property="Visibility" Value="Visible" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -232,7 +233,7 @@
     <Style x:Key="ScrollViewerWithButtonsStyle" TargetType="ScrollViewer">
         <Setter Property="HorizontalScrollBarVisibility" Value="Hidden" />
         <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
-        <Setter Property="behaviors:ScrollViewerBehavior.IsEnabled" Value="True" />
+        <Setter Property="ui:ScrollViewerBehavior.IsEnabled" Value="True" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ScrollViewer">
@@ -251,7 +252,7 @@
                                       Command="{x:Static ScrollBar.LineLeftCommand}"
                                       CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
                                       Style="{StaticResource ScrollRepeatButtonStyle}"
-                                      Visibility="{Binding Path=(behaviors:ScrollViewerBehavior.HasScrollLeft), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                      Visibility="{Binding Path=(ui:ScrollViewerBehavior.HasScrollLeft), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Path Width="6"
                                   Height="10"
                                   Data="M4,0 L0,5 L4,10"
@@ -273,7 +274,7 @@
                                       Command="{x:Static ScrollBar.LineRightCommand}"
                                       CommandTarget="{Binding RelativeSource={RelativeSource TemplatedParent}}"
                                       Style="{StaticResource ScrollRepeatButtonStyle}"
-                                      Visibility="{Binding Path=(behaviors:ScrollViewerBehavior.HasScrollRight), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                      Visibility="{Binding Path=(ui:ScrollViewerBehavior.HasScrollRight), RelativeSource={RelativeSource TemplatedParent}, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <Path Width="6"
                                   Height="10"
                                   Data="M0,0 L4,5 L0,10"
@@ -313,82 +314,6 @@
                             </MultiTrigger.Conditions>
                             <Setter TargetName="Border" Property="Background" Value="{DynamicResource SegmentedButtonHoverBackgroundBrush}" />
                         </MultiTrigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <!-- モダンなスイッチスタイル (CheckBoxベース) -->
-    <Style x:Key="ModernSwitchStyle" TargetType="CheckBox">
-        <Setter Property="Background" Value="{DynamicResource SwitchOffBrush}" />
-        <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="CheckBox">
-                    <Grid x:Name="Root" Background="Transparent">
-                        <Border x:Name="BackgroundBorder"
-                                Width="40"
-                                Height="20"
-                                Background="{TemplateBinding Background}"
-                                CornerRadius="10" />
-                        <Border x:Name="Thumb"
-                                Width="16"
-                                Height="16"
-                                Margin="2,0,0,0"
-                                HorizontalAlignment="Left"
-                                VerticalAlignment="Center"
-                                Background="White"
-                                CornerRadius="8">
-                            <Border.RenderTransform>
-                                <TranslateTransform X="0" />
-                            </Border.RenderTransform>
-                            <Border.Effect>
-                                <DropShadowEffect BlurRadius="4"
-                                                  Opacity="0.2"
-                                                  ShadowDepth="1" />
-                            </Border.Effect>
-                        </Border>
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsChecked" Value="True">
-                            <Trigger.EnterActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Thumb"
-                                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
-                                                         To="20"
-                                                         Duration="0:0:0.2">
-                                            <DoubleAnimation.EasingFunction>
-                                                <QuadraticEase EasingMode="EaseOut" />
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                        <ColorAnimation Storyboard.TargetName="BackgroundBorder"
-                                                        Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                        To="{StaticResource BrandPrimaryColor}"
-                                                        Duration="0:0:0.2" />
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.EnterActions>
-                            <Trigger.ExitActions>
-                                <BeginStoryboard>
-                                    <Storyboard>
-                                        <DoubleAnimation Storyboard.TargetName="Thumb"
-                                                         Storyboard.TargetProperty="(UIElement.RenderTransform).(TranslateTransform.X)"
-                                                         To="0"
-                                                         Duration="0:0:0.2">
-                                            <DoubleAnimation.EasingFunction>
-                                                <QuadraticEase EasingMode="EaseOut" />
-                                            </DoubleAnimation.EasingFunction>
-                                        </DoubleAnimation>
-                                        <ColorAnimation Storyboard.TargetName="BackgroundBorder"
-                                                        Storyboard.TargetProperty="(Border.Background).(SolidColorBrush.Color)"
-                                                        To="{StaticResource SwitchOffColor}"
-                                                        Duration="0:0:0.2" />
-                                    </Storyboard>
-                                </BeginStoryboard>
-                            </Trigger.ExitActions>
-                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

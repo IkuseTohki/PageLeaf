@@ -81,7 +81,7 @@ namespace PageLeaf.UseCases
                 var markdownLink = $"![Image]({relativePath})";
 
                 // エディタに挿入
-                _editorService.RequestInsertText(markdownLink);
+                _editorService.RequestInsertion(markdownLink);
             }
         }
     }

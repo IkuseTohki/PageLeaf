@@ -6,6 +6,7 @@ using PageLeaf.Models.Css.Elements;
 using PageLeaf.Models.Settings;
 using PageLeaf.Services;
 using System.Windows;
+using LeafKit.UI.Services;
 
 using Moq;
 using System;
@@ -21,9 +22,8 @@ namespace PageLeaf.Tests.Services
         {
             // テスト観点: ShowSaveConfirmationDialog が適切なメッセージとボタンで表示され、ユーザーの選択に応じた SaveConfirmationResult を返すことを確認する。
             // Arrange
-            var mockServiceProvider = new Mock<IServiceProvider>();
             var mockWindowService = new Mock<IWindowService>();
-            var dialogService = new DialogService(mockServiceProvider.Object, mockWindowService.Object);
+            var dialogService = new PageLeaf.Services.DialogService(mockWindowService.Object);
 
             // WPF の MessageBox は直接モックするのが困難なため、ここでは MessageBox の結果を直接テストするのではなく、
             // Integration Test として手動で動作確認するか、UI Automation を利用する方が現実的です。

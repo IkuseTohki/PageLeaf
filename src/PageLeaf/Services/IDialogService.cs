@@ -1,27 +1,10 @@
 namespace PageLeaf.Services
 {
     /// <summary>
-    /// ファイルダイアログ操作を提供するサービスインターフェースです。
+    /// PageLeaf 固有のダイアログ操作を含むサービスインターフェースです。
     /// </summary>
-    public interface IDialogService
+    public interface IDialogService : LeafKit.UI.Services.IDialogService
     {
-        /// <summary>
-        /// ファイルを開くダイアログを表示し、選択されたファイルのパスを返します。
-        /// </summary>
-        /// <param name="title">ダイアログのタイトル。</param>
-        /// <param name="filter">ファイルフィルタ文字列 (例: "Markdown files (*.md)|*.md|All files (*.*)|*.*")。</param>
-        /// <returns>選択されたファイルの絶対パス。キャンセルされた場合はnull。</returns>
-        string? ShowOpenFileDialog(string title, string filter);
-
-        /// <summary>
-        /// ファイルを保存するダイアログを表示し、選択されたファイルのパスを返します。
-        /// </summary>
-        /// <param name="title">ダイアログのタイトル。</param>
-        /// <param name="filter">ファイルフィルタ文字列 (例: "Markdown files (*.md)|*.md|All files (*.*)|*.*")。</param>
-        /// <param name="initialFileName">ダイアログの初期ファイル名。</param>
-        /// <returns>選択されたファイルの絶対パス。キャンセルされた場合はnull。</returns>
-        string? ShowSaveFileDialog(string title, string filter, string? initialFileName = null);
-
         /// <summary>
         /// 未保存の変更がある場合に、保存を促す確認ダイアログを表示します。
         /// </summary>
@@ -51,29 +34,5 @@ namespace PageLeaf.Services
         /// バージョン情報を表示します。
         /// </summary>
         void ShowAboutDialog();
-
-        /// <summary>
-        /// メッセージボックスを表示します。
-        /// </summary>
-        /// <param name="message">メッセージ本文。</param>
-        /// <param name="title">タイトル。</param>
-        void ShowMessage(string message, string title);
-
-        /// <summary>
-        /// ユーザーに確認（Yes/No）を求めるダイアログを表示します。
-        /// </summary>
-        /// <param name="message">表示するメッセージ。</param>
-        /// <param name="title">ダイアログのタイトル。</param>
-        /// <returns>はい(true)、いいえ(false)。</returns>
-        bool ShowConfirmationDialog(string message, string title);
-
-        /// <summary>
-        /// 入力ダイアログを表示し、ユーザーが入力した文字列を返します。
-        /// </summary>
-        /// <param name="title">ダイアログのタイトル。</param>
-        /// <param name="message">表示するメッセージ。</param>
-        /// <param name="defaultInput">初期入力値。</param>
-        /// <returns>入力された文字列。キャンセルされた場合は null。</returns>
-        string? ShowInputDialog(string title, string message, string defaultInput = "");
     }
 }

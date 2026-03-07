@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Win32;
 using PageLeaf.Infrastructure.Logging;
 using PageLeaf.Models.Settings;
 using PageLeaf.Services;
@@ -11,11 +12,13 @@ using Serilog;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Windows;
-using AngleSharp.Css.Values;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Windows;
 using System.Windows.Interop;
-using Microsoft.Win32;
+using AngleSharp.Css.Values;
+using LeafKit.UI.Services;
+using LeafKit.UI.ViewModels;
 
 namespace PageLeaf
 {
@@ -128,7 +131,8 @@ namespace PageLeaf
                     services.AddSingleton<ISettingsService>(sp => new SettingsService(sp.GetRequiredService<ILogger<SettingsService>>(), App.BaseDirectory));
                     services.AddSingleton<ISystemThemeProvider, SystemThemeProvider>();
                     services.AddSingleton<IThemeService, ThemeService>();
-                    services.AddSingleton<IDialogService, DialogService>();
+                    services.AddSingleton<IThemeManager, ThemeManager>();
+                    services.AddSingleton<PageLeaf.Services.IDialogService, PageLeaf.Services.DialogService>();
                     services.AddSingleton<IMarkdownService, MarkdownService>();
                     services.AddSingleton<IEditorService, EditorService>();
                     services.AddSingleton<ICssEditorService, CssEditorService>();
@@ -149,7 +153,7 @@ namespace PageLeaf
                     // ViewModels と Views をDIコンテナに登録
                     services.AddTransient<SettingsViewModel>();
                     services.AddTransient<CheatSheetViewModel>();
-                    services.AddTransient<AboutViewModel>();
+                    services.AddTransient<AboutViewModel>(sp => new AboutViewModel(typeof(App).Assembly));
                     services.AddSingleton<CssEditorViewModel>();
                     services.AddSingleton<MainViewModel>();
                     services.AddSingleton<MainWindow>();
@@ -177,6 +181,12 @@ namespace PageLeaf
                 // 設定の初期適用
                 ApplyTheme(settingsService.CurrentSettings.Appearance.Theme);
                 _loggingBootstrapper.UpdateFromSettings(settingsService.CurrentSettings.Logging);
+
+                // ウィンドウサービスのマッピング登録
+                var windowService = (LeafKit.UI.Services.WindowService)AppHost.Services.GetRequiredService<IWindowService>();
+                windowService.Register<SettingsViewModel>(sp => new SettingsWindow(sp.GetRequiredService<SettingsViewModel>()));
+                windowService.Register<CheatSheetViewModel>(sp => new CheatSheetWindow { DataContext = sp.GetRequiredService<CheatSheetViewModel>() });
+                windowService.Register<LeafKit.UI.ViewModels.AboutViewModel>(sp => new LeafKit.UI.Controls.AboutWindow(sp.GetRequiredService<LeafKit.UI.ViewModels.AboutViewModel>()));
 
                 // 設定変更時の適用
                 settingsService.SettingsChanged += (s, settings) =>
@@ -233,28 +243,20 @@ namespace PageLeaf
         private void ApplyTheme(Models.AppTheme theme)
         {
             var themeService = AppHost!.Services.GetRequiredService<IThemeService>();
-            var actualTheme = themeService.GetActualTheme();
-
-            var themeUri = actualTheme == Models.AppTheme.Dark
-                ? new Uri("Resources/DarkColors.xaml", UriKind.Relative)
-                : new Uri("Resources/LightColors.xaml", UriKind.Relative);
 
             try
             {
-                // MergedDictionariesの最初のリソース（ThemeColors）を差し替える
-                var dictionaries = Application.Current.Resources.MergedDictionaries;
-                if (dictionaries.Count > 0)
-                {
-                    dictionaries[0] = new ResourceDictionary { Source = themeUri };
-                }
+                // テーマ決定から適用までのオーケストレーションをサービスに移譲
+                themeService.ApplyActualTheme();
 
                 // タイトルバーのダークモード対応 (Windows 11)
+                var actualTheme = themeService.GetActualTheme();
                 UpdateTitleBarTheme(actualTheme == Models.AppTheme.Dark);
             }
             catch (Exception ex)
             {
                 var logger = AppHost?.Services.GetService<ILogger<App>>();
-                logger?.LogError(ex, "Failed to apply theme: {ThemeUri}", themeUri);
+                logger?.LogError(ex, "Failed to apply theme.");
             }
         }
 
@@ -324,7 +326,7 @@ namespace PageLeaf
             // ユーザー通知
             // AppHostが構築されていない、またはサービスが取得できない場合に備えて
             // 直接ErrorWindowを出すフォールバックも考慮する
-            var dialogService = AppHost?.Services.GetService<IDialogService>();
+            var dialogService = AppHost?.Services.GetService<PageLeaf.Services.IDialogService>();
             if (dialogService != null)
             {
                 dialogService.ShowExceptionDialog("致命的なエラーが発生したため、アプリケーションを終了します。", ex);
