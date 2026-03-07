@@ -181,6 +181,12 @@ namespace PageLeaf
                 ApplyTheme(settingsService.CurrentSettings.Appearance.Theme);
                 _loggingBootstrapper.UpdateFromSettings(settingsService.CurrentSettings.Logging);
 
+                // ウィンドウサービスのマッピング登録
+                var windowService = (LeafKit.UI.Services.WindowService)AppHost.Services.GetRequiredService<IWindowService>();
+                windowService.Register<SettingsViewModel>(sp => new SettingsWindow(sp.GetRequiredService<SettingsViewModel>()));
+                windowService.Register<CheatSheetViewModel>(sp => new CheatSheetWindow { DataContext = sp.GetRequiredService<CheatSheetViewModel>() });
+                windowService.Register<AboutViewModel>(sp => new AboutWindow(sp.GetRequiredService<AboutViewModel>()));
+
                 // 設定変更時の適用
                 settingsService.SettingsChanged += (s, settings) =>
                 {

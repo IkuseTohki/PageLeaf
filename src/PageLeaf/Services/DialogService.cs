@@ -3,6 +3,7 @@ using PageLeaf.ViewModels;
 using PageLeaf.Views;
 using System;
 using System.Windows;
+using LeafKit.UI.Services;
 
 namespace PageLeaf.Services
 {
@@ -89,7 +90,7 @@ namespace PageLeaf.Services
         /// </summary>
         public void ShowSettingsDialog()
         {
-            _windowService.ShowWindow<SettingsViewModel>();
+            _windowService.Show<SettingsViewModel>();
         }
 
         /// <summary>
@@ -97,7 +98,7 @@ namespace PageLeaf.Services
         /// </summary>
         public void ShowAboutDialog()
         {
-            _windowService.ShowWindow<AboutViewModel>();
+            _windowService.Show<AboutViewModel>();
         }
     }
 }

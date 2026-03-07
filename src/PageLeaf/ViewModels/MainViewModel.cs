@@ -6,6 +6,7 @@ using PageLeaf.Models.Css.Elements;
 using PageLeaf.Models.Settings;
 using PageLeaf.Services;
 using PageLeaf.UseCases;
+using LeafKit.UI.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -18,7 +19,7 @@ namespace PageLeaf.ViewModels
         private const string NewStylePlaceholder = "(新規作成...)";
         private readonly IFileService _fileService;
         private readonly ILogger<MainViewModel> _logger;
-        private readonly IDialogService _dialogService;
+        private readonly PageLeaf.Services.IDialogService _dialogService;
         private readonly IWindowService _windowService;
         private readonly ICssManagementService _cssManagementService;
         private readonly ISettingsService _settingsService;
@@ -209,7 +210,7 @@ namespace PageLeaf.ViewModels
         public MainViewModel(
             IFileService fileService,
             ILogger<MainViewModel> logger,
-            IDialogService dialogService,
+            PageLeaf.Services.IDialogService dialogService,
             IWindowService windowService,
             IEditorService editorService,
             ISettingsService settingsService,
@@ -366,14 +367,14 @@ namespace PageLeaf.ViewModels
 
         private void ExecuteShowCheatSheet(object? parameter)
         {
-            _windowService.ShowWindow<CheatSheetViewModel>();
+            _windowService.Show<CheatSheetViewModel>();
         }
 
         private void ExecuteCloseOverlay(object? parameter)
         {
             // オーバーレイクリック時：モーダル対象のウィンドウのみを閉じる
-            _windowService.CloseWindow<SettingsViewModel>();
-            _windowService.CloseWindow<AboutViewModel>();
+            _windowService.Close<SettingsViewModel>();
+            _windowService.Close<AboutViewModel>();
 
             IsOverlayVisible = false;
         }
@@ -457,7 +458,7 @@ namespace PageLeaf.ViewModels
 
         private void ExecuteWindowClosed(object? parameter)
         {
-            _windowService.CloseAllWindows();
+            _windowService.CloseAll();
         }
 
         /// <summary>現在のドキュメントから目次をロードします。</summary>

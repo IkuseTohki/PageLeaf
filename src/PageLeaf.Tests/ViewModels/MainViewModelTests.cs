@@ -9,6 +9,7 @@ using PageLeaf.Models.Settings;
 using PageLeaf.Services;
 using PageLeaf.UseCases;
 using PageLeaf.ViewModels;
+using LeafKit.UI.Services;
 using System.Collections.Generic;
 
 namespace PageLeaf.Tests.ViewModels
@@ -18,7 +19,7 @@ namespace PageLeaf.Tests.ViewModels
     {
         private Mock<IEditorService> _editorServiceMock = null!;
         private Mock<IFileService> _fileServiceMock = null!;
-        private Mock<IDialogService> _dialogServiceMock = null!;
+        private Mock<PageLeaf.Services.IDialogService> _dialogServiceMock = null!;
         private Mock<IWindowService> _windowServiceMock = null!;
         private Mock<ISettingsService> _settingsServiceMock = null!;
         private Mock<ICssManagementService> _cssManagementServiceMock = null!;
@@ -37,7 +38,7 @@ namespace PageLeaf.Tests.ViewModels
         {
             _editorServiceMock = new Mock<IEditorService>();
             _fileServiceMock = new Mock<IFileService>();
-            _dialogServiceMock = new Mock<IDialogService>();
+            _dialogServiceMock = new Mock<PageLeaf.Services.IDialogService>();
             _windowServiceMock = new Mock<IWindowService>();
             _settingsServiceMock = new Mock<ISettingsService>();
             _cssManagementServiceMock = new Mock<ICssManagementService>();
@@ -233,13 +234,13 @@ namespace PageLeaf.Tests.ViewModels
         [TestMethod]
         public void ShowCheatSheet_ShouldCallWindowService()
         {
-            // テスト観点: チートシート表示コマンドを実行すると、WindowService.ShowWindow<CheatSheetViewModel>() が呼ばれることを確認する。
+            // テスト観点: チートシート表示コマンドを実行すると、WindowService.Show<CheatSheetViewModel>() が呼ばれることを確認する。
 
             // Act
             _viewModel.ShowCheatSheetCommand.Execute(null);
 
             // Assert
-            _windowServiceMock.Verify(w => w.ShowWindow<CheatSheetViewModel>(), Times.Once);
+            _windowServiceMock.Verify(w => w.Show<CheatSheetViewModel>(false), Times.Once);
         }
 
         [TestMethod]
@@ -251,7 +252,7 @@ namespace PageLeaf.Tests.ViewModels
             _viewModel.WindowClosedCommand.Execute(null);
 
             // Assert
-            _windowServiceMock.Verify(w => w.CloseAllWindows(), Times.Once);
+            _windowServiceMock.Verify(w => w.CloseAll(), Times.Once);
         }
 
         [TestMethod]
