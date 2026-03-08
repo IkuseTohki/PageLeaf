@@ -44,6 +44,8 @@ namespace PageLeaf
             get
             {
                 // .NET Core 3.1 互換のため、Environment.ProcessPath の代わりに Process.GetCurrentProcess().MainModule.FileName を使用
+                // .NET Core 3.1 の SingleFile (自己展開) では、AppDomain.CurrentDomain.BaseDirectory は一時展開先を指すため、
+                // exeと同じ場所にファイルを生成するにはプロセスパスを取得する必要がある。
                 string? processPath = null;
                 try
                 {
@@ -88,84 +90,85 @@ namespace PageLeaf
         /// アプリケーションの起動時に呼び出されます。
         /// </summary>
         /// <param name="e">スタートアップイベントのデータ。</param>
-        protected override async void OnStartup(StartupEventArgs e)
+        protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
 
-            // リソースの初期化（SingleFile対応）
-            InitializeResources();
-
-            // ロギング設定の先行読み込み（循環依存回避のため Bootstrapper に委譲）
-            _loggingBootstrapper = new LoggingBootstrapper(BaseDirectory);
-            _loggingBootstrapper.LoadInitialSettings();
-
-            // AngleSharpが色をHEX形式で出力するように設定
-            Color.UseHex = true;
-
-            // DIコンテナとロギングを設定
-            AppHost = Host.CreateDefaultBuilder()
-                .UseSerilog((hostContext, services, configuration) =>
-                {
-                    // ログファイルのパスを設定
-                    var logPath = Path.Combine(BaseDirectory, "logs", "PageLeaf-.txt");
-
-                    configuration
-                        .MinimumLevel.ControlledBy(_loggingBootstrapper.LevelSwitch)
-                        .Enrich.FromLogContext()
-                        .WriteTo.Conditional(
-                            evt => _loggingBootstrapper.EnableFileLogging,
-                            wt => wt.File(
-                                logPath,
-                                rollingInterval: RollingInterval.Day,
-                                retainedFileCountLimit: 7,
-                                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
-                            )
-                        );
-                })
-                .ConfigureServices((hostContext, services) =>
-                {
-                    // Services をDIコンテナに登録
-                    services.AddSingleton<IResourceExtractionService>(sp => new ResourceExtractionService(typeof(App).Assembly));
-                    services.AddSingleton<IFileService, FileService>();
-                    services.AddSingleton<ICssService, CssService>();
-                    services.AddSingleton<ISettingsService>(sp => new SettingsService(sp.GetRequiredService<ILogger<SettingsService>>(), App.BaseDirectory));
-                    services.AddSingleton<ISystemThemeProvider, SystemThemeProvider>();
-                    services.AddSingleton<IThemeService, ThemeService>();
-                    services.AddSingleton<IThemeManager, ThemeManager>();
-                    services.AddSingleton<PageLeaf.Services.IDialogService, PageLeaf.Services.DialogService>();
-                    services.AddSingleton<IMarkdownService, MarkdownService>();
-                    services.AddSingleton<IEditorService, EditorService>();
-                    services.AddSingleton<ICssEditorService, CssEditorService>();
-                    services.AddSingleton<ICssManagementService, CssManagementService>();
-                    services.AddSingleton<IImagePasteService, ImagePasteService>();
-                    services.AddSingleton<IEditingSupportService, EditingSupportService>();
-                    services.AddSingleton<IWindowService, WindowService>();
-
-                    // UseCases
-                    services.AddTransient<ISaveAsDocumentUseCase, SaveAsDocumentUseCase>();
-                    services.AddTransient<ISaveDocumentUseCase, SaveDocumentUseCase>();
-                    services.AddTransient<INewDocumentUseCase, NewDocumentUseCase>();
-                    services.AddTransient<IOpenDocumentUseCase, OpenDocumentUseCase>();
-                    services.AddTransient<ILoadCssUseCase, LoadCssUseCase>();
-                    services.AddTransient<ISaveCssUseCase, SaveCssUseCase>();
-                    services.AddTransient<IPasteImageUseCase, PasteImageUseCase>();
-
-                    // ViewModels と Views をDIコンテナに登録
-                    services.AddTransient<SettingsViewModel>();
-                    services.AddTransient<CheatSheetViewModel>();
-                    services.AddTransient<AboutViewModel>(sp => new AboutViewModel(typeof(App).Assembly));
-                    services.AddSingleton<CssEditorViewModel>();
-                    services.AddSingleton<MainViewModel>();
-                    services.AddSingleton<MainWindow>();
-                })
-                .Build();
-
-            // グローバル例外ハンドリングを設定
-            SetupGlobalExceptionHandling();
-
             try
             {
-                await AppHost.StartAsync();
+                // リソースの初期化（SingleFile対応）
+                InitializeResources();
+
+                // ロギング設定の先行読み込み（循環依存回避のため Bootstrapper に委譲）
+                _loggingBootstrapper = new LoggingBootstrapper(BaseDirectory);
+                _loggingBootstrapper.LoadInitialSettings();
+
+                // AngleSharpが色をHEX形式で出力するように設定
+                Color.UseHex = true;
+
+                // DIコンテナとロギングを設定
+                AppHost = Host.CreateDefaultBuilder()
+                    .UseSerilog((hostContext, services, configuration) =>
+                    {
+                        // ログファイルのパスを設定
+                        var logPath = Path.Combine(BaseDirectory, "logs", "PageLeaf-.txt");
+
+                        configuration
+                            .MinimumLevel.ControlledBy(_loggingBootstrapper.LevelSwitch)
+                            .Enrich.FromLogContext()
+                            .WriteTo.Conditional(
+                                evt => _loggingBootstrapper.EnableFileLogging,
+                                wt => wt.File(
+                                    logPath,
+                                    rollingInterval: RollingInterval.Day,
+                                    retainedFileCountLimit: 7,
+                                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}"
+                                )
+                            );
+                    })
+                    .ConfigureServices((hostContext, services) =>
+                    {
+                        // Services をDIコンテナに登録
+                        services.AddSingleton<IResourceExtractionService>(sp => new ResourceExtractionService(typeof(App).Assembly));
+                        services.AddSingleton<IFileService, FileService>();
+                        services.AddSingleton<ICssService, CssService>();
+                        services.AddSingleton<ISettingsService>(sp => new SettingsService(sp.GetRequiredService<ILogger<SettingsService>>(), App.BaseDirectory));
+                        services.AddSingleton<ISystemThemeProvider, SystemThemeProvider>();
+                        services.AddSingleton<IThemeService, ThemeService>();
+                        services.AddSingleton<IThemeManager, ThemeManager>();
+                        services.AddSingleton<PageLeaf.Services.IDialogService, PageLeaf.Services.DialogService>();
+                        services.AddSingleton<IMarkdownService, MarkdownService>();
+                        services.AddSingleton<IEditorService, EditorService>();
+                        services.AddSingleton<ICssEditorService, CssEditorService>();
+                        services.AddSingleton<ICssManagementService, CssManagementService>();
+                        services.AddSingleton<IImagePasteService, ImagePasteService>();
+                        services.AddSingleton<IEditingSupportService, EditingSupportService>();
+                        services.AddSingleton<IWindowService, WindowService>();
+
+                        // UseCases
+                        services.AddTransient<ISaveAsDocumentUseCase, SaveAsDocumentUseCase>();
+                        services.AddTransient<ISaveDocumentUseCase, SaveDocumentUseCase>();
+                        services.AddTransient<INewDocumentUseCase, NewDocumentUseCase>();
+                        services.AddTransient<IOpenDocumentUseCase, OpenDocumentUseCase>();
+                        services.AddTransient<ILoadCssUseCase, LoadCssUseCase>();
+                        services.AddTransient<ISaveCssUseCase, SaveCssUseCase>();
+                        services.AddTransient<IPasteImageUseCase, PasteImageUseCase>();
+
+                        // ViewModels と Views をDIコンテナに登録
+                        services.AddTransient<SettingsViewModel>();
+                        services.AddTransient<CheatSheetViewModel>();
+                        services.AddTransient<AboutViewModel>(sp => new AboutViewModel(typeof(App).Assembly));
+                        services.AddSingleton<CssEditorViewModel>();
+                        services.AddSingleton<MainViewModel>();
+                        services.AddSingleton<MainWindow>();
+                    })
+                    .Build();
+
+                // グローバル例外ハンドリングを設定
+                SetupGlobalExceptionHandling();
+
+                // AppHost.StartAsync() を同期的に待機
+                AppHost.Start();
 
                 var settingsService = AppHost.Services.GetRequiredService<ISettingsService>();
                 var themeService = AppHost.Services.GetRequiredService<IThemeService>();
